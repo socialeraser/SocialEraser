@@ -1,0 +1,20 @@
+{
+  "name": "x-eraser",
+  "version": "1.0.0",
+  "description": "X-Eraser - Batch Delete Twitter History",
+  "main": "index.html",
+  "scripts": {
+    "start": "npx cap run android",
+    "build": "npx cap copy",
+    "android:open": "npx cap open android"
+  },
+  "keywords": ["twitter", "delete", "batch", "cleanup"],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {},
+  "dependencies": {
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/android": "^6.0.0"
+  }
+}
