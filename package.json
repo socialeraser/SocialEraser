@@ -8,13 +8,18 @@
     "build": "npx cap copy",
     "android:open": "npx cap open android"
   },
-  "keywords": ["twitter", "delete", "batch", "cleanup"],
+  "keywords": [
+    "twitter",
+    "delete",
+    "batch",
+    "cleanup"
+  ],
   "author": "",
   "license": "MIT",
-  "devDependencies": {},
   "dependencies": {
-    "@capacitor/core": "^6.0.0",
-    "@capacitor/cli": "^6.0.0",
-    "@capacitor/android": "^6.0.0"
+    "@capacitor/android": "^2.5.0",
+    "@capacitor/cli": "^2.5.0",
+    "@capacitor/core": "^2.5.0",
+    "cordova-android": "^9.1.0"
   }
 }
