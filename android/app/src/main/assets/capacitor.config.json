@@ -4,7 +4,12 @@
   "webDir": "www",
   "android": {
     "allowMixedContent": true,
-    "webContentsDebuggingEnabled": true
+    "webContentsDebuggingEnabled": true,
+    "backgroundColor": "#09090b"
+  },
+  "ios": {
+    "allowsLinkPreview": true,
+    "webviewSnapshots": true
   },
   "plugins": {
     "SplashScreen": {
@@ -15,6 +20,15 @@
     "StatusBar": {
       "style": "DARK",
       "backgroundColor": "#09090b"
+    },
+    "CapacitorStorage": {
+      "clearOnUpgrade": false
+    },
+    "WebView": {
+      "allowFileAccess": true,
+      "allowFileAccessFromFileURLs": true,
+      "allowUniversalAccessFromFileURLs": true,
+      "interceptNavigation": true
     }
   },
   "bundledWebRuntime": false

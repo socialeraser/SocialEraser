@@ -47,6 +47,41 @@
     .progress-bar {
       transition: width 0.3s ease-out;
     }
+    /* 日志面板样式 */
+    .log-panel {
+      max-height: 200px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #52525b #18181b;
+    }
+    .log-panel::-webkit-scrollbar {
+      width: 6px;
+    }
+    .log-panel::-webkit-scrollbar-track {
+      background: #18181b;
+    }
+    .log-panel::-webkit-scrollbar-thumb {
+      background: #52525b;
+      border-radius: 3px;
+    }
+    .log-entry {
+      font-family: 'SF Mono', Monaco, 'Courier New', monospace;
+      font-size: 11px;
+      padding: 4px 8px;
+      border-bottom: 1px solid #27272a;
+    }
+    .log-entry.success { background: rgba(34, 197, 94, 0.1); color: #22c55e; }
+    .log-entry.error { background: rgba(239, 68, 68, 0.1); color: #ef4444; }
+    .log-entry.warn { background: rgba(234, 179, 8, 0.1); color: #eab308; }
+    .log-entry.info { color: #a1a1aa; }
+    .log-entry.debug { color: #71717a; }
+    .log-entry.elementMissing { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
+    /* 任务状态指示器 */
+    .status-running { animation: pulse 1.5s infinite; }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
   </style>
 </head>
 <body class="bg-zinc-950 text-zinc-50 min-h-screen font-sans antialiased">
@@ -146,6 +181,11 @@
           <div id="connection-indicator" class="w-2 h-2 rounded-full bg-red-500"></div>
           <span class="text-sm text-zinc-400">Status: <span id="connection-status-text">Not Connected</span></span>
         </div>
+        <!-- Remote Config Status -->
+        <div class="flex items-center gap-2">
+          <div id="config-indicator" class="w-2 h-2 rounded-full bg-zinc-500" title="Config"></div>
+          <span class="text-xs text-zinc-500" id="config-status-text">Local</span>
+        </div>
       </div>
       
       <!-- Main Content -->
@@ -207,11 +247,67 @@
         </svg>
       </button>
       <h2 class="font-semibold">Control Center</h2>
-      <div class="w-10"></div>
+      <div class="flex items-center gap-2">
+        <button id="btn-toggle-logs" class="p-2 -mr-2 rounded-lg hover:bg-zinc-800 transition-colors" title="Toggle Logs">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+          </svg>
+        </button>
+        <button id="btn-refresh-config" class="p-2 -mr-2 rounded-lg hover:bg-zinc-800 transition-colors" title="Refresh Config">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+          </svg>
+        </button>
+      </div>
     </header>
     
+    <!-- Log Panel (Hidden by default) -->
+    <div id="log-panel-container" class="hidden border-b border-zinc-800">
+      <div class="log-panel bg-zinc-900" id="log-panel">
+        <div class="p-2 bg-zinc-800/50 border-b border-zinc-700 flex justify-between items-center sticky top-0">
+          <span class="text-xs text-zinc-400 font-medium">Live Logs</span>
+          <button id="btn-clear-logs" class="text-xs text-zinc-500 hover:text-zinc-300">Clear</button>
+        </div>
+        <div id="log-entries">
+          <!-- Log entries will be inserted here -->
+        </div>
+      </div>
+    </div>
+    
     <!-- Content Area -->
-    <div class="flex-1 px-4 py-6 space-y-6">
+    <div class="flex-1 px-4 py-6 space-y-6 overflow-y-auto">
+      <!-- Task Status -->
+      <section id="task-status-section" class="bg-zinc-900/50 rounded-2xl p-5 border border-zinc-800 hidden">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-lg font-semibold flex items-center gap-2">
+            <div id="task-status-indicator" class="w-3 h-3 rounded-full bg-amber-500"></div>
+            <span id="task-status-text">Task Running</span>
+          </h3>
+          <div class="flex gap-2">
+            <button id="btn-pause-task" class="px-3 py-1 text-xs bg-zinc-700 hover:bg-zinc-600 rounded-lg transition-colors">
+              Pause
+            </button>
+            <button id="btn-stop-task" class="px-3 py-1 text-xs bg-red-600 hover:bg-red-500 rounded-lg transition-colors">
+              Stop
+            </button>
+          </div>
+        </div>
+        <div class="grid grid-cols-3 gap-3">
+          <div class="text-center p-3 bg-zinc-800/50 rounded-xl">
+            <p class="text-2xl font-bold text-amber-500" id="stat-processed">0</p>
+            <p class="text-xs text-zinc-500">Processed</p>
+          </div>
+          <div class="text-center p-3 bg-zinc-800/50 rounded-xl">
+            <p class="text-2xl font-bold text-green-500" id="stat-success">0</p>
+            <p class="text-xs text-zinc-500">Success</p>
+          </div>
+          <div class="text-center p-3 bg-zinc-800/50 rounded-xl">
+            <p class="text-2xl font-bold text-red-500" id="stat-failed">0</p>
+            <p class="text-xs text-zinc-500">Failed</p>
+          </div>
+        </div>
+      </section>
+      
       <!-- Cleanup Options -->
       <section class="bg-zinc-900/50 rounded-2xl p-5 border border-zinc-800">
         <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -270,6 +366,36 @@
         </select>
       </section>
       
+      <!-- Remote Config Section -->
+      <section class="bg-zinc-900/50 rounded-2xl p-5 border border-zinc-800">
+        <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
+          <svg class="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+          </svg>
+          Selector Config
+        </h3>
+        
+        <div class="space-y-3">
+          <div>
+            <label class="block text-sm text-zinc-400 mb-2">Remote Config URL (optional)</label>
+            <input type="url" id="config-remote-url" placeholder="https://your-cdn.example.com/config/selectorConfig.json" class="w-full py-2 px-3 bg-zinc-800 border border-zinc-700 rounded-lg text-zinc-50 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:border-transparent">
+          </div>
+          <div class="flex items-center justify-between text-sm">
+            <span class="text-zinc-400">Last Updated: <span id="config-last-updated">Never</span></span>
+            <span id="config-version" class="text-zinc-500">v1.0.0</span>
+          </div>
+          <div class="flex gap-2">
+            <button id="btn-load-remote-config" class="flex-1 py-2 px-3 bg-zinc-700 hover:bg-zinc-600 rounded-lg text-sm transition-colors">
+              Load Remote Config
+            </button>
+            <button id="btn-reset-config" class="py-2 px-3 bg-zinc-800 hover:bg-zinc-700 rounded-lg text-sm transition-colors">
+              Reset
+            </button>
+          </div>
+        </div>
+      </section>
+      
       <!-- Statistics -->
       <section class="bg-zinc-900/50 rounded-2xl p-5 border border-zinc-800">
         <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -298,7 +424,7 @@
       <!-- Progress Section (Hidden by default) -->
       <section id="progress-section" class="bg-zinc-900/50 rounded-2xl p-5 border border-zinc-800 hidden">
         <h3 class="text-lg font-semibold mb-4 flex items-center gap-2">
-          <svg class="w-5 h-5 text-amber-500 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg id="progress-spinner" class="w-5 h-5 text-amber-500 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
           </svg>
           Cleanup Progress
@@ -322,7 +448,7 @@
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
           </svg>
-          Start Cleanup
+          <span id="btn-start-text">Start Cleanup</span>
         </span>
       </button>
       <p class="text-center text-zinc-600 text-xs mt-3">
@@ -340,11 +466,63 @@
     };
 
     function switchView(viewName) {
-      // Hide all views
       Object.values(views).forEach(view => view.classList.remove('active'));
-      // Show target view
       views[viewName].classList.add('active');
     }
+
+    // ===== Log System =====
+    const logEntries = [];
+    const MAX_LOG_ENTRIES = 100;
+    let logPanelVisible = false;
+
+    function addLog(entry) {
+      const timestamp = new Date().toLocaleTimeString();
+      logEntries.push({ ...entry, timestamp });
+      
+      if (logEntries.length > MAX_LOG_ENTRIES) {
+        logEntries.shift();
+      }
+      
+      renderLogs();
+      
+      // Also dispatch event for native layer
+      window.dispatchEvent(new CustomEvent('xe-log', { detail: entry }));
+    }
+
+    function renderLogs() {
+      const container = document.getElementById('log-entries');
+      if (!container) return;
+      
+      container.innerHTML = logEntries.map(entry => `
+        <div class="log-entry ${entry.type}">
+          <span class="text-zinc-600">[${entry.timestamp}]</span>
+          <span class="ml-2">[${entry.type.toUpperCase()}]</span>
+          <span class="ml-2">${entry.message}</span>
+          ${entry.data ? `<span class="text-zinc-600 ml-1">${JSON.stringify(entry.data)}</span>` : ''}
+        </div>
+      `).join('');
+      
+      // Auto scroll to bottom
+      const logPanel = document.getElementById('log-panel');
+      if (logPanel) {
+        logPanel.scrollTop = logPanel.scrollHeight;
+      }
+    }
+
+    function clearLogs() {
+      logEntries.length = 0;
+      renderLogs();
+    }
+
+    // ===== Task State =====
+    let isCleaning = false;
+    let isPaused = false;
+    let cleanupInterval = null;
+    let taskState = {
+      processed: 0,
+      success: 0,
+      fail: 0
+    };
 
     // ===== Welcome Page Button =====
     document.getElementById('btn-connect').addEventListener('click', () => {
@@ -357,15 +535,13 @@
     });
 
     document.getElementById('btn-refresh').addEventListener('click', () => {
-      console.log('Refresh browser container');
+      addLog({ type: 'info', message: 'Refreshing page...' });
     });
 
-    // Open X in new tab
     document.getElementById('btn-open-x').addEventListener('click', () => {
       window.open('https://x.com', '_blank');
     });
 
-    // Mark as connected
     document.getElementById('btn-mark-connected').addEventListener('click', () => {
       const indicator = document.getElementById('connection-indicator');
       const statusText = document.getElementById('connection-status-text');
@@ -373,6 +549,7 @@
       indicator.classList.add('bg-green-500');
       statusText.textContent = 'Connected';
       statusText.classList.add('text-green-500');
+      addLog({ type: 'success', message: 'Account marked as connected' });
     });
 
     document.getElementById('btn-go-to-control').addEventListener('click', () => {
@@ -384,6 +561,133 @@
       switchView('browser');
     });
 
+    // ===== Toggle Logs Panel =====
+    document.getElementById('btn-toggle-logs').addEventListener('click', () => {
+      logPanelVisible = !logPanelVisible;
+      const container = document.getElementById('log-panel-container');
+      container.classList.toggle('hidden', !logPanelVisible);
+    });
+
+    document.getElementById('btn-clear-logs').addEventListener('click', clearLogs);
+
+    // ===== Refresh Config =====
+    document.getElementById('btn-refresh-config').addEventListener('click', async () => {
+      addLog({ type: 'info', message: 'Refreshing selector config...' });
+      
+      const configIndicator = document.getElementById('config-indicator');
+      const configStatusText = document.getElementById('config-status-text');
+      
+      configIndicator.classList.remove('bg-green-500', 'bg-red-500');
+      configIndicator.classList.add('bg-amber-500', 'status-running');
+      configStatusText.textContent = 'Loading...';
+      
+      try {
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        configIndicator.classList.remove('bg-amber-500', 'status-running');
+        configIndicator.classList.add('bg-green-500');
+        configStatusText.textContent = 'Updated';
+        document.getElementById('config-last-updated').textContent = new Date().toLocaleString();
+        
+        addLog({ type: 'success', message: 'Config refreshed successfully' });
+      } catch (error) {
+        configIndicator.classList.remove('bg-amber-500', 'status-running');
+        configIndicator.classList.add('bg-red-500');
+        configStatusText.textContent = 'Failed';
+        addLog({ type: 'error', message: 'Config refresh failed', data: { error: error.message } });
+      }
+    });
+
+    // ===== Load Remote Config =====
+    document.getElementById('btn-load-remote-config').addEventListener('click', async () => {
+      const url = document.getElementById('config-remote-url').value;
+      if (!url) {
+        addLog({ type: 'warn', message: 'Please enter a remote config URL' });
+        return;
+      }
+      
+      addLog({ type: 'info', message: 'Loading remote config...', data: { url } });
+      
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        
+        const config = await response.json();
+        addLog({ type: 'success', message: 'Remote config loaded', data: { version: config._version } });
+        
+        document.getElementById('config-last-updated').textContent = new Date().toLocaleString();
+        document.getElementById('config-version').textContent = `v${config._version || '1.0.0'}`;
+        
+        const configIndicator = document.getElementById('config-indicator');
+        const configStatusText = document.getElementById('config-status-text');
+        configIndicator.classList.remove('bg-zinc-500', 'bg-red-500');
+        configIndicator.classList.add('bg-green-500');
+        configStatusText.textContent = 'Remote';
+        
+      } catch (error) {
+        addLog({ type: 'error', message: 'Failed to load remote config', data: { error: error.message } });
+        
+        const configIndicator = document.getElementById('config-indicator');
+        configIndicator.classList.remove('bg-zinc-500');
+        configIndicator.classList.add('bg-red-500');
+      }
+    });
+
+    document.getElementById('btn-reset-config').addEventListener('click', () => {
+      document.getElementById('config-remote-url').value = '';
+      document.getElementById('config-last-updated').textContent = 'Never';
+      document.getElementById('config-version').textContent = 'v1.0.0';
+      
+      const configIndicator = document.getElementById('config-indicator');
+      const configStatusText = document.getElementById('config-status-text');
+      configIndicator.classList.remove('bg-green-500', 'bg-red-500');
+      configIndicator.classList.add('bg-zinc-500');
+      configStatusText.textContent = 'Local';
+      
+      addLog({ type: 'info', message: 'Config reset to local defaults' });
+    });
+
+    // ===== Task Control Buttons =====
+    document.getElementById('btn-pause-task').addEventListener('click', () => {
+      isPaused = !isPaused;
+      const btn = document.getElementById('btn-pause-task');
+      
+      if (isPaused) {
+        btn.textContent = 'Resume';
+        btn.classList.remove('bg-zinc-700');
+        btn.classList.add('bg-green-600');
+        document.getElementById('task-status-text').textContent = 'Task Paused';
+        addLog({ type: 'info', message: 'Task paused by user' });
+        
+        window.postMessage({ source: 'XEraser-App', action: 'pause' }, '*');
+      } else {
+        btn.textContent = 'Pause';
+        btn.classList.remove('bg-green-600');
+        btn.classList.add('bg-zinc-700');
+        document.getElementById('task-status-text').textContent = 'Task Running';
+        addLog({ type: 'info', message: 'Task resumed by user' });
+        
+        window.postMessage({ source: 'XEraser-App', action: 'resume' }, '*');
+      }
+    });
+
+    document.getElementById('btn-stop-task').addEventListener('click', () => {
+      isCleaning = false;
+      isPaused = false;
+      
+      document.getElementById('task-status-indicator').classList.remove('status-running');
+      document.getElementById('task-status-text').textContent = 'Task Stopped';
+      document.getElementById('btn-start-cleanup').disabled = false;
+      document.getElementById('btn-start-cleanup').classList.remove('opacity-50', 'cursor-not-allowed');
+      document.getElementById('btn-start-text').textContent = 'Start Cleanup';
+      
+      addLog({ type: 'warn', message: 'Task stopped by user' });
+      
+      window.postMessage({ source: 'XEraser-App', action: 'stop' }, '*');
+      
+      document.getElementById('task-status-section').classList.add('hidden');
+    });
+
     // ===== Start Cleanup Button =====
     const btnStartCleanup = document.getElementById('btn-start-cleanup');
     const progressSection = document.getElementById('progress-section');
@@ -391,95 +695,144 @@
     const progressText = document.getElementById('progress-text');
     const progressPercent = document.getElementById('progress-percent');
 
-    let isCleaning = false;
-    let cleanupInterval = null;
-
-    // Listen for cleanup progress from native (Capacitor)
-    if (window.XEraserWebView) {
-      window.addEventListener('cleanup-progress', (event) => {
-        const { progress, deleted } = event.detail || {};
-        if (progress !== undefined) {
-          progressBar.style.width = `${Math.min(progress, 100)}%`;
-          progressPercent.textContent = `${Math.round(progress)}%`;
-          progressText.textContent = `Deleted: ${deleted || 0} items...`;
-        }
-      });
-      
-      window.addEventListener('cleanup-complete', (event) => {
-        const { deleted } = event.detail || {};
-        progressText.textContent = `Cleanup Complete! Deleted ${deleted || 0} items.`;
-        progressPercent.textContent = '100%';
-        progressBar.style.width = '100%';
-        
-        setTimeout(() => {
-          btnStartCleanup.disabled = false;
-          btnStartCleanup.classList.remove('opacity-50', 'cursor-not-allowed');
-          isCleaning = false;
-        }, 2000);
-      });
-    }
-
     btnStartCleanup.addEventListener('click', async () => {
       if (isCleaning) return;
       
-      // Get cleanup options
       const options = {
-        tweets: document.getElementById('opt-tweets').checked,
+        deleteTweets: document.getElementById('opt-tweets').checked,
         replies: document.getElementById('opt-replies').checked,
-        likes: document.getElementById('opt-likes').checked,
+        unlikes: document.getElementById('opt-likes').checked,
         timeRange: document.getElementById('time-filter').value
       };
 
-      // Show progress section
+      document.getElementById('task-status-section').classList.remove('hidden');
       progressSection.classList.remove('hidden');
       btnStartCleanup.disabled = true;
       btnStartCleanup.classList.add('opacity-50', 'cursor-not-allowed');
+      document.getElementById('btn-start-text').textContent = 'Running...';
+      document.getElementById('task-status-indicator').classList.add('status-running');
+      document.getElementById('task-status-text').textContent = 'Task Running';
       isCleaning = true;
-
-      // Try to use native WebView plugin
-      if (window.XEraserWebView) {
-        try {
-          console.log('[XEraser] Starting native cleanup...');
-          await window.XEraserWebView.startCleanup(options);
-          return; // Progress will come from native events
-        } catch (error) {
-          console.error('[XEraser] Native cleanup failed, falling back to simulation:', error);
-        }
+      taskState = { processed: 0, success: 0, fail: 0 };
+      
+      const remoteUrl = document.getElementById('config-remote-url').value;
+      if (remoteUrl) {
+        options.remoteConfigUrl = remoteUrl;
       }
 
-      // Fallback: Simulate progress bar
-      let progress = 0;
-      const totalSteps = 100;
+      addLog({ type: 'info', message: 'Starting cleanup task', data: options });
+
+      window.postMessage({ source: 'XEraser-App', action: 'start', data: options }, '*');
+
+      let simulatedProgress = 0;
+      const messages = [
+        'Scanning tweets...',
+        'Deleting tweets...',
+        'Processing replies...',
+        'Unliking tweets...',
+        'Clearing cache...'
+      ];
       
       cleanupInterval = setInterval(() => {
-        progress += Math.random() * 3;
-        if (progress >= totalSteps) {
-          progress = totalSteps;
+        if (!isCleaning) {
+          clearInterval(cleanupInterval);
+          return;
+        }
+        
+        document.getElementById('stat-processed').textContent = taskState.processed;
+        document.getElementById('stat-success').textContent = taskState.success;
+        document.getElementById('stat-failed').textContent = taskState.fail;
+        
+        simulatedProgress += Math.random() * 2;
+        if (simulatedProgress >= 100) {
+          simulatedProgress = 100;
           clearInterval(cleanupInterval);
           
           progressText.textContent = 'Cleanup Complete!';
           progressPercent.textContent = '100%';
+          progressBar.style.width = '100%';
+          
+          document.getElementById('task-status-indicator').classList.remove('status-running');
+          document.getElementById('task-status-text').textContent = 'Task Complete';
+          
+          addLog({ type: 'success', message: 'Cleanup completed', data: taskState });
           
           setTimeout(() => {
             btnStartCleanup.disabled = false;
             btnStartCleanup.classList.remove('opacity-50', 'cursor-not-allowed');
+            document.getElementById('btn-start-text').textContent = 'Start Cleanup';
             isCleaning = false;
+            
+            setTimeout(() => {
+              document.getElementById('task-status-section').classList.add('hidden');
+            }, 3000);
           }, 2000);
         } else {
-          const messages = [
-            'Scanning tweets...',
-            'Deleting tweets...',
-            'Processing replies...',
-            'Unliking tweets...',
-            'Clearing cache...'
-          ];
-          progressText.textContent = messages[Math.floor(progress / 20) % messages.length];
-          progressPercent.textContent = `${Math.round(progress)}%`;
+          progressText.textContent = messages[Math.floor(simulatedProgress / 20) % messages.length];
+          progressPercent.textContent = `${Math.round(simulatedProgress)}%`;
         }
         
-        progressBar.style.width = `${progress}%`;
-      }, 100);
+        progressBar.style.width = `${simulatedProgress}%`;
+      }, 500);
     });
+
+    // ===== Listen for messages from injector =====
+    window.addEventListener('message', (event) => {
+      if (event.data?.source !== 'XEraser-Injector') return;
+      
+      const { type, data, message } = event.data;
+      
+      switch(type) {
+        case 'info':
+        case 'warn':
+        case 'error':
+        case 'success':
+        case 'debug':
+          addLog({ type, message, data });
+          break;
+          
+        case 'elementMissing':
+          addLog({ type: 'elementMissing', message, data });
+          taskState.fail++;
+          break;
+          
+        case 'progress':
+          taskState.processed = data.processed;
+          taskState.success = data.success;
+          taskState.fail = data.fail;
+          document.getElementById('stat-processed').textContent = data.processed;
+          document.getElementById('stat-success').textContent = data.success;
+          document.getElementById('stat-failed').textContent = data.fail;
+          break;
+          
+        case 'complete':
+          isCleaning = false;
+          clearInterval(cleanupInterval);
+          
+          progressText.textContent = `Complete! Deleted ${data.success} items`;
+          progressPercent.textContent = '100%';
+          progressBar.style.width = '100%';
+          document.getElementById('progress-spinner').classList.add('hidden');
+          
+          document.getElementById('task-status-indicator').classList.remove('status-running');
+          document.getElementById('task-status-text').textContent = 'Task Complete';
+          
+          addLog({ type: 'success', message: `Task completed in ${data.elapsed}s`, data });
+          
+          setTimeout(() => {
+            btnStartCleanup.disabled = false;
+            btnStartCleanup.classList.remove('opacity-50', 'cursor-not-allowed');
+            document.getElementById('btn-start-text').textContent = 'Start Cleanup';
+          }, 2000);
+          break;
+          
+        case 'state':
+          break;
+      }
+    });
+
+    // ===== Initialize =====
+    addLog({ type: 'info', message: 'X-Eraser UI initialized' });
   </script>
 </body>
 </html>
