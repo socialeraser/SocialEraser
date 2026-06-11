@@ -1,0 +1,305 @@
+{
+  "_comment": "X-Eraser 全局选择器配置文件 - 适配X英文主流界面",
+  "_version": "1.0.0",
+  "_lastUpdated": "2025-01-15",
+  "_remoteUrl": "https://raw.githubusercontent.com/xiangping/x-eraser-config/main/selectorConfig.json",
+  
+  "selectors": {
+    "tweet": {
+      "_comment": "推文卡片容器选择器",
+      "priority1": {
+        "type": "data-testid",
+        "value": "tweet"
+      },
+      "priority2": {
+        "type": "css",
+        "value": "article[data-testid='tweet']"
+      },
+      "priority3": {
+        "type": "css",
+        "value": "article[role='article']"
+      },
+      "fallback": {
+        "type": "xpath",
+        "value": "//article[contains(@data-testid, 'tweet')]"
+      }
+    },
+    
+    "moreButton": {
+      "_comment": "更多操作按钮（三个点菜单）",
+      "priority1": {
+        "type": "data-testid",
+        "value": "more"
+      },
+      "priority2": {
+        "type": "css",
+        "value": "[data-testid='more'][role='button']"
+      },
+      "priority3": {
+        "type": "xpath",
+        "value": "//div[@data-testid='more']"
+      }
+    },
+    
+    "deleteOption": {
+      "_comment": "删除选项（在更多菜单中）",
+      "multilingual": {
+        "en": ["Delete", "Delete Tweet"],
+        "ja": ["削除", "Tweetを削除"],
+        "ko": ["삭제", "트윗 삭제"],
+        "zh-CN": ["删除", "删除推文"],
+        "zh-TW": ["刪除", "刪除推文"],
+        "es": ["Eliminar", "Eliminar Tweet"],
+        "fr": ["Supprimer", "Supprimer le Tweet"],
+        "de": ["Löschen", "Tweet löschen"]
+      },
+      "priority1": {
+        "type": "role",
+        "value": "menuitem"
+      },
+      "priority2": {
+        "type": "css",
+        "value": "[role='menuitem']"
+      }
+    },
+    
+    "unlikeButton": {
+      "_comment": "取消点赞按钮",
+      "priority1": {
+        "type": "data-testid",
+        "value": "unlike"
+      },
+      "priority2": {
+        "type": "css",
+        "value": "[data-testid='unlike']"
+      },
+      "priority3": {
+        "type": "css",
+        "value": "[data-testid='like']"
+      }
+    },
+    
+    "confirmButton": {
+      "_comment": "确认删除对话框的确认按钮",
+      "priority1": {
+        "type": "data-testid",
+        "value": "confirmationSheetConfirm"
+      },
+      "priority2": {
+        "type": "css",
+        "value": "[data-testid='confirmationSheetConfirm']"
+      },
+      "priority3": {
+        "type": "xpath",
+        "value": "//div[@data-testid='confirmationSheetConfirm']"
+      }
+    },
+    
+    "cancelButton": {
+      "_comment": "取消按钮（对话框）",
+      "priority1": {
+        "type": "data-testid",
+        "value": "confirmationSheetCancel"
+      },
+      "priority2": {
+        "type": "css",
+        "value": "[data-testid='confirmationSheetCancel']"
+      }
+    },
+    
+    "closeButton": {
+      "_comment": "关闭按钮（弹窗）",
+      "priority1": {
+        "type": "data-testid",
+        "value": "app-bar-close"
+      },
+      "priority2": {
+        "type": "aria-label",
+        "value": "Close"
+      },
+      "priority3": {
+        "type": "css",
+        "value": "[aria-label='Close']"
+      }
+    },
+    
+    "profileTab": {
+      "_comment": "个人资料Tab",
+      "priority1": {
+        "type": "data-testid",
+        "value": "UserAvatar"
+      },
+      "priority2": {
+        "type": "css",
+        "value": "a[href*='/profile']"
+      }
+    },
+    
+    "likesTab": {
+      "_comment": "点赞Tab（在个人资料页）",
+      "multilingual": {
+        "en": ["Likes"],
+        "ja": ["いいね"],
+        "ko": ["좋아요"],
+        "zh-CN": ["喜欢"],
+        "zh-TW": ["喜歡"],
+        "es": ["Me gusta"],
+        "fr": ["J'aime"],
+        "de": ["Gefällt mir"]
+      },
+      "priority1": {
+        "type": "aria-label",
+        "value": "Likes"
+      },
+      "priority2": {
+        "type": "xpath",
+        "value": "//span[text()='Likes']/ancestor::a"
+      }
+    },
+    
+    "tweetsTab": {
+      "_comment": "推文Tab（在个人资料页）",
+      "multilingual": {
+        "en": ["Tweets"],
+        "ja": ["Tweet"],
+        "ko": ["트윗"],
+        "zh-CN": ["推文"],
+        "zh-TW": ["推文"],
+        "es": ["Tweets"],
+        "fr": ["Tweets"],
+        "de": ["Tweets"]
+      },
+      "priority1": {
+        "type": "aria-label",
+        "value": "Tweets"
+      },
+      "priority2": {
+        "type": "xpath",
+        "value": "//span[text()='Tweets']/ancestor::a"
+      }
+    },
+    
+    "repliesTab": {
+      "_comment": "回复Tab（在个人资料页）",
+      "multilingual": {
+        "en": ["Replies"],
+        "ja": ["返信"],
+        "ko": ["답글"],
+        "zh-CN": ["回复"],
+        "zh-TW": ["回覆"],
+        "es": ["Respuestas"],
+        "fr": ["Réponses"],
+        "de": ["Antworten"]
+      },
+      "priority1": {
+        "type": "aria-label",
+        "value": "Replies"
+      },
+      "priority2": {
+        "type": "xpath",
+        "value": "//span[text()='Replies']/ancestor::a"
+      }
+    },
+    
+    "popup": {
+      "_comment": "弹窗容器",
+      "priority1": {
+        "type": "data-testid",
+        "value": "confirmationSheet"
+      },
+      "priority2": {
+        "type": "role",
+        "value": "dialog"
+      },
+      "priority3": {
+        "type": "css",
+        "value": "[data-testid='modal']"
+      }
+    }
+  },
+  
+  "timing": {
+    "_comment": "操作时序配置（毫秒）",
+    "minDelayBeforeClick": 1200,
+    "maxDelayBeforeClick": 3800,
+    "minDelayAfterClick": 800,
+    "maxDelayAfterClick": 2000,
+    "minScrollDelay": 500,
+    "maxScrollDelay": 1500,
+    "pageLoadWait": 3000,
+    "menuOpenWait": 500,
+    "confirmationWait": 800,
+    "retryIntervalBase": 1000,
+    "retryIntervalMax": 5000
+  },
+  
+  "rateLimit": {
+    "_comment": "风控限流配置",
+    "maxOperationsPerMinute": 12,
+    "maxOperationsPerBatch": 10,
+    "batchPauseMin": 10000,
+    "batchPauseMax": 20000,
+    "cooldownAfterError": 30000
+  },
+  
+  "behavior": {
+    "_comment": "真人仿真行为配置",
+    "clickOffsetRange": 5,
+    "scrollAmountMin": 300,
+    "scrollAmountMax": 600,
+    "humanlikeDelayEnabled": true,
+    "randomScrollEnabled": true,
+    "elementVisibilityCheck": true
+  },
+  
+  "retry": {
+    "_comment": "重试配置",
+    "maxRetries": 3,
+    "retryOnElementNotFound": true,
+    "retryOnClickFailed": true,
+    "retryOnConfirmationFailed": true
+  },
+  
+  "api": {
+    "_comment": "X API v2 双引擎配置",
+    "enabled": false,
+    "baseUrl": "https://api.twitter.com/2",
+    "oauthToken": "",
+    "fallbackToDOMOnAPIError": true,
+    "rateLimit": {
+      "maxRequestsPerWindow": 180,
+      "windowMs": 900000
+    }
+  },
+  
+  "storage": {
+    "_comment": "Capacitor Storage 配置",
+    "taskProgressKey": "xe_tweet_task_progress",
+    "selectorConfigCacheKey": "xe_selector_config_cache",
+    "lastSelectorConfigFetch": "xe_selector_config_last_fetch",
+    "autoResumeEnabled": true
+  },
+  
+  "logging": {
+    "_comment": "日志配置",
+    "enabled": true,
+    "logLevel": "info",
+    "postMessageToParent": true,
+    "consoleOutput": true,
+    "logTypes": {
+      "elementMatching": true,
+      "operationSuccess": true,
+      "operationFailure": true,
+      "retryAttempts": true,
+      "elementMissing": true,
+      "rateLimitHit": true
+    }
+  },
+  
+  "compatibility": {
+    "_comment": "兼容性配置",
+    "supportedLanguages": ["en", "ja", "ko", "zh-CN", "zh-TW", "es", "fr", "de"],
+    "detectLanguageAutomatically": true,
+    "fallbackLanguage": "en"
+  }
+}

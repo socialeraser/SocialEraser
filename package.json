@@ -2,10 +2,11 @@
   "name": "x-eraser",
   "version": "1.0.0",
   "description": "X-Eraser - Batch Delete Twitter History",
-  "main": "index.html",
+  "main": "www/index.html",
   "scripts": {
-    "start": "npx cap run android",
-    "build": "npx cap copy",
+    "sync": "node scripts/sync-shared.js",
+    "start": "npm run build && npx cap run android",
+    "build": "npm run sync && npx cap copy",
     "android:open": "npx cap open android"
   },
   "keywords": [
