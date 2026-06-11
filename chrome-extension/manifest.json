@@ -1,38 +1,33 @@
 {
   "manifest_version": 3,
-  "name": "X-Eraser",
-  "version": "2.1",
-  "description": "批量删除X推文和取消点赞",
-  "permissions": [
-    "activeTab",
-    "storage",
-    "tabs"
-  ],
-  "host_permissions": [
-    "*://x.com/*",
-    "*://twitter.com/*"
-  ],
-  "action": {
-    "default_popup": "popup.html",
-    "default_icon": {
-      "16": "icons/icon16.png",
-      "48": "icons/icon48.png",
-      "128": "icons/icon128.png"
-    }
-  },
-  "content_scripts": [
-    {
-      "matches": ["*://x.com/*", "*://twitter.com/*"],
-      "js": ["panel.js", "injector.js"],
-      "run_at": "document_idle"
-    }
-  ],
-  "background": {
-    "service_worker": "background.js"
-  },
+  "name": "__MSG_ext_name__",
+  "description": "__MSG_ext_description__",
+  "version": "1.0.0",
+  "default_locale": "en",
   "icons": {
     "16": "icons/icon16.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
-  }
+  },
+  "permissions": [
+    "storage",
+    "activeTab",
+    "sidePanel"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://x.com/*", "*://twitter.com/*"],
+      "js": ["lib/config.js", "content.js"],
+      "run_at": "document_start"
+    }
+  ]
 }

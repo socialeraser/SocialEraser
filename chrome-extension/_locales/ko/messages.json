@@ -1,0 +1,10 @@
+{
+  "ext_name": {
+    "message": "X-Eraser",
+    "description": "Extension name"
+  },
+  "ext_description": {
+    "message": "X/Twitter 일괄 삭제 도구",
+    "description": "Extension description"
+  }
+}

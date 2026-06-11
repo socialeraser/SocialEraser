@@ -1,0 +1,10 @@
+{
+  "ext_name": {
+    "message": "X-Eraser",
+    "description": "Extension name"
+  },
+  "ext_description": {
+    "message": "Batch cleanup tool for X/Twitter",
+    "description": "Extension description"
+  }
+}

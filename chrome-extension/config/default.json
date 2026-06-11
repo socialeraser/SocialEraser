@@ -1,0 +1,72 @@
+{
+  "version": "1.0.0",
+  "updated": "2025-01-01",
+  "selectors": {
+    "xWebsite": {
+      "patterns": [
+        "x.com",
+        "twitter.com"
+      ]
+    },
+    "login": {
+      "checkElements": {
+        "zh-CN": [
+          { "type": "text", "value": "继续" },
+          { "type": "text", "value": "创建您的账户" },
+          { "type": "selector", "value": "[data-testid='loginButton']" }
+        ],
+        "zh-TW": [
+          { "type": "text", "value": "繼續" },
+          { "type": "text", "value": "建立您的帳戶" },
+          { "type": "selector", "value": "[data-testid='loginButton']" }
+        ],
+        "en": [
+          { "type": "text", "value": "Sign in" },
+          { "type": "text", "value": "Create your account" },
+          { "type": "selector", "value": "[data-testid='loginButton']" }
+        ],
+        "ja": [
+          { "type": "text", "value": "サインイン" },
+          { "type": "text", "value": "アカウントを作成" },
+          { "type": "selector", "value": "[data-testid='loginButton']" }
+        ],
+        "ko": [
+          { "type": "text", "value": "로그인" },
+          { "type": "text", "value": "계정 만들기" },
+          { "type": "selector", "value": "[data-testid='loginButton']" }
+        ],
+        "es": [
+          { "type": "text", "value": "Iniciar sesión" },
+          { "type": "text", "value": "Crea tu cuenta" },
+          { "type": "selector", "value": "[data-testid='loginButton']" }
+        ],
+        "de": [
+          { "type": "text", "value": "Anmelden" },
+          { "type": "text", "value": "Konto erstellen" },
+          { "type": "selector", "value": "[data-testid='loginButton']" }
+        ],
+        "fr": [
+          { "type": "text", "value": "Se connecter" },
+          { "type": "text", "value": "Créer votre compte" },
+          { "type": "selector", "value": "[data-testid='loginButton']" }
+        ]
+      },
+      "loggedInElements": [
+        { "type": "selector", "value": "[data-testid='UserAvatar']" },
+        { "type": "selector", "value": "[data-testid='tweetTextarea_0']" }
+      ]
+    },
+    "tweet": {
+      "container": "[data-testid='tweet']",
+      "moreButton": "[data-testid='more']",
+      "deleteButton": "[data-testid='Delete']",
+      "confirmButton": "[data-testid='confirmationSheetConfirm']"
+    },
+    "like": {
+      "unlikeButton": "[data-testid='unlike']"
+    },
+    "bookmark": {
+      "removeButton": "[data-testid='bookmark']"
+    }
+  }
+}

@@ -37,8 +37,6 @@ npx cap sync android
 npx cap run android
 ```
 
-> **iOS**：当前仓库未包含 `ios/` 工程，Android 为移动端主要目标。
-
 ## 开发工作流
 
 核心脚本与配置集中在 `shared/`，修改后需同步到各端：
@@ -51,9 +49,18 @@ npm run sync
 |--------|----------|
 | `shared/injector.js` | `chrome-extension/injector.js`、`www/injector.js` |
 | `shared/selectorConfig.json` | `www/selectorConfig.json` |
-| `shared/bridge.js` | `www/bridge.js` |
+| `shared/bridge.js` | `chrome-extension/bridge.js`、`www/bridge.js` |
 
-**请勿直接编辑** `chrome-extension/injector.js` 或 `www/injector.js`（文件头标注 AUTO-GENERATED），应改 `shared/` 后执行 `npm run sync`。
+**请勿直接编辑** `chrome-extension/injector.js`、`chrome-extension/bridge.js` 或 `www/injector.js`（文件头标注 AUTO-GENERATED），应改 `shared/` 后执行 `npm run sync`。
+
+### 通信协议
+
+| 方向 | source | 用途 |
+|------|--------|------|
+| App → Injector | `XEraser-App` | `start` / `stop` / `pause` / `resume` |
+| Injector → App | `XEraser-Injector` | `progress` / `complete` / `error` / 日志事件 |
+
+扩展端：`bridge.js` 同时驱动 `XEraserPanel` 与 `XEraser-Injector` 事件。移动端：`XEraserNative.postMessage` 经原生插件回传 App 壳。
 
 ## 技术架构
 

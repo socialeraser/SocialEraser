@@ -1,9 +1,9 @@
 package com.xeraser.app;
 
 import android.annotation.SuppressLint;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.TextUtils;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.WebChromeClient;
@@ -14,16 +14,23 @@ import android.widget.FrameLayout;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
-import com.getcapacitor.annotation.ActivityCallback;
-import com.getcapacitor.annotation.PluginMethod;
+import com.getcapacitor.PluginCall;
+import com.getcapacitor.PluginMethod;
+import com.getcapacitor.annotation.CapacitorPlugin;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+@CapacitorPlugin()
 public class XEraserWebViewPlugin extends Plugin {
-    
+
     private WebView webView;
     private FrameLayout container;
     private String injectedScript = "";
     private boolean scriptInjected = false;
+    private boolean isLoading = false;
     private Handler mainHandler;
+    private XEraserBridge bridge;
 
     @Override
     public void load() {
@@ -31,11 +38,19 @@ public class XEraserWebViewPlugin extends Plugin {
         mainHandler = new Handler(Looper.getMainLooper());
     }
 
+    @SuppressLint("SetJavaScriptEnabled")
     @PluginMethod
     public void loadX(PluginCall call) {
+        if (webView != null && container != null) {
+            JSObject ret = new JSObject();
+            ret.put("success", true);
+            ret.put("message", "WebView already loaded");
+            call.resolve(ret);
+            return;
+        }
+
         mainHandler.post(() -> {
             try {
-                // 创建 WebView
                 webView = new WebView(getContext());
                 WebSettings settings = webView.getSettings();
                 settings.setJavaScriptEnabled(true);
@@ -46,45 +61,72 @@ public class XEraserWebViewPlugin extends Plugin {
                 settings.setUseWideViewPort(true);
                 settings.setBuiltInZoomControls(false);
                 settings.setDisplayZoomControls(false);
-                
-                // 创建容器
+                settings.setCacheMode(WebSettings.LOAD_NO_CACHE);
+
                 container = new FrameLayout(getContext());
                 container.addView(webView);
-                
-                // 设置 WebViewClient
+
                 webView.setWebViewClient(new WebViewClient() {
+                    @Override
+                    public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+                        super.onPageStarted(view, url, favicon);
+                        isLoading = true;
+                        notifyListeners("webViewLoading", new JSObject().put("loading", true).put("url", url));
+                    }
+
                     @Override
                     public void onPageFinished(WebView view, String url) {
                         super.onPageFinished(view, url);
-                        
-                        // 页面加载完成后注入脚本
+                        isLoading = false;
+                        notifyListeners("webViewLoading", new JSObject().put("loading", false).put("url", url));
+
                         if (!scriptInjected && !injectedScript.isEmpty()) {
                             injectScriptInternal(injectedScript);
+                            scriptInjected = true;
                         }
                     }
+
+                    @Override
+                    public void onReceivedError(WebView view, int errorCode, String description, String failingUrl) {
+                        super.onReceivedError(view, errorCode, description, failingUrl);
+                        notifyListeners("webViewError", new JSObject()
+                            .put("errorCode", errorCode)
+                            .put("description", description)
+                            .put("url", failingUrl));
+                    }
                 });
-                
-                webView.setWebChromeClient(new WebChromeClient());
-                
-                // 添加 JavaScript 接口
-                webView.addJavascriptInterface(new XEraserBridge(), "XEraserNative");
-                
-                // 加载 x.com
+
+                webView.setWebChromeClient(new WebChromeClient() {
+                    @Override
+                    public void onProgressChanged(WebView view, int newProgress) {
+                        super.onProgressChanged(view, newProgress);
+                        notifyListeners("webViewProgress", new JSObject().put("progress", newProgress));
+                    }
+                });
+
+                bridge = new XEraserBridge();
+                webView.addJavascriptInterface(bridge, "XEraserNative");
+
                 webView.loadUrl("https://x.com");
-                
-                // 在视图中显示 WebView
+
                 if (getActivity() != null) {
                     getActivity().runOnUiThread(() -> {
-                        View decorView = getActivity().getWindow().getDecorView();
-                        FrameLayout rootView = (FrameLayout) decorView.findViewById(android.R.id.content);
-                        rootView.addView(container);
+                        try {
+                            View decorView = getActivity().getWindow().getDecorView();
+                            FrameLayout rootView = (FrameLayout) decorView.findViewById(android.R.id.content);
+                            if (rootView != null) {
+                                rootView.addView(container);
+                            }
+                        } catch (Exception e) {
+                            notifyListeners("webViewError", new JSObject().put("error", e.getMessage()));
+                        }
                     });
                 }
-                
+
                 JSObject ret = new JSObject();
                 ret.put("success", true);
                 call.resolve(ret);
-                
+
             } catch (Exception e) {
                 JSObject ret = new JSObject();
                 ret.put("success", false);
@@ -97,20 +139,20 @@ public class XEraserWebViewPlugin extends Plugin {
     @PluginMethod
     public void injectScript(PluginCall call) {
         String script = call.getString("script", "");
-        
-        if (script.isEmpty()) {
+
+        if (TextUtils.isEmpty(script)) {
             call.reject("Script is empty");
             return;
         }
-        
+
         this.injectedScript = script;
-        
+
         mainHandler.post(() -> {
             if (webView != null && webView.getUrl() != null && webView.getUrl().contains("x.com")) {
                 injectScriptInternal(script);
                 scriptInjected = true;
             }
-            
+
             JSObject ret = new JSObject();
             ret.put("success", true);
             call.resolve(ret);
@@ -125,12 +167,34 @@ public class XEraserWebViewPlugin extends Plugin {
     }
 
     @PluginMethod
+    public void executeScript(PluginCall call) {
+        String script = call.getString("script", "");
+
+        if (TextUtils.isEmpty(script)) {
+            call.reject("Script is empty");
+            return;
+        }
+
+        mainHandler.post(() -> {
+            if (webView != null) {
+                webView.evaluateJavascript(script, value -> {
+                    JSObject ret = new JSObject();
+                    ret.put("success", true);
+                    ret.put("result", value);
+                    call.resolve(ret);
+                });
+            } else {
+                call.reject("WebView not initialized");
+            }
+        });
+    }
+
+    @PluginMethod
     public void startCleanup(PluginCall call) {
-        // 直接调用 injector.js 的 start 方法
         mainHandler.post(() -> {
             if (webView != null) {
                 webView.evaluateJavascript(
-                    "if(window.XEraser) XEraser.start();",
+                    "if(window.XEraser && window.XEraser.start) window.XEraser.start();",
                     null
                 );
             }
@@ -227,16 +291,53 @@ public class XEraserWebViewPlugin extends Plugin {
         });
     }
 
-    // JavaScript Bridge 用于接收 injector.js 的消息
     class XEraserBridge {
         @JavascriptInterface
         public void postMessage(String data) {
-            // 将消息发送回 JavaScript
             mainHandler.post(() -> {
-                if (webView != null) {
-                    String script = "window.dispatchEvent(new MessageEvent('message', {data: " + data + "}));";
-                    webView.evaluateJavascript(script, null);
+                if (webView == null) return;
+
+                try {
+                    JSONObject jsonData = new JSONObject(data);
+                    String source = jsonData.optString("source", "");
+                    String type = jsonData.optString("type", "");
+                    String message = jsonData.optString("message", "");
+                    JSONObject payload = jsonData.optJSONObject("data");
+
+                    if ("XEraser-Injector".equals(source)) {
+                        JSObject event = new JSObject();
+                        event.put("source", source);
+                        event.put("type", type);
+                        event.put("message", message);
+                        if (payload != null) {
+                            for (String key : payload.keys()) {
+                                event.put(key, payload.opt(key));
+                            }
+                        }
+
+                        notifyListeners("xeEvent", event);
+
+                        String script = "(function() {"
+                            + "var event = new MessageEvent('message', {data: " + data + "});"
+                            + "window.dispatchEvent(event);"
+                            + "})();";
+                        webView.evaluateJavascript(script, null);
+                    }
+                } catch (JSONException e) {
+                    notifyListeners("xeEvent", new JSObject()
+                        .put("source", "XEraser-Native")
+                        .put("type", "error")
+                        .put("message", "Failed to parse message: " + e.getMessage()));
                 }
+            });
+        }
+
+        @JavascriptInterface
+        public void log(String level, String message) {
+            mainHandler.post(() -> {
+                notifyListeners("xeLog", new JSObject()
+                    .put("level", level)
+                    .put("message", message));
             });
         }
     }

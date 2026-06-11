@@ -7,7 +7,9 @@
     "sync": "node scripts/sync-shared.js",
     "start": "npm run build && npx cap run android",
     "build": "npm run sync && npx cap copy",
-    "android:open": "npx cap open android"
+    "android:open": "npx cap open android",
+    "test": "jest",
+    "test:watch": "jest --watch"
   },
   "keywords": [
     "twitter",
@@ -22,5 +24,9 @@
     "@capacitor/cli": "^2.5.0",
     "@capacitor/core": "^2.5.0",
     "cordova-android": "^9.1.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
   }
 }
