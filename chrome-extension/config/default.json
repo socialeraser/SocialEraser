@@ -63,10 +63,24 @@
       "confirmButton": "[data-testid='confirmationSheetConfirm']"
     },
     "like": {
-      "unlikeButton": "[data-testid='unlike']"
+      "container": "[data-testid='tweet'], [data-testid='cellInnerDiv']",
+      "unlikeButton": ["[data-testid='unlike']", "[data-testid='unretweet']"]
     },
     "bookmark": {
+      "container": "[data-testid='tweet']",
       "removeButton": "[data-testid='bookmark']"
+    },
+    "following": {
+      "container": "[data-testid='UserAvatar']",
+      "unfollowButton": "[data-testid='defaultProfileFollowButton']",
+      "followingTab": "[data-testid='Tab']",
+      "followingTabValue": "Following"
+    },
+    "message": {
+      "container": "[data-testid='DMConversation']",
+      "moreButton": "[data-testid='DMConversationDropdown']",
+      "deleteButton": "[data-testid='deletDm']",
+      "confirmButton": "[data-testid='deletDmConfirm']"
     }
   }
 }

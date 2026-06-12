@@ -1,14 +1,20 @@
 // X-Eraser i18n - Multi-language Support
+// 8 languages: en, zh-CN, zh-TW, ja, ko, es, de, fr
 
 (function() {
   'use strict';
 
   console.log('[X-Eraser] i18n.js loading...');
 
+  // 中文文案需要更细粒度的处理
+  // 使用 {var} 作为占位符
   const TRANSLATIONS = {
     en: {
+      // UI 标签
       openXWebsite: 'Open X Website',
+      pleaseLogin: 'Please Login First',
       checking: 'Checking...',
+      checkingLogin: 'Checking login status...',
       xWebsiteDetected: 'X website detected',
       pleaseOpenX: 'Please open X website',
       loggedIn: 'Logged in',
@@ -31,23 +37,75 @@
       processing: 'Processing...',
       processed: 'Processed',
       waiting: 'Waiting for start...',
-      dailyLimit: 'Free daily limit',
+      completed: 'Completed',
+      paused: 'Paused',
+      stopped: 'Stopped',
+      activity: 'Activity',
       privacy: 'Privacy',
       terms: 'Terms',
       help: 'Help',
-      trustText: 'Your data is processed locally. We never store your credentials.',
-      deleted: 'Deleted',
-      skipped: 'Skipped',
-      error: 'Error',
-      completed: 'Completed!',
-      paused: 'Paused',
-      stopped: 'Stopped',
-      noItemsSelected: 'Please select at least one item',
-      dailyLimitExceeded: 'Daily limit exceeded. Subscribe to continue!'
+      trustTitle: '100% Local Processing',
+      trustText: 'Your data is processed locally. We never store your credentials or personal information.',
+
+      // 弹窗/警告
+      noItemsSelected: 'Please select at least one option',
+      confirmStop: 'Stop cleanup? Progress will be lost.',
+
+      // 日志消息
+      refreshingConfig: 'Refreshing config from remote...',
+      configRefreshed: 'Config refreshed. X: {xStatus}, Logged in: {loginStatus}',
+      configRefreshFailed: 'Failed to refresh config, status re-checked',
+      statusYes: 'yes',
+      statusNo: 'no',
+      startingCleanup: 'Starting cleanup...',
+      cleanupCompleted: 'Cleanup completed. Total processed: {count}',
+      stoppedByUser: 'Stopped by user. Processed: {count}',
+      pausedLog: 'Paused',
+      resumedLog: 'Resumed',
+      likesRequiresNav: 'Likes requires /likes page, navigating...',
+      bookmarksRequiresNav: 'Bookmarks requires /bookmarks page, navigating...',
+      messagesRequiresNav: 'Messages requires /messages page, navigating...',
+      navigatingTo: 'Navigating to: {url}',
+      pageLoadedResuming: 'Page loaded, resuming cleanup...',
+      cleanupAutoResumed: 'Cleanup auto-resumed',
+      pageTypeMismatch: 'Page type mismatch, aborting',
+      startingLikesCleanup: 'Starting likes cleanup on {url}',
+      noUnlikeButtons: 'No unlike buttons found on page, selectors may be wrong',
+      triedSelectors: 'Tried: {selectors}',
+      noMoreLikes: 'No more likes',
+      endOfLikes: 'End of likes',
+      foundButtons: 'Found {count} buttons with: {selector}',
+      clickedUnlike: 'Clicked unlike button #{count}',
+      unlikeFailed: 'Unlike failed: {error}',
+      clickReturnedFalse: 'Click returned false for unlike button',
+
+      // 诊断
+      pageDiagnostics: '=== Page Diagnostics ===',
+      endDiagnostics: '=== End Diagnostics ===',
+      totalTestIdElements: 'Total data-testid elements: {count}',
+      topTestIds: 'Top data-testids: {list}',
+      totalLabeledButtons: 'Total labeled buttons: {count}',
+      topAriaLabels: 'Top aria-labels: {list}',
+
+      // 每日额度
+      dailyLimitReached: 'Daily free limit reached ({used}/{limit})',
+      dailyLimitReachedHint: 'You have used all {limit} free actions today.\nUpgrade to Premium for unlimited cleanup!',
+      upgradeToPremium: 'Upgrade to Premium',
+      maybeLater: 'Maybe Later',
+      usedToday: 'Used today: {used} / {limit}',
+      cleanupSkipped: 'Cleanup skipped due to daily limit',
+
+      // 过滤
+      invalidDateRange: 'Start date cannot be later than end date',
+      noItemsMatched: 'No items matched the filter',
+      dateFilterSkipped: 'Date filter skipped for {type}: no timestamp found on some items',
     },
+
     'zh-CN': {
       openXWebsite: '打开 X 网站',
+      pleaseLogin: '请先登录',
       checking: '检查中...',
+      checkingLogin: '正在检测登录状态...',
       xWebsiteDetected: '已检测到 X 网站',
       pleaseOpenX: '请打开 X 网站',
       loggedIn: '已登录',
@@ -56,8 +114,8 @@
       selectOptions: '选择要删除的内容',
       tweets: '推文',
       likes: '点赞',
-      following: '关注',
       bookmarks: '书签',
+      following: '关注',
       messages: '私信',
       filterOptions: '筛选条件',
       fromDate: '开始日期',
@@ -70,38 +128,87 @@
       processing: '处理中...',
       processed: '已处理',
       waiting: '等待开始...',
-      dailyLimit: '今日免费额度',
-      privacy: '隐私政策',
-      terms: '使用条款',
-      help: '帮助',
-      trustText: '您的数据在本地处理，我们不会存储您的登录凭证。',
-      deleted: '已删除',
-      skipped: '已跳过',
-      error: '错误',
-      completed: '完成！',
+      completed: '已完成',
       paused: '已暂停',
       stopped: '已停止',
+      activity: '活动日志',
+      privacy: '隐私',
+      terms: '条款',
+      help: '帮助',
+      trustTitle: '100% 本地处理',
+      trustText: '您的数据在本地处理，我们绝不存储您的凭证或个人信息。',
+
       noItemsSelected: '请至少选择一项',
-      dailyLimitExceeded: '今日免费额度已用完，订阅后可继续！'
+      confirmStop: '确定停止清理？进度将丢失。',
+
+      refreshingConfig: '正在从远程刷新配置...',
+      configRefreshed: '配置已刷新。X: {xStatus}，已登录: {loginStatus}',
+      configRefreshFailed: '刷新配置失败，状态已重新检测',
+      statusYes: '是',
+      statusNo: '否',
+      startingCleanup: '开始清理...',
+      cleanupCompleted: '清理完成，共处理: {count}',
+      stoppedByUser: '用户已停止。已处理: {count}',
+      pausedLog: '已暂停',
+      resumedLog: '已继续',
+      likesRequiresNav: '点赞需要在 /likes 页面，正在跳转...',
+      bookmarksRequiresNav: '书签需要在 /bookmarks 页面，正在跳转...',
+      messagesRequiresNav: '私信需要在 /messages 页面，正在跳转...',
+      navigatingTo: '正在跳转至: {url}',
+      pageLoadedResuming: '页面已加载，正在恢复清理...',
+      cleanupAutoResumed: '清理已自动恢复',
+      pageTypeMismatch: '页面类型不匹配，中止',
+      startingLikesCleanup: '开始在 {url} 清理点赞',
+      noUnlikeButtons: '页面上找不到 unlike 按钮，选择器可能错误',
+      triedSelectors: '已尝试: {selectors}',
+      noMoreLikes: '没有更多点赞了',
+      endOfLikes: '点赞已全部处理',
+      foundButtons: '找到 {count} 个按钮，选择器: {selector}',
+      clickedUnlike: '已点击 unlike 按钮 #{count}',
+      unlikeFailed: '取消点赞失败: {error}',
+      clickReturnedFalse: 'unlike 按钮点击返回 false',
+
+      pageDiagnostics: '=== 页面诊断 ===',
+      endDiagnostics: '=== 诊断结束 ===',
+      totalTestIdElements: 'data-testid 元素总数: {count}',
+      topTestIds: '常用 data-testid: {list}',
+      totalLabeledButtons: '带 aria-label 按钮总数: {count}',
+      topAriaLabels: '常用 aria-label: {list}',
+
+      // 每日额度
+      dailyLimitReached: '已达到每日免费额度限制 ({used}/{limit})',
+      dailyLimitReachedHint: '您今日已使用全部 {limit} 次免费操作。\n升级到高级版享受无限清理！',
+      upgradeToPremium: '升级到高级版',
+      maybeLater: '稍后再说',
+      usedToday: '今日已使用: {used} / {limit}',
+      cleanupSkipped: '已达每日额度限制，跳过清理',
+
+      // 过滤
+      invalidDateRange: '开始日期不能晚于结束日期',
+      noItemsMatched: '没有匹配筛选条件的内容',
+      dateFilterSkipped: '{type} 日期过滤已跳过：部分内容未找到时间戳',
     },
+
     'zh-TW': {
       openXWebsite: '打開 X 網站',
+      pleaseLogin: '請先登入',
       checking: '檢查中...',
-      xWebsiteDetected: '已檢測到 X 網站',
+      checkingLogin: '正在偵測登入狀態...',
+      xWebsiteDetected: '已偵測到 X 網站',
       pleaseOpenX: '請打開 X 網站',
       loggedIn: '已登入',
       notLoggedIn: '未登入',
       notLoggedInHint: '請先登入',
       selectOptions: '選擇要刪除的內容',
       tweets: '推文',
-      likes: '喜歡',
-      following: '追蹤',
+      likes: '讚',
       bookmarks: '書籤',
+      following: '追蹤',
       messages: '訊息',
       filterOptions: '篩選條件',
       fromDate: '開始日期',
       toDate: '結束日期',
-      keywordPlaceholder: '按關鍵詞篩選...',
+      keywordPlaceholder: '按關鍵字篩選...',
       startCleanup: '開始清理',
       pause: '暫停',
       resume: '繼續',
@@ -109,24 +216,73 @@
       processing: '處理中...',
       processed: '已處理',
       waiting: '等待開始...',
-      dailyLimit: '今日免費額度',
-      privacy: '隱私政策',
-      terms: '使用條款',
-      help: '幫助',
-      trustText: '您的資料在本地處理，我們不會儲存您的登入憑證。',
-      deleted: '已刪除',
-      skipped: '已跳過',
-      error: '錯誤',
-      completed: '完成！',
+      completed: '已完成',
       paused: '已暫停',
       stopped: '已停止',
+      activity: '活動記錄',
+      privacy: '隱私',
+      terms: '條款',
+      help: '說明',
+      trustTitle: '100% 本地處理',
+      trustText: '您的資料在本地處理，我們絕不儲存您的憑證或個人資訊。',
+
       noItemsSelected: '請至少選擇一項',
-      dailyLimitExceeded: '今日免費額度已用完，訂閱後可繼續！'
+      confirmStop: '確定停止清理？進度將遺失。',
+
+      refreshingConfig: '正在從遠端刷新設定...',
+      configRefreshed: '設定已刷新。X: {xStatus}，已登入: {loginStatus}',
+      configRefreshFailed: '刷新設定失敗，狀態已重新偵測',
+      statusYes: '是',
+      statusNo: '否',
+      startingCleanup: '開始清理...',
+      cleanupCompleted: '清理完成，共處理: {count}',
+      stoppedByUser: '使用者已停止。已處理: {count}',
+      pausedLog: '已暫停',
+      resumedLog: '已繼續',
+      likesRequiresNav: '讚需要在 /likes 頁面，正在跳轉...',
+      bookmarksRequiresNav: '書籤需要在 /bookmarks 頁面，正在跳轉...',
+      messagesRequiresNav: '訊息需要在 /messages 頁面，正在跳轉...',
+      navigatingTo: '正在跳轉至: {url}',
+      pageLoadedResuming: '頁面已載入，正在恢復清理...',
+      cleanupAutoResumed: '清理已自動恢復',
+      pageTypeMismatch: '頁面類型不符，中止',
+      startingLikesCleanup: '開始在 {url} 清理讚',
+      noUnlikeButtons: '頁面上找不到 unlike 按鈕，選擇器可能錯誤',
+      triedSelectors: '已嘗試: {selectors}',
+      noMoreLikes: '沒有更多讚了',
+      endOfLikes: '讚已全部處理',
+      foundButtons: '找到 {count} 個按鈕，選擇器: {selector}',
+      clickedUnlike: '已點擊 unlike 按鈕 #{count}',
+      unlikeFailed: '取消讚失敗: {error}',
+      clickReturnedFalse: 'unlike 按鈕點擊返回 false',
+
+      pageDiagnostics: '=== 頁面診斷 ===',
+      endDiagnostics: '=== 診斷結束 ===',
+      totalTestIdElements: 'data-testid 元素總數: {count}',
+      topTestIds: '常用 data-testid: {list}',
+      totalLabeledButtons: '帶 aria-label 按鈕總數: {count}',
+      topAriaLabels: '常用 aria-label: {list}',
+
+      // 每日額度
+      dailyLimitReached: '已達到每日免費額度限制 ({used}/{limit})',
+      dailyLimitReachedHint: '您今日已使用全部 {limit} 次免費操作。\n升級到高級版享受無限清理！',
+      upgradeToPremium: '升級到高級版',
+      maybeLater: '稍後再說',
+      usedToday: '今日已使用: {used} / {limit}',
+      cleanupSkipped: '已達每日額度限制，跳過清理',
+
+      // 過濾
+      invalidDateRange: '開始日期不能晚於結束日期',
+      noItemsMatched: '沒有符合篩選條件的內容',
+      dateFilterSkipped: '{type} 日期過濾已跳過：部分內容未找到時間戳',
     },
+
     ja: {
       openXWebsite: 'X ウェブサイトを開く',
+      pleaseLogin: '先にログインしてください',
       checking: '確認中...',
-      xWebsiteDetected: 'X ウェブサイトを検出',
+      checkingLogin: 'ログイン状態を確認中...',
+      xWebsiteDetected: 'X ウェブサイト検出',
       pleaseOpenX: 'X ウェブサイトを開いてください',
       loggedIn: 'ログイン済み',
       notLoggedIn: '未ログイン',
@@ -134,8 +290,8 @@
       selectOptions: '削除する項目を選択',
       tweets: 'ツイート',
       likes: 'いいね',
-      following: 'フォロー',
       bookmarks: 'ブックマーク',
+      following: 'フォロー',
       messages: 'メッセージ',
       filterOptions: 'フィルターオプション',
       fromDate: '開始日',
@@ -148,33 +304,82 @@
       processing: '処理中...',
       processed: '処理済み',
       waiting: '開始を待機中...',
-      dailyLimit: '1日の無料制限',
+      completed: '完了',
+      paused: '一時停止中',
+      stopped: '停止',
+      activity: 'アクティビティ',
       privacy: 'プライバシー',
       terms: '利用規約',
       help: 'ヘルプ',
-      trustText: 'あなたのデータはローカルで処理されます。認証情報を保存ことはありません。',
-      deleted: '削除済み',
-      skipped: 'スキップ',
-      error: 'エラー',
-      completed: '完了！',
-      paused: '一時停止中',
-      stopped: '停止',
-      noItemsSelected: '少なくとも1つの項目を選択してください',
-      dailyLimitExceeded: '1日の無料制限を超えました。購読して続行してください！'
+      trustTitle: '100% ローカル処理',
+      trustText: 'データはローカルで処理されます。認証情報や個人情報は保存しません。',
+
+      noItemsSelected: '少なくとも1つ選択してください',
+      confirmStop: 'クリーンアップを停止しますか？進捗は失われます。',
+
+      refreshingConfig: 'リモートから設定を更新中...',
+      configRefreshed: '設定を更新しました。X: {xStatus}、ログイン: {loginStatus}',
+      configRefreshFailed: '設定の更新に失敗、状態は再確認済み',
+      statusYes: 'はい',
+      statusNo: 'いいえ',
+      startingCleanup: 'クリーンアップ開始...',
+      cleanupCompleted: 'クリーンアップ完了。処理数: {count}',
+      stoppedByUser: 'ユーザーにより停止。処理数: {count}',
+      pausedLog: '一時停止',
+      resumedLog: '再開',
+      likesRequiresNav: 'いいねは /likes ページが必要です、ナビゲート中...',
+      bookmarksRequiresNav: 'ブックマークは /bookmarks ページが必要です、ナビゲート中...',
+      messagesRequiresNav: 'メッセージは /messages ページが必要です、ナビゲート中...',
+      navigatingTo: 'ナビゲート先: {url}',
+      pageLoadedResuming: 'ページロード完了、クリーンアップを再開中...',
+      cleanupAutoResumed: 'クリーンアップを自動再開',
+      pageTypeMismatch: 'ページタイプ不一致、中止',
+      startingLikesCleanup: '{url} でいいねのクリーンアップを開始',
+      noUnlikeButtons: 'unlike ボタンが見つかりません、セレクタが間違っている可能性',
+      triedSelectors: '試行: {selectors}',
+      noMoreLikes: 'もういいねはありません',
+      endOfLikes: 'いいねの処理完了',
+      foundButtons: '{count} 個のボタンを発見: {selector}',
+      clickedUnlike: 'unlike ボタン #{count} をクリック',
+      unlikeFailed: 'いいね解除失敗: {error}',
+      clickReturnedFalse: 'unlike ボタンクリックが false を返しました',
+
+      pageDiagnostics: '=== ページ診断 ===',
+      endDiagnostics: '=== 診断終了 ===',
+      totalTestIdElements: 'data-testid 要素総数: {count}',
+      topTestIds: '主要 data-testid: {list}',
+      totalLabeledButtons: 'aria-label 付きボタン総数: {count}',
+      topAriaLabels: '主要 aria-label: {list}',
+
+      // 毎日の上限
+      dailyLimitReached: '1日の無料上限に達しました ({used}/{limit})',
+      dailyLimitReachedHint: '本日 {limit} 回の無料操作をすべて使用しました。\nプレミアムにアップグレードして無制限のクリーンアップを！',
+      upgradeToPremium: 'プレミアムにアップグレード',
+      maybeLater: '後で',
+      usedToday: '本日の使用: {used} / {limit}',
+      cleanupSkipped: '1日の上限に達したためスキップ',
+
+      // フィルター
+      invalidDateRange: '開始日は終了日より後にできません',
+      noItemsMatched: 'フィルター条件に一致する項目がありません',
+      dateFilterSkipped: '{type} の日付フィルターをスキップ：一部の項目にタイムスタンプがありません',
     },
+
     ko: {
       openXWebsite: 'X 웹사이트 열기',
+      pleaseLogin: '먼저 로그인하세요',
       checking: '확인 중...',
+      checkingLogin: '로그인 상태 확인 중...',
       xWebsiteDetected: 'X 웹사이트 감지됨',
       pleaseOpenX: 'X 웹사이트를 열어주세요',
       loggedIn: '로그인됨',
       notLoggedIn: '로그인 안됨',
-      notLoggedInHint: '먼저 로그인해주세요',
+      notLoggedInHint: '먼저 로그인하세요',
       selectOptions: '삭제할 항목 선택',
       tweets: '트윗',
       likes: '좋아요',
-      following: '팔로잉',
       bookmarks: '북마크',
+      following: '팔로잉',
       messages: '메시지',
       filterOptions: '필터 옵션',
       fromDate: '시작일',
@@ -187,33 +392,82 @@
       processing: '처리 중...',
       processed: '처리됨',
       waiting: '시작 대기 중...',
-      dailyLimit: '일일 무료 제한',
+      completed: '완료',
+      paused: '일시정지됨',
+      stopped: '중지됨',
+      activity: '활동',
       privacy: '개인정보',
       terms: '이용약관',
       help: '도움말',
-      trustText: '귀하의 데이터는 로컬에서 처리됩니다. 자격 증명을 저장하지 않습니다.',
-      deleted: '삭제됨',
-      skipped: '건너뜀',
-      error: '오류',
-      completed: '완료！',
-      paused: '일시정지됨',
-      stopped: '중지됨',
-      noItemsSelected: '최소 한 가지 항목을 선택해주세요',
-      dailyLimitExceeded: '일일 무료 제한을 초과했습니다. 구독하여 계속하세요！'
+      trustTitle: '100% 로컬 처리',
+      trustText: '데이터는 로컬에서 처리됩니다. 자격 증명이나 개인 정보를 저장하지 않습니다.',
+
+      noItemsSelected: '최소 하나의 항목을 선택하세요',
+      confirmStop: '정리를 중지하시겠습니까? 진행 상황이 손실됩니다.',
+
+      refreshingConfig: '원격에서 설정 새로 고침 중...',
+      configRefreshed: '설정이 새로 고쳐졌습니다. X: {xStatus}, 로그인: {loginStatus}',
+      configRefreshFailed: '설정 새로 고침 실패, 상태 재확인됨',
+      statusYes: '예',
+      statusNo: '아니오',
+      startingCleanup: '정리 시작...',
+      cleanupCompleted: '정리 완료. 처리됨: {count}',
+      stoppedByUser: '사용자가 중지함. 처리됨: {count}',
+      pausedLog: '일시정지',
+      resumedLog: '재개',
+      likesRequiresNav: '좋아요는 /likes 페이지 필요, 이동 중...',
+      bookmarksRequiresNav: '북마크는 /bookmarks 페이지 필요, 이동 중...',
+      messagesRequiresNav: '메시지는 /messages 페이지 필요, 이동 중...',
+      navigatingTo: '이동 중: {url}',
+      pageLoadedResuming: '페이지 로드 완료, 정리 재개 중...',
+      cleanupAutoResumed: '정리 자동 재개됨',
+      pageTypeMismatch: '페이지 유형 불일치, 중단',
+      startingLikesCleanup: '{url}에서 좋아요 정리 시작',
+      noUnlikeButtons: 'unlike 버튼을 찾을 수 없음, 선택기가 잘못되었을 수 있음',
+      triedSelectors: '시도함: {selectors}',
+      noMoreLikes: '더 이상 좋아요 없음',
+      endOfLikes: '좋아요 처리 완료',
+      foundButtons: '{count}개 버튼 발견: {selector}',
+      clickedUnlike: 'unlike 버튼 #{count} 클릭함',
+      unlikeFailed: '좋아요 취소 실패: {error}',
+      clickReturnedFalse: 'unlike 버튼 클릭이 false 반환',
+
+      pageDiagnostics: '=== 페이지 진단 ===',
+      endDiagnostics: '=== 진단 종료 ===',
+      totalTestIdElements: 'data-testid 요소 총계: {count}',
+      topTestIds: '주요 data-testid: {list}',
+      totalLabeledButtons: 'aria-label 버튼 총계: {count}',
+      topAriaLabels: '주요 aria-label: {list}',
+
+      // 일일 한도
+      dailyLimitReached: '일일 무료 한도 도달 ({used}/{limit})',
+      dailyLimitReachedHint: '오늘 {limit}회 무료 작업을 모두 사용했습니다.\n무제한 정리를 위해 프리미엄으로 업그레이드하세요!',
+      upgradeToPremium: '프리미엄으로 업그레이드',
+      maybeLater: '나중에',
+      usedToday: '오늘 사용: {used} / {limit}',
+      cleanupSkipped: '일일 한도 도달로 정리 건너뜀',
+
+      // 필터
+      invalidDateRange: '시작 날짜는 종료 날짜보다 늦을 수 없습니다',
+      noItemsMatched: '필터 조건과 일치하는 항목이 없습니다',
+      dateFilterSkipped: '{type} 날짜 필터 건너뜀: 일부 항목에 타임스탬프가 없습니다',
     },
+
     es: {
-      openXWebsite: 'Abrir sitio web X',
+      openXWebsite: 'Abrir sitio web de X',
+      pleaseLogin: 'Por favor inicia sesión primero',
       checking: 'Verificando...',
+      checkingLogin: 'Verificando estado de inicio de sesión...',
       xWebsiteDetected: 'Sitio web X detectado',
-      pleaseOpenX: 'Por favor abre el sitio web X',
+      pleaseOpenX: 'Por favor abre el sitio web de X',
       loggedIn: 'Conectado',
       notLoggedIn: 'No conectado',
       notLoggedInHint: 'Por favor inicia sesión primero',
-      selectOptions: 'Selecciona elementos para eliminar',
+      selectOptions: 'Seleccionar elementos para eliminar',
       tweets: 'Tweets',
       likes: 'Me gusta',
-      following: 'Siguiendo',
       bookmarks: 'Marcadores',
+      following: 'Siguiendo',
       messages: 'Mensajes',
       filterOptions: 'Opciones de filtro',
       fromDate: 'Desde fecha',
@@ -225,77 +479,175 @@
       stop: 'Detener',
       processing: 'Procesando...',
       processed: 'Procesado',
-      waiting: 'Esperando para iniciar...',
-      dailyLimit: 'Límite diario gratuito',
+      waiting: 'Esperando inicio...',
+      completed: 'Completado',
+      paused: 'Pausado',
+      stopped: 'Detenido',
+      activity: 'Actividad',
       privacy: 'Privacidad',
       terms: 'Términos',
       help: 'Ayuda',
-      trustText: 'Tus datos se procesan localmente. Nunca almacenamos tus credenciales.',
-      deleted: 'Eliminado',
-      skipped: 'Omitido',
-      error: 'Error',
-      completed: '¡Completado！',
-      paused: 'Pausado',
-      stopped: 'Detenido',
-      noItemsSelected: 'Por favor selecciona al menos un elemento',
-      dailyLimitExceeded: 'Límite diario excedido. ¡Suscríbete para continuar！'
+      trustTitle: '100% Procesamiento Local',
+      trustText: 'Tus datos se procesan localmente. Nunca almacenamos tus credenciales ni información personal.',
+
+      noItemsSelected: 'Por favor selecciona al menos una opción',
+      confirmStop: '¿Detener la limpieza? Se perderá el progreso.',
+
+      refreshingConfig: 'Actualizando configuración remota...',
+      configRefreshed: 'Configuración actualizada. X: {xStatus}, Conectado: {loginStatus}',
+      configRefreshFailed: 'Error al actualizar configuración, estado re-verificado',
+      statusYes: 'sí',
+      statusNo: 'no',
+      startingCleanup: 'Iniciando limpieza...',
+      cleanupCompleted: 'Limpieza completada. Total procesado: {count}',
+      stoppedByUser: 'Detenido por el usuario. Procesado: {count}',
+      pausedLog: 'Pausado',
+      resumedLog: 'Reanudado',
+      likesRequiresNav: 'Likes requiere página /likes, navegando...',
+      bookmarksRequiresNav: 'Marcadores requiere página /bookmarks, navegando...',
+      messagesRequiresNav: 'Mensajes requiere página /messages, navegando...',
+      navigatingTo: 'Navegando a: {url}',
+      pageLoadedResuming: 'Página cargada, reanudando limpieza...',
+      cleanupAutoResumed: 'Limpieza auto-reanudada',
+      pageTypeMismatch: 'Tipo de página no coincide, abortando',
+      startingLikesCleanup: 'Iniciando limpieza de likes en {url}',
+      noUnlikeButtons: 'No se encontraron botones unlike, los selectores pueden ser incorrectos',
+      triedSelectors: 'Intentado: {selectors}',
+      noMoreLikes: 'No hay más likes',
+      endOfLikes: 'Likes terminados',
+      foundButtons: '{count} botones encontrados con: {selector}',
+      clickedUnlike: 'Clic en botón unlike #{count}',
+      unlikeFailed: 'Error al quitar like: {error}',
+      clickReturnedFalse: 'El clic en unlike devolvió false',
+
+      pageDiagnostics: '=== Diagnóstico de Página ===',
+      endDiagnostics: '=== Fin del Diagnóstico ===',
+      totalTestIdElements: 'Total elementos data-testid: {count}',
+      topTestIds: 'Top data-testids: {list}',
+      totalLabeledButtons: 'Total botones con aria-label: {count}',
+      topAriaLabels: 'Top aria-labels: {list}',
+
+      // Límite diario
+      dailyLimitReached: 'Límite diario gratuito alcanzado ({used}/{limit})',
+      dailyLimitReachedHint: 'Has usado las {limit} acciones gratuitas de hoy.\n¡Actualiza a Premium para limpieza ilimitada!',
+      upgradeToPremium: 'Actualizar a Premium',
+      maybeLater: 'Quizás más tarde',
+      usedToday: 'Usado hoy: {used} / {limit}',
+      cleanupSkipped: 'Limpieza omitida por límite diario',
+
+      // Filtro
+      invalidDateRange: 'La fecha de inicio no puede ser posterior a la fecha de fin',
+      noItemsMatched: 'Ningún elemento coincide con el filtro',
+      dateFilterSkipped: 'Filtro de fecha omitido para {type}: no se encontró marca temporal en algunos elementos',
     },
+
     de: {
       openXWebsite: 'X-Website öffnen',
-      checking: 'Überprüfung...',
+      pleaseLogin: 'Bitte zuerst anmelden',
+      checking: 'Überprüfe...',
+      checkingLogin: 'Überprüfe Anmeldestatus...',
       xWebsiteDetected: 'X-Website erkannt',
-      pleaseOpenX: 'Bitte X-Website öffnen',
+      pleaseOpenX: 'Bitte öffne die X-Website',
       loggedIn: 'Angemeldet',
       notLoggedIn: 'Nicht angemeldet',
       notLoggedInHint: 'Bitte zuerst anmelden',
-      selectOptions: 'Elemente zum Löschen auswählen',
+      selectOptions: 'Zu löschende Elemente auswählen',
       tweets: 'Tweets',
-      likes: 'Gefällt mir',
-      following: 'Folge ich',
+      likes: 'Likes',
       bookmarks: 'Lesezeichen',
+      following: 'Folge ich',
       messages: 'Nachrichten',
       filterOptions: 'Filteroptionen',
       fromDate: 'Von Datum',
       toDate: 'Bis Datum',
-      keywordPlaceholder: 'Nach Schlüsselwort filtern...',
+      keywordPlaceholder: 'Nach Stichwort filtern...',
       startCleanup: 'Bereinigung starten',
       pause: 'Pause',
       resume: 'Fortsetzen',
-      stop: 'Stopp',
-      processing: 'Verarbeitung...',
+      stop: 'Stoppen',
+      processing: 'Verarbeite...',
       processed: 'Verarbeitet',
-      waiting: 'Warten auf Start...',
-      dailyLimit: 'Tägliches kostenloses Limit',
-      privacy: 'Datenschutz',
-      terms: 'AGB',
-      help: 'Hilfe',
-      trustText: 'Ihre Daten werden lokal verarbeitet. Wir speichern niemals Ihre Anmeldedaten.',
-      deleted: 'Gelöscht',
-      skipped: 'Übersprungen',
-      error: 'Fehler',
-      completed: 'Abgeschlossen！',
+      waiting: 'Warte auf Start...',
+      completed: 'Abgeschlossen',
       paused: 'Pausiert',
       stopped: 'Gestoppt',
-      noItemsSelected: 'Bitte wählen Sie mindestens ein Element',
-      dailyLimitExceeded: 'Tageslimit überschritten. Abonnieren Sie um fortzufahren！'
+      activity: 'Aktivität',
+      privacy: 'Datenschutz',
+      terms: 'Bedingungen',
+      help: 'Hilfe',
+      trustTitle: '100% Lokale Verarbeitung',
+      trustText: 'Deine Daten werden lokal verarbeitet. Wir speichern niemals deine Anmeldedaten oder persönlichen Informationen.',
+
+      noItemsSelected: 'Bitte mindestens eine Option auswählen',
+      confirmStop: 'Bereinigung stoppen? Fortschritt geht verloren.',
+
+      refreshingConfig: 'Konfiguration wird remote aktualisiert...',
+      configRefreshed: 'Konfiguration aktualisiert. X: {xStatus}, Angemeldet: {loginStatus}',
+      configRefreshFailed: 'Aktualisierung fehlgeschlagen, Status neu geprüft',
+      statusYes: 'ja',
+      statusNo: 'nein',
+      startingCleanup: 'Starte Bereinigung...',
+      cleanupCompleted: 'Bereinigung abgeschlossen. Verarbeitet: {count}',
+      stoppedByUser: 'Vom Benutzer gestoppt. Verarbeitet: {count}',
+      pausedLog: 'Pausiert',
+      resumedLog: 'Fortgesetzt',
+      likesRequiresNav: 'Likes benötigt /likes-Seite, navigiere...',
+      bookmarksRequiresNav: 'Lesezeichen benötigt /bookmarks-Seite, navigiere...',
+      messagesRequiresNav: 'Nachrichten benötigt /messages-Seite, navigiere...',
+      navigatingTo: 'Navigiere zu: {url}',
+      pageLoadedResuming: 'Seite geladen, setze Bereinigung fort...',
+      cleanupAutoResumed: 'Bereinigung automatisch fortgesetzt',
+      pageTypeMismatch: 'Seitentyp stimmt nicht, abgebrochen',
+      startingLikesCleanup: 'Starte Likes-Bereinigung auf {url}',
+      noUnlikeButtons: 'Keine unlike-Buttons gefunden, Selektoren könnten falsch sein',
+      triedSelectors: 'Versucht: {selectors}',
+      noMoreLikes: 'Keine weiteren Likes',
+      endOfLikes: 'Likes beendet',
+      foundButtons: '{count} Buttons gefunden mit: {selector}',
+      clickedUnlike: 'unlike-Button #{count} geklickt',
+      unlikeFailed: 'Unlike fehlgeschlagen: {error}',
+      clickReturnedFalse: 'unlike-Klick gab false zurück',
+
+      pageDiagnostics: '=== Seiten-Diagnose ===',
+      endDiagnostics: '=== Diagnose Ende ===',
+      totalTestIdElements: 'data-testid Elemente gesamt: {count}',
+      topTestIds: 'Top data-testids: {list}',
+      totalLabeledButtons: 'Buttons mit aria-label gesamt: {count}',
+      topAriaLabels: 'Top aria-labels: {list}',
+
+      // Tageslimit
+      dailyLimitReached: 'Tägliches kostenloses Limit erreicht ({used}/{limit})',
+      dailyLimitReachedHint: 'Du hast alle {limit} kostenlosen Aktionen heute verbraucht.\nUpgrade auf Premium für unbegrenzte Bereinigung!',
+      upgradeToPremium: 'Auf Premium upgraden',
+      maybeLater: 'Vielleicht später',
+      usedToday: 'Heute verwendet: {used} / {limit}',
+      cleanupSkipped: 'Bereinigung wegen Tageslimit übersprungen',
+
+      // Filter
+      invalidDateRange: 'Das Startdatum darf nicht nach dem Enddatum liegen',
+      noItemsMatched: 'Keine Elemente entsprechen dem Filter',
+      dateFilterSkipped: 'Datumsfilter für {type} übersprungen: bei einigen Elementen wurde kein Zeitstempel gefunden',
     },
+
     fr: {
       openXWebsite: 'Ouvrir le site X',
+      pleaseLogin: 'Veuillez vous connecter d\'abord',
       checking: 'Vérification...',
+      checkingLogin: 'Vérification du statut de connexion...',
       xWebsiteDetected: 'Site X détecté',
       pleaseOpenX: 'Veuillez ouvrir le site X',
       loggedIn: 'Connecté',
       notLoggedIn: 'Non connecté',
       notLoggedInHint: 'Veuillez vous connecter d\'abord',
-      selectOptions: 'Sélectionnez les éléments à supprimer',
+      selectOptions: 'Sélectionner les éléments à supprimer',
       tweets: 'Tweets',
       likes: 'J\'aime',
-      following: 'Abonnements',
       bookmarks: 'Signets',
+      following: 'Abonnements',
       messages: 'Messages',
       filterOptions: 'Options de filtre',
-      fromDate: 'Date de début',
-      toDate: 'Date de fin',
+      fromDate: 'Du',
+      toDate: 'Au',
       keywordPlaceholder: 'Filtrer par mot-clé...',
       startCleanup: 'Démarrer le nettoyage',
       pause: 'Pause',
@@ -303,64 +655,125 @@
       stop: 'Arrêter',
       processing: 'Traitement...',
       processed: 'Traité',
-      waiting: 'En attente de démarrage...',
-      dailyLimit: 'Limite quotidienne gratuite',
+      waiting: 'En attente...',
+      completed: 'Terminé',
+      paused: 'En pause',
+      stopped: 'Arrêté',
+      activity: 'Activité',
       privacy: 'Confidentialité',
       terms: 'Conditions',
       help: 'Aide',
-      trustText: 'Vos données sont traitées localement. Nous ne stockons jamais vos identifiants.',
-      deleted: 'Supprimé',
-      skipped: 'Ignoré',
-      error: 'Erreur',
-      completed: 'Terminé！',
-      paused: 'En pause',
-      stopped: 'Arrêté',
-      noItemsSelected: 'Veuillez sélectionner au moins un élément',
-      dailyLimitExceeded: 'Limite quotidienne dépassée. Abonnez-vous pour continuer！'
+      trustTitle: '100% Traitement Local',
+      trustText: 'Vos données sont traitées localement. Nous ne stockons jamais vos identifiants ni informations personnelles.',
+
+      noItemsSelected: 'Veuillez sélectionner au moins une option',
+      confirmStop: 'Arrêter le nettoyage ? La progression sera perdue.',
+
+      refreshingConfig: 'Actualisation de la configuration distante...',
+      configRefreshed: 'Configuration actualisée. X: {xStatus}, Connecté: {loginStatus}',
+      configRefreshFailed: 'Échec d\'actualisation, statut re-vérifié',
+      statusYes: 'oui',
+      statusNo: 'non',
+      startingCleanup: 'Démarrage du nettoyage...',
+      cleanupCompleted: 'Nettoyage terminé. Total traité: {count}',
+      stoppedByUser: 'Arrêté par l\'utilisateur. Traité: {count}',
+      pausedLog: 'En pause',
+      resumedLog: 'Repris',
+      likesRequiresNav: 'J\'aime nécessite la page /likes, navigation...',
+      bookmarksRequiresNav: 'Signets nécessite la page /bookmarks, navigation...',
+      messagesRequiresNav: 'Messages nécessite la page /messages, navigation...',
+      navigatingTo: 'Navigation vers: {url}',
+      pageLoadedResuming: 'Page chargée, reprise du nettoyage...',
+      cleanupAutoResumed: 'Nettoyage auto-repris',
+      pageTypeMismatch: 'Type de page incorrect, annulé',
+      startingLikesCleanup: 'Démarrage nettoyage des j\'aime sur {url}',
+      noUnlikeButtons: 'Aucun bouton unlike trouvé, sélecteurs peut-être incorrects',
+      triedSelectors: 'Essayé: {selectors}',
+      noMoreLikes: 'Plus de j\'aime',
+      endOfLikes: 'J\'aime terminés',
+      foundButtons: '{count} boutons trouvés avec: {selector}',
+      clickedUnlike: 'Clic sur bouton unlike #{count}',
+      unlikeFailed: 'Échec unlike: {error}',
+      clickReturnedFalse: 'Le clic unlike a renvoyé false',
+
+      pageDiagnostics: '=== Diagnostic de Page ===',
+      endDiagnostics: '=== Fin Diagnostic ===',
+      totalTestIdElements: 'Total éléments data-testid: {count}',
+      topTestIds: 'Top data-testids: {list}',
+      totalLabeledButtons: 'Total boutons avec aria-label: {count}',
+      topAriaLabels: 'Top aria-labels: {list}',
+
+      // Limite quotidienne
+      dailyLimitReached: 'Limite quotidienne gratuite atteinte ({used}/{limit})',
+      dailyLimitReachedHint: 'Vous avez utilisé toutes les {limit} actions gratuites aujourd\'hui.\nPassez à Premium pour un nettoyage illimité !',
+      upgradeToPremium: 'Passer à Premium',
+      maybeLater: 'Peut-être plus tard',
+      usedToday: 'Utilisé aujourd\'hui: {used} / {limit}',
+      cleanupSkipped: 'Nettoyage ignoré (limite quotidienne)',
+
+      // Filtre
+      invalidDateRange: 'La date de début ne peut pas être postérieure à la date de fin',
+      noItemsMatched: 'Aucun élément ne correspond au filtre',
+      dateFilterSkipped: 'Filtre de date ignoré pour {type} : aucun horodatage trouvé sur certains éléments',
     }
   };
 
-  let currentLang = 'en';
-
-  function detectBrowserLanguage() {
-    const lang = navigator.language || navigator.userLanguage || 'en';
-    const langLower = lang.toLowerCase();
-    
-    if (langLower.startsWith('zh')) {
-      return langLower.includes('tw') || langLower.includes('hant') ? 'zh-TW' : 'zh-CN';
+  // 检测浏览器语言
+  function detectLanguage() {
+    var lang = (navigator.language || 'en').toLowerCase();
+    if (lang.startsWith('zh')) {
+      return lang.includes('tw') || lang.includes('hant') ? 'zh-TW' : 'zh-CN';
     }
-    
-    const langCode = langLower.split('-')[0];
-    return TRANSLATIONS[langCode] ? langCode : 'en';
+    if (lang.startsWith('ja')) return 'ja';
+    if (lang.startsWith('ko')) return 'ko';
+    if (lang.startsWith('es')) return 'es';
+    if (lang.startsWith('de')) return 'de';
+    if (lang.startsWith('fr')) return 'fr';
+    if (TRANSLATIONS[lang]) return lang;
+    return 'en';
   }
 
-  function t(key) {
-    const translations = TRANSLATIONS[currentLang] || TRANSLATIONS['en'];
-    return translations[key] || TRANSLATIONS['en'][key] || key;
-  }
+  // 语言元数据：国旗 + 原生名称
+  var LANG_META = {
+    'en':     { flag: '🇺🇸', name: 'English' },
+    'zh-CN':  { flag: '🇨🇳', name: '简体中文' },
+    'zh-TW':  { flag: '🇹🇼', name: '繁體中文' },
+    'ja':     { flag: '🇯🇵', name: '日本語' },
+    'ko':     { flag: '🇰🇷', name: '한국어' },
+    'es':     { flag: '🇪🇸', name: 'Español' },
+    'de':     { flag: '🇩🇪', name: 'Deutsch' },
+    'fr':     { flag: '🇫🇷', name: 'Français' }
+  };
 
-  function applyTranslations() {
-    currentLang = detectBrowserLanguage();
-    
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-      const key = el.getAttribute('data-i18n');
-      el.textContent = t(key);
+  // 支持的语言代码列表
+  var SUPPORTED_LANGS = ['en', 'zh-CN', 'zh-TW', 'ja', 'ko', 'es', 'de', 'fr'];
+
+  var currentLang = detectLanguage();
+  console.log('[X-Eraser] Detected language:', currentLang);
+
+  // 翻译函数 - 支持 {var} 占位符
+  function t(key, vars) {
+    vars = vars || {};
+    var langDict = TRANSLATIONS[currentLang] || TRANSLATIONS.en;
+    var text = langDict[key] || TRANSLATIONS.en[key] || key;
+    return text.replace(/\{(\w+)\}/g, function(match, name) {
+      return vars[name] !== undefined ? vars[name] : match;
     });
-    
-    document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-      const key = el.getAttribute('data-i18n-placeholder');
-      el.placeholder = t(key);
-    });
-    
-    document.documentElement.lang = currentLang;
   }
 
+  // 暴露到全局
   window.XEraseri18n = {
     t: t,
-    getLang: () => currentLang,
-    apply: applyTranslations,
-    detectLang: detectBrowserLanguage
+    setLanguage: function(lang) {
+      if (TRANSLATIONS[lang]) {
+        currentLang = lang;
+      }
+    },
+    getLanguage: function() { return currentLang; },
+    getSupportedLanguages: function() { return SUPPORTED_LANGS; },
+    getLangMeta: function(lang) { return LANG_META[lang]; },
+    detectLanguage: detectLanguage
   };
 
-  console.log('[X-Eraser] i18n.js ready, detected lang:', detectBrowserLanguage());
+  console.log('[X-Eraser] i18n.js ready, language:', currentLang);
 })();

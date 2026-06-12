@@ -61,6 +61,32 @@
     .status-dot.red { background: #ef4444; }
     .status-dot.green { background: #22c55e; }
     .status-dot.yellow { background: #eab308; }
+    .status-dot.pulsing {
+      animation: dotPulse 1.2s ease-in-out infinite;
+      box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.6);
+    }
+    @keyframes dotPulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.6);
+        transform: scale(1);
+      }
+      50% {
+        box-shadow: 0 0 0 6px rgba(234, 179, 8, 0);
+        transform: scale(1.2);
+      }
+      100% {
+        box-shadow: 0 0 0 0 rgba(234, 179, 8, 0);
+        transform: scale(1);
+      }
+    }
+    .status-text.checking {
+      color: #eab308;
+      animation: textFade 1.2s ease-in-out infinite;
+    }
+    @keyframes textFade {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
     .status-text { font-size: 12px; color: #a1a1aa; }
     .status-text.error { color: #ef4444; }
     .status-text.success { color: #22c55e; }
@@ -156,7 +182,31 @@
       align-items: center;
       margin-bottom: 10px;
     }
-    .progress-title { font-size: 13px; font-weight: 600; }
+    .progress-title {
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .progress-spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid #f59e0b;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: progressSpin 0.8s linear infinite;
+    }
+    .progress-spinner.paused {
+      animation: none;
+      border-top-color: #f59e0b;
+      opacity: 0.5;
+    }
+    @keyframes progressSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
     .progress-close {
       background: none;
       border: none;
@@ -208,7 +258,61 @@
     .log-entry.info { color: #60a5fa; }
     .log-time { color: #52525b; margin-right: 6px; }
 
-    .btn-refresh {
+    #refresh-section {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .lang-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: transparent;
+      border: 1px solid #3f3f46;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: all 0.2s;
+      padding: 0;
+    }
+    .lang-btn:hover {
+      background: #27272a;
+      border-color: #f59e0b;
+    }
+    .lang-dropdown {
+      position: absolute;
+      top: 56px;
+      right: 16px;
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 10px;
+      padding: 6px;
+      min-width: 180px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      z-index: 1000;
+      display: none;
+    }
+    .lang-dropdown.open { display: block; }
+    .lang-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #a1a1aa;
+      transition: background 0.15s;
+    }
+    .lang-option:hover { background: #27272a; color: #fff; }
+    .lang-option.active { color: #f59e0b; background: rgba(245, 158, 11, 0.1); }
+    .lang-option .flag { font-size: 18px; }
+    .lang-option .name { flex: 1; }
+    .lang-option .check { color: #f59e0b; opacity: 0; }
+    .lang-option.active .check { opacity: 1; }
+    #btn-refresh {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -222,12 +326,12 @@
       cursor: pointer;
       transition: all 0.2s;
     }
-    .btn-refresh:hover {
+    #btn-refresh:hover {
       background: #27272a;
       color: #f59e0b;
       border-color: #f59e0b;
     }
-    .btn-refresh:disabled {
+    #btn-refresh:disabled {
       opacity: 0.5;
       cursor: not-allowed;
     }
@@ -319,7 +423,10 @@
         </div>
       </div>
       <div id="refresh-section">
-        <button id="btn-refresh" class="btn-refresh" title="Refresh Config">
+        <button id="btn-lang" class="lang-btn" title="Language">
+          <span id="lang-flag">🇺🇸</span>
+        </button>
+        <button id="btn-refresh" title="Refresh">
           <span id="refresh-icon" class="refresh-icon">↻</span>
         </button>
       </div>
@@ -337,49 +444,50 @@
     </div>
 
     <div id="options-section" style="display: none;">
-      <div class="section-title">Select items to delete</div>
+      <div class="section-title" data-i18n="selectOptions">Select items to delete</div>
       <div class="options-card">
         <div class="option-item">
           <input type="checkbox" id="opt-tweets" class="option-checkbox" checked>
-          <label for="opt-tweets" class="option-label">Tweets</label>
+          <label for="opt-tweets" class="option-label" data-i18n="tweets">Tweets</label>
           <span class="option-count">0</span>
         </div>
         <div class="option-item">
           <input type="checkbox" id="opt-likes" class="option-checkbox" checked>
-          <label for="opt-likes" class="option-label">Likes</label>
+          <label for="opt-likes" class="option-label" data-i18n="likes">Likes</label>
           <span class="option-count">0</span>
         </div>
         <div class="option-item">
           <input type="checkbox" id="opt-bookmarks" class="option-checkbox" checked>
-          <label for="opt-bookmarks" class="option-label">Bookmarks</label>
+          <label for="opt-bookmarks" class="option-label" data-i18n="bookmarks">Bookmarks</label>
           <span class="option-count">0</span>
         </div>
         <div class="option-item">
           <input type="checkbox" id="opt-following" class="option-checkbox">
-          <label for="opt-following" class="option-label">Following</label>
+          <label for="opt-following" class="option-label" data-i18n="following">Following</label>
           <span class="option-count">0</span>
         </div>
         <div class="option-item">
           <input type="checkbox" id="opt-messages" class="option-checkbox">
-          <label for="opt-messages" class="option-label">Messages</label>
+          <label for="opt-messages" class="option-label" data-i18n="messages">Messages</label>
           <span class="option-count">0</span>
         </div>
       </div>
 
-      <div class="section-title">Filter options</div>
+      <div class="section-title" data-i18n="filterOptions">Filter options</div>
       <div class="filter-section">
         <div class="filter-row">
           <div style="flex: 1;">
-            <div class="filter-label">From date</div>
+            <div class="filter-label" data-i18n="fromDate">From date</div>
             <input type="date" id="filter-date-from" class="filter-input">
           </div>
           <div style="flex: 1;">
-            <div class="filter-label">To date</div>
+            <div class="filter-label" data-i18n="toDate">To date</div>
             <input type="date" id="filter-date-to" class="filter-input">
           </div>
         </div>
         <div class="filter-row">
-          <input type="text" id="filter-keyword" class="filter-input" placeholder="Filter by keyword...">
+          <input type="text" id="filter-keyword" class="filter-input"
+                 data-i18n-placeholder="keywordPlaceholder" placeholder="Filter by keyword...">
         </div>
       </div>
 
@@ -393,14 +501,17 @@
 
       <div id="progress-card" class="progress-card">
         <div class="progress-header">
-          <span class="progress-title">Processing...</span>
+          <span class="progress-title">
+            <span id="progress-spinner" class="progress-spinner"></span>
+            <span id="progress-text">Processing...</span>
+          </span>
           <button id="btn-close-progress" class="progress-close">&times;</button>
         </div>
         <div class="progress-bar-container">
           <div id="progress-bar" class="progress-bar" style="width: 0%;"></div>
         </div>
         <div class="progress-stats">
-          <span>Processed</span>: <span id="progress-current" class="current">0</span>
+          <span data-i18n="processed">Processed</span>: <span id="progress-current" class="current">0</span>
           <span>/</span>
           <span id="progress-total">0</span>
         </div>
@@ -414,6 +525,10 @@
       <button id="btn-open-x" class="btn btn-primary">Open X Website</button>
     </div>
 
+    <div id="login-section" style="display: none;">
+      <button id="btn-login" class="btn btn-primary">Please Login First</button>
+    </div>
+
     <div class="trust-badge">
       <span class="trust-icon">🛡️</span>
       <div class="trust-badge-title">100% Local Processing</div>
@@ -421,14 +536,17 @@
         Your data is processed locally. We never store your credentials or personal information.
       </div>
       <div class="trust-links" style="margin-top: 12px;">
-        <span class="trust-link">Privacy</span>
-        <span class="trust-link">Terms</span>
-        <span class="trust-link">Help</span>
+        <span class="trust-link" data-i18n="privacy">Privacy</span>
+        <span class="trust-link" data-i18n="terms">Terms</span>
+        <span class="trust-link" data-i18n="help">Help</span>
       </div>
     </div>
   </div>
 
   <script src="lib/i18n.js"></script>
   <script src="sidepanel.js"></script>
+
+  <!-- 语言下拉菜单 -->
+  <div id="lang-dropdown" class="lang-dropdown"></div>
 </body>
 </html>
