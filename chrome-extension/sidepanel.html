@@ -248,6 +248,24 @@
       font-size: 11px;
       font-family: 'Monaco', 'Menlo', monospace;
     }
+    .log-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 4px;
+    }
+    .log-toolbar button {
+      background: transparent;
+      border: 1px solid #3f3f46;
+      color: #a1a1aa;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .log-toolbar button:hover {
+      background: #27272a;
+      color: #e4e4e7;
+    }
     .log-entry {
       color: #a1a1aa;
       margin-bottom: 4px;
@@ -517,6 +535,9 @@
         </div>
         <div id="log-area" class="log-area">
           <div class="log-entry info"><span class="log-time">--:--:--</span>Waiting for start...</div>
+        </div>
+        <div class="log-toolbar">
+          <button id="btn-copy-diag" data-i18n="copyDiagnosticLog" title="Copy diagnostic info to clipboard for bug reports">Copy Diagnostic Log</button>
         </div>
       </div>
     </div>

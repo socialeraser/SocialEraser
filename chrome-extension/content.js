@@ -1,12 +1,18 @@
 // X-Eraser Content Script
 // 注入到 X 网站
 
+// 防止 manifest content_scripts + chrome.scripting.executeScript 重复注入同一个 content.js
+// 重复注入会导致 2 个 injector 实例、2 个 onLog 包装、日志面板重复输出
 (function() {
   'use strict';
+  if (window.__XEraserContentInjected) {
+    console.log('[X-Eraser] Content script already injected, skipping re-init');
+    return;
+  }
+  window.__XEraserContentInjected = true;
 
   console.log('[X-Eraser] Content script loaded on', window.location.href);
 
-  let remoteConfig = null;
   let injector = null;
 
   const GLOBAL_LOGIN_INDICATORS = [
@@ -16,7 +22,18 @@
     "[data-testid='UserAvatar']",
   ];
 
-  function initXEraserConfig() {
+  // 直接从 storage 读远程配置（中间不再经过 background）
+  async function getRemoteConfig() {
+    try {
+      const stored = await chrome.storage.local.get('remoteConfig');
+      if (stored && stored.remoteConfig) return stored.remoteConfig;
+    } catch (e) {
+      console.warn('[X-Eraser] Failed to read remote config from storage:', e.message);
+    }
+    return null;
+  }
+
+  function initXEraserConfig(remoteConfig) {
     window.XEraserConfig = {
       getWebsitePatterns() {
         if (remoteConfig && remoteConfig.selectors && remoteConfig.selectors.xWebsite && remoteConfig.selectors.xWebsite.patterns) {
@@ -48,7 +65,7 @@
     };
   }
 
-  function initInjector() {
+  function initInjector(remoteConfig) {
     if (window.XEraserInjector) {
       injector = new window.XEraserInjector();
       injector.setConfig(remoteConfig);
@@ -71,7 +88,7 @@
         chrome.runtime.sendMessage({
           type: 'cleanupComplete',
           data: result
-        }).catch(function() {});
+        });
       };
 
       injector.onError = function(message) {
@@ -86,73 +103,221 @@
   }
 
   async function loadConfig() {
-    try {
-      const response = await chrome.runtime.sendMessage({ target: 'getConfig' });
-      if (response && response.config) {
-        remoteConfig = response.config;
-        console.log('[X-Eraser] Config received from background');
-      } else {
-        console.log('[X-Eraser] No config from background, using defaults');
-      }
-    } catch (error) {
-      console.warn('[X-Eraser] Could not get config from background:', error.message);
+    const remoteConfig = await getRemoteConfig();
+    if (remoteConfig) {
+      console.log('[X-Eraser] Config loaded from storage');
+    } else {
+      console.log('[X-Eraser] No config in storage, using defaults');
     }
 
-    initXEraserConfig();
-    initInjector();
+    initXEraserConfig(remoteConfig);
+    initInjector(remoteConfig);
 
     console.log('[X-Eraser] Config initialized, checking status...');
     setTimeout(checkXStatus, 500);
 
-    // 等待 DOM 完全加载后检查并自动恢复清理任务
-    setTimeout(checkAndResumePendingCleanup, 1500);
+    // 用 MutationObserver 监听 article 元素出现，触发后立即启动 auto-resume
+    // 比固定 setTimeout 更稳：早触发立即启动，晚触发不等满 timeout，3s 兜底防 observer 漏
+    waitForArticles(3000).then(function(count) {
+      console.log('[X-Eraser] Articles detected:', count, '— proceeding to auto-resume');
+      checkAndResumePendingCleanup();
+    }).catch(function(e) {
+      console.error('[X-Eraser] waitForArticles failed:', e);
+    });
+  }
+
+  // 监听 X 推文卡片（<article> 标签）出现，立即 resolve；超时兜底
+  function waitForArticles(timeout) {
+    if (timeout === undefined) timeout = 3000;
+    return new Promise(function(resolve) {
+      // document_start 注入时 <body> 还没创建，MutationObserver.observe(null) 会抛
+      // 等 DOMContentLoaded 后再启动 observer
+      function startObserving() {
+        if (!document.body) {
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', startObserving, { once: true });
+          } else {
+            // 极端情况：readyState 不是 loading 但 body 仍 null（极少见）
+            setTimeout(startObserving, 10);
+          }
+          return;
+        }
+
+        // 1. 立即检查：已有则直接 resolve
+        var initial = document.querySelectorAll('article').length;
+        if (initial > 0) { resolve(initial); return; }
+
+        // 2. MutationObserver 监听 DOM 变化
+        var resolved = false;
+        var observer = new MutationObserver(function() {
+          if (resolved) return;
+          var n = document.querySelectorAll('article').length;
+          if (n > 0) {
+            resolved = true;
+            observer.disconnect();
+            resolve(n);
+          }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        // 3. 兜底超时（X 真的挂了或 article 选择器失效也不会永远等）
+        setTimeout(function() {
+          if (resolved) return;
+          resolved = true;
+          observer.disconnect();
+          resolve(0);
+        }, timeout);
+      }
+
+      startObserving();
+    });
+  }
+
+  // 强制跳页：通过 background chrome.tabs.update 改 tab URL
+  // X 的 React Router 会拦截 location.replace/href 走软路由，必须绕过
+  // chrome.tabs.update 是 Chrome API 层，X 拦不了
+  function forcePageLoad(url) {
+    const sep = url.indexOf('?') >= 0 ? '&' : '?';
+    const finalUrl = url + sep + '_=' + Date.now();
+    try {
+      chrome.runtime.sendMessage({
+        target: 'forceNavigation',
+        url: finalUrl
+      });
+    } catch (e) {
+      // 兜底：background 不可用时退回 location.replace
+      console.warn('[X-Eraser] forceNavigation failed, fallback to location.replace:', e);
+      window.location.replace(finalUrl);
+    }
   }
 
   async function checkAndResumePendingCleanup() {
     try {
-      const response = await chrome.runtime.sendMessage({ target: 'consumePendingCleanup' });
-      if (response && response.pending) {
-        console.log('[X-Eraser] Resuming pending cleanup:', response.pending);
-        const pageType = detectPageType();
-        const types = response.pending.types || [];
-        console.log('[X-Eraser] After navigation - types:', types, 'pageType:', pageType);
+      // Content script 不能直读 session storage（manifest V3 限制），走 background 消息
+      const readResp = await chrome.runtime.sendMessage({ target: 'readPendingCleanup' });
+      if (!readResp || !readResp.pending) {
+        return;
+      }
 
-        // 通知 side panel
-        chrome.runtime.sendMessage({
-          type: 'cleanupLog',
-          data: { message: 'Page loaded, resuming cleanup...', level: 'info' }
-        }).catch(function() {});
+      const pending = readResp.pending;
+      const pageType = detectPageType();
+      const types = pending.types || [];
+      console.log('[X-Eraser] Resuming pending cleanup - types:', types, 'pageType:', pageType);
 
-        // 检查页面类型是否匹配
-        const needsNav = (
-          (types.indexOf('likes') >= 0 && pageType !== 'likes') ||
-          (types.indexOf('bookmarks') >= 0 && pageType !== 'bookmarks') ||
-          (types.indexOf('messages') >= 0 && pageType !== 'messages')
-        );
+      // 通知 side panel
+      chrome.runtime.sendMessage({
+        type: 'cleanupLog',
+        data: { message: t('pageLoadedResuming'), level: 'info' }
+      }).catch(function() {});
 
-        if (needsNav) {
-          // 仍然不对，跳回正确页面（防止循环）
-          console.warn('[X-Eraser] Page type still mismatch after navigation');
-          chrome.runtime.sendMessage({
-            type: 'cleanupLog',
-            data: { message: 'Page type mismatch, aborting', level: 'error' }
-          }).catch(function() {});
-          return;
+      // 找到 pageType 匹配的那个 type（仅一个）
+      const matchedType = types.find(function(t) {
+        if (t === 'likes') return pageType === 'likes';
+        if (t === 'bookmarks') return pageType === 'bookmarks';
+        if (t === 'messages') return pageType === 'messages';
+        if (t === 'tweets') return pageType === 'tweets';
+        if (t === 'following') return pageType === 'following';
+        return false;
+      });
+
+      if (!matchedType) {
+        // 当前页面不匹配任何 type，兜底跳到第一个
+        const firstType = types[0];
+        const nextUrl = getPageURLForType(firstType);
+        if (nextUrl) {
+          console.log('[X-Eraser] No matched type on this page, navigating to:', firstType);
+          forcePageLoad(nextUrl);
+        } else {
+          // 未知 type，清空 session 避免死循环
+          await chrome.runtime.sendMessage({ target: 'clearPendingCleanup' });
         }
+        return;
+      }
 
-        // 自动开始清理
-        if (injector) {
-          injector.setConfig(remoteConfig);
-          injector.startCleanup(response.pending);
-          chrome.runtime.sendMessage({
-            type: 'cleanupLog',
-            data: { message: 'Cleanup auto-resumed', level: 'success' }
-          }).catch(function() {});
+      // 跑 matchedType，remainingTypes 留给下次
+      const remainingTypes = types.filter(function(t) { return t !== matchedType; });
+      const optionsForCurrent = Object.assign({}, pending, { types: [matchedType] });
+
+      if (injector) {
+        const remoteConfig = await getRemoteConfig();
+        injector.setConfig(remoteConfig);
+        const isLast = remainingTypes.length === 0;
+        await runCleanupWithRetry(optionsForCurrent, 2, isLast);
+
+        // 跑完后处理 remainingTypes
+        if (remainingTypes.length > 0) {
+          // 更新 session，移除已处理的 type
+          const newPending = Object.assign({}, pending, { types: remainingTypes });
+          await chrome.runtime.sendMessage({ target: 'updatePendingCleanup', pending: newPending });
+          // 跳到下一个 type 的页面
+          const nextType = remainingTypes[0];
+          const nextUrl = getPageURLForType(nextType);
+          if (nextUrl) {
+            console.log('[X-Eraser] Processed ' + matchedType + ', navigating to:', nextType);
+            chrome.runtime.sendMessage({
+              type: 'cleanupLog',
+              data: { message: t('processedNavigatingTo', {next: t(nextType)}), level: 'info' }
+            }).catch(function() {});
+            forcePageLoad(nextUrl);
+          }
+        } else {
+          // 全部完成，清空 session
+          await chrome.runtime.sendMessage({ target: 'clearPendingCleanup' });
         }
       }
     } catch (error) {
       console.warn('[X-Eraser] Failed to check pending cleanup:', error.message);
     }
+  }
+
+  // 根据 type 返回对应页面 URL
+  function getPageURLForType(type) {
+    if (type === 'likes') return getLikesPageURL();
+    if (type === 'bookmarks') return getBookmarksPageURL();
+    if (type === 'messages') return getMessagesPageURL();
+    return null;
+  }
+
+  // 包装 injector.onComplete 返回 Promise，用于 await cleanup 完成
+  // isLast = false 时不调原始 onComplete（避免中间 type 跑完侧边栏误以为完成）
+  function runCleanupOnce(options, attempt, isLast) {
+    return new Promise(function(resolve) {
+      let resolved = false;
+      const origOnComplete = injector.onComplete;
+      injector.onComplete = function(result) {
+        // 只有最后一个 type 跑完才转发到 sidepanel
+        if (isLast && origOnComplete) {
+          try {
+            origOnComplete(result);
+          } catch (e) {
+            console.error('[X-Eraser] origOnComplete threw:', e);
+          }
+        }
+        if (!resolved) {
+          resolved = true;
+          console.log('[X-Eraser] Auto-resume attempt ' + attempt + ': processed=' + result.processed + (isLast ? ' (final)' : ' (continuing)'));
+          resolve(result);
+        }
+      };
+      injector.startCleanup(options);
+    });
+  }
+
+  // 兜底重试：0 命中时等 4 秒再启动一次（给 X 页面进一步渲染时间）
+  async function runCleanupWithRetry(options, maxAttempts, isLast) {
+    for (let i = 1; i <= maxAttempts; i++) {
+      const result = await runCleanupOnce(options, i, isLast);
+      if (result.processed > 0) return result;
+      if (i < maxAttempts) {
+        console.log('[X-Eraser] Auto-resume: 0 items processed, retrying in 4s...');
+        chrome.runtime.sendMessage({
+          type: 'cleanupLog',
+          data: { message: t('retryingIn', {seconds: 4}), level: 'info' }
+        }).catch(function() {});
+        await new Promise(function(r) { setTimeout(r, 4000); });
+      }
+    }
+    return { processed: 0, errors: 0 };
   }
 
   loadConfig();
@@ -325,6 +490,62 @@
     };
   }
 
+  async function handleStartCleanup(message, sendResponse) {
+    if (!injector) {
+      sendResponse({ error: 'Injector not ready' });
+      return;
+    }
+    // 检查页面类型与所选类型是否匹配
+    const pageType = detectPageType();
+    const types = (message.options && message.options.types) || [];
+    console.log('[X-Eraser] Start cleanup - types:', types, 'pageType:', pageType);
+
+    if (types.indexOf('likes') >= 0 && pageType !== 'likes') {
+      const likesUrl = getLikesPageURL();
+      console.log('[X-Eraser] Likes requires /likes page, current:', pageType);
+      chrome.runtime.sendMessage({
+        type: 'cleanupLog',
+        data: { message: t('likesRequiresNav'), level: 'info' }
+      }).catch(function() {});
+      // 先 sendResponse（避免跳页后 message channel 关闭），再 forcePageLoad
+      sendResponse({ started: true, needsNavigation: true });
+      // 延迟 100ms 让 sendResponse 完整投递到 background + sidepanel，
+      // 然后再 forcePageLoad 触发 chrome.tabs.update 卸载 content
+      setTimeout(function() { forcePageLoad(likesUrl); }, 100);
+      return;
+    }
+
+    if (types.indexOf('bookmarks') >= 0 && pageType !== 'bookmarks') {
+      const bookmarksUrl = getBookmarksPageURL();
+      console.log('[X-Eraser] Bookmarks requires /bookmarks page, current:', pageType);
+      chrome.runtime.sendMessage({
+        type: 'cleanupLog',
+        data: { message: t('bookmarksRequiresNav'), level: 'info' }
+      }).catch(function() {});
+      sendResponse({ started: true, needsNavigation: true });
+      setTimeout(function() { forcePageLoad(bookmarksUrl); }, 100);
+      return;
+    }
+
+    if (types.indexOf('messages') >= 0 && pageType !== 'messages') {
+      const messagesUrl = getMessagesPageURL();
+      console.log('[X-Eraser] Messages requires /messages page, current:', pageType);
+      chrome.runtime.sendMessage({
+        type: 'cleanupLog',
+        data: { message: t('messagesRequiresNav'), level: 'info' }
+      }).catch(function() {});
+      sendResponse({ started: true, needsNavigation: true });
+      setTimeout(function() { forcePageLoad(messagesUrl); }, 100);
+      return;
+    }
+
+    // 从 storage 读最新配置（不再依赖模块级 remoteConfig）
+    const remoteConfig = await getRemoteConfig();
+    injector.setConfig(remoteConfig);
+    injector.startCleanup(message.options);
+    sendResponse({ started: true });
+  }
+
   chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     if (message.target !== 'content') return;
 
@@ -336,60 +557,8 @@
         sendResponse({ pong: true });
         break;
       case 'startCleanup':
-        if (!injector) {
-          sendResponse({ error: 'Injector not ready' });
-          return;
-        }
-        // 检查页面类型与所选类型是否匹配
-        const pageType = detectPageType();
-        const types = (message.options && message.options.types) || [];
-        console.log('[X-Eraser] Start cleanup - types:', types, 'pageType:', pageType);
-
-        if (types.indexOf('likes') >= 0 && pageType !== 'likes') {
-          const likesUrl = getLikesPageURL();
-          console.log('[X-Eraser] Likes requires /likes page, current:', pageType);
-          chrome.runtime.sendMessage({
-            type: 'cleanupLog',
-            data: { message: 'Likes requires /likes page, navigating...', level: 'info' }
-          }).catch(function() {});
-          chrome.runtime.sendMessage({
-            type: 'cleanupLog',
-            data: { message: 'Navigating to: ' + likesUrl, level: 'info' }
-          }).catch(function() {});
-          // 导航到 likes 页面
-          window.location.href = likesUrl;
-          sendResponse({ started: true, needsNavigation: true });
-          return;
-        }
-
-        if (types.indexOf('bookmarks') >= 0 && pageType !== 'bookmarks') {
-          const bookmarksUrl = getBookmarksPageURL();
-          console.log('[X-Eraser] Bookmarks requires /bookmarks page, current:', pageType);
-          chrome.runtime.sendMessage({
-            type: 'cleanupLog',
-            data: { message: 'Bookmarks requires /bookmarks page, navigating...', level: 'info' }
-          }).catch(function() {});
-          window.location.href = bookmarksUrl;
-          sendResponse({ started: true, needsNavigation: true });
-          return;
-        }
-
-        if (types.indexOf('messages') >= 0 && pageType !== 'messages') {
-          const messagesUrl = getMessagesPageURL();
-          console.log('[X-Eraser] Messages requires /messages page, current:', pageType);
-          chrome.runtime.sendMessage({
-            type: 'cleanupLog',
-            data: { message: 'Messages requires /messages page, navigating...', level: 'info' }
-          }).catch(function() {});
-          window.location.href = messagesUrl;
-          sendResponse({ started: true, needsNavigation: true });
-          return;
-        }
-
-        injector.setConfig(remoteConfig);
-        injector.startCleanup(message.options);
-        sendResponse({ started: true });
-        break;
+        handleStartCleanup(message, sendResponse);
+        return true;
       case 'pauseCleanup':
         if (injector) {
           injector.pause();

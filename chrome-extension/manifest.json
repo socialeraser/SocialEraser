@@ -12,7 +12,9 @@
   "permissions": [
     "storage",
     "activeTab",
-    "sidePanel"
+    "sidePanel",
+    "tabs",
+    "scripting"
   ],
   "host_permissions": [
     "<all_urls>"
@@ -26,7 +28,7 @@
   "content_scripts": [
     {
       "matches": ["*://x.com/*", "*://twitter.com/*"],
-      "js": ["lib/config.js", "lib/injector.js", "content.js"],
+      "js": ["lib/i18n.js", "lib/config.js", "lib/injector.js", "content.js"],
       "run_at": "document_start"
     }
   ]

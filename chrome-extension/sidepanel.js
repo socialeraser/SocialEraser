@@ -100,6 +100,7 @@
     els.logArea = document.getElementById('log-area');
     els.btnRefresh = document.getElementById('btn-refresh');
     els.refreshIcon = document.getElementById('refresh-icon');
+    els.btnCopyDiag = document.getElementById('btn-copy-diag');
     els.btnLang = document.getElementById('btn-lang');
     els.langFlag = document.getElementById('lang-flag');
     els.langDropdown = document.getElementById('lang-dropdown');
@@ -192,6 +193,7 @@
     if (els.btnStop) els.btnStop.onclick = stopCleanup;
     if (els.btnRefresh) els.btnRefresh.onclick = refreshConfig;
     if (els.btnLang) els.btnLang.onclick = toggleLangDropdown;
+    if (els.btnCopyDiag) els.btnCopyDiag.onclick = copyDiagnosticLog;
 
     // 点击其他地方关闭下拉菜单
     document.addEventListener('click', function(e) {
@@ -543,6 +545,55 @@
     els.logArea.scrollTop = els.logArea.scrollHeight;
   }
 
+  // 一键复制诊断日志（开发者排查用）：包含日志面板 + 当前 URL + 扩展版本
+  function copyDiagnosticLog() {
+    try {
+      var logEntries = els.logArea ? Array.from(els.logArea.querySelectorAll('.log-entry')) : [];
+      var logText = logEntries.map(function(entry) {
+        var time = entry.querySelector('.log-time');
+        var text = entry.textContent || '';
+        return (time ? time.textContent : '') + ' ' + text;
+      }).join('\n');
+
+      var diagText = '=== X-Eraser Diagnostic Log ===\n' +
+        'Timestamp: ' + new Date().toISOString() + '\n' +
+        'X website: ' + (state.isX ? 'yes' : 'no') + '\n' +
+        'Logged in: ' + (state.isLoggedIn ? 'yes' : 'no') + '\n' +
+        'Extension: ' + (chrome.runtime.getManifest().version) + '\n' +
+        'User Agent: ' + navigator.userAgent + '\n' +
+        '\n=== Activity Log ===\n' +
+        (logText || '(empty)');
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(diagText).then(function() {
+          addLog(t('copiedToClipboard'), 'success');
+        }).catch(function(err) {
+          fallbackCopy(diagText, err.message);
+        });
+      } else {
+        fallbackCopy(diagText, 'Clipboard API unavailable');
+      }
+    } catch (e) {
+      addLog(t('copyFailed', {error: e.message}), 'error');
+    }
+  }
+
+  function fallbackCopy(text, reason) {
+    try {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      addLog(t('copiedToClipboard'), 'success');
+    } catch (e) {
+      addLog(t('copyFailed', {error: reason || e.message}), 'error');
+    }
+  }
+
   function startCleanup() {
     var options = [];
     var checkboxIds = ['opt-tweets', 'opt-likes', 'opt-bookmarks', 'opt-following', 'opt-messages'];
@@ -628,15 +679,41 @@
         addLog(t('usedToday', {used: used, limit: isPremium ? '∞' : FREE_LIMIT_PER_DAY}), 'info');
         addLog(t('startingCleanup'), 'info');
 
-        chrome.storage.session.set({ pendingCleanup: state.cleanupOptions }).then(function() {
-          activateXTab(function() {
-            chrome.runtime.sendMessage({type: 'startCleanup', options: state.cleanupOptions});
+        console.log('[X-Eraser sidepanel] state.cleanupOptions:', state.cleanupOptions);
+
+        // 写 session 后必须 readback 确认（MV3 service worker cold start / 写失败时 session 可能丢）
+        function writeSessionAndStart() {
+          chrome.storage.session.set({ pendingCleanup: state.cleanupOptions }).then(function() {
+            // 写后立即 readback 确认
+            return chrome.storage.session.get('pendingCleanup');
+          }).then(function(readback) {
+            console.log('[X-Eraser sidepanel] session readback:', readback);
+            if (!readback || !readback.pendingCleanup) {
+              console.warn('[X-Eraser sidepanel] session write/readback failed, retrying...');
+              // 重试一次
+              return chrome.storage.session.set({ pendingCleanup: state.cleanupOptions }).then(function() {
+                return chrome.storage.session.get('pendingCleanup');
+              });
+            }
+            return readback;
+          }).then(function(finalReadback) {
+            if (!finalReadback || !finalReadback.pendingCleanup) {
+              console.error('[X-Eraser sidepanel] session write FAILED after retry, pending cleanup will not work');
+              addLog(t('sessionWriteFailed'), 'error');
+              // 即便失败也发 startCleanup（让单页流程仍能 work）
+            }
+            activateXTab(function() {
+              chrome.runtime.sendMessage({type: 'startCleanup', options: state.cleanupOptions});
+            });
+          }).catch(function(err) {
+            console.error('[X-Eraser sidepanel] session write error:', err);
+            activateXTab(function() {
+              chrome.runtime.sendMessage({type: 'startCleanup', options: state.cleanupOptions});
+            });
           });
-        }).catch(function() {
-          activateXTab(function() {
-            chrome.runtime.sendMessage({type: 'startCleanup', options: state.cleanupOptions});
-          });
-        });
+        }
+
+        writeSessionAndStart();
       });
     });
   }

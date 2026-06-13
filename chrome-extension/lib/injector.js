@@ -12,12 +12,10 @@
       confirmButton: "[data-testid='confirmationSheetConfirm']"
     },
     like: {
-      container: "[data-testid='tweet'], [data-testid='cellInnerDiv']",
-      unlikeButton: "[data-testid='unlike'], [data-testid='unretweet']"
+      container: "[data-testid='tweet'], [data-testid='cellInnerDiv']"
     },
     bookmark: {
-      container: "[data-testid='tweet']",
-      removeButton: "[data-testid='removeBookmark']"
+      container: "[data-testid='tweet']"
     },
     following: {
       container: "[data-testid='UserAvatar']",
@@ -42,11 +40,18 @@
     }
 
     setConfig(config) {
-      if (config && config.selectors) {
-        this.config = config.selectors;
-      } else {
-        this.config = DEFAULT_SELECTORS;
+      // 合并：先以 DEFAULT_SELECTORS 为底，远程配置覆盖缺失的键
+      // 之前实现是「config.selectors 直接替换 default」，导致远程缺键时 this.config[key] 是 undefined
+      var merged = {};
+      for (var k in DEFAULT_SELECTORS) {
+        if (DEFAULT_SELECTORS.hasOwnProperty(k)) merged[k] = DEFAULT_SELECTORS[k];
       }
+      if (config && config.selectors) {
+        for (var k2 in config.selectors) {
+          if (config.selectors.hasOwnProperty(k2)) merged[k2] = config.selectors[k2];
+        }
+      }
+      this.config = merged;
     }
 
     findElement(selectors, context) {
@@ -175,77 +180,6 @@
       return true;
     }
 
-    // 真正的取消点赞实现
-    async unlikeTweet(container) {
-      if (!container) return false;
-      
-      const selectors = this.config.like || DEFAULT_SELECTORS.like;
-      const unlikeButton = this.findElement(selectors.unlikeButton, container);
-      
-      if (!unlikeButton) {
-        return false;
-      }
-      
-      // 记录点击前的按钮状态
-      const beforeHTML = unlikeButton.outerHTML;
-      
-      await this.safeClick(unlikeButton, 1000);
-      
-      // 验证是否真的取消点赞了
-      // 点击后 unlike 按钮应该消失或变成 like 按钮
-      await this.sleep(500);
-      
-      return true;
-    }
-
-    // 全局扫描并取消点赞（用于 /likes 页面）
-    async unlikeAllOnPage() {
-      const selectors = this.config.like || DEFAULT_SELECTORS.like;
-      const unlikeButtons = this.findElements(selectors.unlikeButton);
-      
-      if (unlikeButtons.length === 0) {
-        return 0;
-      }
-      
-      let unliked = 0;
-      for (let i = 0; i < unlikeButtons.length; i++) {
-        if (!this.isRunning || this.errorCount >= this.maxErrors) break;
-        
-        while (this.isPaused && this.isRunning) {
-          await this.sleep(500);
-        }
-        
-        const btn = unlikeButtons[i];
-        if (btn.dataset.xeraserProcessed) continue;
-        btn.dataset.xeraserProcessed = 'true';
-        
-        const success = await this.unlikeTweet(btn.closest("[data-testid='tweet']") || btn.parentElement);
-        if (success) {
-          unliked++;
-          this.processedCount++;
-          this.progress('Unlike #' + unliked);
-        } else {
-          this.errorCount++;
-        }
-        
-        await this.sleep(300);
-      }
-      
-      return unliked;
-    }
-
-    async removeBookmark(container) {
-      if (!container) return false;
-      
-      const selectors = this.config.bookmark || DEFAULT_SELECTORS.bookmark;
-      const removeButton = this.findElement(selectors.removeButton, container);
-      
-      if (!removeButton) return false;
-      
-      await this.safeClick(removeButton, 500);
-      return true;
-    }
-
     async unfollowUser(container) {
       if (!container) return false;
       
@@ -268,12 +202,27 @@
       return true;
     }
 
+    // 哪些 itemType 启用日期+关键字过滤（暂只 bookmarks）
+    shouldFilter(itemType) {
+      if (!this.filters) return false;
+      return itemType === 'bookmarks';
+    }
+
     async processItems(itemType, maxItems) {
       if (maxItems === undefined) maxItems = 50;
 
-      // 转换 'likes' -> 'like'（配置 key 是单数）
-      var configKey = itemType;
-      if (itemType === 'likes') configKey = 'like';
+      // 复数 itemType 映射到单数配置 key（DEFAULT_SELECTORS / remoteConfig 都用单数）
+      var CONFIG_KEY_MAP = {
+        likes: 'like',
+        bookmarks: 'bookmark',
+        tweets: 'tweet',
+        messages: 'message'
+      };
+      var configKey = CONFIG_KEY_MAP[itemType] || itemType;
+
+      // 预计算 keyword 小写（与 processLikes 保持一致）
+      this._keywordLower = (this.filters && this.filters.keyword)
+        ? this.filters.keyword.toLowerCase() : '';
 
       if (!this.isRunning) return;
 
@@ -285,9 +234,18 @@
 
       this.log('Processing ' + itemType + '...');
 
+      // 记录进入时的处理数，结束时用于判断该 type 是否 0 命中
+      var processedBefore = this.processedCount;
+
       // 特殊处理 Likes：全局扫描 unlike 按钮
       if (itemType === 'likes') {
         await this.processLikes(maxItems);
+        return;
+      }
+
+      // 特殊处理 Bookmarks：全局扫描 remove-bookmark 按钮
+      if (itemType === 'bookmarks') {
+        await this.processBookmarks(maxItems);
         return;
       }
 
@@ -318,9 +276,22 @@
 
         item.dataset.xeraserProcessed = 'true';
 
+        // 过滤判断：仅对 shouldFilter 命中的类型生效
+        if (this.shouldFilter(itemType)) {
+          var meta = this.extractMeta(item, itemType);
+          if (!this.matchesFilter(meta, this.filters)) {
+            // 日期缺失提示（每类型最多 1 次）
+            if ((this.filters.fromDate || this.filters.toDate) && !meta.dateISO
+                && !this._dateMissingWarned.has(itemType)) {
+              this._dateMissingWarned.add(itemType);
+              this.log(t('dateFilterSkipped', {type: itemType}));
+            }
+            continue;
+          }
+        }
+
         let handler;
         if (itemType === 'tweets') handler = (el) => this.deleteTweet(el);
-        else if (itemType === 'bookmarks') handler = (el) => this.removeBookmark(el);
         else if (itemType === 'following') handler = (el) => this.unfollowUser(el);
         else return;
 
@@ -342,6 +313,11 @@
 
       if (this.errorCount >= this.maxErrors) {
         this.error('Too many errors, stopping');
+      }
+
+      // 该 type 0 命中且启用了过滤，给用户明确提示
+      if (this.processedCount === processedBefore && this.shouldFilter(itemType)) {
+        this.log(t('noItemsMatched'));
       }
     }
 
@@ -388,26 +364,37 @@
       let emptyScrolls = 0;
       const maxEmptyScrolls = 3;
 
-      // 扩展的选择器 - 多种备选以兼容 X 不同版本
-      const unlikeSelectors = [
+      // 内置兜底选择器（远程配置可覆盖，远程的放前面优先）
+      const BUILTIN_UNLIKE_SELECTORS = [
         "[data-testid='unlike']",
         "[data-testid='unlike-react']",
         "button[aria-label*='Liked']",
         "button[aria-label*='Unlike']"
       ];
+      var remoteUnlike = (this.config && this.config.like && Array.isArray(this.config.like.unlikeButtons))
+        ? this.config.like.unlikeButtons : [];
+      const unlikeSelectors = remoteUnlike.concat(BUILTIN_UNLIKE_SELECTORS);
 
-      this.log('Starting likes cleanup on ' + window.location.href);
+      this.log(t('startingLikesCleanup'));
 
       // 预计算 keyword 小写，避免循环里重复 toLowerCase
       this._keywordLower = (this.filters && this.filters.keyword)
         ? this.filters.keyword.toLowerCase() : '';
 
-      // 一次性诊断：输出页面上所有相关 data-testid
+      // 一次性诊断：输出到 console（开发者用），不进用户日志面板
       if (emptyScrolls === 0) {
         this._diagnosePage();
       }
 
+      // 总时长兜底：防止 X 改版或网络慢导致永远卡在循环
+      var startedAt = Date.now();
+      var MAX_DURATION_MS = 30000;
+
       while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
+        if (Date.now() - startedAt > MAX_DURATION_MS) {
+          this.log(t('cleanupTimeout'));
+          break;
+        }
         if (this.isPaused) {
           await this.sleep(500);
           continue;
@@ -431,18 +418,20 @@
         });
 
         if (pending.length === 0) {
-          if (unlikeButtons.length === 0 && emptyScrolls === 0) {
-            this.log('No unlike buttons found on page, selectors may be wrong');
-            this.log('Tried: ' + unlikeSelectors.join(', '));
+          if (unlikeButtons.length === 0 && emptyScrolls === 1) {
+            // 第二次 0 命中才打（避免第一次就误判 X 改版——首次 0 也可能是真没书签）
+            this.log(t('noUnlikeButtons'));
+            // 调试细节：把候选选择器输出到 console（不进用户面板）
+            console.log('[X-Eraser] Tried selectors:', unlikeSelectors);
           }
           emptyScrolls++;
           if (emptyScrolls > maxEmptyScrolls) {
-            this.log('No more likes');
+            this.log(t('noMoreLikes'));
             break;
           }
           const hasMore = await this.scrollToBottom(1500);
           if (!hasMore) {
-            this.log('End of likes');
+            this.log(t('endOfLikes'));
             break;
           }
           continue;
@@ -451,7 +440,7 @@
         emptyScrolls = 0;
 
         if (matchedSelector && emptyScrolls === 0) {
-          this.log('Found ' + unlikeButtons.length + ' buttons with: ' + matchedSelector);
+          this.log(t('foundButtonsCount', {count: unlikeButtons.length}));
         }
 
         const btn = pending[0];
@@ -466,7 +455,7 @@
             if ((this.filters.fromDate || this.filters.toDate) && !meta.dateISO
                 && !this._dateMissingWarned.has('likes')) {
               this._dateMissingWarned.add('likes');
-              this.log('Date filter skipped for likes: no timestamp found on some items');
+              this.log(t('dateFilterSkipped', {type: 'likes'}));
             }
             await this.sleep(50);
             continue;
@@ -480,13 +469,13 @@
           if (ok) {
             this.processedCount++;
             this.progress('Unlike #' + this.processedCount);
-            this.log('Clicked unlike button #' + this.processedCount);
+            this.log(t('clickedUnlike', {count: this.processedCount}));
           } else {
             this.errorCount++;
-            this.error('Click returned false for unlike button');
+            this.error(t('clickReturnedFalse'));
           }
         } catch (e) {
-          this.error('Unlike failed: ' + e.message);
+          this.error(t('unlikeFailed', {error: e.message}));
           this.errorCount++;
         }
 
@@ -495,11 +484,141 @@
 
       // 0 命中时给用户明确提示
       if (this.processedCount === 0 && this.filters) {
-        this.log('No items matched the filter');
+        this.log(t('noItemsMatched'));
+      }
+    }
+
+    // 专门处理 Bookmarks：仿 processLikes 的全局扫按钮模式
+    async processBookmarks(maxItems) {
+      if (maxItems === undefined) maxItems = 50;
+
+      let emptyScrolls = 0;
+      const maxEmptyScrolls = 3;
+
+      // 备选选择器（按优先级）
+      // 内置兜底（远程配置可覆盖，远程的放前面优先）
+      const BUILTIN_REMOVE_SELECTORS = [
+        "button[aria-label='Bookmarked']",
+        "button[aria-label*='Bookmarked']",
+        "[data-testid='bookmark']",
+        "[data-testid='removeBookmark']",
+        "[data-testid='unbookmark']",
+        "button[aria-label*='Remove']"
+      ];
+      var remoteRemove = (this.config && this.config.bookmark && Array.isArray(this.config.bookmark.removeButtons))
+        ? this.config.bookmark.removeButtons : [];
+      const removeSelectors = remoteRemove.concat(BUILTIN_REMOVE_SELECTORS);
+
+      this.log(t('startingBookmarksCleanup'));
+
+      if (emptyScrolls === 0) {
+        this._diagnosePage();
+      }
+
+      // 总时长兜底：防止 X 改版或网络慢导致永远卡在循环
+      var startedAt = Date.now();
+      var MAX_DURATION_MS = 30000;
+
+      while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
+        if (Date.now() - startedAt > MAX_DURATION_MS) {
+          this.log(t('cleanupTimeout'));
+          break;
+        }
+        if (this.isPaused) {
+          await this.sleep(500);
+          continue;
+        }
+
+        // 尝试所有备选选择器
+        let removeButtons = [];
+        let matchedSelector = null;
+        for (let s = 0; s < removeSelectors.length; s++) {
+          removeButtons = this.findElements(removeSelectors[s]);
+          if (removeButtons.length > 0) {
+            matchedSelector = removeSelectors[s];
+            break;
+          }
+        }
+
+        // 过滤已处理（clicked='true' 或 filtered='skipped'）
+        const pending = removeButtons.filter(function(btn) {
+          var p = btn.dataset.xeraserProcessed;
+          return !p || (p !== 'true' && p !== 'skipped');
+        });
+
+        if (pending.length === 0) {
+          if (removeButtons.length === 0 && emptyScrolls === 1) {
+            // 第二次 0 命中才打（避免第一次就误判 X 改版——首次 0 也可能是真没书签）
+            this.log(t('noRemoveBookmarkButtons'));
+            // 调试细节：把候选选择器输出到 console（不进用户面板）
+            console.log('[X-Eraser] Tried selectors:', removeSelectors);
+          }
+          emptyScrolls++;
+          if (emptyScrolls > maxEmptyScrolls) {
+            this.log(t('noMoreBookmarks'));
+            break;
+          }
+          const hasMore = await this.scrollToBottom(1500);
+          if (!hasMore) {
+            this.log(t('endOfBookmarks'));
+            break;
+          }
+          continue;
+        }
+
+        emptyScrolls = 0;
+
+        if (matchedSelector && emptyScrolls === 0) {
+          this.log(t('foundButtonsCount', {count: removeButtons.length}));
+        }
+
+        const btn = pending[0];
+
+        // 过滤判断
+        if (this.filters) {
+          // article 用 HTML 标准标签，不依赖 testid（X 改版也不影响）
+          var article = btn.closest('article') || btn.parentElement;
+          var meta = this.extractMeta(article, 'bookmarks');
+          if (!this.matchesFilter(meta, this.filters)) {
+            btn.dataset.xeraserProcessed = 'skipped';
+            if ((this.filters.fromDate || this.filters.toDate) && !meta.dateISO
+                && !this._dateMissingWarned.has('bookmarks')) {
+              this._dateMissingWarned.add('bookmarks');
+              this.log(t('dateFilterSkipped', {type: 'bookmarks'}));
+            }
+            await this.sleep(50);
+            continue;
+          }
+        }
+
+        btn.dataset.xeraserProcessed = 'true';
+
+        try {
+          const ok = await this.safeClick(btn, 800);
+          if (ok) {
+            this.processedCount++;
+            this.progress('Bookmark #' + this.processedCount);
+            this.log(t('clickedRemoveBookmark', {count: this.processedCount}));
+          } else {
+            this.errorCount++;
+            this.error(t('clickReturnedFalseRemoveBookmark'));
+          }
+        } catch (e) {
+          this.error(t('removeBookmarkFailed', {error: e.message}));
+          this.errorCount++;
+        }
+
+        await this.sleep(500);
+      }
+
+      // 0 命中时给用户明确提示
+      if (this.processedCount === 0 && this.filters) {
+        this.log(t('noItemsMatched'));
       }
     }
 
     // 诊断：输出页面上所有 data-testid 信息，帮助调试选择器
+    // 输出到 console（开发者用），不进用户日志面板
     _diagnosePage() {
       try {
         const allWithTestId = document.querySelectorAll('[data-testid]');
@@ -511,27 +630,27 @@
         const sorted = Object.keys(testIdCounts).sort(function(a, b) {
           return testIdCounts[b] - testIdCounts[a];
         });
-        this.log('=== Page Diagnostics ===');
-        this.log('Total data-testid elements: ' + allWithTestId.length);
-        this.log('Top data-testids: ' + sorted.slice(0, 20).map(function(k) {
+        console.log('[X-Eraser Diagnostics] === Page Diagnostics ===');
+        console.log('Total data-testid elements:', allWithTestId.length);
+        console.log('Top data-testids:', sorted.slice(0, 20).map(function(k) {
           return k + '(' + testIdCounts[k] + ')';
         }).join(', '));
 
         // 查找所有带 aria-label 的 button
         const labeledButtons = document.querySelectorAll('button[aria-label]');
-        this.log('Total labeled buttons: ' + labeledButtons.length);
+        console.log('Total labeled buttons:', labeledButtons.length);
         const uniqueLabels = {};
         for (let i = 0; i < Math.min(labeledButtons.length, 50); i++) {
           const lbl = labeledButtons[i].getAttribute('aria-label');
           uniqueLabels[lbl] = (uniqueLabels[lbl] || 0) + 1;
         }
         const topLabels = Object.keys(uniqueLabels).slice(0, 15);
-        this.log('Top aria-labels: ' + topLabels.map(function(k) {
+        console.log('Top aria-labels:', topLabels.map(function(k) {
           return '"' + k + '"(' + uniqueLabels[k] + ')';
         }).join(', '));
-        this.log('=== End Diagnostics ===');
+        console.log('[X-Eraser Diagnostics] === End Diagnostics ===');
       } catch (e) {
-        this.error('Diagnostics failed: ' + e.message);
+        console.warn('[X-Eraser Diagnostics] failed:', e.message);
       }
     }
 
