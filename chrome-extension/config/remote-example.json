@@ -83,10 +83,14 @@
       ]
     },
     "following": {
-      "container": "[data-testid='UserAvatar']",
-      "unfollowButton": "[data-testid='defaultProfileFollowButton']",
-      "followingTab": "[data-testid='Tab']",
-      "followingTabValue": "Following"
+      "container": "[data-testid='cellInnerDiv']",
+      "unfollowButtons": [
+        "[data-testid='unfollow']",
+        "[data-testid='UserUnfollow']",
+        "button[aria-label*='Following']",
+        "button[aria-label*='Unfollow']"
+      ],
+      "confirmButton": "[data-testid='confirmationSheetConfirm']"
     },
     "message": {
       "container": "[data-testid='DMConversation']",

@@ -275,6 +275,7 @@
     if (type === 'likes') return getLikesPageURL();
     if (type === 'bookmarks') return getBookmarksPageURL();
     if (type === 'messages') return getMessagesPageURL();
+    if (type === 'following') return getFollowingPageURL();
     return null;
   }
 
@@ -475,6 +476,15 @@
     return 'https://x.com/messages';
   }
 
+  function getFollowingPageURL() {
+    var username = getCurrentUsername();
+    if (username) {
+      return 'https://x.com/' + username + '/following';
+    }
+    console.warn('[X-Eraser] Could not get username, using /i/following fallback');
+    return 'https://x.com/i/following';
+  }
+
   function checkXStatus() {
     const isX = isTargetWebsite();
     const isLoggedIn = isX ? checkLoginStatus() : false;
@@ -536,6 +546,18 @@
       }).catch(function() {});
       sendResponse({ started: true, needsNavigation: true });
       setTimeout(function() { forcePageLoad(messagesUrl); }, 100);
+      return;
+    }
+
+    if (types.indexOf('following') >= 0 && pageType !== 'following') {
+      const followingUrl = getFollowingPageURL();
+      console.log('[X-Eraser] Following requires /following page, current:', pageType);
+      chrome.runtime.sendMessage({
+        type: 'cleanupLog',
+        data: { message: t('followingRequiresNav'), level: 'info' }
+      }).catch(function() {});
+      sendResponse({ started: true, needsNavigation: true });
+      setTimeout(function() { forcePageLoad(followingUrl); }, 100);
       return;
     }
 

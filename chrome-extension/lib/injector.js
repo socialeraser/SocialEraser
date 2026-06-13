@@ -18,8 +18,14 @@
       container: "[data-testid='tweet']"
     },
     following: {
-      container: "[data-testid='UserAvatar']",
-      unfollowButton: "[data-testid='unfollow']"
+      container: "[data-testid='cellInnerDiv']",
+      unfollowButtons: [
+        "[data-testid='unfollow']",
+        "[data-testid='UserUnfollow']",
+        "button[aria-label*='Following']",
+        "button[aria-label*='Unfollow']"
+      ],
+      confirmButton: "[data-testid='confirmationSheetConfirm']"
     }
   };
 
@@ -182,30 +188,38 @@
 
     async unfollowUser(container) {
       if (!container) return false;
-      
+
       const selectors = this.config.following || DEFAULT_SELECTORS.following;
-      const unfollowButton = this.findElement(selectors.unfollowButton, container);
-      
+
+      // 兼容新旧配置：unfollowButtons（数组，新）|| unfollowButton（字符串，旧）
+      const btnSelectors = Array.isArray(selectors.unfollowButtons)
+        ? selectors.unfollowButtons
+        : (selectors.unfollowButton ? [selectors.unfollowButton] : []);
+
+      if (btnSelectors.length === 0) return false;
+
+      const unfollowButton = this.findElement(btnSelectors, container);
       if (!unfollowButton) return false;
-      
+
       await this.safeClick(unfollowButton, 0);
-      
-      const confirmButton = await this.waitForElement(
-        this.config.tweet ? this.config.tweet.confirmButton : "[data-testid='confirmationSheetConfirm']",
-        2000
-      );
-      
+
+      // confirm 优先级：following.confirmButton > tweet.confirmButton > 硬编码兜底
+      const confirmSel = (selectors && selectors.confirmButton)
+        || (this.config.tweet && this.config.tweet.confirmButton)
+        || "[data-testid='confirmationSheetConfirm']";
+
+      const confirmButton = await this.waitForElement(confirmSel, 2000);
       if (confirmButton) {
         await this.safeClick(confirmButton, 500);
       }
-      
+
       return true;
     }
 
-    // 哪些 itemType 启用日期+关键字过滤（暂只 bookmarks）
+    // 哪些 itemType 启用日期+关键字过滤（bookmarks + following）
     shouldFilter(itemType) {
       if (!this.filters) return false;
-      return itemType === 'bookmarks';
+      return itemType === 'bookmarks' || itemType === 'following';
     }
 
     async processItems(itemType, maxItems) {
@@ -249,8 +263,22 @@
         return;
       }
 
-      // 其他类型
+      // 特殊处理 Following：全局扫描 unfollow 按钮
+      if (itemType === 'following') {
+        await this.processFollowing(maxItems);
+        return;
+      }
+
+      // 其他类型（tweets 用通用循环）
+      // 无进展兜底：与 likes/bookmarks/following 一致
+      var lastProgressTime = Date.now();
+      var STUCK_TIMEOUT_MS = 30000;
+
       while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
+        if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) {
+          this.log(t('cleanupStuck'));
+          break;
+        }
         if (this.isPaused) {
           await this.sleep(500);
           continue;
@@ -299,6 +327,7 @@
           const success = await handler(item);
           if (success) {
             this.processedCount++;
+            lastProgressTime = Date.now();  // 重置无进展计时器
             this.progress(itemType + ' #' + this.processedCount);
           } else {
             this.errorCount++;
@@ -321,8 +350,9 @@
       }
     }
 
-    // 提取 tweet 容器的元数据（日期 + 文本），用于过滤
-    // 暂只服务 likes；tweets/bookmarks/following/messages 暂未实现过滤
+    // 提取容器的元数据（日期 + 文本），用于过滤
+    // likes/bookmarks/tweets：dateISO 从 <time datetime> 取，text 从 [data-testid="tweetText"] 取
+    // following：dateISO 通常为空（页面无加入时间），text 从用户名 / bio 取
     extractMeta(container, itemType) {
       var meta = { dateISO: null, text: '' };
       if (!container) return meta;
@@ -334,11 +364,24 @@
         meta.dateISO = dt.slice(0, 10);
       }
 
-      // 文本：只查目标子元素，避免在巨大容器上读 textContent
-      var textEls = container.querySelectorAll('[data-testid="tweetText"]');
+      // 文本：按类型选不同选择器，避免在巨大容器上读 textContent
       var parts = [];
-      for (var i = 0; i < textEls.length; i++) {
-        parts.push(textEls[i].textContent || '');
+      if (itemType === 'following') {
+        // UserCell 内：用户名 / @handle / bio
+        var userCell = container.querySelector('[data-testid="UserCell"]')
+          || container.querySelector('[data-testid="userCell"]');
+        var scope = userCell || container;
+        var nameEls = scope.querySelectorAll('[data-testid="User-Name"], [data-testid="UserName"]');
+        var bioEl = scope.querySelector('[data-testid="UserDescription"]');
+        for (var n = 0; n < nameEls.length; n++) {
+          parts.push(nameEls[n].textContent || '');
+        }
+        if (bioEl) parts.push(bioEl.textContent || '');
+      } else {
+        var textEls = container.querySelectorAll('[data-testid="tweetText"]');
+        for (var i = 0; i < textEls.length; i++) {
+          parts.push(textEls[i].textContent || '');
+        }
       }
       meta.text = parts.join(' ').trim();
 
@@ -386,13 +429,16 @@
         this._diagnosePage();
       }
 
-      // 总时长兜底：防止 X 改版或网络慢导致永远卡在循环
-      var startedAt = Date.now();
-      var MAX_DURATION_MS = 30000;
+      // 无进展兜底：连续 STUCK_TIMEOUT_MS 没新增任何 processedCount 就退出
+      // 注意：这不是"批量时长上限"。订阅用户跑几千条几小时都 OK，
+      // 这个超时只用来抓 X 改版 / 选择器失效 / 网络卡死导致的死循环。
+      // 真正的批量上限在 sidepanel.js 的 dailyUsage（免费 50/天，订阅无限）。
+      var lastProgressTime = Date.now();
+      var STUCK_TIMEOUT_MS = 30000;
 
       while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
-        if (Date.now() - startedAt > MAX_DURATION_MS) {
-          this.log(t('cleanupTimeout'));
+        if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) {
+          this.log(t('cleanupStuck'));
           break;
         }
         if (this.isPaused) {
@@ -468,6 +514,7 @@
           const ok = await this.safeClick(btn, 800);
           if (ok) {
             this.processedCount++;
+            lastProgressTime = Date.now();  // 重置无进展计时器
             this.progress('Unlike #' + this.processedCount);
             this.log(t('clickedUnlike', {count: this.processedCount}));
           } else {
@@ -515,13 +562,16 @@
         this._diagnosePage();
       }
 
-      // 总时长兜底：防止 X 改版或网络慢导致永远卡在循环
-      var startedAt = Date.now();
-      var MAX_DURATION_MS = 30000;
+      // 无进展兜底：连续 STUCK_TIMEOUT_MS 没新增任何 processedCount 就退出
+      // 注意：这不是"批量时长上限"。订阅用户跑几千条几小时都 OK，
+      // 这个超时只用来抓 X 改版 / 选择器失效 / 网络卡死导致的死循环。
+      // 真正的批量上限在 sidepanel.js 的 dailyUsage（免费 50/天，订阅无限）。
+      var lastProgressTime = Date.now();
+      var STUCK_TIMEOUT_MS = 30000;
 
       while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
-        if (Date.now() - startedAt > MAX_DURATION_MS) {
-          this.log(t('cleanupTimeout'));
+        if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) {
+          this.log(t('cleanupStuck'));
           break;
         }
         if (this.isPaused) {
@@ -597,6 +647,7 @@
           const ok = await this.safeClick(btn, 800);
           if (ok) {
             this.processedCount++;
+            lastProgressTime = Date.now();  // 重置无进展计时器
             this.progress('Bookmark #' + this.processedCount);
             this.log(t('clickedRemoveBookmark', {count: this.processedCount}));
           } else {
@@ -605,6 +656,161 @@
           }
         } catch (e) {
           this.error(t('removeBookmarkFailed', {error: e.message}));
+          this.errorCount++;
+        }
+
+        await this.sleep(500);
+      }
+
+      // 0 命中时给用户明确提示
+      if (this.processedCount === 0 && this.filters) {
+        this.log(t('noItemsMatched'));
+      }
+    }
+
+    // 专门处理 Following：仿 processBookmarks 的全局扫按钮模式
+    // 区别：1) 需要两步点击（unfollow + confirm dialog）
+    //      2) 过滤容器用 cellInnerDiv 而非 article
+    async processFollowing(maxItems) {
+      if (maxItems === undefined) maxItems = 50;
+
+      let emptyScrolls = 0;
+      const maxEmptyScrolls = 3;
+
+      // 内置兜底选择器（远程配置可覆盖，远程的放前面优先）
+      const BUILTIN_UNFOLLOW_SELECTORS = [
+        "[data-testid='unfollow']",
+        "[data-testid='UserUnfollow']",
+        "button[aria-label*='Following']",
+        "button[aria-label*='Unfollow']"
+      ];
+      var remoteUnfollow = (this.config && this.config.following && Array.isArray(this.config.following.unfollowButtons))
+        ? this.config.following.unfollowButtons : [];
+      const unfollowSelectors = remoteUnfollow.concat(BUILTIN_UNFOLLOW_SELECTORS);
+
+      // confirm 选择器优先级：following.confirmButton > tweet.confirmButton > 硬编码兜底
+      const confirmSel = (this.config && this.config.following && this.config.following.confirmButton)
+        || (this.config && this.config.tweet && this.config.tweet.confirmButton)
+        || "[data-testid='confirmationSheetConfirm']";
+
+      this.log(t('startingFollowingCleanup'));
+
+      if (emptyScrolls === 0) {
+        this._diagnosePage();
+      }
+
+      // 无进展兜底：连续 STUCK_TIMEOUT_MS 没新增任何 processedCount 就退出
+      // 注意：这不是"批量时长上限"。订阅用户跑几千条几小时都 OK，
+      // 这个超时只用来抓 X 改版 / 选择器失效 / 网络卡死导致的死循环。
+      // 真正的批量上限在 sidepanel.js 的 dailyUsage（免费 50/天，订阅无限）。
+      var lastProgressTime = Date.now();
+      var STUCK_TIMEOUT_MS = 30000;
+
+      while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
+        if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) {
+          this.log(t('cleanupStuck'));
+          break;
+        }
+        if (this.isPaused) {
+          await this.sleep(500);
+          continue;
+        }
+
+        // 尝试所有备选选择器
+        let unfollowButtons = [];
+        let matchedSelector = null;
+        for (let s = 0; s < unfollowSelectors.length; s++) {
+          unfollowButtons = this.findElements(unfollowSelectors[s]);
+          if (unfollowButtons.length > 0) {
+            matchedSelector = unfollowSelectors[s];
+            break;
+          }
+        }
+
+        // 过滤已处理（clicked='true' 或 filtered='skipped'）
+        const pending = unfollowButtons.filter(function(btn) {
+          var p = btn.dataset.xeraserProcessed;
+          return !p || (p !== 'true' && p !== 'skipped');
+        });
+
+        if (pending.length === 0) {
+          if (unfollowButtons.length === 0 && emptyScrolls === 1) {
+            // 第二次 0 命中才打（避免首次误判 X 改版）
+            this.log(t('noUnfollowButtons'));
+            console.log('[X-Eraser] Tried selectors:', unfollowSelectors);
+          }
+          emptyScrolls++;
+          if (emptyScrolls > maxEmptyScrolls) {
+            this.log(t('noMoreFollowing'));
+            break;
+          }
+          const hasMore = await this.scrollToBottom(1500);
+          if (!hasMore) {
+            this.log(t('endOfFollowing'));
+            break;
+          }
+          continue;
+        }
+
+        emptyScrolls = 0;
+
+        if (matchedSelector && emptyScrolls === 0) {
+          this.log(t('foundButtonsCount', {count: unfollowButtons.length}));
+        }
+
+        const btn = pending[0];
+
+        // 过滤判断：容器用 cellInnerDiv（following 页面用户行的标准 testid）
+        if (this.filters) {
+          var cell = btn.closest("[data-testid='cellInnerDiv']") || btn.parentElement;
+          var meta = this.extractMeta(cell, 'following');
+          if (!this.matchesFilter(meta, this.filters)) {
+            btn.dataset.xeraserProcessed = 'skipped';
+            // following 页通常没有 <time datetime>，日期过滤会全部跳过 → 提示一次
+            if ((this.filters.fromDate || this.filters.toDate) && !meta.dateISO
+                && !this._dateMissingWarned.has('following')) {
+              this._dateMissingWarned.add('following');
+              this.log(t('dateFilterSkipped', {type: 'following'}));
+            }
+            await this.sleep(50);
+            continue;
+          }
+        }
+
+        btn.dataset.xeraserProcessed = 'true';
+
+        try {
+          // step 1: 点 unfollow 按钮（X 弹出确认 dialog）
+          const ok1 = await this.safeClick(btn, 500);
+          if (!ok1) {
+            this.errorCount++;
+            this.error(t('clickReturnedFalse'));
+            await this.sleep(500);
+            continue;
+          }
+
+          // step 2: 等 confirm 弹窗并点击
+          const confirmButton = await this.waitForElement(confirmSel, 2000);
+          if (confirmButton) {
+            const ok2 = await this.safeClick(confirmButton, 500);
+            if (ok2) {
+              this.processedCount++;
+              lastProgressTime = Date.now();  // 重置无进展计时器
+              this.progress('Unfollow #' + this.processedCount);
+              this.log(t('clickedUnfollow', {count: this.processedCount}));
+            } else {
+              this.errorCount++;
+              this.error(t('clickReturnedFalseConfirm'));
+            }
+          } else {
+            // 没出现 confirm dialog——可能 X 改版直接取关了，仍记为成功
+            this.processedCount++;
+            lastProgressTime = Date.now();  // 重置无进展计时器
+            this.progress('Unfollow #' + this.processedCount);
+            this.log(t('unfollowedNoConfirm', {count: this.processedCount}));
+          }
+        } catch (e) {
+          this.error(t('unfollowFailed', {error: e.message}));
           this.errorCount++;
         }
 
