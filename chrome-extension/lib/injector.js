@@ -12,10 +12,24 @@
       confirmButton: "[data-testid='confirmationSheetConfirm']"
     },
     like: {
-      container: "[data-testid='tweet'], [data-testid='cellInnerDiv']"
+      container: "[data-testid='tweet'], [data-testid='cellInnerDiv']",
+      unlikeButtons: [
+        "[data-testid='unlike']",
+        "[data-testid='unlike-react']",
+        "button[aria-label*='Liked']",
+        "button[aria-label*='Unlike']"
+      ]
     },
     bookmark: {
-      container: "[data-testid='tweet']"
+      container: "[data-testid='tweet']",
+      removeButtons: [
+        "button[aria-label='Bookmarked']",
+        "button[aria-label*='Bookmarked']",
+        "[data-testid='bookmark']",
+        "[data-testid='removeBookmark']",
+        "[data-testid='unbookmark']",
+        "button[aria-label*='Remove']"
+      ]
     },
     following: {
       container: "[data-testid='cellInnerDiv']",
