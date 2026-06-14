@@ -62,15 +62,38 @@
     }
 
     setConfig(config) {
-      // 合并：先以 DEFAULT_SELECTORS 为底，远程配置覆盖缺失的键
-      // 之前实现是「config.selectors 直接替换 default」，导致远程缺键时 this.config[key] 是 undefined
+      // 字段级合并：先以 DEFAULT_SELECTORS 为底，远程配置只覆盖它显式提供的字段
+      // 修复前是「config.selectors 直接替换 default 对象」，导致远程缺键时 merged[k]
+      // 整个块被远程对象替换（即使远程只覆盖了 container），其余字段全丢。
+      // 修复后：远程缺键时仍保留 DEFAULT 字段；远程有键时仅覆盖那个键。
+      // 拷贝策略：每个字段如果是数组/对象，再浅拷贝一层；
+      //           这样 processXxx 写入 merged 不会污染 DEFAULT_SELECTORS。
       var merged = {};
+      function shallowCopyField(val) {
+        if (Array.isArray(val)) return val.slice();
+        if (val && typeof val === 'object') return Object.assign({}, val);
+        return val;
+      }
       for (var k in DEFAULT_SELECTORS) {
-        if (DEFAULT_SELECTORS.hasOwnProperty(k)) merged[k] = DEFAULT_SELECTORS[k];
+        if (DEFAULT_SELECTORS.hasOwnProperty(k)) {
+          merged[k] = Object.assign({}, DEFAULT_SELECTORS[k]);
+          // 数组/对象字段额外浅拷贝
+          for (var f in merged[k]) {
+            if (merged[k].hasOwnProperty(f)) {
+              merged[k][f] = shallowCopyField(merged[k][f]);
+            }
+          }
+        }
       }
       if (config && config.selectors) {
         for (var k2 in config.selectors) {
-          if (config.selectors.hasOwnProperty(k2)) merged[k2] = config.selectors[k2];
+          if (!config.selectors.hasOwnProperty(k2)) continue;
+          if (!merged[k2]) merged[k2] = {};
+          for (var field in config.selectors[k2]) {
+            if (config.selectors[k2].hasOwnProperty(field)) {
+              merged[k2][field] = config.selectors[k2][field];
+            }
+          }
         }
       }
       this.config = merged;
