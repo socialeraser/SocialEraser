@@ -15,33 +15,61 @@
   // 每日额度配置
   var FREE_LIMIT_PER_DAY = 50;
 
+  // 单飞串行链：所有 dailyUsage 读写都排队走这条 Promise 链
+  // 修复并发的 read-modify-write 竞态——cleanupProgress 回调高频触发时旧实现会丢计数
+  var _dailyUsageChain = Promise.resolve();
+
   // 读取今日已使用额度
   function getDailyUsage(callback) {
-    chrome.storage.local.get(['dailyUsage'], function(result) {
-      var data = result.dailyUsage;
-      var today = new Date().toDateString();
-      if (!data || data.date !== today) {
-        // 新的一天，重置
-        data = { date: today, used: 0 };
-        chrome.storage.local.set({ dailyUsage: data });
-      }
-      callback(data.used || 0);
+    _dailyUsageChain = _dailyUsageChain.then(function() {
+      return new Promise(function(resolve) {
+        chrome.storage.local.get(['dailyUsage'], function(result) {
+          var data = result.dailyUsage;
+          var today = new Date().toDateString();
+          if (!data || data.date !== today) {
+            // 新的一天，重置
+            data = { date: today, used: 0 };
+            chrome.storage.local.set({ dailyUsage: data }, function() { resolve(data.used || 0); });
+          } else {
+            resolve(data.used || 0);
+          }
+        });
+      });
+    }).then(function(used) {
+      if (callback) callback(used);
+      return used;
+    }).catch(function(err) {
+      // 单步失败不能毒化整条链，否则后续 increment 会永远排队
+      console.warn('[X-Eraser] getDailyUsage chain step failed:', err && err.message);
+      if (callback) callback(0);
+      return 0;
     });
+    return _dailyUsageChain;
   }
 
   // 增加今日使用额度
   function incrementDailyUsage(count, callback) {
-    chrome.storage.local.get(['dailyUsage'], function(result) {
-      var today = new Date().toDateString();
-      var data = result.dailyUsage;
-      if (!data || data.date !== today) {
-        data = { date: today, used: 0 };
-      }
-      data.used = (data.used || 0) + count;
-      chrome.storage.local.set({ dailyUsage: data }, function() {
-        if (callback) callback(data.used);
+    _dailyUsageChain = _dailyUsageChain.then(function() {
+      return new Promise(function(resolve) {
+        chrome.storage.local.get(['dailyUsage'], function(result) {
+          var today = new Date().toDateString();
+          var data = result.dailyUsage;
+          if (!data || data.date !== today) {
+            data = { date: today, used: 0 };
+          }
+          data.used = (data.used || 0) + count;
+          chrome.storage.local.set({ dailyUsage: data }, function() {
+            // callback 在 resolve 之前触发，保证调用方拿到的是写后值
+            if (callback) callback(data.used);
+            resolve(data.used);
+          });
+        });
       });
+    }).catch(function(err) {
+      console.warn('[X-Eraser] incrementDailyUsage chain step failed:', err && err.message);
+      if (callback) callback(null);
     });
+    return _dailyUsageChain;
   }
 
   var els = {};
@@ -228,6 +256,10 @@
       } else if (msg.type === 'cleanupResumed') {
         onResumed();
       } else if (msg.type === 'cleanupStopped') {
+        onStopped();
+      } else if (msg.type === 'cleanupAborted') {
+        // retry limit 触发 / cleanup 主动放弃（content.js 发的消息）
+        // 行为等同 onStopped，但语义独立（区别于用户主动 Stop）
         onStopped();
       } else if (msg.type === 'cleanupTypeStart') {
         setOptionState(msg.data.type, 'processing');
@@ -658,8 +690,8 @@
 
   function startCleanup() {
     var options = [];
-    var checkboxIds = ['opt-tweets', 'opt-likes', 'opt-bookmarks', 'opt-following', 'opt-messages'];
-    var optionNames = ['tweets', 'likes', 'bookmarks', 'following', 'messages'];
+    var checkboxIds = ['opt-tweets', 'opt-likes', 'opt-bookmarks', 'opt-following'];
+    var optionNames = ['tweets', 'likes', 'bookmarks', 'following'];
     for (var i = 0; i < checkboxIds.length; i++) {
       var el = document.getElementById(checkboxIds[i]);
       if (el && el.checked) {
@@ -920,6 +952,14 @@
     if (els.progressSpinner) els.progressSpinner.className = 'progress-spinner paused';
     // 收到 injector 的 stopped 消息：所有 option-count 回到 idle
     resetAllOptionStates();
+    // 修复历史 bug：onStopped 之前没复位按钮显示，导致 cleanupStopped 消息路径下 UI 卡死
+    // 现在 stopCleanup 用户主动路径（手动复位）和 onStopped 消息回调路径（这里复位）一致
+    if (els.controlButtons) els.controlButtons.style.display = 'flex';
+    if (els.runningButtons) els.runningButtons.style.display = 'none';
+    if (els.btnPause) {
+      els.btnPause.textContent = t('pause');
+      els.btnPause.onclick = pauseCleanup;
+    }
   }
 
   if (document.readyState === 'loading') {

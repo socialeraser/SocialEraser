@@ -228,7 +228,6 @@
       const matchedType = types.find(function(t) {
         if (t === 'likes') return pageType === 'likes';
         if (t === 'bookmarks') return pageType === 'bookmarks';
-        if (t === 'messages') return pageType === 'messages';
         if (t === 'tweets') return pageType === 'tweets';
         if (t === 'following') return pageType === 'following';
         return false;
@@ -239,7 +238,32 @@
         const firstType = types[0];
         const nextUrl = getPageURLForType(firstType);
         if (nextUrl) {
-          console.log('[X-Eraser] No matched type on this page, navigating to:', firstType);
+          // 关键修复：retry 计数防止无限 forcePageLoad
+          // 场景：X 把 /messages 重定向到 Create Passcode / Settings 等页面，
+          //       detectPageType 返回 'other'，matchedType 永远是 null，
+          //       forcePageLoad 反复触发 → 死循环
+          // 解决：retry 超过 3 次主动清 session + 提示用户
+          const retryCount = (pending.retryCount || 0) + 1;
+          if (retryCount > 3) {
+            console.warn('[X-Eraser] Retry limit reached (' + retryCount + '), aborting cleanup. Current page:', pageType);
+            await chrome.runtime.sendMessage({ target: 'clearPendingCleanup' });
+            // 通知 sidepanel：cleanup 已中止 + 错误原因（chrome.runtime.sendMessage 是广播，sidepanel 直接收到）
+            chrome.runtime.sendMessage({
+              type: 'cleanupLog',
+              data: { message: t('cleanupAbortedPageNotFound'), level: 'error' }
+            }).catch(function() {});
+            chrome.runtime.sendMessage({
+              type: 'cleanupAborted',
+              data: { reason: 'page_not_found', retries: retryCount }
+            }).catch(function() {});
+            return;
+          }
+          // 更新 retry 计数并跳页
+          await chrome.runtime.sendMessage({
+            target: 'updatePendingCleanup',
+            pending: Object.assign({}, pending, { retryCount: retryCount })
+          });
+          console.log('[X-Eraser] No matched type on this page, navigating to:', firstType, '(retry ' + retryCount + '/3)');
           forcePageLoad(nextUrl);
         } else {
           // 未知 type，清空 session 避免死循环
@@ -288,7 +312,6 @@
   function getPageURLForType(type) {
     if (type === 'likes') return getLikesPageURL();
     if (type === 'bookmarks') return getBookmarksPageURL();
-    if (type === 'messages') return getMessagesPageURL();
     if (type === 'following') return getFollowingPageURL();
     return null;
   }
@@ -314,7 +337,16 @@
           resolve(result);
         }
       };
-      injector.startCleanup(options);
+      // 关键修复：startCleanup 是 async，内部 await 链任何 throw 都会变成 reject
+      // 旧实现不 .catch → runCleanupOnce Promise 永久挂起 → runCleanupWithRetry 卡死 →
+      // clearPendingCleanup 永远不被调用 → 下次 page load 又 auto-resume → 死循环
+      // 新实现：任何 throw 都 resolve(0)，让上层走完流程并清 session
+      injector.startCleanup(options).catch(function(e) {
+        if (resolved) return;
+        resolved = true;
+        console.warn('[X-Eraser] startCleanup threw in attempt ' + attempt + ': ' + e.message);
+        resolve({ processed: 0, errors: 0 });
+      });
     });
   }
 
@@ -423,7 +455,6 @@
     if (url.includes('/likes')) return 'likes';
     if (url.includes('/bookmarks')) return 'bookmarks';
     if (url.includes('/following') && !url.match(/\/following\//)) return 'following';
-    if (url.includes('/messages')) return 'messages';
     if (url.match(/^\/[^/]+\/status\//) || url.includes('/status/')) return 'tweets';
     return 'other';
   }
@@ -449,7 +480,7 @@
 
     // 尝试 3: 从导航栏的用户头像链接获取
     var avatarLinks = document.querySelectorAll('a[href^="/"]');
-    var reservedPaths = ['home', 'explore', 'notifications', 'messages', 'bookmarks', 'i', 'search', 'settings', 'compose', 'login'];
+    var reservedPaths = ['home', 'explore', 'notifications', 'bookmarks', 'i', 'search', 'settings', 'compose', 'login'];
     for (var i = 0; i < avatarLinks.length; i++) {
       var href = avatarLinks[i].getAttribute('href');
       var m = href && href.match(/^\/([^\/\?]+)$/);
@@ -484,10 +515,6 @@
 
   function getBookmarksPageURL() {
     return 'https://x.com/i/bookmarks';
-  }
-
-  function getMessagesPageURL() {
-    return 'https://x.com/messages';
   }
 
   function getFollowingPageURL() {
@@ -551,18 +578,6 @@
       return;
     }
 
-    if (types.indexOf('messages') >= 0 && pageType !== 'messages') {
-      const messagesUrl = getMessagesPageURL();
-      console.log('[X-Eraser] Messages requires /messages page, current:', pageType);
-      chrome.runtime.sendMessage({
-        type: 'cleanupLog',
-        data: { message: t('messagesRequiresNav'), level: 'info' }
-      }).catch(function() {});
-      sendResponse({ started: true, needsNavigation: true });
-      setTimeout(function() { forcePageLoad(messagesUrl); }, 100);
-      return;
-    }
-
     if (types.indexOf('following') >= 0 && pageType !== 'following') {
       const followingUrl = getFollowingPageURL();
       console.log('[X-Eraser] Following requires /following page, current:', pageType);
@@ -610,8 +625,12 @@
       case 'stopCleanup':
         if (injector) {
           injector.stop();
-          sendResponse({ stopped: true });
         }
+        // 关键修复：Stop 同时清 pendingCleanup session
+        // 否则下次 page load 会从 session 读到 pending → 又 auto-resume → 死循环
+        // 用户主动 Stop 应等价于"放弃整个清理任务"
+        chrome.runtime.sendMessage({ target: 'clearPendingCleanup' }).catch(function() {});
+        sendResponse({ stopped: true });
         break;
       case 'getCleanupStatus':
         if (injector) {

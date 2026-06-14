@@ -1,4 +1,4 @@
-// 临时验证脚本：检查 i18n.js 8 语言 × 9 key 完整性
+// 临时验证脚本：检查 i18n.js 8 语言 × N key 完整性
 const fs = require('fs');
 const path = require('path');
 
@@ -16,7 +16,8 @@ const required = [
   'noMoreFollowing',
   'endOfFollowing',
   'cleanupStuck',
-  'dailyBudgetExhausted'
+  'dailyBudgetExhausted',
+  'cleanupAbortedPageNotFound'
 ];
 
 const langs = ['en', 'zh-CN', 'zh-TW', 'ja', 'ko', 'es', 'de', 'fr'];

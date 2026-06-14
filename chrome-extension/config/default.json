@@ -91,12 +91,6 @@
         "button[aria-label*='Unfollow']"
       ],
       "confirmButton": "[data-testid='confirmationSheetConfirm']"
-    },
-    "message": {
-      "container": "[data-testid='DMConversation']",
-      "moreButton": "[data-testid='DMConversationDropdown']",
-      "deleteButton": "[data-testid='deletDm']",
-      "confirmButton": "[data-testid='deletDmConfirm']"
     }
   }
 }

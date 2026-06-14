@@ -231,8 +231,7 @@
       var CONFIG_KEY_MAP = {
         likes: 'like',
         bookmarks: 'bookmark',
-        tweets: 'tweet',
-        messages: 'message'
+        tweets: 'tweet'
       };
       var configKey = CONFIG_KEY_MAP[itemType] || itemType;
 

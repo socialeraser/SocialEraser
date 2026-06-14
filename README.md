@@ -11,7 +11,7 @@
 | 常驻侧边栏 | ✅ | Chrome Side Panel，不消失 |
 | 检测X网站 | ✅ | 自动识别 x.com / twitter.com |
 | 检测登录状态 | ✅ | 多语言支持 |
-| 批量删除选项 | ✅ | 推文/点赞/书签/关注/私信 |
+| 批量删除选项 | ✅ | 推文/点赞/书签/关注（私信暂不支持，详见下方说明）|
 | 日期/关键字筛选 | ✅ | UI + 逻辑均已实现 |
 | 实时进度显示 | ✅ | 进度条 + 日志动画 |
 | 暂停/停止/继续 | ✅ | 状态机控制 |
@@ -28,13 +28,13 @@
 | **option-count 状态机** | ✅ | pending（灰 spinner）→ processing（蓝 spinner）→ done（数字）|
 | **status-card 自动收起** | ✅ | 状态正常时延迟 1s 平滑收起，异常立即展开 |
 
-### 开发中功能
+### 暂不支持的功能
 
 | 功能 | 状态 | 说明 |
 |------|------|------|
+| 批量删除 Messages（私信）| ❌ | X 使用 `event.isTrusted` 验证用户输入，content script 派发的 JS 事件（`dispatchEvent` / `mousedown`+`contextmenu` 等序列）全部被 X 拒绝。详见下方"为何 Messages 不支持" |
 | 实际删除操作 | 🔄 | 核心引擎已就绪，端到端真机测试中 |
 | 批量删除推文 | 🔄 | `deleteTweet` 方法已存在，缺 `getTweetsPageURL` 跳转和 tweets 专用配置 |
-| 批量删除私信 | ❌ | `processMessages` 未实现，通用循环也缺 handler 分支 |
 | 免费额度 50/天 | 🔄 | 计数器已 per-type 化，弹窗未实现 |
 | 订阅系统 Creem | 🔄 | 架构待设计 |
 | Android App | 🔄 | Capacitor 工程已就绪，UI 待移植 |
@@ -56,6 +56,28 @@
 | `dailyUsage` race condition | P2 | progress 回调并发时 read-modify-write 丢计数，待改为事务式更新 |
 | Following confirm 弹窗选择器依赖 X 当前 UI | P2 | `[data-testid='confirmationSheetConfirm']` 可能随 X 改版失效，remote config 可热修 |
 | `unfollowUser` 旧配置兼容 | P3 | 已兼容 `unfollowButton`（旧字符串）和 `unfollowButtons`（新数组）两种 schema |
+
+### 为何 Messages（私信）不支持
+
+X 的 Messages 列表页**只能通过 right-click（mac 两指点击 / Windows 右键）触发 Delete conversation 菜单**。经测试，X 在监听 `contextmenu` / `mousedown` 等事件时**校验 `event.isTrusted` 字段**——只有真实用户输入（OS 级事件）才为 `true`。
+
+Chrome extension content script 用以下任一方式派发事件，**全部失败**（`isTrusted=false`，被 X 忽略）：
+
+| 派发方式 | 结果 |
+|---------|------|
+| `el.dispatchEvent(new MouseEvent('contextmenu', {...}))` | ✗ 失败 |
+| `mousedown` + `mouseup` + `contextmenu` 序列 | ✗ 失败 |
+| `pointerdown` + `mousedown` + `mouseup` + `contextmenu` 完整 PointerEvent 序列 | ✗ 失败 |
+| CDP `Input.dispatchMouseEvent`（浏览器内核级）| ✓ 有效（但 content script 无法调用）|
+
+**唯一能模拟 native right click 的方式**是申请 `chrome.debugger` 权限 + background 用 `chrome.debugger.sendCommand('Input.dispatchMouseEvent')`。这会触发 Chrome 的权限警告（"该扩展程序可以访问与此扩展程序相关的页面上的所有数据"），对发布和用户信任有显著负面影响。
+
+**其他类型（tweets/likes/bookmarks/following）不受影响**——它们用普通 `.click()` 触发删除，X 不对 click 校验 `isTrusted`，content script 直接调用 `el.click()` 即可。
+
+**未来重新实现 Messages 的可能路径**：
+1. 申请 `debugger` 权限（影响发布和用户信任）
+2. 通过 X GraphQL API 直接删除（需要 OAuth token，超出 chrome extension 范畴）
+3. 等待 X 改版放弃 `isTrusted` 校验（小概率事件）
 
 ## 安装使用
 

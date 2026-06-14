@@ -25,7 +25,6 @@
       likes: 'Likes',
       bookmarks: 'Bookmarks',
       following: 'Following',
-      messages: 'Messages',
       filterOptions: 'Filter options',
       fromDate: 'From date',
       toDate: 'To date',
@@ -64,7 +63,6 @@
       resumedLog: 'Resumed',
       likesRequiresNav: 'Likes requires /likes page, navigating...',
       bookmarksRequiresNav: 'Bookmarks requires /bookmarks page, navigating...',
-      messagesRequiresNav: 'Messages requires /messages page, navigating...',
       followingRequiresNav: 'Following requires /following page, navigating...',
       navigatingTo: 'Navigating to: {url}',
       pageLoadedResuming: 'Page loaded, resuming cleanup...',
@@ -124,6 +122,9 @@
       copiedToClipboard: 'Diagnostic log copied to clipboard',
       copyFailed: 'Failed to copy: {error}',
       sessionWriteFailed: 'Warning: failed to save cleanup state, cross-page resume may not work',
+
+      // Auto-resume retry limit reached (page mismatch)
+      cleanupAbortedPageNotFound: 'Cleanup aborted: could not reach the target page after 3 retries. Please navigate manually and try again.',
     },
 
     'zh-CN': {
@@ -141,7 +142,6 @@
       likes: '点赞',
       bookmarks: '书签',
       following: '关注',
-      messages: '私信',
       filterOptions: '筛选条件',
       fromDate: '开始日期',
       toDate: '结束日期',
@@ -178,7 +178,6 @@
       resumedLog: '已继续',
       likesRequiresNav: '点赞需要在 /likes 页面，正在跳转...',
       bookmarksRequiresNav: '书签需要在 /bookmarks 页面，正在跳转...',
-      messagesRequiresNav: '私信需要在 /messages 页面，正在跳转...',
       followingRequiresNav: '关注列表需要在 /following 页面，正在跳转...',
       navigatingTo: '正在跳转至: {url}',
       pageLoadedResuming: '页面已加载，正在恢复清理...',
@@ -237,6 +236,9 @@
       copiedToClipboard: '诊断日志已复制到剪贴板',
       copyFailed: '复制失败：{error}',
       sessionWriteFailed: '警告：保存清理状态失败，跨页恢复可能不工作',
+
+      // Auto-resume retry limit reached (page mismatch)
+      cleanupAbortedPageNotFound: '清理已中止：3 次重试后仍无法到达目标页面，请手动导航后重试。',
     },
 
     'zh-TW': {
@@ -254,7 +256,6 @@
       likes: '讚',
       bookmarks: '書籤',
       following: '追蹤',
-      messages: '訊息',
       filterOptions: '篩選條件',
       fromDate: '開始日期',
       toDate: '結束日期',
@@ -291,7 +292,6 @@
       resumedLog: '已繼續',
       likesRequiresNav: '讚需要在 /likes 頁面，正在跳轉...',
       bookmarksRequiresNav: '書籤需要在 /bookmarks 頁面，正在跳轉...',
-      messagesRequiresNav: '訊息需要在 /messages 頁面，正在跳轉...',
       followingRequiresNav: '追蹤列表需要在 /following 頁面，正在跳轉...',
       navigatingTo: '正在跳轉至: {url}',
       pageLoadedResuming: '頁面已載入，正在恢復清理...',
@@ -350,6 +350,9 @@
       copiedToClipboard: '診斷日誌已複製到剪貼簿',
       copyFailed: '複製失敗：{error}',
       sessionWriteFailed: '警告：儲存清理狀態失敗，跨頁恢復可能無法運作',
+
+      // Auto-resume retry limit reached (page mismatch)
+      cleanupAbortedPageNotFound: '清理已中止：3 次重試後仍無法到達目標頁面，請手動導航後重試。',
     },
 
     ja: {
@@ -367,7 +370,6 @@
       likes: 'いいね',
       bookmarks: 'ブックマーク',
       following: 'フォロー',
-      messages: 'メッセージ',
       filterOptions: 'フィルターオプション',
       fromDate: '開始日',
       toDate: '終了日',
@@ -404,7 +406,6 @@
       resumedLog: '再開',
       likesRequiresNav: 'いいねは /likes ページが必要です、ナビゲート中...',
       bookmarksRequiresNav: 'ブックマークは /bookmarks ページが必要です、ナビゲート中...',
-      messagesRequiresNav: 'メッセージは /messages ページが必要です、ナビゲート中...',
       followingRequiresNav: 'フォロー一覧は /following ページが必要です、ナビゲート中...',
       navigatingTo: 'ナビゲート先: {url}',
       pageLoadedResuming: 'ページロード完了、クリーンアップを再開中...',
@@ -463,6 +464,9 @@
       copiedToClipboard: '診断ログをクリップボードにコピーしました',
       copyFailed: 'コピー失敗：{error}',
       sessionWriteFailed: '警告：クリーンアップ状態の保存に失敗しました、ページ遷移後の再開が機能しない可能性があります',
+
+      // Auto-resume retry limit reached (page mismatch)
+      cleanupAbortedPageNotFound: 'クリーンアップ中止：3 回再試行しても対象ページに到達できません。手動で移動して再試行してください。',
     },
 
     ko: {
@@ -480,7 +484,6 @@
       likes: '좋아요',
       bookmarks: '북마크',
       following: '팔로잉',
-      messages: '메시지',
       filterOptions: '필터 옵션',
       fromDate: '시작일',
       toDate: '종료일',
@@ -517,7 +520,6 @@
       resumedLog: '재개',
       likesRequiresNav: '좋아요는 /likes 페이지 필요, 이동 중...',
       bookmarksRequiresNav: '북마크는 /bookmarks 페이지 필요, 이동 중...',
-      messagesRequiresNav: '메시지는 /messages 페이지 필요, 이동 중...',
       followingRequiresNav: '팔로잉은 /following 페이지 필요, 이동 중...',
       navigatingTo: '이동 중: {url}',
       pageLoadedResuming: '페이지 로드 완료, 정리 재개 중...',
@@ -576,6 +578,9 @@
       copiedToClipboard: '진단 로그가 클립보드에 복사됨',
       copyFailed: '복사 실패: {error}',
       sessionWriteFailed: '경고: 정리 상태 저장 실패, 페이지 간 재개가 작동하지 않을 수 있음',
+
+      // Auto-resume retry limit reached (page mismatch)
+      cleanupAbortedPageNotFound: '정리 중단: 3회 재시도 후에도 대상 페이지에 도달할 수 없습니다. 수동으로 이동 후 다시 시도하세요.',
     },
 
     es: {
@@ -593,7 +598,6 @@
       likes: 'Me gusta',
       bookmarks: 'Marcadores',
       following: 'Siguiendo',
-      messages: 'Mensajes',
       filterOptions: 'Opciones de filtro',
       fromDate: 'Desde fecha',
       toDate: 'Hasta fecha',
@@ -630,7 +634,6 @@
       resumedLog: 'Reanudado',
       likesRequiresNav: 'Likes requiere página /likes, navegando...',
       bookmarksRequiresNav: 'Marcadores requiere página /bookmarks, navegando...',
-      messagesRequiresNav: 'Mensajes requiere página /messages, navegando...',
       followingRequiresNav: 'Siguiendo requiere página /following, navegando...',
       navigatingTo: 'Navegando a: {url}',
       pageLoadedResuming: 'Página cargada, reanudando limpieza...',
@@ -689,6 +692,9 @@
       copiedToClipboard: 'Registro de diagnóstico copiado al portapapeles',
       copyFailed: 'Error al copiar: {error}',
       sessionWriteFailed: 'Advertencia: fallo al guardar el estado de limpieza, la reanudación entre páginas puede no funcionar',
+
+      // Auto-resume retry limit reached (page mismatch)
+      cleanupAbortedPageNotFound: 'Limpieza abortada: no se pudo llegar a la página objetivo después de 3 reintentos. Navega manualmente y vuelve a intentarlo.',
     },
 
     de: {
@@ -706,7 +712,6 @@
       likes: 'Likes',
       bookmarks: 'Lesezeichen',
       following: 'Folge ich',
-      messages: 'Nachrichten',
       filterOptions: 'Filteroptionen',
       fromDate: 'Von Datum',
       toDate: 'Bis Datum',
@@ -743,7 +748,6 @@
       resumedLog: 'Fortgesetzt',
       likesRequiresNav: 'Likes benötigt /likes-Seite, navigiere...',
       bookmarksRequiresNav: 'Lesezeichen benötigt /bookmarks-Seite, navigiere...',
-      messagesRequiresNav: 'Nachrichten benötigt /messages-Seite, navigiere...',
       followingRequiresNav: 'Folge ich benötigt /following-Seite, navigiere...',
       navigatingTo: 'Navigiere zu: {url}',
       pageLoadedResuming: 'Seite geladen, setze Bereinigung fort...',
@@ -802,6 +806,9 @@
       copiedToClipboard: 'Diagnoseprotokoll in Zwischenablage kopiert',
       copyFailed: 'Kopieren fehlgeschlagen: {error}',
       sessionWriteFailed: 'Warnung: Bereinigungsstatus konnte nicht gespeichert werden, seitenübergreifende Wiederaufnahme funktioniert möglicherweise nicht',
+
+      // Auto-resume retry limit reached (page mismatch)
+      cleanupAbortedPageNotFound: 'Bereinigung abgebrochen: Zielseite nach 3 Versuchen nicht erreichbar. Bitte manuell navigieren und erneut versuchen.',
     },
 
     fr: {
@@ -819,7 +826,6 @@
       likes: 'J\'aime',
       bookmarks: 'Signets',
       following: 'Abonnements',
-      messages: 'Messages',
       filterOptions: 'Options de filtre',
       fromDate: 'Du',
       toDate: 'Au',
@@ -856,7 +862,6 @@
       resumedLog: 'Repris',
       likesRequiresNav: 'J\'aime nécessite la page /likes, navigation...',
       bookmarksRequiresNav: 'Signets nécessite la page /bookmarks, navigation...',
-      messagesRequiresNav: 'Messages nécessite la page /messages, navigation...',
       followingRequiresNav: 'Abonnements nécessite la page /following, navigation...',
       navigatingTo: 'Navigation vers: {url}',
       pageLoadedResuming: 'Page chargée, reprise du nettoyage...',
@@ -915,7 +920,10 @@
       copiedToClipboard: 'Journal de diagnostic copié dans le presse-papiers',
       copyFailed: 'Échec de la copie : {error}',
       sessionWriteFailed: 'Attention : échec de l\'enregistrement de l\'état du nettoyage, la reprise entre pages peut ne pas fonctionner',
-    }
+
+      // Auto-resume retry limit reached (page mismatch)
+      cleanupAbortedPageNotFound: 'Nettoyage annulé : impossible d\'atteindre la page cible après 3 tentatives. Naviguez manuellement et réessayez.',
+    },
   };
 
   // 检测浏览器语言
