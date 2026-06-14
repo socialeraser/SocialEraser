@@ -8,6 +8,7 @@
     isRunning: false,
     isPaused: false,
     processedItems: 0,
+    statusHideTimer: null,
     totalItems: 0
   };
 
@@ -228,6 +229,10 @@
         onResumed();
       } else if (msg.type === 'cleanupStopped') {
         onStopped();
+      } else if (msg.type === 'cleanupTypeStart') {
+        setOptionState(msg.data.type, 'processing');
+      } else if (msg.type === 'cleanupTypeComplete') {
+        setOptionState(msg.data.type, 'done', msg.data.processed);
       }
     });
   }
@@ -507,6 +512,27 @@
       var optionsDisplay = showOptions ? 'block' : 'none';
       if (els.optionsSection.style.display !== optionsDisplay) els.optionsSection.style.display = optionsDisplay;
     }
+
+    // 状态一切正常时，延迟 1s 自动收起 status-card（节省可视空间）
+    // 异常状态（无 X tab / 未登录 / 检测中）立即重新展开
+    var statusCard = document.getElementById('status-card');
+    if (statusCard) {
+      var allOk = state.isX && state.isLoggedIn === true && !state.checkingLogin;
+      if (allOk) {
+        if (!state.statusHideTimer) {
+          state.statusHideTimer = setTimeout(function() {
+            statusCard.classList.add('hidden');
+            state.statusHideTimer = null;
+          }, 1000);
+        }
+      } else {
+        if (state.statusHideTimer) {
+          clearTimeout(state.statusHideTimer);
+          state.statusHideTimer = null;
+        }
+        statusCard.classList.remove('hidden');
+      }
+    }
   }
 
   function updateProgress() {
@@ -516,6 +542,42 @@
     }
     if (els.progressCurrent) els.progressCurrent.textContent = state.processedItems;
     if (els.progressTotal) els.progressTotal.textContent = state.totalItems;
+  }
+
+  // 设置单个 option-count 的状态（idle / pending / processing / done）
+  // 状态语义：
+  //   idle      → "0"（默认）
+  //   pending   → 灰 spinner（Start Cleanup 后等待处理）
+  //   processing → 蓝 spinner + 高亮（正在处理该项）
+  //   done      → 显示数字（该项处理完毕的本次条数）
+  function setOptionState(type, state, count) {
+    var checkbox = document.getElementById('opt-' + type);
+    if (!checkbox) return;
+    var item = checkbox.closest('.option-item');
+    if (!item) return;
+    var countEl = item.querySelector('.option-count');
+    if (!countEl) return;
+
+    item.classList.remove('pending', 'processing', 'done');
+
+    if (state === 'pending' || state === 'processing') {
+      item.classList.add(state);
+      countEl.innerHTML = '<span class="spinner"></span>';
+    } else if (state === 'done') {
+      item.classList.add('done');
+      var n = (typeof count === 'number') ? count : 0;
+      countEl.textContent = n > 0 ? n.toLocaleString() : '0';
+    } else {
+      // idle
+      countEl.textContent = '0';
+    }
+  }
+
+  // 重置所有 option-count 到 idle 状态
+  function resetAllOptionStates() {
+    ['tweets', 'likes', 'bookmarks', 'following', 'messages'].forEach(function(type) {
+      setOptionState(type, 'idle');
+    });
   }
 
   function addLog(message, level) {
@@ -662,6 +724,12 @@
         state.dailyRemaining = remaining;
         state.totalItems = isPremium ? '∞' : remaining;
         state.cleanupOptions = { types: options, maxPerType: maxPerType, filters: filters };
+
+        // 重置所有 option-count 到 idle（避免上次 done 数字残留），再把选中项设 pending
+        resetAllOptionStates();
+        options.forEach(function(type) {
+          setOptionState(type, 'pending');
+        });
 
         if (els.progressCard) els.progressCard.className = 'progress-card active';
         if (els.logArea) els.logArea.innerHTML = '';
@@ -850,6 +918,8 @@
     state.isPaused = false;
     if (els.progressText) els.progressText.textContent = t('stopped');
     if (els.progressSpinner) els.progressSpinner.className = 'progress-spinner paused';
+    // 收到 injector 的 stopped 消息：所有 option-count 回到 idle
+    resetAllOptionStates();
   }
 
   if (document.readyState === 'loading') {

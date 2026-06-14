@@ -43,6 +43,8 @@
       this.onLog = null;
       this.onComplete = null;
       this.onError = null;
+      this.onTypeStart = null;
+      this.onTypeComplete = null;
     }
 
     setConfig(config) {
@@ -418,7 +420,7 @@
         ? this.config.like.unlikeButtons : [];
       const unlikeSelectors = remoteUnlike.concat(BUILTIN_UNLIKE_SELECTORS);
 
-      this.log(t('startingLikesCleanup'));
+      this.log(t('startingLikesCleanup', {url: window.location.href}));
 
       // 预计算 keyword 小写，避免循环里重复 toLowerCase
       this._keywordLower = (this.filters && this.filters.keyword)
@@ -885,10 +887,23 @@
                  ' kw=' + (this.filters.keyword || '-'));
       }
 
+      // 关键修复：maxPerType 是总预算（侧边栏传的是 remaining = FREE_LIMIT_PER_DAY - used），
+      // 旧代码每个 type 都拿 maxPerType，导致 N 个 type 可以清 N×limit 条，超出每日免费额度。
+      // 例如 remaining=8、types=3，旧代码能清到 24；正确行为应总共最多清 8。
+      const totalBudget = maxPerType;
       for (let i = 0; i < types.length; i++) {
         const type = types[i];
         if (!this.isRunning) break;
-        await this.processItems(type, maxPerType);
+        const remainingForType = Math.max(0, totalBudget - this.processedCount);
+        if (remainingForType <= 0) {
+          this.log(t('dailyBudgetExhausted', {type: t(type), remaining: 0}));
+          break;
+        }
+        if (this.onTypeStart) this.onTypeStart(type);
+        const beforeTypeCount = this.processedCount;
+        await this.processItems(type, remainingForType);
+        const typeProcessed = this.processedCount - beforeTypeCount;
+        if (this.onTypeComplete) this.onTypeComplete(type, typeProcessed);
       }
 
       this.isRunning = false;

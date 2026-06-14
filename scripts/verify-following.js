@@ -75,6 +75,73 @@ check('injector 每个 processedCount++ 都重置无进展计时器',
 check('injector 使用 cleanupStuck i18n key（不再有 cleanupTimeout）',
   injector.includes("t('cleanupStuck')") && !injector.includes("t('cleanupTimeout')"));
 
+// Bug fix：maxPerType 是总预算，不应每个 type 都拿
+check('injector 修正 maxPerType 作为总预算共享（不再每个 type 直接传 maxPerType）',
+  /Math\.max\(\s*0\s*,\s*totalBudget\s*-\s*this\.processedCount\s*\)/.test(injector),
+  '缺少 totalBudget - processedCount 剩余预算计算');
+check('injector 预算归零时 break（不再无脑遍历所有 type）',
+  /remainingForType\s*<=\s*0[\s\S]{0,200}break/.test(injector),
+  '缺少 remainingForType <= 0 break 逻辑');
+
+// 新功能：option-count 状态机（pending → processing → done）
+check('injector 暴露 onTypeStart / onTypeComplete 回调',
+  injector.includes('this.onTypeStart = null') && injector.includes('this.onTypeComplete = null'));
+check('injector 在每个 type 循环里调 onTypeStart + onTypeComplete',
+  /this\.onTypeStart\s*\(\s*type\s*\)/.test(injector) &&
+  /this\.onTypeComplete\s*\(\s*type\s*,\s*typeProcessed\s*\)/.test(injector));
+
+const sidepanelJs2 = fs.readFileSync(path.join(__dirname, '..', 'chrome-extension/sidepanel.js'), 'utf8');
+const sidepanelHtml2 = fs.readFileSync(path.join(__dirname, '..', 'chrome-extension/sidepanel.html'), 'utf8');
+
+check('content.js 转发 cleanupTypeStart / cleanupTypeComplete 到 sidepanel',
+  content.includes("type: 'cleanupTypeStart'") && content.includes("type: 'cleanupTypeComplete'"));
+
+check('sidepanel.js 监听 cleanupTypeStart（pending → processing）',
+  sidepanelJs2.includes("msg.type === 'cleanupTypeStart'"));
+check('sidepanel.js 监听 cleanupTypeComplete（processing → done）',
+  sidepanelJs2.includes("msg.type === 'cleanupTypeComplete'"));
+
+check('sidepanel.js 有 setOptionState 状态机函数（idle/pending/processing/done）',
+  /function\s+setOptionState\([^)]*state/.test(sidepanelJs2) &&
+  /pending/.test(sidepanelJs2) && /processing/.test(sidepanelJs2) && /done/.test(sidepanelJs2));
+
+check('sidepanel.js Start Cleanup 时把所有项 reset 后设选中项 pending',
+  /resetAllOptionStates\s*\(\s*\)/.test(sidepanelJs2) &&
+  /options\.forEach[\s\S]{0,200}setOptionState\(\s*type\s*,\s*['"]pending['"]\s*\)/.test(sidepanelJs2));
+
+check('sidepanel.js Stop 时 reset 所有 option-count 到 idle',
+  /function\s+stopCleanup\s*\(\s*\)\s*\{[\s\S]*?resetAllOptionStates\s*\(\s*\)/.test(sidepanelJs2) &&
+  /function\s+onStopped\s*\(\s*\)\s*\{[\s\S]*?resetAllOptionStates\s*\(\s*\)/.test(sidepanelJs2));
+
+check('sidepanel.html 有 spinner 动画 + pending/processing/done 三态样式',
+  /@keyframes\s+option-spin/.test(sidepanelHtml2) &&
+  /\.option-item\.pending/.test(sidepanelHtml2) &&
+  /\.option-item\.processing/.test(sidepanelHtml2) &&
+  /\.option-item\.done/.test(sidepanelHtml2));
+
+// 新功能：status-card 一切正常时延迟 1s 自动收起
+check('sidepanel.html status-card 有 id="status-card"',
+  /id="status-card"/.test(sidepanelHtml2));
+check('sidepanel.html status-card.hidden 样式存在（max-height:0 / opacity:0 / transition）',
+  /\.status-card\.hidden/.test(sidepanelHtml2) &&
+  /max-height:\s*0/.test(sidepanelHtml2) &&
+  /opacity:\s*0/.test(sidepanelHtml2) &&
+  /transition:/.test(sidepanelHtml2));
+
+check('sidepanel.js state 包含 statusHideTimer 字段',
+  /statusHideTimer:\s*null/.test(sidepanelJs2));
+
+check('sidepanel.js updateUI 末尾有 auto-hide 逻辑（allOk + 1s 定时器 + add hidden）',
+  /var\s+allOk\s*=/.test(sidepanelJs2) &&
+  /state\.isX\s*&&\s*state\.isLoggedIn\s*===\s*true/.test(sidepanelJs2) &&
+  /setTimeout\(/.test(sidepanelJs2) &&
+  /classList\.add\(['"]hidden['"]\)/.test(sidepanelJs2) &&
+  /},\s*1000\s*\)/.test(sidepanelJs2));
+
+check('sidepanel.js auto-hide 异常时立即重新展开（clearTimeout + removeClass hidden）',
+  /clearTimeout\(\s*state\.statusHideTimer\s*\)/.test(sidepanelJs2) &&
+  /statusCard\.classList\.remove\(['"]hidden['"]\)/.test(sidepanelJs2));
+
 // 5. i18n.js 改动（已有脚本 verify-i18n.js 检查，跳过）
 
 // 6. sidepanel.html / sidepanel.js 不应破坏

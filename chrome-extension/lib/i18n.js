@@ -101,6 +101,7 @@
       noItemsMatched: 'No items matched the filter',
       dateFilterSkipped: 'Date filter skipped for {type}: no timestamp found on some items',
       cleanupStuck: 'No progress for 30s, stopping (X UI may have changed)',
+      dailyBudgetExhausted: 'Daily budget reached, skipping {type}',
       noRemoveBookmarkButtons: 'No processable content found',
       foundButtonsCount: 'Found {count} items to process',
       retryingIn: 'Retrying in {seconds} seconds...',
@@ -213,6 +214,7 @@
       noItemsMatched: '没有匹配筛选条件的内容',
       dateFilterSkipped: '{type} 日期过滤已跳过：部分内容未找到时间戳',
       cleanupStuck: '30 秒无进展，已停止（X 改版或选择器可能失效）',
+      dailyBudgetExhausted: '今日额度已用完，跳过 {type}',
       noRemoveBookmarkButtons: '未找到可处理的内容',
       foundButtonsCount: '找到 {count} 个待处理项',
       retryingIn: '{seconds} 秒后重试...',
@@ -325,6 +327,7 @@
       noItemsMatched: '沒有符合篩選條件的內容',
       dateFilterSkipped: '{type} 日期過濾已跳過：部分內容未找到時間戳',
       cleanupStuck: '30 秒無進展，已停止（X 改版或選擇器可能失效）',
+      dailyBudgetExhausted: '今日額度已用完，跳過 {type}',
       noRemoveBookmarkButtons: '未找到可處理的內容',
       foundButtonsCount: '找到 {count} 個待處理項',
       retryingIn: '{seconds} 秒後重試...',
@@ -437,6 +440,7 @@
       noItemsMatched: 'フィルター条件に一致する項目がありません',
       dateFilterSkipped: '{type} の日付フィルターをスキップ：一部の項目にタイムスタンプがありません',
       cleanupStuck: '30秒間進展なし、停止しました（Xの仕様変更またはセレクタ無効の可能性）',
+      dailyBudgetExhausted: '本日の上限に達しました、{type} をスキップ',
       noRemoveBookmarkButtons: '処理対象が見つかりません',
       foundButtonsCount: '{count} 件の処理対象を検出',
       retryingIn: '{seconds} 秒後に再試行...',
@@ -549,6 +553,7 @@
       noItemsMatched: '필터 조건과 일치하는 항목이 없습니다',
       dateFilterSkipped: '{type} 날짜 필터 건너뜀: 일부 항목에 타임스탬프가 없습니다',
       cleanupStuck: '30초간 진행 없음, 중지 (X UI 변경 또는 선택기 실패 가능성)',
+      dailyBudgetExhausted: '오늘 한도 도달, {type} 건너뜀',
       noRemoveBookmarkButtons: '처리할 내용을 찾을 수 없음',
       foundButtonsCount: '{count}개 항목 발견',
       retryingIn: '{seconds}초 후 재시도...',
@@ -661,6 +666,7 @@
       noItemsMatched: 'Ningún elemento coincide con el filtro',
       dateFilterSkipped: 'Filtro de fecha omitido para {type}: no se encontró marca temporal en algunos elementos',
       cleanupStuck: 'Sin progreso en 30s, deteniendo (posible cambio de UI o selector inválido)',
+      dailyBudgetExhausted: 'Presupuesto diario agotado, omitiendo {type}',
       noRemoveBookmarkButtons: 'No se encontró contenido procesable',
       foundButtonsCount: 'Se encontraron {count} elementos para procesar',
       retryingIn: 'Reintentando en {seconds} segundos...',
@@ -773,6 +779,7 @@
       noItemsMatched: 'Keine Elemente entsprechen dem Filter',
       dateFilterSkipped: 'Datumsfilter für {type} übersprungen: bei einigen Elementen wurde kein Zeitstempel gefunden',
       cleanupStuck: 'Keine Fortschritte seit 30s, wird beendet (UI-Änderung oder Selektor-Fehler möglich)',
+      dailyBudgetExhausted: 'Tagesbudget erschöpft, überspringe {type}',
       noRemoveBookmarkButtons: 'Kein verarbeitbarer Inhalt gefunden',
       foundButtonsCount: '{count} Elemente zur Verarbeitung gefunden',
       retryingIn: 'Erneuter Versuch in {seconds} Sekunden...',
@@ -885,6 +892,7 @@
       noItemsMatched: 'Aucun élément ne correspond au filtre',
       dateFilterSkipped: 'Filtre de date ignoré pour {type} : aucun horodatage trouvé sur certains éléments',
       cleanupStuck: 'Aucun progrès depuis 30s, arrêt (changement d\'UI ou sélecteur invalide possible)',
+      dailyBudgetExhausted: 'Budget quotidien épuisé, ignoré {type}',
       noRemoveBookmarkButtons: 'Aucun contenu traitable trouvé',
       foundButtonsCount: '{count} éléments à traiter trouvés',
       retryingIn: 'Nouvelle tentative dans {seconds} secondes...',
@@ -971,4 +979,37 @@
   window.t = t;
 
   console.log('[X-Eraser] i18n.js ready, language:', currentLang);
+
+  // 关键修复：用户保存的 preferredLang 必须覆盖 navigator.language 自动检测
+  // 否则用户选了 English，但 content.js / injector.js 跑在 X 页面上下文，
+  // navigator.language 是中文时仍会显示中文。
+  //
+  // 工作流程：
+  // 1. i18n.js 加载时立刻读 chrome.storage.local.preferredLang 并 setLanguage
+  // 2. 监听 chrome.storage.onChanged，用户在 sidepanel 切换语言后自动同步
+  //
+  // 注意：storage.get 是 async，最初几个 t() 调用可能仍在 auto-detect 的语言，
+  // 但 content.js 第一次 t() 通常在 setTimeout(1000) 之后（waitForArticles 等），
+  // storage 读取 < 100ms 完成，所以后续调用都是正确语言。
+  if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+    chrome.storage.local.get(['preferredLang'], function(result) {
+      if (result && result.preferredLang && TRANSLATIONS[result.preferredLang]) {
+        if (result.preferredLang !== currentLang) {
+          currentLang = result.preferredLang;
+          console.log('[X-Eraser] Applied preferred language:', currentLang);
+        }
+      }
+    });
+    if (chrome.storage.onChanged && chrome.storage.onChanged.addListener) {
+      chrome.storage.onChanged.addListener(function(changes, area) {
+        if (area === 'local' && changes.preferredLang) {
+          var newLang = changes.preferredLang.newValue;
+          if (newLang && TRANSLATIONS[newLang]) {
+            currentLang = newLang;
+            console.log('[X-Eraser] Language changed to:', currentLang);
+          }
+        }
+      });
+    }
+  }
 })();

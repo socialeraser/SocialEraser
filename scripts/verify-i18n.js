@@ -15,7 +15,8 @@ const required = [
   'unfollowFailed',
   'noMoreFollowing',
   'endOfFollowing',
-  'cleanupStuck'
+  'cleanupStuck',
+  'dailyBudgetExhausted'
 ];
 
 const langs = ['en', 'zh-CN', 'zh-TW', 'ja', 'ko', 'es', 'de', 'fr'];
@@ -58,6 +59,33 @@ for (const lang of langs) {
 }
 
 console.log(allOk
-  ? '\n[OK] 8 languages × 9 keys = 72 entries all present'
+  ? '\n[OK] 8 languages × ' + required.length + ' keys = ' + (8 * required.length) + ' entries all present'
   : '\n[FAIL] some keys missing');
+
+// 语言同步检查：i18n.js 必须读 preferredLang 并监听 storage.onChanged
+// 否则用户在 sidepanel 切语言后，content/injector 仍用 navigator.language
+const checks = [
+  {
+    name: 'i18n.js 读 chrome.storage.local.preferredLang',
+    ok: src.includes("chrome.storage.local.get(['preferredLang']")
+  },
+  {
+    name: 'i18n.js 监听 chrome.storage.onChanged',
+    ok: src.includes('chrome.storage.onChanged.addListener')
+  },
+  {
+    name: 'onChanged handler 过滤 preferredLang 字段',
+    ok: src.includes('changes.preferredLang')
+  },
+  {
+    name: 'onChanged handler 验证 TRANSLATIONS[newLang] 存在',
+    ok: /TRANSLATIONS\[\s*(?:changes\.preferredLang\.newValue|newLang)\s*\]/.test(src)
+  }
+];
+
+for (const c of checks) {
+  console.log((c.ok ? '[OK]   ' : '[FAIL] ') + c.name);
+  if (!c.ok) allOk = false;
+}
+
 process.exit(allOk ? 0 : 1);

@@ -98,6 +98,20 @@
         }).catch(function() {});
       };
 
+      injector.onTypeStart = function(type) {
+        chrome.runtime.sendMessage({
+          type: 'cleanupTypeStart',
+          data: { type: type }
+        }).catch(function() {});
+      };
+
+      injector.onTypeComplete = function(type, processed) {
+        chrome.runtime.sendMessage({
+          type: 'cleanupTypeComplete',
+          data: { type: type, processed: processed }
+        }).catch(function() {});
+      };
+
       console.log('[X-Eraser] Injector initialized');
     }
   }
