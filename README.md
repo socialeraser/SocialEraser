@@ -12,7 +12,7 @@
 | 检测X网站 | ✅ | 自动识别 x.com / twitter.com |
 | 检测登录状态 | ✅ | 多语言支持 |
 | 批量删除选项 | ✅ | 推文/点赞/书签/关注/私信 |
-| 日期/关键字筛选 | ✅ | UI 已就绪 |
+| 日期/关键字筛选 | ✅ | UI + 逻辑均已实现 |
 | 实时进度显示 | ✅ | 进度条 + 日志动画 |
 | 暂停/停止/继续 | ✅ | 状态机控制 |
 | 8种语言支持 | ✅ | en/zh-CN/zh-TW/ja/ko/es/de/fr |
@@ -21,22 +21,41 @@
 | 底部信任文案 | ✅ | 突出显示隐私承诺 |
 | DOM 操作引擎 | ✅ | 健壮的删除实现 |
 | 无后端设计 | ✅ | 纯前端，无需服务器 |
+| **批量取关 Following** | ✅ | 复用 processBookmarks 模式，cellInnerDiv 行 + 独立 confirm 选择器 |
+| **多 type 并行 session** | ✅ | 总预算共享（不再每 type 重复算额度）|
+| **无进展超时保护** | ✅ | 30s 无进展即停（防 X 改版死循环）|
+| **i18n 多上下文同步** | ✅ | storage.onChanged 跨 context 广播语言切换 |
+| **option-count 状态机** | ✅ | pending（灰 spinner）→ processing（蓝 spinner）→ done（数字）|
+| **status-card 自动收起** | ✅ | 状态正常时延迟 1s 平滑收起，异常立即展开 |
 
 ### 开发中功能
 
 | 功能 | 状态 | 说明 |
 |------|------|------|
-| 实际删除操作 | 🔄 | 核心引擎已就绪，待测试 |
-| 日期过滤逻辑 | 🔄 | UI 就绪，逻辑未实现 |
-| 免费额度 50/天 | 🔄 | 计数器存在，弹窗未实现 |
+| 实际删除操作 | 🔄 | 核心引擎已就绪，端到端真机测试中 |
+| 批量删除推文 | 🔄 | `deleteTweet` 方法已存在，缺 `getTweetsPageURL` 跳转和 tweets 专用配置 |
+| 批量删除私信 | ❌ | `processMessages` 未实现，通用循环也缺 handler 分支 |
+| 免费额度 50/天 | 🔄 | 计数器已 per-type 化，弹窗未实现 |
+| 订阅系统 Creem | 🔄 | 架构待设计 |
+| Android App | 🔄 | Capacitor 工程已就绪，UI 待移植 |
 
 ### 待开发功能
 
 | 功能 | 优先级 | 说明 |
 |------|--------|------|
-| 订阅系统 Creem | P1 | 付费会员解锁 |
-| Android App | P2 | Capacitor 实现 |
-| iOS App | P2 | Capacitor 实现 |
+| 订阅系统 Creem | P1 | 付费会员解锁无限额度 + 速度加成 |
+| Android App | P2 | Capacitor 复用 injector.js 引擎 |
+| iOS App | P2 | Capacitor 复用 injector.js 引擎 |
+| 真实数据接入 option-count | P3 | 替代当前的"本次处理条数"语义，从 profile 头部读取 |
+| 高级过滤规则 | P3 | 正则、域名白名单、批量规则预设 |
+
+### 已知问题
+
+| 问题 | 优先级 | 说明 |
+|------|--------|------|
+| `dailyUsage` race condition | P2 | progress 回调并发时 read-modify-write 丢计数，待改为事务式更新 |
+| Following confirm 弹窗选择器依赖 X 当前 UI | P2 | `[data-testid='confirmationSheetConfirm']` 可能随 X 改版失效，remote config 可热修 |
+| `unfollowUser` 旧配置兼容 | P3 | 已兼容 `unfollowButton`（旧字符串）和 `unfollowButtons`（新数组）两种 schema |
 
 ## 安装使用
 
@@ -48,6 +67,13 @@
 4. 选择 `chrome-extension` 文件夹
 5. 打开 x.com 并登录
 6. 点击扩展图标，打开侧边栏
+
+## 验证脚本
+
+```bash
+node scripts/verify-i18n.js        # 检查 i18n 8 语言 × 全部 key 完整性
+node scripts/verify-following.js   # 回归检查 55 项（含 following 流程、状态机、auto-hide）
+```
 7. 勾选要执行的操作，点击「开始清理」
 
 ## 项目结构

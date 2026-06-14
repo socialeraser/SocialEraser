@@ -142,6 +142,24 @@ check('sidepanel.js auto-hide 异常时立即重新展开（clearTimeout + remov
   /clearTimeout\(\s*state\.statusHideTimer\s*\)/.test(sidepanelJs2) &&
   /statusCard\.classList\.remove\(['"]hidden['"]\)/.test(sidepanelJs2));
 
+// 结构性检查：每个 UI checkbox 都有对应的 getXxxPageURL + processXxx / handler
+// 防止"checkbox 在 UI 上但底层未实现"的状态混淆
+const uiTypes = ['tweets', 'likes', 'bookmarks', 'following', 'messages'];
+uiTypes.forEach(function(type) {
+  // 1. UI checkbox 存在
+  const checkboxRe = new RegExp('id="opt-' + type + '"');
+  check('结构完整性：UI 有 opt-' + type + ' checkbox', checkboxRe.test(sidepanelHtml2));
+
+  // 2. content.js 有 getPageURLForType 分支
+  const getUrlRe = new RegExp("type === '" + type + "'[\\s\\S]{0,80}get\\w*PageURL\\(\\)");
+  check('结构完整性：getPageURLForType 覆盖 ' + type, getUrlRe.test(content));
+
+  // 3. injector.js 有对应处理（processXxx 专用 OR 通用循环 handler）
+  const hasProcess = new RegExp('process' + type.charAt(0).toUpperCase() + type.slice(1) + '\\(').test(injector);
+  const hasHandler = new RegExp("itemType\\s*===\\s*['\"]" + type + "['\"]").test(injector);
+  check('结构完整性：injector 有 ' + type + ' 的处理（processXxx 或 handler）', hasProcess || hasHandler);
+});
+
 // 5. i18n.js 改动（已有脚本 verify-i18n.js 检查，跳过）
 
 // 6. sidepanel.html / sidepanel.js 不应破坏
