@@ -14,10 +14,16 @@
         "button[aria-label='More']",
         "button[aria-label*='More']"
       ],
-      deleteButton: "[data-testid='Delete']",
+      // X 改版后 Delete 菜单项已无 data-testid（X 把菜单项从 <a data-testid="Delete"> 改成 <div role="menuitem">无 testid>）
+      // 修复前用 "[data-testid='Delete']" 0 命中；现改用 waitForMenuItemByText() 按 8 语言文字匹配
+      // 保留 deleteButton 字段仅用于字段级合并兼容（远程配置里若有就 merge 进去，运行时不会被引用）
+      deleteButton: null,
       confirmButton: "[data-testid='confirmationSheetConfirm']",
-      // Retweet 卡片：撤销 repost 按钮（一键撤销，无 confirm）
+      // Retweet 卡片：撤销 repost 按钮
+      // 修复前漏了 [data-testid='unretweetConfirm']（X 改版后 Undo repost 菜单项的实际 testid，见 tests/在转发的帖子下面点击Undo）
+      // 0 命中导致 retweet 卡片的 unretweet 完全没工作；现在加上
       unreTweetButtons: [
+        "[data-testid='unretweetConfirm']",
         "[data-testid='unretweet']",
         "[data-testid='Unretweet']",
         "button[aria-label*='Undo repost']",
@@ -231,19 +237,44 @@
 
       const moreButton = this.findElement(moreBtnSelectors, container);
       if (!moreButton) return false;
-      
+
       await this.safeClick(moreButton, 0);
-      
-      const deleteButton = await this.waitForElement(selectors.deleteButton, 3000);
-      if (!deleteButton) return false;
-      
-      await this.safeClick(deleteButton, 0);
-      
+
+      // X 改版后 Delete 菜单项无 data-testid —— 改用 8 语言文字内容匹配
+      // 关键修复：之前用 selectors.deleteButton（"[data-testid='Delete']"）0 命中，
+      //   整个 deleteTweet 走不到 confirmButton，0 删除
+      // 详见 tests/respost弹出框源码.txt 与 docs/lessons-learned.md 案例 2
+      const deleteItem = await this.waitForMenuItemByText(
+        ['Delete', '删除', '刪除', '削除', '삭제', 'Eliminar', 'Löschen', 'Supprimer'],
+        3000
+      );
+      if (!deleteItem) return false;
+
+      await this.safeClick(deleteItem, 0);
+
       const confirmButton = await this.waitForElement(selectors.confirmButton, 3000);
       if (!confirmButton) return false;
-      
+
       await this.safeClick(confirmButton, 1000);
       return true;
+    }
+
+    // 通用 helper：等待并返回文本内容匹配任一关键字的 menuitem
+    // 用于 X 改版后菜单项无固定 testid、必须按 i18n 文字匹配的场景
+    async waitForMenuItemByText(keywords, timeout) {
+      if (!Array.isArray(keywords) || keywords.length === 0) return null;
+      const startTime = Date.now();
+      while (Date.now() - startTime < timeout) {
+        const items = this.findElements('[role="menuitem"]', document);
+        for (let i = 0; i < items.length; i++) {
+          const text = (items[i].textContent || '').trim();
+          if (keywords.indexOf(text) !== -1) {
+            return items[i];
+          }
+        }
+        await this.sleep(150);
+      }
+      return null;
     }
 
     async unfollowUser(container) {
@@ -276,7 +307,12 @@
       return true;
     }
 
-    // 撤销 Retweet：点 unreTweet 按钮（X 的 Undo repost 是一键操作，无 confirm）
+    // 撤销 Retweet：分两步 —— 先点 retweet 按钮弹出菜单，再点 "Undo repost" 菜单项
+    // X 改版后是 2 步操作（点 retweet 图标 → 菜单 → 点 Undo repost）
+    //
+    // 修复前：只用 [data-testid="unretweetConfirm"] 找菜单项，0 命中
+    //   用户实测反馈：菜单弹出后 "Undo repost" 文字菜单项是有的，但 testid 不是 unretweetConfirm（X 改版后可能改 testid 或去掉 testid，类似 Delete 那种情况）
+    // 修复后：textid 优先 → 8 语言文字兜底（与 waitForMenuItemByText 复用）
     async unreTweet(container) {
       if (!container) return false;
 
@@ -288,10 +324,41 @@
         : (selectors.unreTweetButton ? [selectors.unreTweetButton] : []);
       if (btnSelectors.length === 0) return false;
 
+      // 1) 点 retweet 按钮（在 container 内部 —— 卡片自己的 retweet 图标）打开菜单
       const unreTweetButton = this.findElement(btnSelectors, container);
       if (!unreTweetButton) return false;
 
       await this.safeClick(unreTweetButton, 500);
+
+      // 2) 等菜单项出现 —— testid 优先（保留之前 verify 通过的 selector）
+      let unretweetMenuItem = await this.waitForElement(
+        '[data-testid="unretweetConfirm"]', 2000
+      );
+
+      // 3) testid miss → 8 语言文字兜底（X 改版后菜单项可能去掉 testid）
+      if (!unretweetMenuItem) {
+        unretweetMenuItem = await this.waitForMenuItemByText(
+          [
+            'Undo repost', 'Undo Repost',          // en
+            '撤销转推',                              // zh-CN
+            '取消轉推',                              // zh-TW
+            'リポストを取り消す',                    // ja
+            '리트윗 취소',                            // ko
+            'Cancelar repost',                       // es
+            'Repost rückgängig machen',             // de
+            'Annuler le repost'                      // fr
+          ],
+          2000
+        );
+      }
+
+      if (!unretweetMenuItem) {
+        // 真找不到 —— 留下日志帮用户/AI 看到底是哪种 miss
+        this.log('[unretweet] 找不到 Undo repost 菜单项 —— testid 和文字匹配都 0 命中');
+        return false;
+      }
+
+      await this.safeClick(unretweetMenuItem, 500);
       return true;
     }
 
@@ -304,6 +371,35 @@
       var text = (socialContext.textContent || '').toLowerCase();
       // 8 语言：pinned / 已置顶 / 已釘選 / ピン留め / 고정 / fijado / angeheftet / épinglé / angepinnt
       return /pinned|已置顶|已釘選|ピン留め|고정|fijado|angeheftet|épinglé|angeheftet|angepinnt/i.test(text);
+    }
+
+    // 检测 reply 卡片：用户在某条推文下回复的推文（不是自己的原创，也不是转发）
+    // 关键修复：用户 includeReplies=false 时，reply 卡片应该被跳过
+    //   现象：用户实测反馈"我没有勾选 Include replies 但 reply 也被删了" —— processTweets 没加 includeReplies 过滤
+    //   原因：导航修复后跑 /with_replies 看到 6 条推文（1 原创 + 1 reply + 3 retweet + 1 早期），reply 卡片被当成原创处理
+    //   修法：socialContext 文案匹配 8 语言 "Replying to" 关键字，仅在 deleteTweet 路径（非 retweet）上过滤
+    // 关键：retweet 卡片也可能带 "Replying to" 文字（用户回复了别人 + 自己也 retweet），所以 retweet 候选不应用此过滤
+    //
+    // 实战发现（2026-06-15 真机验证）：用 chrome-devtools-mcp 端到端测试用户创建的「I like SpaceX」回复卡片：
+    //   - 该 reply 卡片在 /with_replies 页面上 **没有** socialContext 元素（X 不在用户自己 profile 视图里显示 "Replying to"）
+    //   - 旧版 isReplyTweet 查不到 → reply 被当成原创 → 被误删
+    //   - 唯一可靠的「非破坏性」检测是 **在文章全文里搜 "Replying to" / "in reply to" 关键字**
+    //   - 另一个 100% 可靠的检测是 **打开 caret 菜单后数菜单项数**：原创=11 项，reply=8 项（少了 Edit / Add/remove content disclosure / Change who can reply）
+    //     但这个需要在 click 之后才能用，作为二次校验更合适
+    isReplyTweet(container) {
+      if (!container) return false;
+      // 1) 优先查 socialContext（X 旧版行为）
+      var socialContext = container.querySelector("[data-testid='socialContext']");
+      if (socialContext) {
+        var scText = (socialContext.textContent || '').toLowerCase();
+        if (/replying to|回复|回覆|返信|답장|respondiendo a|antworten|répondre|rispondendo a/i.test(scText)) {
+          return true;
+        }
+      }
+      // 2) 兜底：扫描整个 article 的 textContent，搜 "Replying to" / "in reply to" 关键字
+      //   适用于：X 在用户自己 profile 视图隐藏 socialContext，但 reply 链接 text 仍然带这些词
+      var fullText = (container.textContent || '').toLowerCase();
+      return /replying to|in reply to|回复\s*@|回覆\s*@|返信先|답장\s*@/i.test(fullText);
     }
 
     // 哪些 itemType 启用日期+关键字过滤（bookmarks + following + tweets）
@@ -847,18 +943,33 @@
       const self = this;
 
       // 内置兜底选择器（远程配置可覆盖，远程的放前面优先）
+      //   X 各改版下"more 按钮"形态差异很大（testid / role / svg / i18n），必须宽泛覆盖
+      //   排他规则：必须是按钮（button / role=button），避免误中 article / svg icon
       const BUILTIN_MORE_BUTTONS = [
+        // 通用 testid 形态
         "[data-testid='more']",
         "[data-testid='caret']",
+        "[data-testid='tweet-action']:last-of-type",  // 旧版中"more"是 action 组最后一个
+        // 显式 button / role=button 形态（避免误中容器）
         "button[aria-label='More']",
-        "button[aria-label*='More']"
+        "button[aria-label*='More']",
+        "[role='button'][aria-label*='More']",
+        // i18n 兜底（中文 / 日文 / 韩文 / 西语 / 德语 / 法语）
+        "button[aria-label*='更多']",
+        "button[aria-label*='その他']",
+        "button[aria-label*='더 보기']",
+        "button[aria-label*='Más']",
+        "button[aria-label*='Mehr']",
+        "button[aria-label*='Plus']"
       ];
       const BUILTIN_UNRETWEET_BUTTONS = [
         "[data-testid='unretweet']",
         "[data-testid='Unretweet']",
+        "[data-testid='undoRepost']",
         "button[aria-label*='Undo repost']",
         "button[aria-label*='Undo Repost']",
-        "[data-testid='undoRepost']"
+        "button[aria-label*='取消转帖']",
+        "button[aria-label*='撤销转发']"
       ];
 
       // 远程配置覆盖
@@ -875,18 +986,47 @@
 
       this.log(t('startingTweetsCleanup', {url: window.location.href}));
 
+      // 关键修复：等 articles 渲染（X 改版后 SPA 渲染延迟有时 1-2s）
+      //   现象：用户实测反馈"还没开始就结束了" —— 诊断 0 命中 + 立即 End of tweets list
+      //   修法：_diagnosePage 前等最多 3s 让至少 1 个 article 出现
+      //   关联：getTweetsPageURL 已修复会走 /with_replies，这里再加渲染等待做防御
+      var __articleWaitStart = Date.now();
+      while (Date.now() - __articleWaitStart < 3000) {
+        if (document.querySelectorAll('article').length > 0) break;
+        await this.sleep(200);
+      }
+
       // 预计算 keyword 小写
       this._keywordLower = (this.filters && this.filters.keyword)
         ? this.filters.keyword.toLowerCase() : '';
 
       this._diagnosePage();
 
-      // 无进展兜底（同其他 processXxx 一致）
-      var lastProgressTime = Date.now();
-      var STUCK_TIMEOUT_MS = 30000;
-
-      // 收集所有候选按钮：每条带 isRetweet 标记
+      // 诊断：每个选择器组实际匹配多少按钮（一次性 log，让用户/开发者看到 DOM 里到底是什么）
+      // 之前只 log 到 console（要看 devtools），现在 log 到 sidepanel 日志，零成本发现 selector miss
+      function logSelectorMatches(label, selectors) {
+        const results = [];
+        let total = 0;
+        for (let s = 0; s < selectors.length; s++) {
+          const btns = self.findElements(selectors[s]);
+          if (btns.length > 0) {
+            results.push(selectors[s] + ' → ' + btns.length);
+            total += btns.length;
+          }
+        }
+        if (results.length > 0) {
+          self.log('[diagnose] ' + label + ' matches: ' + total + ' (' + results.join('; ') + ')');
+        } else {
+          self.log('[diagnose] ' + label + ' matches: 0 — 全部 selector 都没匹配到！可能 X 改版或页面还没加载');
+        }
+      }
+      var diagnosticLogged = false;
       function collectCandidates() {
+        if (!diagnosticLogged) {
+          diagnosticLogged = true;
+          logSelectorMatches('more', moreButtons);
+          if (includeRetweets) logSelectorMatches('unretweet', unretweetButtons);
+        }
         const candidates = [];
         const seen = new WeakSet();
         function addAll(buttons, isRetweet) {
@@ -897,16 +1037,38 @@
             candidates.push({ btn: btn, isRetweet: isRetweet });
           }
         }
-        // 第一个有效的 more 选择器组（仿 processLikes 优先级：第一个有结果就停）
+
+        // 关键修复：retweet 卡片的 caret 菜单里没有 Delete / Undo repost
+        //   现象：用户实测反馈"转发的右上角 More 按钮弹窗里没有删除"
+        //   原因：转发卡片没有用 caret → Delete 路径，只能用帖子下面的 retweet 图标 → Undo repost 路径
+        //   修法：collectCandidates 时跳过转发卡片的 caret，避免 caret 残留菜单阻塞后续 unretweet 点击
+        function isRetweetCard(button) {
+          if (!button) return false;
+          var article = button.closest('article')
+            || button.closest("[data-testid='tweet']");
+          if (!article) return false;
+          // 4 种 retweet 指示器（覆盖 X 改版）
+          return article.querySelector('[data-testid="unretweet"]') !== null
+              || article.querySelector('[data-testid="Unretweet"]') !== null
+              || article.querySelector('[data-testid="undoRepost"]') !== null
+              // 兜底：aria-label 含 "Reposted" 表明这是转发卡片的 retweet 按钮（用户已转）
+              || article.querySelector('button[aria-label*="Reposted"]') !== null;
+        }
+
+        // 累积所有匹配（不去重 break）——不同 X 改版下同一个页面的不同推文卡片可能用不同 testid，
+        //   比如"自己推文"用 caret，"他人推文"用 more，break 会漏匹配。
+        //   addAll 内部用 WeakSet 去重，所以多个 selector 命中同一元素不会重复。
         for (let s = 0; s < moreButtons.length; s++) {
           const btns = self.findElements(moreButtons[s]);
-          if (btns.length > 0) { addAll(btns, false); break; }
+          // 关键：retweet 卡片的 caret 跳过（菜单里没 Delete）
+          const nonRetweetBtns = btns.filter(function(b) { return !isRetweetCard(b); });
+          if (nonRetweetBtns.length > 0) addAll(nonRetweetBtns, false);
         }
         // retweet 按钮（若用户关闭则跳过）
         if (includeRetweets) {
           for (let s = 0; s < unretweetButtons.length; s++) {
             const btns = self.findElements(unretweetButtons[s]);
-            if (btns.length > 0) { addAll(btns, true); break; }
+            if (btns.length > 0) addAll(btns, true);
           }
         }
         return candidates;
@@ -914,6 +1076,12 @@
 
       let emptyScrolls = 0;
       const maxEmptyScrolls = 3;
+
+      // 无进展兜底（30s 没新增就 break，防止 X 改版 / 选择器失效死循环）
+      //   重要：这个 var 必须在 processTweets 函数体内声明——上次 refactor 误把它加到了 processLikes 里
+      //   导致 processTweets 的 while 循环 ReferenceError，整个 cleanup 0 命中
+      var lastProgressTime = Date.now();
+      var STUCK_TIMEOUT_MS = 30000;
 
       while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
         if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) {
@@ -965,6 +1133,22 @@
           continue;
         }
 
+        // includeReplies 过滤：用户关闭时跳过 reply 卡片（仅 deleteTweet 路径）
+        // 关键修复：includeReplies=false 时，reply 不能被当成原创删
+        //   现象：用户实测反馈"我没有勾选 Include replies 但 reply 也被删了"
+        //   原因：导航修复后 /with_replies 显示 reply 卡片，但 processTweets 没加 includeReplies 过滤
+        //   关键：retweet 候选（isRetweet=true）不应用此过滤 —— 用户可能 retweet 了 reply（卡是 retweet 形态不是 reply）
+        //         只在 deleteTweet 路径（非 retweet）上过滤
+        if (!isRetweet
+            && this.tweetOptions
+            && this.tweetOptions.includeReplies === false
+            && this.isReplyTweet(article)) {
+          btn.dataset.xeraserProcessed = 'skipped';
+          this.log('[tweets] reply skipped (includeReplies=false)');
+          await this.sleep(50);
+          continue;
+        }
+
         // 日期 + 关键字过滤
         if (this.shouldFilter('tweets')) {
           var meta = this.extractMeta(article, 'tweets');
@@ -988,7 +1172,7 @@
             success = await this.unreTweet(article);
             if (success) {
               this.processedCount++;
-              lastProgressTime = Date.now();
+              lastProgressTime = Date.now();  // 重置无进展计时器
               this.progress('Undo repost #' + this.processedCount);
               this.log(t('unreTweetSuccess', {count: this.processedCount}));
             } else {
@@ -998,7 +1182,7 @@
             success = await this.deleteTweet(article);
             if (success) {
               this.processedCount++;
-              lastProgressTime = Date.now();
+              lastProgressTime = Date.now();  // 重置无进展计时器
               this.progress('Tweet #' + this.processedCount);
               this.log(t('tweetDeleted', {count: this.processedCount}));
             } else {

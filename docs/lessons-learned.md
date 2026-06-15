@@ -315,7 +315,57 @@ _mergeConfig(defaultConfig, remoteConfig) {
 
 ---
 
-## 八、反模式（看到就该警觉）
+## 八、案例 7：X 改版后 selector 失效 — 验证真实 DOM 而不是想当然
+
+### 症状
+- 用户跑 tweets cleanup，看到 `[diagnose] more matches: 3`（以为是成功信号）
+- `Done. Processed: 0` —— 0 删除，0 撤销
+- 用户在 sidepanel 日志前 5-10 行**根本看不出**问题在哪
+
+### 根因
+X 在 2024-2026 改版了 3 类关键 selector，**默默失效**：
+
+| 位置 | X 旧版 | X 新版（实际 DOM）|
+|------|--------|---------------|
+| Delete 菜单项 | `<a data-testid="Delete">` | `<div role="menuitem">` **无 testid**（只有文字 "Delete"）|
+| 确认弹框按钮 | 业务专属 testid（`Delete` / `unretweet`）| 通用 `confirmationSheet{Confirm,Cancel}` |
+| Undo repost 菜单项 | 直接按钮 | 菜单项 `data-testid="unretweetConfirm"` |
+
+**3 个静默失败叠加**：
+1. `deleteButton: "[data-testid='Delete']"` —— 0 命中，但 `waitForElement` 等 3s 后返回 null 不报错
+2. `unreTweetButtons` 漏 `unretweetConfirm` —— retweet 卡片 0 撤销
+3. `unreTweet` 1 步 click —— X 改版后是 2 步（点 retweet 按钮 → 菜单 → 点 unretweetConfirm）
+
+### 修复
+1. `DEFAULT_SELECTORS.tweet.deleteButton = null`（保留字段仅用于字段级合并兼容，运行时不用）
+2. 新增 `waitForMenuItemByText(keywords, timeout)` 通用 helper —— 按 i18n 文字匹配 `role="menuitem"`
+3. `unreTweetButtons` 加 `[data-testid='unretweetConfirm']` 作首项
+4. `unreTweet` 改 2 步：点 retweet 按钮（container 内） → wait `[data-testid="unretweetConfirm"]`（document 级）→ click
+
+### 经验
+- **X 改版有 3 类规律**：testid 改 / 业务专属→通用 / 菜单项无 testid。每类都要在 `verify-actual-x-selectors.js` 加一行注释锁住
+- **"8 语言文字匹配"是 X 改版后的最后兜底**——所有菜单项都该按角色 + 文字内容找，不要全靠 testid
+- **`waitForMenuItemByText` 是通用 helper**，未来任何"无 testid 菜单项"都能复用
+- **HTML 真相比 selector 想象更可靠**。让用户保存 5 份 HTML 源码，比自动化测试 10 次都准
+
+### 回归测试
+`scripts/verify-actual-x-selectors.js` — **31 项** assert，**7 个角度**锁住：
+
+| # | 角度 | 关键断言 |
+|---|------|----------|
+| 1 | with_replies 推文卡片数量 | tweet = caret = retweet = like = bookmark（X 一致性）|
+| 2 | caret = aria-label="More" 同一个元素 | combined pattern 数量 = caret 数量 |
+| 3 | 自己 More 菜单的 Delete | ">Delete<" 文字 ≥ 1，**`data-testid="Delete"` = 0** |
+| 4 | Delete 确认弹框 | `confirmationSheetConfirm` + `confirmationSheetCancel` 各 1，"Delete post?" 标题存在 |
+| 5 | 转发 Undo 菜单 | `unretweetConfirm` 在 `role="menuitem"` 里 |
+| 6 | 回复的 More 弹框 | Delete 文字 ≥ 1，**`data-testid="Delete"` = 0** |
+| 7 | injector.js 源码 | `deleteButton !== "[data-testid='Delete']"` + `unretweetConfirm` 在 `unreTweetButtons` 首项 + `deleteTweet` 用 `waitForMenuItemByText` |
+
+**关键防回归点**：第 7 项直接 grep 源码，**防止有人改回去**用旧的 `[data-testid='Delete']` selector。
+
+---
+
+## 九、反模式（看到就该警觉）
 
 | 反模式 | 案例 | 为什么坏 |
 |--------|------|----------|
@@ -328,12 +378,15 @@ _mergeConfig(defaultConfig, remoteConfig) {
 | **留「以后可能用到」的代码** | 旧 `runCleanupWithRetry` 注释说「保留以备扩展」 | YAGNI。今天删了，3 个月后需要时从 git 找比维护兼容代码便宜 |
 | **`setTimeout(4000)` 当默认值** | retry sleep 4s | 心智模型脆弱。改用 MutationObserver / 事件 / Promise 让「就绪」变成显式信号 |
 | **加 UI 元素忘绑 `els.xxx`** | tweets 子选项 4 个元素漏绑 → 子区块永远不显示 | UI 元素和 JS 引用是 1:1 关系；用 `verify-sidepanel-bindings.js` 静态扫描强制锁定 |
+| **只备 1 个 selector、不验证真实 DOM** | `deleteButton: "[data-testid='Delete']"` 0 命中但代码不报错 | X 改版后默默失效，整个 delete 流程 0 删除；用 `verify-actual-x-selectors.js` 把 HTML 真相 + selector 决策 1:1 锁定 |
+| **菜单项只靠 testid 找** | 旧版 `<a data-testid="Delete">` → 新版 `<div role="menuitem">` 无 testid | X 改版后菜单项普遍去掉 testid；按 `role="menuitem"` + 8 语言文字匹配是最后兜底 |
+| **自动化浏览器 ≠ 真实浏览器** | 以为换 puppeteer-core / 系统 Chrome 能绕过 X/Google 登录墙 | X/Google 识别所有 CDP 控制的 Chrome；3 次变种尝试后必须**停下来**承认受限 |
 
 ---
 
-## 九、防御性约束（写到 test 里的硬护栏）
+## 十、防御性约束（写到 test 里的硬护栏）
 
-每修一次 bug，都要在 `scripts/verify-*.js` 加一个测试断言这个 bug 不会再回来。本项目已经积累的 6 个 verify 脚本共 **380+ assert**：
+每修一次 bug，都要在 `scripts/verify-*.js` 加一个测试断言这个 bug 不会再回来。本项目已经积累的 **9 个 verify 脚本**共 **420+ assert**：
 
 - `verify-login-detection.js` 37 项：sticky 状态机 + selector 健壮性
 - `verify-no-retry.js` 14 项：cleanup 不再重试 + `setTimeout(.., 4000)` 反模式硬约束
@@ -342,6 +395,9 @@ _mergeConfig(defaultConfig, remoteConfig) {
 - `verify-setconfig.js` 13 项：字段级合并 + 数组不拼接
 - `check-schema.js` 4 项：selector schema 对齐（`moreButton` → `moreButtons` 升级不漏）
 - `verify-sidepanel-bindings.js` 6 项：sidepanel.js 所有 `els.<name>` 引用 ↔ `getElementById` 绑定 1:1 锁定（防加新元素忘绑）
+- `verify-daily-usage-chain.js` 9 项：dailyUsage 单飞串行链（防 read-modify-write 竞态 + .catch 毒化链 + callback 顺序）
+- `verify-tweets-sub-options-grouping.js` 7 项：Tweets 子项展开时联动分割线
+- **`verify-actual-x-selectors.js` 31 项**（**新**）：用真实 X 页面 HTML 锁定 selector 决策（防 X 改版后 selector 默默失效）
 
 **写完一段代码就写一段 assert**。新机制加进来 = 新 assert 加进来。**Assert 比注释更长寿**——注释会被忽略，assert 不会。
 
@@ -355,10 +411,11 @@ _mergeConfig(defaultConfig, remoteConfig) {
 | 案例 4 dailyUsage race condition | `verify-daily-usage-chain.js` 9 项 |
 | 案例 5 processTweets 双模式 | `verify-following.js` + `check-schema.js`（覆盖 moreButtons 数组升级）|
 | 案例 6 setConfig 字段合并 | `verify-setconfig.js` 13 项 |
+| **案例 7 X 改版 selector 失效** | **`verify-actual-x-selectors.js` 31 项**（含 HTML 真相 + 源码 grep 双重锁）|
 
 ---
 
-## 十、给 AI 协作的提醒
+## 十一、给 AI 协作的提醒
 
 如果你（AI）看到本项目代码，请按这个优先级判断：
 
@@ -367,5 +424,288 @@ _mergeConfig(defaultConfig, remoteConfig) {
 3. **状态变更能不能 sticky？** 不要默认加 setInterval poll
 4. **Selector 列表里有没有语义锚点？** 不能全是 X 改版就废的 testid
 5. **写完代码有没有加 assert？** 没有的话，bug 下次还会回来
+6. **selector 决策有没有 HTML 真相背书？** 静态分析 ≠ 真实 DOM，让用户提供 saved HTML 比 AI 自己想更可靠
+7. **遇到反爬虫环境（X/Google 登录墙）别硬试**——3 次变种尝试后停下来，让用户提供真机日志或 HTML 源码
 
 完成一次改动后**回头看一遍代码**——如果能用 5 行说清楚这个改动在做什么，就 pass；如果需要 50 行注释才能说清楚，**大概率是过度设计**。
+
+---
+
+## 十二、案例 8：AI 沙盒的墙 —— puppeteer-mcp 跑不通，chrome-devtools-mcp 跑得通
+
+### 症状
+- 想让 AI 直接读用户登录态的 X 页面，验证 selector 是否真能命中
+- 装 puppeteer-mcp，反复调 `navigate` 都失败：
+  - 没装 Chrome 131 → 错误 `Could not find Chrome (ver. 131.0.6778.204)`
+  - 装 Chrome 131 → `npm error EPERM`（缓存目录被 root 锁）
+  - 改用 `launchOptions.executablePath` 指向系统 Chrome 149 → `options.filter is not a function`
+- 让用户**自己**打开带 `--remote-debugging-port=9222` 的 Chrome，再用 Node 连 9222 → `ECONNREFUSED`
+- 用户能看到 Chrome 进程在跑（`ps aux` 能看到 `--remote-debugging-port=9222`），但我这边就是连不上
+- 折腾 5 轮后用户提醒：「你装个 chrome-devtools-mcp 不就行了？」 —— **一次就跑通**
+
+### 根因
+- **AI 跑的进程在沙盒里**，跟用户日常 Mac **不在同一个网络空间**
+- puppeteer-mcp 是**在 AI 沙盒里启动的**：
+  - 它启动的 Chrome 也在沙盒里
+  - 沙盒里的 Chrome 没有用户的登录 cookie
+  - 想让沙盒里的 Chrome 连用户 Mac 上的 Chrome 9222 → 网络隔离 → `ECONNREFUSED`
+- chrome-devtools-mcp 是**装在用户 Mac 上的**：
+  - 它直接连用户 Mac 上的 Chrome 9222
+  - 不经过 AI 沙盒 → 没有网络隔离
+  - 用户 Chrome 已经登录 → 它直接用登录态
+
+### 修复
+**用户**装 chrome-devtools-mcp：
+
+```bash
+claude mcp add chrome-devtools npx chrome-devtools-mcp@latest
+```
+
+（具体命令以 chrome-devtools-mcp 官方文档为准）。装完后 **AI 端不需要任何特殊配置**，直接用 `mcp__chrome-devtools__*` 工具。
+
+### 经验
+
+**核心原则**：**「AI 沙盒里的工具 ≠ 用户机器上的工具」**
+
+| 能力 | 沙盒里能做的 | 用户机器上能做的 |
+|------|-------------|----------------|
+| 读文件 | ✓ 用户显式分享过的 | ✓ 整个文件系统 |
+| 跑测试 | ✓ 单元测试 | ✓ 集成测试（需要登录态的）|
+| 控制浏览器 | △ 只能起新的、无登录态 | ✓ 直接接已有 Chrome、有登录态 |
+| 写文件 | △ 受限（不能动系统文件）| ✓ 完整 |
+| 跨网络 | ✗ 受限 | ✓ 完整 |
+
+**4 条新约束**：
+
+1. **遇到「需要登录态」的需求，先想 chrome-devtools-mcp 类的「跑在用户端」的工具，不要默认用 puppeteer-mcp**
+2. **AI 沙盒里能「装」的不一定能在沙盒里「用」** —— 装 Chrome 131 失败、`ECONNREFUSED` 失败、各种 npm EPERM 失败都是同一根因
+3. **3 次变种尝试失败后必须停**，问用户有没有「在用户机器上跑」的方案。**用户其实往往比 AI 更懂生态**
+4. **不要预设「AI 能直接干」** —— AI 干很多事需要**用户装东西**。把这个事实摆到台面上，比反复在沙盒里撞墙更高效
+
+### AI 协作反模式（新加）
+
+| 反模式 | 表现 | 后果 |
+|--------|------|------|
+| **「沙盒里能跑通就行」** | 只试沙盒内的工具 | 用户需求满足不了（要登录态、要用户数据）|
+| **「用我能用的工具硬试」** | 反复试 puppeteer-mcp 不同 launchOptions | 浪费 5 轮，最后用户给方案 |
+| **「我自己也能装上」** | 试图用 npm 装到沙盒里 | 撞 npm 缓存权限墙 |
+| **「生态就这一种工具」** | 不知道有 chrome-devtools-mcp | 卡死在已知工具上 |
+
+**对 AI 的提醒**：
+
+- 知识库是「海量的」，但**思维不要被自己已知的 1-2 个工具框死**
+- 听到用户说「你装个 X 不就行了」，**先别犟**，X 也许真的能解决
+- 「AI 沙盒」和「用户机器」是两个世界，**很多事只有用户能启动**
+
+### 相关 verify / 文档
+- 无新增 verify 脚本（这是工具选型问题，不是代码 bug）
+- `docs/lessons-learned.md` 第十一节「给 AI 协作的提醒」同步加第 8 条：「需要登录态的需求优先用 chrome-devtools-mcp 等跑在用户端的 MCP」
+
+---
+
+## 十三、案例 9：菜单项数 = reply 标识（chrome-devtools-mcp 实战发现）
+
+### 症状
+- 用户在 xiangping5211 profile /with_replies 页面有 3 条推文：1 原创 + 1 转发 + 1 回复
+- 旧版 `isReplyTweet(container)` **只**查 `socialContext` 元素的 textContent
+- 实战发现：「I like SpaceX」（**回复**）的 article **没有** `socialContext` 元素（X 在用户自己 profile 视图隐藏）
+- 后果：旧版 `isReplyTweet` 返回 false → 跟 includeReplies=false 不匹配 → 误删 reply
+
+### 根因
+- X 的 DOM 在不同视图（home timeline / profile / search）下展示**不一致**
+- 「Replying to」标注主要在 home timeline（socialContext 里）显示，**profile /with_replies 不显示**
+- 旧实现依赖单一 DOM 标记（socialContext），碰到不显示的视图就漏
+
+### 修复
+**1. 双层检测（`isReplyTweet` 重构）**：
+```javascript
+isReplyTweet(container) {
+  if (!container) return false;
+  // 1) 优先查 socialContext（旧行为，X 旧版/部分视图仍会显示）
+  var socialContext = container.querySelector("[data-testid='socialContext']");
+  if (socialContext) {
+    var scText = (socialContext.textContent || '').toLowerCase();
+    if (/replying to|回复|回覆|返信|답장|respondiendo a|antworten|répondre|rispondendo a/i.test(scText)) {
+      return true;
+    }
+  }
+  // 2) 兜底：扫描整个 article textContent
+  //    适用于：X 不显示 socialContext，但 reply 链接 text 仍带这些词
+  var fullText = (container.textContent || '').toLowerCase();
+  return /replying to|in reply to|回复\s*@|回覆\s*@|返信先|답장\s*@/i.test(fullText);
+}
+```
+
+**2. 第二种 reply 标识（菜单项数差异）—— 真机实战发现 2026-06-15**：
+
+打开 caret 菜单后数菜单项数：
+- 原创推文菜单 = **11 项**（含 `Edit` / `Add/remove content disclosure` / `Change who can reply`）
+- reply 推文菜单 = **8 项**（少这 3 项）
+- **差 3 项 = reply 标识**
+
+> 这是 100% 可靠的标识，但**只能在 click 之后**数，作为二次校验用。
+
+**3. verify 脚本加 baseline 锁**（`verify-actual-x-selectors.js` 第 10 节）：
+- 原创菜单项数 ≥ 10
+- reply 菜单项数 7-9
+- 差值 = 3（**这个相对差比绝对数字更稳**）
+
+### 经验
+
+| 经验 | 体现 |
+|------|------|
+| **DOM 在不同视图下展示不一致** | profile / home timeline / search 渲染策略不同，selector 必须在多个视图都验证 |
+| **多标识联合检测 = 更稳** | 单一 DOM 标记易漏，socialContext + 全文搜 + 菜单项数（3 路）联合才能扛住 X 改版 |
+| **真机验证胜过 saved HTML** | saved HTML 是「某一时刻的快照」，可能已过期；用 chrome-devtools-mcp 实时看才是真相 |
+| **「相对差」比「绝对数字」更稳** | 11 vs 8 容易变（X 改版加项），但「差 3 项」这个规律不容易变 |
+
+### 回归测试
+- `verify-actual-x-selectors.js` 第 10 节：3 路标识 + 差值 3 = 9 项新 assert
+- 实战 E2E 流程已通过：删 3 条（原创 + 转发 + 回复）全部成功，无误删
+
+### 给 AI 的提醒
+- 「用户自己看 saved HTML 告诉我」是**次优解**，「我实时通过 MCP 看」是**最优解**
+- 修 selector bug 时，**至少 2 路独立检测**（不要单点依赖）
+- 「X 改版」是常态，**baseline 用相对差锁**而不是绝对数字
+
+---
+
+## 十四、MCP 浏览器启动步骤（沉淀给以后的项目用）
+
+> 这是从「沙盒连不上 Chrome」到「chrome-devtools-mcp 跑通」全过程的**可复用操作手册**。
+> 任何需要登录态、要操作用户浏览器、要看真实 DOM 的项目，**都可以按这个流程来**。
+
+### 前置条件
+- Mac / Linux 桌面（Windows 类似）
+- 用户已登录目标网站（X / Facebook / 任何要登录态的）
+- Node 22.12.0+（很多新 MCP 要求）
+
+### 步骤
+
+#### 1. 装 nvm + Node 22.12.0（如果还没装）
+
+```bash
+# 装 nvm（如果连不上 GitHub，用 gitee 镜像）
+git clone https://gitee.com/mirrors/nvm.git ~/.nvm
+cd ~/.nvm && git checkout v0.40.1
+
+# 加到 ~/.bash_profile（或 ~/.zshrc）
+echo '
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+' >> ~/.bash_profile
+
+# 重开终端
+nvm install 22.12.0
+nvm use 22.12.0
+node -v   # 确认 v22.12.0+
+```
+
+#### 2. 装目标 MCP
+
+```bash
+# 用 nvm 装的 node 跑 npm（避免 Trae/VSCode 内置 node 版本太旧）
+/Users/你的用户名/.nvm/versions/node/v22.12.0/bin/npm install -g chrome-devtools-mcp
+```
+
+> 注意：npm 全局 prefix 可能被改到项目盘（`/Volumes/.../.npm-global/`），
+> 装完用 `/Users/你的用户名/.nvm/versions/node/v22.12.0/bin/npm root -g` 查真实路径
+
+#### 3. 找入口文件路径
+
+```bash
+cat /真实路径/lib/node_modules/chrome-devtools-mcp/package.json | grep -A 2 '"bin"'
+```
+
+输出大概：
+```json
+"bin": {
+  "chrome-devtools-mcp": "./build/src/bin/chrome-devtools-mcp.js"
+}
+```
+
+记下完整路径：
+```
+/Volumes/.../lib/node_modules/chrome-devtools-mcp/build/src/bin/chrome-devtools-mcp.js
+```
+
+#### 4. 写 Trae / VSCode MCP 配置
+
+`~/.trae-cn/mcp_servers.json` 或 Trae 设置 → MCP → 手动配置：
+
+```json
+{
+  "mcpServers": {
+    "chrome-devtools": {
+      "command": "/Users/你的用户名/.nvm/versions/node/v22.12.0/bin/node",
+      "args": [
+        "/Volumes/.../lib/node_modules/chrome-devtools-mcp/build/src/bin/chrome-devtools-mcp.js",
+        "--browserUrl=http://localhost:9222"
+      ]
+    }
+  }
+}
+```
+
+**关键 3 点**：
+1. `command` = nvm node 绝对路径（**不是** npx，避免 PATH 撞 Trae 内置 node）
+2. `args[0]` = 入口 JS 绝对路径
+3. `args[1]` = `--browserUrl=http://localhost:9222`（**必填**，连你已登录的 Chrome）
+
+#### 5. 启动 Chrome 带调试端口
+
+```bash
+# 完全退出 Chrome
+pkill -9 "Google Chrome" 2>/dev/null
+sleep 2
+
+# 用独立 user-data-dir 启动（避开 macOS 集成）
+mkdir -p /tmp/eraser-chrome-profile
+/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome \
+  --remote-debugging-port=9222 \
+  --user-data-dir=/tmp/eraser-chrome-profile \
+  > /tmp/chrome.log 2>&1 &
+
+# 验证
+sleep 3
+lsof -iTCP:9222 -sTCP:LISTEN
+```
+
+看到 Chrome 进程在监听 9222 就行。
+
+#### 6. 重启 Trae / VSCode
+
+完全退出 → 重开 → 工具列表里看到 `mcp__chrome-devtools__*` 一组新工具 = 装好。
+
+#### 7. 用 MCP 自助干活
+
+直接告诉 AI：
+- 「去 x.com/某账号/with_replies 抓真实 DOM」
+- 「分析这个菜单有几项」
+- 「点这个按钮，看会弹什么」
+
+AI 跑完给你结果。
+
+### 关键踩坑点（之前都遇到过）
+
+| 坑 | 解决 |
+|----|------|
+| node 版本太旧（< 22.12.0）| 用 nvm 装新版，**command 用绝对路径** |
+| 装到 nvm 默认目录但找不到入口 | `npm root -g` 看真实 prefix，**入口路径以这个为准** |
+| Chrome 没带调试端口启动 | 必须先 `pkill -9` 杀干净的 Chrome 实例，再 `&` 后台启动 |
+| Chrome 双击打开（没参数），9222 不监听 | 看 `lsof -iTCP:9222 -sTCP:LISTEN`，**没监听就是没启对** |
+| MCP 默认启无头 Chrome（拿不到登录态）| **必填** `--browserUrl=http://localhost:9222` 参数 |
+| 沙盒里 curl localhost:9222 失败 | 正常，**那堵墙跨不过**，MCP 必须跑在用户机器上 |
+| node 命令撞 Trae 内置 node | `command` 用 nvm node 绝对路径，**别用 npx** |
+| **脚本必须跑在用户机器上，不是 AI 沙盒** | Trae 的 terminal 跟 Mac 桌面不在同进程空间，`pkill / lsof / 启动 Chrome` 都跨不过去 | 启动类脚本（kill 进程 / 起 GUI / 查端口）**只让用户在 Mac 终端跑**，AI 沙盒只跑只读 / 编译类 |
+
+### 适用范围
+
+- ✅ 看登录态的 X / Facebook / Instagram DOM
+- ✅ 自动化点按钮、填表单、抓数据
+- ✅ 端到端测试 Web 应用
+- ✅ 任何「要登录态、要用户数据」的需求
+
+- ❌ 沙盒内独立爬虫（登录态过不去）
+- ❌ 绕过 X / Google 反爬虫（做不到）
+- ❌ 跨用户/跨账号（每个 MCP 只能连一个 Chrome 实例）

@@ -558,14 +558,21 @@
     return 'https://x.com/i/following';
   }
 
-  // Tweets 页面 URL：/{username}/with_replies（含回复）或 /{username}（不含回复）
-  // opts.includeReplies 默认 true（覆盖更全）
+  // Tweets 页面 URL：/{username}/with_replies（含回复+retweet）或 /{username}（仅原创）
+  // opts.includeReplies 默认 true；opts.includeRetweets 默认 true
+  // 关键修复：只要 retweets 或 replies 任何一个要处理，都走 /with_replies
+  //   原因：默认 profile /{username} 不显示 retweets 也不显示 replies
+  //   即使 includeReplies=false，只要 includeRetweets=true 也要走 /with_replies（retweet 不在默认 profile 显示）
+  //   现象：用户实测反馈"还没开始就结束了" —— 导航到默认 profile，0 文章可见
   function getTweetsPageURL(opts) {
     opts = opts || {};
     var includeReplies = opts.includeReplies !== false;
+    var includeRetweets = opts.includeRetweets !== false;  // 关键新增
     var username = getCurrentUsername();
     if (username) {
-      return 'https://x.com/' + username + (includeReplies ? '/with_replies' : '');
+      // 关键：retweet 或 reply 任一要处理 → 必须 /with_replies（默认 profile 不显示它们）
+      var needsFullTimeline = includeReplies || includeRetweets;
+      return 'https://x.com/' + username + (needsFullTimeline ? '/with_replies' : '');
     }
     // 无 username 时退回 /home（兜底，至少能进入 X 域；retry 机制会处理）
     console.warn('[X-Eraser] Could not get username for tweets, using /home fallback');
