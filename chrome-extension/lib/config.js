@@ -56,8 +56,14 @@
           ]
         },
         loggedInElements: [
+          { type: 'selector', value: "a[href='/compose/post']" },
+          { type: 'selector', value: "a[href='/i/bookmarks']" },
+          { type: 'selector', value: "[data-testid^='AppTabBar_']" },
+          { type: 'selector', value: "a[href^='/messages']" },
+          { type: 'selector', value: "a[href^='/notifications']" },
+          { type: 'selector', value: "[data-testid='SideNav_AccountSwitcher']" },
           { type: 'selector', value: "[data-testid='UserAvatar']" },
-          { type: 'selector', value: "[data-testid='tweetTextarea_0']" }
+          { type: 'selector', value: "[aria-label*='Account menu']" }
         ]
       }
     }

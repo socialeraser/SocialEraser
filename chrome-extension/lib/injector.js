@@ -7,9 +7,23 @@
   const DEFAULT_SELECTORS = {
     tweet: {
       container: "[data-testid='tweet']",
-      moreButton: "[data-testid='caret']",
+      // 原创推文：more 按钮（数组多备选抗改版；旧 schema moreButton 字符串仍可走字段级合并兼容）
+      moreButtons: [
+        "[data-testid='more']",
+        "[data-testid='caret']",
+        "button[aria-label='More']",
+        "button[aria-label*='More']"
+      ],
       deleteButton: "[data-testid='Delete']",
-      confirmButton: "[data-testid='confirmationSheetConfirm']"
+      confirmButton: "[data-testid='confirmationSheetConfirm']",
+      // Retweet 卡片：撤销 repost 按钮（一键撤销，无 confirm）
+      unreTweetButtons: [
+        "[data-testid='unretweet']",
+        "[data-testid='Unretweet']",
+        "button[aria-label*='Undo repost']",
+        "button[aria-label*='Undo Repost']",
+        "[data-testid='undoRepost']"
+      ]
     },
     like: {
       container: "[data-testid='tweet'], [data-testid='cellInnerDiv']",
@@ -205,10 +219,17 @@
 
     async deleteTweet(container) {
       if (!container) return false;
-      
+
       const selectors = this.config.tweet || DEFAULT_SELECTORS.tweet;
-      
-      const moreButton = this.findElement(selectors.moreButton, container);
+
+      // 兼容：moreButtons（数组，新 schema）|| moreButton（字符串，旧 schema）
+      // 与 unfollowUser 的兼容模式一致
+      const moreBtnSelectors = Array.isArray(selectors.moreButtons)
+        ? selectors.moreButtons
+        : (selectors.moreButton ? [selectors.moreButton] : []);
+      if (moreBtnSelectors.length === 0) return false;
+
+      const moreButton = this.findElement(moreBtnSelectors, container);
       if (!moreButton) return false;
       
       await this.safeClick(moreButton, 0);
@@ -255,10 +276,40 @@
       return true;
     }
 
-    // 哪些 itemType 启用日期+关键字过滤（bookmarks + following）
+    // 撤销 Retweet：点 unreTweet 按钮（X 的 Undo repost 是一键操作，无 confirm）
+    async unreTweet(container) {
+      if (!container) return false;
+
+      const selectors = this.config.tweet || DEFAULT_SELECTORS.tweet;
+
+      // 兼容：unreTweetButtons（数组，新）|| unreTweetButton（字符串，旧）
+      const btnSelectors = Array.isArray(selectors.unreTweetButtons)
+        ? selectors.unreTweetButtons
+        : (selectors.unreTweetButton ? [selectors.unreTweetButton] : []);
+      if (btnSelectors.length === 0) return false;
+
+      const unreTweetButton = this.findElement(btnSelectors, container);
+      if (!unreTweetButton) return false;
+
+      await this.safeClick(unreTweetButton, 500);
+      return true;
+    }
+
+    // 检测置顶推文：通过 socialContext 文案关键字判断（8 语言）
+    // pinned 关键字与 retweet 关键字不重叠，所以无需二次过滤
+    isPinnedTweet(container) {
+      if (!container) return false;
+      var socialContext = container.querySelector("[data-testid='socialContext']");
+      if (!socialContext) return false;
+      var text = (socialContext.textContent || '').toLowerCase();
+      // 8 语言：pinned / 已置顶 / 已釘選 / ピン留め / 고정 / fijado / angeheftet / épinglé / angepinnt
+      return /pinned|已置顶|已釘選|ピン留め|고정|fijado|angeheftet|épinglé|angeheftet|angepinnt/i.test(text);
+    }
+
+    // 哪些 itemType 启用日期+关键字过滤（bookmarks + following + tweets）
     shouldFilter(itemType) {
       if (!this.filters) return false;
-      return itemType === 'bookmarks' || itemType === 'following';
+      return itemType === 'bookmarks' || itemType === 'following' || itemType === 'tweets';
     }
 
     async processItems(itemType, maxItems) {
@@ -286,9 +337,6 @@
 
       this.log('Processing ' + itemType + '...');
 
-      // 记录进入时的处理数，结束时用于判断该 type 是否 0 命中
-      var processedBefore = this.processedCount;
-
       // 特殊处理 Likes：全局扫描 unlike 按钮
       if (itemType === 'likes') {
         await this.processLikes(maxItems);
@@ -307,85 +355,14 @@
         return;
       }
 
-      // 其他类型（tweets 用通用循环）
-      // 无进展兜底：与 likes/bookmarks/following 一致
-      var lastProgressTime = Date.now();
-      var STUCK_TIMEOUT_MS = 30000;
-
-      while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
-        if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) {
-          this.log(t('cleanupStuck'));
-          break;
-        }
-        if (this.isPaused) {
-          await this.sleep(500);
-          continue;
-        }
-
-        const items = this.findElements(selectors.container);
-
-        if (items.length === 0) {
-          const hasMore = await this.scrollToBottom();
-          if (!hasMore) {
-            this.log('No more ' + itemType);
-            break;
-          }
-          continue;
-        }
-
-        const item = items[0];
-        if (item.dataset.xeraserProcessed) {
-          await this.sleep(300);
-          window.scrollBy(0, 200);
-          continue;
-        }
-
-        item.dataset.xeraserProcessed = 'true';
-
-        // 过滤判断：仅对 shouldFilter 命中的类型生效
-        if (this.shouldFilter(itemType)) {
-          var meta = this.extractMeta(item, itemType);
-          if (!this.matchesFilter(meta, this.filters)) {
-            // 日期缺失提示（每类型最多 1 次）
-            if ((this.filters.fromDate || this.filters.toDate) && !meta.dateISO
-                && !this._dateMissingWarned.has(itemType)) {
-              this._dateMissingWarned.add(itemType);
-              this.log(t('dateFilterSkipped', {type: itemType}));
-            }
-            continue;
-          }
-        }
-
-        let handler;
-        if (itemType === 'tweets') handler = (el) => this.deleteTweet(el);
-        else if (itemType === 'following') handler = (el) => this.unfollowUser(el);
-        else return;
-
-        try {
-          const success = await handler(item);
-          if (success) {
-            this.processedCount++;
-            lastProgressTime = Date.now();  // 重置无进展计时器
-            this.progress(itemType + ' #' + this.processedCount);
-          } else {
-            this.errorCount++;
-          }
-        } catch (e) {
-          this.error('Error: ' + e.message);
-          this.errorCount++;
-        }
-
-        await this.sleep(500);
+      // 特殊处理 Tweets：原创删推文 + retweet 撤销 repost（仿 processBookmarks 模式）
+      if (itemType === 'tweets') {
+        await this.processTweets(maxItems);
+        return;
       }
 
-      if (this.errorCount >= this.maxErrors) {
-        this.error('Too many errors, stopping');
-      }
-
-      // 该 type 0 命中且启用了过滤，给用户明确提示
-      if (this.processedCount === processedBefore && this.shouldFilter(itemType)) {
-        this.log(t('noItemsMatched'));
-      }
+      // 未知 type：兜底拒绝
+      this.error('Unknown itemType: ' + itemType);
     }
 
     // 提取容器的元数据（日期 + 文本），用于过滤
@@ -861,6 +838,190 @@
       }
     }
 
+    // 专门处理 Tweets：原创删推文 + retweet 撤销 repost
+    // 仿 processBookmarks 模式：每个 iteration 全局扫按钮 + 过滤 + dispatch
+    // 不同点：dispatch 时按 isRetweet 标记调 deleteTweet 或 unreTweet
+    async processTweets(maxItems) {
+      if (maxItems === undefined) maxItems = 50;
+
+      const self = this;
+
+      // 内置兜底选择器（远程配置可覆盖，远程的放前面优先）
+      const BUILTIN_MORE_BUTTONS = [
+        "[data-testid='more']",
+        "[data-testid='caret']",
+        "button[aria-label='More']",
+        "button[aria-label*='More']"
+      ];
+      const BUILTIN_UNRETWEET_BUTTONS = [
+        "[data-testid='unretweet']",
+        "[data-testid='Unretweet']",
+        "button[aria-label*='Undo repost']",
+        "button[aria-label*='Undo Repost']",
+        "[data-testid='undoRepost']"
+      ];
+
+      // 远程配置覆盖
+      var remoteMore = (this.config && this.config.tweet && Array.isArray(this.config.tweet.moreButtons))
+        ? this.config.tweet.moreButtons : [];
+      var remoteUnretweet = (this.config && this.config.tweet && Array.isArray(this.config.tweet.unreTweetButtons))
+        ? this.config.tweet.unreTweetButtons : [];
+
+      const moreButtons = remoteMore.concat(BUILTIN_MORE_BUTTONS);
+      const unretweetButtons = remoteUnretweet.concat(BUILTIN_UNRETWEET_BUTTONS);
+
+      // 是否跳过 retweet（用户在 sidepanel 关闭 includeRetweets）
+      var includeRetweets = !(self.tweetOptions && self.tweetOptions.includeRetweets === false);
+
+      this.log(t('startingTweetsCleanup', {url: window.location.href}));
+
+      // 预计算 keyword 小写
+      this._keywordLower = (this.filters && this.filters.keyword)
+        ? this.filters.keyword.toLowerCase() : '';
+
+      this._diagnosePage();
+
+      // 无进展兜底（同其他 processXxx 一致）
+      var lastProgressTime = Date.now();
+      var STUCK_TIMEOUT_MS = 30000;
+
+      // 收集所有候选按钮：每条带 isRetweet 标记
+      function collectCandidates() {
+        const candidates = [];
+        const seen = new WeakSet();
+        function addAll(buttons, isRetweet) {
+          for (let i = 0; i < buttons.length; i++) {
+            const btn = buttons[i];
+            if (seen.has(btn)) continue;
+            seen.add(btn);
+            candidates.push({ btn: btn, isRetweet: isRetweet });
+          }
+        }
+        // 第一个有效的 more 选择器组（仿 processLikes 优先级：第一个有结果就停）
+        for (let s = 0; s < moreButtons.length; s++) {
+          const btns = self.findElements(moreButtons[s]);
+          if (btns.length > 0) { addAll(btns, false); break; }
+        }
+        // retweet 按钮（若用户关闭则跳过）
+        if (includeRetweets) {
+          for (let s = 0; s < unretweetButtons.length; s++) {
+            const btns = self.findElements(unretweetButtons[s]);
+            if (btns.length > 0) { addAll(btns, true); break; }
+          }
+        }
+        return candidates;
+      }
+
+      let emptyScrolls = 0;
+      const maxEmptyScrolls = 3;
+
+      while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
+        if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) {
+          this.log(t('cleanupStuck'));
+          break;
+        }
+        if (this.isPaused) {
+          await this.sleep(500);
+          continue;
+        }
+
+        const candidates = collectCandidates();
+
+        // 过滤已处理（true / skipped / pinned 三态）
+        const pending = candidates.filter(function(c) {
+          var p = c.btn.dataset.xeraserProcessed;
+          return !p || (p !== 'true' && p !== 'skipped' && p !== 'pinned');
+        });
+
+        if (pending.length === 0) {
+          emptyScrolls++;
+          if (emptyScrolls > maxEmptyScrolls) {
+            this.log(t('noMoreTweets'));
+            break;
+          }
+          const hasMore = await this.scrollToBottom(1500);
+          if (!hasMore) {
+            this.log(t('endOfTweets'));
+            break;
+          }
+          continue;
+        }
+
+        emptyScrolls = 0;
+        const candidate = pending[0];
+        const btn = candidate.btn;
+        const isRetweet = candidate.isRetweet;
+
+        // 找容器：article 优先（X 标准标签），fallback 到 data-testid='tweet'，再 fallback parentElement
+        var article = btn.closest('article')
+          || btn.closest("[data-testid='tweet']")
+          || btn.parentElement;
+
+        // Pinned 检测：8 语言关键字匹配
+        if (this.isPinnedTweet(article)) {
+          btn.dataset.xeraserProcessed = 'pinned';
+          this.log(t('pinnedTweetSkipped'));
+          await this.sleep(50);
+          continue;
+        }
+
+        // 日期 + 关键字过滤
+        if (this.shouldFilter('tweets')) {
+          var meta = this.extractMeta(article, 'tweets');
+          if (!this.matchesFilter(meta, this.filters)) {
+            btn.dataset.xeraserProcessed = 'skipped';
+            if ((this.filters.fromDate || this.filters.toDate) && !meta.dateISO
+                && !this._dateMissingWarned.has('tweets')) {
+              this._dateMissingWarned.add('tweets');
+              this.log(t('dateFilterSkipped', {type: 'tweets'}));
+            }
+            await this.sleep(50);
+            continue;
+          }
+        }
+
+        btn.dataset.xeraserProcessed = 'true';
+
+        try {
+          let success = false;
+          if (isRetweet) {
+            success = await this.unreTweet(article);
+            if (success) {
+              this.processedCount++;
+              lastProgressTime = Date.now();
+              this.progress('Undo repost #' + this.processedCount);
+              this.log(t('unreTweetSuccess', {count: this.processedCount}));
+            } else {
+              this.error(t('unretweetFailed', {error: 'no unretweet button'}));
+            }
+          } else {
+            success = await this.deleteTweet(article);
+            if (success) {
+              this.processedCount++;
+              lastProgressTime = Date.now();
+              this.progress('Tweet #' + this.processedCount);
+              this.log(t('tweetDeleted', {count: this.processedCount}));
+            } else {
+              this.error(t('tweetDeleteFailed', {error: 'no more button or confirm'}));
+            }
+          }
+          if (!success) {
+            this.errorCount++;
+          }
+        } catch (e) {
+          this.error((isRetweet ? 'unretweet' : 'deleteTweet') + ' threw: ' + e.message);
+          this.errorCount++;
+        }
+
+        await this.sleep(500);
+      }
+
+      // 0 命中时给用户明确提示
+      if (this.processedCount === 0 && this.filters) {
+        this.log(t('noItemsMatched'));
+      }
+    }
+
     // 诊断：输出页面上所有 data-testid 信息，帮助调试选择器
     // 输出到 console（开发者用），不进用户日志面板
     _diagnosePage() {
@@ -903,6 +1064,7 @@
       const types = options.types || [];
       const maxPerType = options.maxPerType || 50;
       this.filters = options.filters || null;
+      this.tweetOptions = options.tweetOptions || null;
 
       if (types.length === 0) {
         this.error('No types selected');

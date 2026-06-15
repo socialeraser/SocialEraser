@@ -4,7 +4,8 @@
 
   var state = {
     isX: false,
-    isLoggedIn: false,
+    // null = 尚未从 content 拿到确认值（让 UI 显示"检测中"，不预先报"未登录"）
+    isLoggedIn: null,
     isRunning: false,
     isPaused: false,
     processedItems: 0,
@@ -134,6 +135,12 @@
     els.langFlag = document.getElementById('lang-flag');
     els.langDropdown = document.getElementById('lang-dropdown');
 
+    // Tweets 子选项（必须在 afterLangLoaded 里绑，否则 updateTweetsOptionsVisibility / getTweetsOptions 全失效）
+    els.optTweets = document.getElementById('opt-tweets');
+    els.tweetsOptionsSection = document.getElementById('tweets-options-section');
+    els.optIncludeReplies = document.getElementById('opt-include-replies');
+    els.optIncludeRetweets = document.getElementById('opt-include-retweets');
+
     updateLangFlag();   // 先设置国旗
     applyI18n();        // 再应用所有翻译（不会闪）
     bindEvents();
@@ -164,8 +171,8 @@
       });
     }
 
-    // 备用轮询：10 秒一次（silent 模式，不显示"检测中"）
-    setInterval(function() { checkXTabStatus(true); }, 10000);
+    // 不再有备用轮询：登录态完全由 content.js 的 sticky 缓存 + statusUpdate 广播驱动
+    // （旧的 10s silent 轮询每 10s 重检一次，会把"检测中→已确认"的瞬态错位带回来，反而误报）
   }
 
   // 应用翻译到所有 UI 元素
@@ -223,6 +230,12 @@
     if (els.btnRefresh) els.btnRefresh.onclick = refreshConfig;
     if (els.btnLang) els.btnLang.onclick = toggleLangDropdown;
     if (els.btnCopyDiag) els.btnCopyDiag.onclick = copyDiagnosticLog;
+
+    // Tweets 勾选状态联动：勾选时显示子选项区块
+    if (els.optTweets) {
+      els.optTweets.addEventListener('change', updateTweetsOptionsVisibility);
+      updateTweetsOptionsVisibility();
+    }
 
     // 点击其他地方关闭下拉菜单
     document.addEventListener('click', function(e) {
@@ -386,111 +399,73 @@
     });
   }
 
-  // 登录状态检测相关
-  var LOGIN_CHECK_DURATION = 10000;  // 持续检测 10 秒
-  var LOGIN_CHECK_INTERVAL = 1000;   // 每次检测间隔 1 秒
-  var currentLoginCheck = null;      // 当前正在进行的检测任务
-
+  // 登录态检测（简化版）：
+  // - 完全由 content.js 维护 sticky 缓存（cachedIsLoggedIn）
+  // - 侧栏只做一次"问 content"的动作 + 处理 null（仍检测中）
+  // - 删除旧的 10s retry 循环和 silent 轮询：完全多余，反而会因偶发抓空而误判
+  // - content 的 statusUpdate 广播才是登录态变化的唯一推送通道
   function checkXTabStatus(silent) {
     return new Promise(function(resolve) {
       var patterns = getPatterns();
       chrome.tabs.query({url: patterns}, function(tabs) {
         if (tabs && tabs.length > 0) {
-          var wasX = state.isX;
-          state.isX = true;
-          if (!wasX) {
-            // X.com 状态从 false 变 true：必须显示"检测中"动画
-            updateUI();
-            setTimeout(function() {
-              if (!silent) {
+          var tab = tabs[0];
+          if (!state.isX) {
+            state.isX = true;
+            if (!silent) {
+              state.checkingLogin = true;
+              updateUI();
+            }
+          }
+          chrome.tabs.sendMessage(tab.id, {target: 'content', type: 'getStatus'}, function(resp) {
+            if (chrome.runtime.lastError || !resp) {
+              // content 还没就绪：保持 null（"检测中"），不预设任何值
+              if (!silent && !state.checkingLogin) {
                 state.checkingLogin = true;
                 updateUI();
               }
-              startLoginCheck(tabs[0].id, resolve, silent);
-            }, 1000);
-          } else {
-            // X.com 一直打开：静默检测（不显示"检测中"）
-            if (!currentLoginCheck) {
-              startLoginCheck(tabs[0].id, resolve, true);
-            } else {
-              if (resolve) resolve();
+              resolve();
+              return;
             }
-          }
+            applyStatusFromContent(resp, silent);
+            resolve();
+          });
         } else {
-          cancelLoginCheck();
+          // 没有 X tab：明确未登录
+          var changed = state.isX !== false || state.isLoggedIn !== false || state.checkingLogin;
           state.isX = false;
           state.isLoggedIn = false;
           state.checkingLogin = false;
-          updateUI();
+          if (changed && !silent) updateUI();
           resolve();
         }
       });
     });
   }
 
-  // 取消正在进行的登录检测
-  function cancelLoginCheck() {
-    if (currentLoginCheck) {
-      if (currentLoginCheck.timeoutId) clearTimeout(currentLoginCheck.timeoutId);
-      currentLoginCheck.cancelled = true;
-      currentLoginCheck = null;
-    }
-  }
-
-  // 持续 N 秒的登录检测：
-  // - 检测到已登录 → 立即停止
-  // - 检测到未登录 → 持续到 10 秒（避免单次误判）
-  // - 10 秒兜底 → 显示未登录
-  // - silent 静默模式：不显示"检测中"动画
-  function startLoginCheck(tabId, finalResolve, silent) {
-    cancelLoginCheck();  // 取消之前的检测
-
-    var check = {
-      tabId: tabId,
-      startTime: Date.now(),
-      cancelled: false,
-      loginConfirmed: false,  // 是否已确认"已登录"
-      silent: !!silent        // 静默模式
-    };
-    currentLoginCheck = check;
-
-    function finish(loggedIn) {
-      if (check.cancelled) return;
-      check.cancelled = true;
-      state.isLoggedIn = loggedIn;
-      // 只有在非静默模式下才重置 checkingLogin 和更新 UI
-      if (!check.silent) {
-        state.checkingLogin = false;
-        updateUI();
-      }
-      currentLoginCheck = null;
-      if (finalResolve) finalResolve();
+  // 把 content 返回的 status 应用到 state（统一处理，避免重复逻辑）
+  // silent=true 时只在值真正变化时更新 state（不刷新 UI）
+  function applyStatusFromContent(resp, silent) {
+    if (typeof resp.isX === 'boolean' && resp.isX !== state.isX) {
+      state.isX = resp.isX;
     }
 
-    function tryOnce() {
-      if (check.cancelled) return;
+    var loggedIn = resp.isLoggedIn;  // 可能是 true / false / null
+    var wasChecking = state.checkingLogin;
 
-      chrome.tabs.sendMessage(tabId, {target: 'content', type: 'getStatus'}, function(resp) {
-        if (check.cancelled) return;
-
-        if (!chrome.runtime.lastError && resp && resp.isLoggedIn) {
-          // ✅ 检测到"已登录"：立即停止
-          finish(true);
-          return;
-        }
-
-        // sendMessage 失败 或 返回 isLoggedIn=false：继续重试
-        var elapsed = Date.now() - check.startTime;
-        if (elapsed < LOGIN_CHECK_DURATION) {
-          check.timeoutId = setTimeout(tryOnce, LOGIN_CHECK_INTERVAL);
-        } else {
-          // 10 秒到了，兜底按未登录处理
-          finish(false);
-        }
-      });
+    if (typeof loggedIn === 'boolean') {
+      if (loggedIn !== state.isLoggedIn) state.isLoggedIn = loggedIn;
+      state.checkingLogin = false;
+    } else if (loggedIn === null) {
+      // content 仍在初次检测：保持侧栏"检测中"
+      if (state.isLoggedIn !== null) state.isLoggedIn = null;
+      state.checkingLogin = true;
     }
 
-    tryOnce();
+    if (!silent && (state.checkingLogin !== wasChecking
+        || (typeof loggedIn === 'boolean' && loggedIn !== wasChecking))) {
+      updateUI();
+    }
   }
 
   function activateXTab(callback) {
@@ -704,6 +679,37 @@
     }
   }
 
+  // Tweets 勾选状态联动：勾选时显示子选项区块，并联动调整周边分割线
+  // 视觉分组：Tweets + 子项 是一个组，其他 3 项是另一个组，分割线在组与组之间
+  //   - Tweets 这一行去掉 border-bottom（不然会把子项"切"到 Likes 那组）
+  //   - 子项的下一个 .option-item（Likes）加 border-top 作为新分割线
+  function updateTweetsOptionsVisibility() {
+    var checked = !!(els.optTweets && els.optTweets.checked);
+    if (els.tweetsOptionsSection) {
+      els.tweetsOptionsSection.style.display = checked ? 'block' : 'none';
+    }
+    // 联动分割线：依赖 DOM 结构（tweets-options-section 的 nextElementSibling 必须是 Likes 那个 .option-item）
+    var tweetsItem = els.optTweets && els.optTweets.closest('.option-item');
+    if (tweetsItem) {
+      tweetsItem.classList.toggle('sub-options-open', checked);
+    }
+    if (els.tweetsOptionsSection) {
+      var nextItem = els.tweetsOptionsSection.nextElementSibling;
+      if (nextItem && nextItem.classList.contains('option-item')) {
+        nextItem.classList.toggle('has-prev-sub-options', checked);
+      }
+    }
+  }
+
+  // 收集 Tweets 子选项（仅在 tweets 被勾选时有意义）
+  // 默认 true：includeReplies / includeRetweets 都默认开启（覆盖最全）
+  function getTweetsOptions() {
+    return {
+      includeReplies: !els.optIncludeReplies || els.optIncludeReplies.checked,
+      includeRetweets: !els.optIncludeRetweets || els.optIncludeRetweets.checked
+    };
+  }
+
   function startCleanup() {
     var options = [];
     var checkboxIds = ['opt-tweets', 'opt-likes', 'opt-bookmarks', 'opt-following'];
@@ -714,6 +720,8 @@
         options.push(optionNames[i]);
       }
     }
+    // 收集 Tweets 子选项（与 type=tweets 一起存进 cleanupOptions）
+    var tweetOptions = (options.indexOf('tweets') >= 0) ? getTweetsOptions() : null;
     if (options.length === 0) {
       // 用进度卡片显示警告，不打断用户
       if (els.progressCard) els.progressCard.className = 'progress-card active';
@@ -771,7 +779,7 @@
         state.processedItems = 0;
         state.dailyRemaining = remaining;
         state.totalItems = isPremium ? '∞' : remaining;
-        state.cleanupOptions = { types: options, maxPerType: maxPerType, filters: filters };
+        state.cleanupOptions = { types: options, maxPerType: maxPerType, filters: filters, tweetOptions: tweetOptions };
 
         // 重置所有 option-count 到 idle（避免上次 done 数字残留），再把选中项设 pending
         resetAllOptionStates();

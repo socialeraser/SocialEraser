@@ -151,7 +151,7 @@ uiTypes.forEach(function(type) {
   check('结构完整性：UI 有 opt-' + type + ' checkbox', checkboxRe.test(sidepanelHtml2));
 
   // 2. content.js 有 getPageURLForType 分支
-  const getUrlRe = new RegExp("type === '" + type + "'[\\s\\S]{0,80}get\\w*PageURL\\(\\)");
+  const getUrlRe = new RegExp("type === '" + type + "'[\\s\\S]{0,80}get\\w*PageURL\\([^)]*\\)");
   check('结构完整性：getPageURLForType 覆盖 ' + type, getUrlRe.test(content));
 
   // 3. injector.js 有对应处理（processXxx 专用 OR 通用循环 handler）

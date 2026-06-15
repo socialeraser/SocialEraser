@@ -15,12 +15,34 @@
 
   let injector = null;
 
+  // 登录态正向 indicator：X 各页面侧栏的稳定元素 + 通用 fallback
+  // 顺序：最稳定的 sidebar 锚点（任何登录页都有）→ 通用元素
+  // - a[href="/compose/post"] / [data-testid^="AppTabBar_"]：侧栏常驻元素，不依赖具体 testid
+  // - 其余：之前用过的 testid，作为兜底
+  // 不再用 [data-testid='tweetTextarea_0']（仅 /home 存在）和 [data-testid='AppBody-Assistor']（X 已移除）
   const GLOBAL_LOGIN_INDICATORS = [
-    "[data-testid='AppBody-Assistor']",
+    "a[href='/compose/post']",
+    "a[href='/i/bookmarks']",
+    "[data-testid^='AppTabBar_']",
+    "a[href^='/messages']",
+    "a[href^='/notifications']",
     "[data-testid='SideNav_AccountSwitcher']",
-    "[aria-label*='Account menu']",
     "[data-testid='UserAvatar']",
+    "[aria-label*='Account menu']",
   ];
+
+  // X 的保留路径（导航/系统页），不能被当成 user profile/tweets 源
+  // 用于 detectPageType 排除 + getCurrentUsername 兜底判定
+  const RESERVED_PATHS = ['home', 'explore', 'notifications', 'bookmarks', 'i', 'search', 'settings', 'compose', 'login', 'messages'];
+
+  // 登录态 sticky 缓存：
+  // - null = 尚未检测（初始 / 跨页面 reload）
+  // - true = 已确认登录（一旦置 true，只在用户登出时才会翻转为 false）
+  // - false = 已确认未登录
+  // 设计动机：X 改版 + SPA 跳转 / 侧栏 lazy load 都会让 querySelector 偶发抓空，
+  //   之前每 3s 重检一次导致侧栏在 /home→/likes 闪一下 "Not logged in"。
+  // 现在只做一次正向检测，缓存结果，唯一翻转信号 = checkIsLoginPage()（URL 进登录页）。
+  let cachedIsLoggedIn = null;
 
   // 直接从 storage 读远程配置（中间不再经过 background）
   async function getRemoteConfig() {
@@ -48,8 +70,14 @@
         return {
           checkElements: {},
           loggedInElements: [
+            { type: 'selector', value: "a[href='/compose/post']" },
+            { type: 'selector', value: "a[href='/i/bookmarks']" },
+            { type: 'selector', value: "[data-testid^='AppTabBar_']" },
+            { type: 'selector', value: "a[href^='/messages']" },
+            { type: 'selector', value: "a[href^='/notifications']" },
+            { type: 'selector', value: "[data-testid='SideNav_AccountSwitcher']" },
             { type: 'selector', value: "[data-testid='UserAvatar']" },
-            { type: 'selector', value: "[data-testid='tweetTextarea_0']" }
+            { type: 'selector', value: "[aria-label*='Account menu']" }
           ]
         };
       },
@@ -236,7 +264,7 @@
       if (!matchedType) {
         // 当前页面不匹配任何 type，兜底跳到第一个
         const firstType = types[0];
-        const nextUrl = getPageURLForType(firstType);
+        const nextUrl = getPageURLForType(firstType, pending && pending.tweetOptions);
         if (nextUrl) {
           // 关键修复：retry 计数防止无限 forcePageLoad
           // 场景：X 把 /messages 重定向到 Create Passcode / Settings 等页面，
@@ -280,7 +308,11 @@
         const remoteConfig = await getRemoteConfig();
         injector.setConfig(remoteConfig);
         const isLast = remainingTypes.length === 0;
-        await runCleanupWithRetry(optionsForCurrent, 2, isLast);
+        // 旧实现：runCleanupWithRetry 调用 maxAttempts=2 会在 0 命中时无条件重试一次。
+        // 这与前面 waitForArticles(3000) 的职责重复，导致每页跑 2 次（4s 浪费 + 用户困惑）。
+        // waitForArticles 已经用 MutationObserver 等 article 出现，最长 3s 兜底，
+        // 真正的"页面没加载"场景由它 cover，cleanup 本体只跑 1 次。
+        await runCleanupOnce(optionsForCurrent, 1, isLast);
 
         // 跑完后处理 remainingTypes
         if (remainingTypes.length > 0) {
@@ -289,7 +321,7 @@
           await chrome.runtime.sendMessage({ target: 'updatePendingCleanup', pending: newPending });
           // 跳到下一个 type 的页面
           const nextType = remainingTypes[0];
-          const nextUrl = getPageURLForType(nextType);
+          const nextUrl = getPageURLForType(nextType, pending && pending.tweetOptions);
           if (nextUrl) {
             console.log('[X-Eraser] Processed ' + matchedType + ', navigating to:', nextType);
             chrome.runtime.sendMessage({
@@ -309,10 +341,12 @@
   }
 
   // 根据 type 返回对应页面 URL
-  function getPageURLForType(type) {
+  // tweetOptions 仅 tweets 类型使用：{ includeReplies: bool, includeRetweets: bool }
+  function getPageURLForType(type, tweetOptions) {
     if (type === 'likes') return getLikesPageURL();
     if (type === 'bookmarks') return getBookmarksPageURL();
     if (type === 'following') return getFollowingPageURL();
+    if (type === 'tweets') return getTweetsPageURL(tweetOptions);
     return null;
   }
 
@@ -338,8 +372,8 @@
         }
       };
       // 关键修复：startCleanup 是 async，内部 await 链任何 throw 都会变成 reject
-      // 旧实现不 .catch → runCleanupOnce Promise 永久挂起 → runCleanupWithRetry 卡死 →
-      // clearPendingCleanup 永远不被调用 → 下次 page load 又 auto-resume → 死循环
+      // 旧实现不 .catch → runCleanupOnce Promise 永久挂起 → clearPendingCleanup 永远不被调用
+      // → 下次 page load 又 auto-resume → 死循环
       // 新实现：任何 throw 都 resolve(0)，让上层走完流程并清 session
       injector.startCleanup(options).catch(function(e) {
         if (resolved) return;
@@ -350,22 +384,11 @@
     });
   }
 
-  // 兜底重试：0 命中时等 4 秒再启动一次（给 X 页面进一步渲染时间）
-  async function runCleanupWithRetry(options, maxAttempts, isLast) {
-    for (let i = 1; i <= maxAttempts; i++) {
-      const result = await runCleanupOnce(options, i, isLast);
-      if (result.processed > 0) return result;
-      if (i < maxAttempts) {
-        console.log('[X-Eraser] Auto-resume: 0 items processed, retrying in 4s...');
-        chrome.runtime.sendMessage({
-          type: 'cleanupLog',
-          data: { message: t('retryingIn', {seconds: 4}), level: 'info' }
-        }).catch(function() {});
-        await new Promise(function(r) { setTimeout(r, 4000); });
-      }
-    }
-    return { processed: 0, errors: 0 };
-  }
+  // 已删除：runCleanupWithRetry 旧函数（2024 重构）
+  // 原职责："0 命中时等 4 秒再启动一次给 X 渲染时间"——与 waitForArticles(3000) 职责重复，
+  //       导致每页 cleanup 跑 2 次（4s 浪费 + 用户困惑）。
+  // waitForArticles 已用 MutationObserver + 3s 兜底 cover "页面没加载" 场景。
+  // cleanup 本体只跑 1 次，符合 KISS。
 
   loadConfig();
 
@@ -452,10 +475,20 @@
   // 检测当前 URL 类型
   function detectPageType() {
     const url = window.location.href.toLowerCase();
+    const path = window.location.pathname;
+
     if (url.includes('/likes')) return 'likes';
     if (url.includes('/bookmarks')) return 'bookmarks';
     if (url.includes('/following') && !url.match(/\/following\//)) return 'following';
-    if (url.match(/^\/[^/]+\/status\//) || url.includes('/status/')) return 'tweets';
+
+    // Tweets timeline: /{username} 或 /{username}/with_replies
+    // 显式不匹配 /{username}/status/{id}（单条推文详情页，不是列表）
+    // 显式不匹配保留路径（home/explore/...）
+    var tweetsMatch = path.match(/^\/([^\/?#]+)(?:\/(with_replies))?\/?$/);
+    if (tweetsMatch && RESERVED_PATHS.indexOf(tweetsMatch[1].toLowerCase()) === -1) {
+      return 'tweets';
+    }
+
     return 'other';
   }
 
@@ -480,11 +513,10 @@
 
     // 尝试 3: 从导航栏的用户头像链接获取
     var avatarLinks = document.querySelectorAll('a[href^="/"]');
-    var reservedPaths = ['home', 'explore', 'notifications', 'bookmarks', 'i', 'search', 'settings', 'compose', 'login'];
     for (var i = 0; i < avatarLinks.length; i++) {
       var href = avatarLinks[i].getAttribute('href');
       var m = href && href.match(/^\/([^\/\?]+)$/);
-      if (m && m[1] && reservedPaths.indexOf(m[1]) === -1) {
+      if (m && m[1] && RESERVED_PATHS.indexOf(m[1]) === -1) {
         // 检查是否是 profile 链接（通常是头像或 profile 按钮）
         var ariaLabel = avatarLinks[i].getAttribute('aria-label') || '';
         if (ariaLabel.toLowerCase().indexOf('profile') >= 0) {
@@ -496,7 +528,7 @@
 
     // 尝试 4: 从当前 URL（如果在 profile 页面）
     var urlMatch = window.location.pathname.match(/^\/([^\/]+)\/?$/);
-    if (urlMatch && urlMatch[1] && reservedPaths.indexOf(urlMatch[1]) === -1) {
+    if (urlMatch && urlMatch[1] && RESERVED_PATHS.indexOf(urlMatch[1]) === -1) {
       console.log('[X-Eraser] Got username from URL path:', urlMatch[1]);
       return urlMatch[1];
     }
@@ -526,9 +558,59 @@
     return 'https://x.com/i/following';
   }
 
+  // Tweets 页面 URL：/{username}/with_replies（含回复）或 /{username}（不含回复）
+  // opts.includeReplies 默认 true（覆盖更全）
+  function getTweetsPageURL(opts) {
+    opts = opts || {};
+    var includeReplies = opts.includeReplies !== false;
+    var username = getCurrentUsername();
+    if (username) {
+      return 'https://x.com/' + username + (includeReplies ? '/with_replies' : '');
+    }
+    // 无 username 时退回 /home（兜底，至少能进入 X 域；retry 机制会处理）
+    console.warn('[X-Eraser] Could not get username for tweets, using /home fallback');
+    return 'https://x.com/home';
+  }
+
+  // sticky 状态机：
+  // - cachedIsLoggedIn === true 时：只 checkIsLoginPage() 能翻转为 false
+  // - cachedIsLoggedIn === null/false 时：正向检测一次，命中就锁 true
+  // - 返回值可能是 null（仍在检测），让侧栏显示 "checking" 而非误报 "not logged in"
+  function getEffectiveLoginStatus() {
+    if (!isTargetWebsite()) return false;
+
+    // 唯一能翻转 true → false 的信号：用户进了登录页
+    if (cachedIsLoggedIn === true) {
+      if (checkIsLoginPage()) {
+        cachedIsLoggedIn = false;
+        console.log('[X-Eraser] Login page detected, flipping cached state to false');
+        return false;
+      }
+      return true;
+    }
+
+    // 检测到登录页：直接 false
+    if (checkIsLoginPage()) {
+      if (cachedIsLoggedIn !== false) {
+        cachedIsLoggedIn = false;
+      }
+      return false;
+    }
+
+    // 首次 / 重置后：跑一次正向 selector 检测
+    if (checkLoginStatus()) {
+      cachedIsLoggedIn = true;
+      console.log('[X-Eraser] Login confirmed (sticky cached)');
+      return true;
+    }
+
+    // 还没确认：返回 null 让侧栏显示"检测中"，而非误报"未登录"
+    return null;
+  }
+
   function checkXStatus() {
     const isX = isTargetWebsite();
-    const isLoggedIn = isX ? checkLoginStatus() : false;
+    const isLoggedIn = isX ? getEffectiveLoginStatus() : false;
     const isLoginPage = isX ? checkIsLoginPage() : false;
     const pageType = isX ? detectPageType() : null;
 
@@ -587,6 +669,18 @@
       }).catch(function() {});
       sendResponse({ started: true, needsNavigation: true });
       setTimeout(function() { forcePageLoad(followingUrl); }, 100);
+      return;
+    }
+
+    if (types.indexOf('tweets') >= 0 && pageType !== 'tweets') {
+      const tweetsUrl = getTweetsPageURL(message.options.tweetOptions);
+      console.log('[X-Eraser] Tweets requires profile page, current:', pageType);
+      chrome.runtime.sendMessage({
+        type: 'cleanupLog',
+        data: { message: t('tweetsRequiresNav'), level: 'info' }
+      }).catch(function() {});
+      sendResponse({ started: true, needsNavigation: true });
+      setTimeout(function() { forcePageLoad(tweetsUrl); }, 100);
       return;
     }
 

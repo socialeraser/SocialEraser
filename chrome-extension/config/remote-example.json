@@ -52,15 +52,33 @@
         ]
       },
       "loggedInElements": [
+        { "type": "selector", "value": "a[href='/compose/post']" },
+        { "type": "selector", "value": "a[href='/i/bookmarks']" },
+        { "type": "selector", "value": "[data-testid^='AppTabBar_']" },
+        { "type": "selector", "value": "a[href^='/messages']" },
+        { "type": "selector", "value": "a[href^='/notifications']" },
+        { "type": "selector", "value": "[data-testid='SideNav_AccountSwitcher']" },
         { "type": "selector", "value": "[data-testid='UserAvatar']" },
-        { "type": "selector", "value": "[data-testid='tweetTextarea_0']" }
+        { "type": "selector", "value": "[aria-label*='Account menu']" }
       ]
     },
     "tweet": {
       "container": "[data-testid='tweet']",
-      "moreButton": "[data-testid='more']",
+      "moreButtons": [
+        "[data-testid='more']",
+        "[data-testid='caret']",
+        "button[aria-label='More']",
+        "button[aria-label*='More']"
+      ],
       "deleteButton": "[data-testid='Delete']",
-      "confirmButton": "[data-testid='confirmationSheetConfirm']"
+      "confirmButton": "[data-testid='confirmationSheetConfirm']",
+      "unreTweetButtons": [
+        "[data-testid='unretweet']",
+        "[data-testid='Unretweet']",
+        "button[aria-label*='Undo repost']",
+        "button[aria-label*='Undo Repost']",
+        "[data-testid='undoRepost']"
+      ]
     },
     "like": {
       "container": "[data-testid='tweet'], [data-testid='cellInnerDiv']",

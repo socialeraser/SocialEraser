@@ -132,6 +132,9 @@
     }
     .option-item:last-child { border-bottom: none; padding-bottom: 0; }
     .option-item:first-child { padding-top: 0; }
+    /* Tweets 子项展开时联动分割线：让 Tweets+子项 视觉上是一个组，与其他 3 项用分割线隔开 */
+    .option-item.sub-options-open { border-bottom-color: transparent; }
+    .option-item.has-prev-sub-options { border-top: 1px solid #27272a; }
     .option-checkbox {
       width: 18px;
       height: 18px;
@@ -223,6 +226,33 @@
       color: #71717a;
       margin-bottom: 6px;
     }
+
+    /* Tweets 子选项：缩进到主选项下方（不另起 card，靠 indent 表达从属关系） */
+    .tweets-sub-options {
+      padding: 0 0 8px 32px;       /* 32px 缩进 = 视觉上与 Tweets label 对齐 */
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      margin-top: -4px;            /* 抵消 .option-item 的 padding-bottom，更紧凑 */
+    }
+    .checkbox-sub {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: #a1a1aa;              /* 比主选项 label 略淡，视觉上是"次级" */
+      cursor: pointer;
+      padding: 3px 0;
+      user-select: none;
+    }
+    .checkbox-sub input[type="checkbox"] {
+      width: 14px;
+      height: 14px;
+      accent-color: #f59e0b;
+      cursor: pointer;
+      margin: 0;
+    }
+    .checkbox-sub:hover { color: #e4e4e7; }
 
     .progress-card {
       background: #18181b;
@@ -525,6 +555,17 @@
           <input type="checkbox" id="opt-tweets" class="option-checkbox" checked>
           <label for="opt-tweets" class="option-label" data-i18n="tweets">Tweets</label>
           <span class="option-count">0</span>
+        </div>
+        <!-- Tweets 子选项：紧贴主选项下方缩进展示（仅勾选 Tweets 时显示） -->
+        <div id="tweets-options-section" class="tweets-sub-options" style="display: none;">
+          <label class="checkbox-sub">
+            <input type="checkbox" id="opt-include-replies" checked>
+            <span data-i18n="includeReplies">Include replies</span>
+          </label>
+          <label class="checkbox-sub">
+            <input type="checkbox" id="opt-include-retweets" checked>
+            <span data-i18n="includeRetweets">Include retweets</span>
+          </label>
         </div>
         <div class="option-item">
           <input type="checkbox" id="opt-likes" class="option-checkbox" checked>

@@ -17,7 +17,25 @@ const required = [
   'endOfFollowing',
   'cleanupStuck',
   'dailyBudgetExhausted',
-  'cleanupAbortedPageNotFound'
+  'cleanupAbortedPageNotFound',
+  // Tweets 子选项（Step 3 批次清理推文，缩进后 tweetsOptions 标题已删除）
+  'includeReplies',
+  'includeRetweets',
+  'includeRepliesHint',
+  'includeRetweetsHint',
+  'startingTweetsCleanup',
+  'noMoreTweets',
+  'pinnedTweetSkipped',
+  'unreTweetSuccess',
+  'undoRepost',
+  'retweetNotDeleted',
+  'tweetSkipped',
+  'pinnedTweetHint',
+  'endOfTweets',
+  'tweetDeleteFailed',
+  'unretweetFailed',
+  'tweetsRequiresNav',
+  'tweetDeleted'
 ];
 
 const langs = ['en', 'zh-CN', 'zh-TW', 'ja', 'ko', 'es', 'de', 'fr'];
