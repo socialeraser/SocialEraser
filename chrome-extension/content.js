@@ -646,11 +646,32 @@
 
   function notifyStatus() {
     const status = checkXStatus();
+    // 只在登录状态变化时广播，避免无意义消息
+    // （每次 getStatus sidepanel 都查得对，但状态没变就广播会触发不必要的 updateUI）
+    if (lastBroadcastStatus
+        && lastBroadcastStatus.isLoggedIn === status.isLoggedIn
+        && lastBroadcastStatus.isX === status.isX) {
+      return;
+    }
+    lastBroadcastStatus = {
+      isLoggedIn: status.isLoggedIn,
+      isX: status.isX
+    };
     chrome.runtime.sendMessage({
       type: 'statusUpdate',
       data: status
     }).catch(function() {});
   }
+
+  // 修复 bug：从未登录 → 登录后 sidepanel 一直显示 Not logged in
+  // 原因：之前只在 page load 时 notifyStatus 一次，X 是 SPA 登录后 URL 变
+  //       但不触发 load，content 永远不主动通知 sidepanel。
+  // 修复：每 3 秒轮询一次，状态变化时发 statusUpdate 给 sidepanel。
+  // 选 3s 是因为登录/登出场景对实时性要求低，3s 是合理平衡
+  // （再短 CPU 持续高，再长 user-perceived delay 明显）。
+  var LOGIN_STATUS_POLL_INTERVAL_MS = 3000;
+  var lastBroadcastStatus = null;
+  setInterval(notifyStatus, LOGIN_STATUS_POLL_INTERVAL_MS);
 
   if (document.readyState === 'complete') {
     setTimeout(notifyStatus, 1000);

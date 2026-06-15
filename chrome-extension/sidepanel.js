@@ -265,6 +265,22 @@
         setOptionState(msg.data.type, 'processing');
       } else if (msg.type === 'cleanupTypeComplete') {
         setOptionState(msg.data.type, 'done', msg.data.processed);
+      } else if (msg.type === 'statusUpdate') {
+        // content.js 主动推送状态变化（如从未登录 → 登录后）
+        // 修复前 content 只在 page load 时 notifyStatus 一次，
+        //  X SPA 登录 URL 变但不触发 load → sidepanel 永远显示 Not logged in
+        // 修复后 content 每 3s 轮询，状态变化时广播
+        if (msg.data) {
+          if (typeof msg.data.isX === 'boolean' && msg.data.isX !== state.isX) {
+            state.isX = msg.data.isX;
+          }
+          if (typeof msg.data.isLoggedIn === 'boolean' && msg.data.isLoggedIn !== state.isLoggedIn) {
+            state.isLoggedIn = msg.data.isLoggedIn;
+            // 状态已知时直接退出"检测中"（yellow pulsing）状态
+            state.checkingLogin = false;
+            updateUI();
+          }
+        }
       }
     });
   }

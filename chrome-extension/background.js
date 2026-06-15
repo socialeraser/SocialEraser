@@ -159,7 +159,8 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
       message.type === 'cleanupError' ||
       message.type === 'cleanupPaused' ||
       message.type === 'cleanupResumed' ||
-      message.type === 'cleanupStopped')) {
+      message.type === 'cleanupStopped' ||
+      message.type === 'statusUpdate')) {
     sendResponse({ received: true });
     return false;
   }
