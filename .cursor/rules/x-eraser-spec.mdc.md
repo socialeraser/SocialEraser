@@ -49,3 +49,13 @@ X-Eraser 是 X/Twitter 跨平台批量清理工具，支持 Chrome 扩展和 And
    - 必须输出可直接运行的完整代码，**严禁使用 `// 剩余代码保持不变` 等占位符**，必须补齐所有缺失逻辑。
 
    - 使用标准代码块标注语言，注释只保留精简的必要业务逻辑。
+
+5. **底层重构必须先确认（事故备忘）：**
+
+   - 涉及 manifest 权限变化、跨文件协作流程、架构调整等"底层改动"前，必须先用 AskUserQuestion 列出方案让用户选择，**禁止自行决定**。
+
+   - 涉及 git 状态的操作（reset / restore / patch / stash / checkout）前，必须**先**确认 worktree 干净 / 当前 HEAD / 远端分支，**避免陷入 patch 反复 reverse/forward 的死循环**。
+
+   - 拆分多个 commit 时，**优先用 `git add <具体文件>` 而不是 `git add -p`**（patch 拆分易出错）。单文件多 hunks 拆 commit 时，必须在 split 前后 `git diff --cached` 验证，避免错位。
+
+   - **铁律**：如果发现自己在 git 操作中"反复 apply / reverse 同一个 hunk"——**立即停止**，向用户报告现状，让用户决定后续。**不要试图"再试一次"突破死循环**。
