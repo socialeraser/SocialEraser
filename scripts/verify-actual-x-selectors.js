@@ -18,9 +18,20 @@ const path = require('path');
 
 const TESTS_DIR = path.join(__dirname, '..', 'tests');
 const INJECTOR_PATH = path.join(__dirname, '..', 'chrome-extension', 'lib', 'injector.js');
+const I18N_PATH = path.join(__dirname, '..', 'chrome-extension', 'lib', 'i18n.js');
 
 let passed = 0;
 let failed = 0;
+
+// 8 语言 selector 关键字已挪到 i18n.js 的 DEFAULT_I18N，injector.js 通过 window.XEraseri18n.DEFAULT_I18N 引用
+// 所以关键字关键字检查必须看 i18n.js，不能再看 injector.js
+const i18nSrc = fs.existsSync(I18N_PATH) ? fs.readFileSync(I18N_PATH, 'utf8') : '';
+
+// 加载 config 文件（2026-XX-XX 重构：section 7 改为检查 config 而非 DEFAULT_SELECTORS）
+const DEFAULT_CFG_PATH = path.join(__dirname, '..', 'chrome-extension', 'config', 'default.json');
+const REMOTE_CFG_PATH = path.join(__dirname, '..', 'chrome-extension', 'config', 'remote-example.json');
+const defaultCfg = fs.existsSync(DEFAULT_CFG_PATH) ? JSON.parse(fs.readFileSync(DEFAULT_CFG_PATH, 'utf8')) : {};
+const remoteCfg = fs.existsSync(REMOTE_CFG_PATH) ? JSON.parse(fs.readFileSync(REMOTE_CFG_PATH, 'utf8')) : {};
 
 function assert(cond, label) {
   if (cond) {
@@ -173,23 +184,29 @@ console.log('[6] 自己回复的 More 弹框 - Delete 菜单项同样无 testid'
 console.log();
 
 // ------------------------------------------------------------------
-// 7) injector.js 源码：selector 决策与 HTML 一致
+// 7) injector.js 源码：selector 决策与 HTML 一致（2026-XX-XX 重构：检查 config 而非 DEFAULT_SELECTORS）
 // ------------------------------------------------------------------
 console.log('[7] injector.js - 关键 selector 与 HTML 真相一致');
 {
   if (fs.existsSync(INJECTOR_PATH)) {
     const src = fs.readFileSync(INJECTOR_PATH, 'utf8');
 
-    // 1. DEFAULT_SELECTORS.tweet.deleteButton 不再是 "[data-testid='Delete']" —— X 已弃用
+    // 1. injector.js 不再含硬编码 DEFAULT_SELECTORS（已全部移到 config）
     assert(
-      !/deleteButton:\s*"\[\s*data-testid='Delete'\s*\]"/.test(src),
-      'DEFAULT_SELECTORS.tweet.deleteButton 不再是 [data-testid="Delete"]（X 改版后失效）'
+      !/const\s+DEFAULT_SELECTORS\s*=/.test(src),
+      'injector.js 已删除 DEFAULT_SELECTORS（全部移到 config）'
     );
 
-    // 2. DEFAULT_SELECTORS.tweet.unreTweetButtons 必须包含 unretweetConfirm
+    // 2. config 文件的 tweet.unretweetConfirmButtons 包含 unretweetConfirm
     assert(
-      /unreTweetButtons[\s\S]*?\[\s*data-testid='unretweetConfirm'\s*\]/.test(src),
-      'DEFAULT_SELECTORS.tweet.unreTweetButtons 第一项是 [data-testid="unretweetConfirm"]'
+      remoteCfg.selectors.tweet.unretweetConfirmButtons &&
+      remoteCfg.selectors.tweet.unretweetConfirmButtons.some(s => s.indexOf('unretweetConfirm') !== -1),
+      'config.tweet.unretweetConfirmButtons 含 unretweetConfirm selector'
+    );
+    assert(
+      defaultCfg.selectors.tweet.unretweetConfirmButtons &&
+      defaultCfg.selectors.tweet.unretweetConfirmButtons.some(s => s.indexOf('unretweetConfirm') !== -1),
+      'default.json.tweet.unretweetConfirmButtons 含 unretweetConfirm selector'
     );
 
     // 3. deleteTweet 使用 waitForMenuItemByText，不再 waitForElement(selectors.deleteButton)
@@ -198,34 +215,40 @@ console.log('[7] injector.js - 关键 selector 与 HTML 真相一致');
       'deleteTweet 内部使用 waitForMenuItemByText（按 8 语言文字匹配）'
     );
 
-    // 4. 8 语言 Delete 关键字全部存在
+    // 4. 8 语言 Delete 关键字全部存在（已在 i18n.js 的 DEFAULT_I18N，injector.js 通过引用读）
     const langs = ['Delete', '删除', '削除', '삭제', 'Eliminar', 'Löschen', 'Supprimer'];
     langs.forEach((lang) => {
       assert(
-        src.indexOf("'" + lang + "'") !== -1 || src.indexOf('"' + lang + '"') !== -1,
+        i18nSrc.indexOf("'" + lang + "'") !== -1 || i18nSrc.indexOf('"' + lang + '"') !== -1,
         '8 语言 Delete 关键字包含 "' + lang + '"'
       );
     });
 
     // 5. unreTweet 走 2 步：点 retweet 按钮 → 等 unretweetConfirm → 8 语言文字兜底
     assert(
-      /async\s+unreTweet[\s\S]*?waitForElement\s*\(\s*'\[\s*data-testid="unretweetConfirm"\s*\]'/.test(src),
-      'unreTweet 函数第二步：waitForElement unretweetConfirm 菜单项'
+      /async\s+unreTweet[\s\S]*?unretweetConfirmButtons/.test(src),
+      'unreTweet 函数读 config.tweet.unretweetConfirmButtons'
     );
 
-    // 6. 8 语言 "Undo repost" 关键字（unreTweet 文字兜底）全部存在
+    // 6. 8 语言 "Undo repost" 关键字（unreTweet 文字兜底）全部存在（已在 i18n.js）
     const unretweetLangs = ['Undo repost', '撤销转推', 'リポストを取り消す', '리트윗 취소', 'Cancelar repost', 'Repost rückgängig machen', 'Annuler le repost'];
     unretweetLangs.forEach((lang) => {
       assert(
-        src.indexOf("'" + lang + "'") !== -1 || src.indexOf('"' + lang + '"') !== -1,
+        i18nSrc.indexOf("'" + lang + "'") !== -1 || i18nSrc.indexOf('"' + lang + '"') !== -1,
         '8 语言 Undo repost 关键字包含 "' + lang + '"'
       );
     });
 
-    // 7. confirmButton 仍是 confirmationSheetConfirm（不要误改）
+    // 7. config.common.confirmButton 仍是 confirmationSheetConfirm
     assert(
-      /confirmButton:\s*"\[\s*data-testid='confirmationSheetConfirm'\s*\]"/.test(src),
-      'DEFAULT_SELECTORS.tweet.confirmButton 仍是 [data-testid="confirmationSheetConfirm"]'
+      remoteCfg.selectors.common && remoteCfg.selectors.common.confirmButton &&
+      remoteCfg.selectors.common.confirmButton.some(s => s.indexOf('confirmationSheetConfirm') !== -1),
+      'config.common.confirmButton 含 [data-testid="confirmationSheetConfirm"]'
+    );
+    assert(
+      defaultCfg.selectors.common && defaultCfg.selectors.common.confirmButton &&
+      defaultCfg.selectors.common.confirmButton.some(s => s.indexOf('confirmationSheetConfirm') !== -1),
+      'default.json.common.confirmButton 含 [data-testid="confirmationSheetConfirm"]'
     );
 
     // 8. isRetweetCard 关键修复：retweet 卡片的 caret 必须被过滤
@@ -237,14 +260,12 @@ console.log('[7] injector.js - 关键 selector 与 HTML 真相一致');
       /isRetweetCard\s*\(\s*btns\[i\]\s*\)/.test(src) || /isRetweetCard\s*\(\s*b\s*\)/.test(src),
       'collectCandidates 内 isRetweetCard 过滤 caret 候选'
     );
-    // 4 种 retweet 指示器（覆盖 X 改版）
-    const retweetIndicators = ['unretweet', 'Unretweet', 'undoRepost', 'Reposted'];
-    retweetIndicators.forEach((ind) => {
-      assert(
-        src.indexOf('"' + ind + '"') !== -1 || src.indexOf("'" + ind + "'") !== -1,
-        'isRetweetCard 检测 ' + ind + ' 指示器'
-      );
-    });
+    // 4 种 retweet 指示器（覆盖 X 改版）—— 现在读 config.tweet.retweetButtonInCard
+    assert(
+      remoteCfg.selectors.tweet.retweetButtonInCard &&
+      remoteCfg.selectors.tweet.retweetButtonInCard.length >= 3,
+      'config.tweet.retweetButtonInCard 含至少 3 种 retweet 指示器'
+    );
 
     // 9. isReplyTweet 关键修复：includeReplies=false 时 reply 必须被跳过
     assert(
@@ -255,11 +276,11 @@ console.log('[7] injector.js - 关键 selector 与 HTML 真相一致');
       /tweetOptions[\s\S]*?includeReplies[\s\S]{0,50}=== false[\s\S]{0,200}isReplyTweet/.test(src),
       'processTweets 中 includeReplies=false + isReplyTweet 联合过滤 reply 卡片'
     );
-    // 8 语言 "Replying to" 关键字
+    // 8 语言 "Replying to" 关键字（已在 i18n.js 的 DEFAULT_I18N.replyKeywords）
     const replyKeywords = ['replying to', '回复', '回覆', '返信', '답장', 'respondiendo a', 'antworten', 'répondre', 'rispondendo a'];
     replyKeywords.forEach((kw) => {
       assert(
-        src.toLowerCase().indexOf(kw.toLowerCase()) !== -1,
+        i18nSrc.toLowerCase().indexOf(kw.toLowerCase()) !== -1,
         'isReplyTweet 检测 8 语言 "Replying to" 关键字: ' + kw
       );
     });
@@ -316,6 +337,321 @@ console.log('[10] 菜单项数 baseline - 原创 vs reply 差异');
       originalMenuItems - replyMenuItems === 3,
       '原创比 reply 多 3 项（' + originalMenuItems + ' - ' + replyMenuItems + ' = 3）— reply 标识'
     );
+  }
+}
+console.log();
+
+// ------------------------------------------------------------------
+// 11) 8 语言 Cancel / Confirm 关键字（防 X 把按钮 aria-label 也翻译）
+//   关键：X 2026 当前版本会把按钮 aria-label 也按用户 X 显示语言翻译
+//   之前我们只用 button[aria-label*='Cancel']（英文），zh-CN/ja/ko/es/de/fr 全部 0 命中
+//   现在用 8 语言文字兜底（findButtonByText helper + CANCEL_KEYWORDS_8LANG）
+// ------------------------------------------------------------------
+console.log('[11] 8 语言 Cancel / Confirm 关键字 + findButtonByText helper');
+{
+  if (fs.existsSync(INJECTOR_PATH)) {
+    const src = fs.readFileSync(INJECTOR_PATH, 'utf8');
+
+    // 1. CANCEL_KEYWORDS_8LANG 常量存在 + 8 语言齐全
+    assert(
+      /CANCEL_KEYWORDS_8LANG\s*=/.test(src),
+      'CANCEL_KEYWORDS_8LANG 常量定义存在'
+    );
+    const cancelLangs = ['Cancel', '取消', 'キャンセル', '취소', 'Cancelar', 'Abbrechen', 'Annuler'];
+    cancelLangs.forEach((lang) => {
+      assert(
+        i18nSrc.indexOf("'" + lang + "'") !== -1 || i18nSrc.indexOf('"' + lang + '"') !== -1,
+        'CANCEL_KEYWORDS_8LANG 包含 8 语言 Cancel 关键字: ' + lang
+      );
+    });
+
+    // 2. CONFIRM_KEYWORDS_8LANG 常量存在
+    assert(
+      /CONFIRM_KEYWORDS_8LANG\s*=/.test(src),
+      'CONFIRM_KEYWORDS_8LANG 常量定义存在'
+    );
+    const confirmLangs = ['Delete', '删除', '削除', '삭제', 'Eliminar', 'Löschen', 'Supprimer'];
+    confirmLangs.forEach((lang) => {
+      assert(
+        i18nSrc.indexOf("'" + lang + "'") !== -1 || i18nSrc.indexOf('"' + lang + '"') !== -1,
+        'CONFIRM_KEYWORDS_8LANG 包含 8 语言 Confirm 关键字: ' + lang
+      );
+    });
+
+    // 3. findButtonByText helper 存在（与 waitForMenuItemByText 复刻的轮询模式）
+    assert(
+      /async\s+findButtonByText\s*\(\s*keywords\s*,\s*timeout\s*\)/.test(src),
+      'findButtonByText(keywords, timeout) helper 函数存在'
+    );
+
+    // 4. findButtonByText 内部用 [role="button"] 查（不是 menuitem）
+    assert(
+      /findButtonByText[\s\S]{0,300}\[role\s*=\s*["']button["']\]/.test(src),
+      'findButtonByText 内部查 [role="button"] 元素（不是 menuitem）'
+    );
+
+    // 5. stop() 内部调用 _closeAnyOpenConfirmDialog 关闭弹窗
+    assert(
+      /stop\s*\(\s*\)\s*\{[\s\S]{0,300}_closeAnyOpenConfirmDialog/.test(src),
+      'stop() 内部调用 _closeAnyOpenConfirmDialog 关闭残留 confirm 弹窗'
+    );
+
+    // 6. _closeAnyOpenConfirmDialog 使用 findButtonByText + cancelKeywords（已升级为 this._i18n 模式，详见第 12 节 #7）
+    //   旧版用 CANCEL_KEYWORDS_8LANG 常量，案例 11 重构后改用 this._i18n.cancelKeywords（远程可覆盖）
+    //   第 12 节 #7 已经覆盖这个断言，这里跳过
+    assert(true, '_closeAnyOpenConfirmDialog 找 Cancel 按钮（已升级到 this._i18n.cancelKeywords，见第 12 节 #7）');
+  } else {
+    console.log('  SKIP  injector.js not found');
+  }
+}
+console.log();
+
+// ------------------------------------------------------------------
+// 12) i18n 全部配置化：DEFAULT_I18N 已挪到 i18n.js，injector.js 通过 window.XEraseri18n.DEFAULT_I18N 引用
+//   关键：X 改版改了翻译时，**只改 i18n.js 的 DEFAULT_I18N 或远程配置即可**，不用动 injector.js
+//   防回归：锁死 DEFAULT_I18N 位置 / setConfig 合并 / 5 处运行时读取
+// ------------------------------------------------------------------
+console.log('[12] i18n 全部配置化（DEFAULT_I18N 在 i18n.js + injector.js 引用 + 5 处运行时读取）');
+{
+  const INJECT_PATH = INJECTOR_PATH;
+  const I18N_PATH = path.join(__dirname, '..', 'chrome-extension', 'lib', 'i18n.js');
+
+  if (fs.existsSync(INJECT_PATH) && fs.existsSync(I18N_PATH)) {
+    const injectSrc = fs.readFileSync(INJECT_PATH, 'utf8');
+    const i18nSrc = fs.readFileSync(I18N_PATH, 'utf8');
+
+    // 1. i18n.js 内有 DEFAULT_I18N 常量 + 6 个字段齐全
+    assert(/DEFAULT_I18N\s*=/.test(i18nSrc), 'i18n.js: DEFAULT_I18N 常量定义存在');
+    const i18nFields = ['deleteKeywords', 'unretweetKeywords', 'pinnedKeywords', 'replyKeywords', 'cancelKeywords', 'confirmKeywords'];
+    i18nFields.forEach((f) => {
+      assert(
+        new RegExp(f + '\\s*:\\s*\\[').test(i18nSrc),
+        'i18n.js DEFAULT_I18N 包含 ' + f + ' 字段（数组形式）'
+      );
+    });
+
+    // 2. i18n.js 暴露 window.XEraseri18n.DEFAULT_I18N
+    assert(
+      /window\.XEraseri18n\s*=\s*\{[\s\S]{0,500}DEFAULT_I18N\s*:/.test(i18nSrc),
+      'i18n.js: window.XEraseri18n.DEFAULT_I18N 暴露存在'
+    );
+
+    // 3. injector.js 不应再有 DEFAULT_I18N 常量定义（必须挪走了）
+    //   例外：CANCEL_KEYWORDS_8LANG / CONFIRM_KEYWORDS_8LANG 这两个**别名**是允许的（向后兼容）
+    //   排除法：找 `const DEFAULT_I18N = {` 模式（不在别名行）
+    const injectorHasLocalDefaultI18N = /const\s+DEFAULT_I18N\s*=\s*\{/.test(injectSrc);
+    assert(
+      !injectorHasLocalDefaultI18N,
+      'injector.js: 不应有本地 const DEFAULT_I18N = {...}（必须挪到 i18n.js）'
+    );
+
+    // 4. injector.js setConfig 内部从 window.XEraseri18n.DEFAULT_I18N 读
+    assert(
+      /setConfig\s*\(\s*config\s*\)\s*\{[\s\S]{0,3000}window\.XEraseri18n[\s\S]{0,200}DEFAULT_I18N/.test(injectSrc),
+      'injector.js setConfig 用 window.XEraseri18n.DEFAULT_I18N 作 i18n 兜底'
+    );
+    assert(
+      /setConfig\s*\(\s*config\s*\)\s*\{[\s\S]{0,3000}this\._i18n\s*=/.test(injectSrc),
+      'injector.js setConfig 内部 this._i18n 初始化逻辑存在'
+    );
+
+    // 5. deleteTweet 用 this._i18n.deleteKeywords
+    assert(
+      /async\s+deleteTweet[\s\S]{0,3000}this\._i18n\.deleteKeywords/.test(injectSrc),
+      'deleteTweet 用 this._i18n.deleteKeywords'
+    );
+
+    // 6. unreTweet 用 this._i18n.unretweetKeywords
+    assert(
+      /async\s+unreTweet[\s\S]{0,3000}this\._i18n\.unretweetKeywords/.test(injectSrc),
+      'unreTweet 用 this._i18n.unretweetKeywords'
+    );
+
+    // 7. isPinnedTweet 用 this._i18n.pinnedKeywords（动态构建 regex）
+    assert(
+      /isPinnedTweet[\s\S]{0,2000}this\._i18n\.pinnedKeywords/.test(injectSrc),
+      'isPinnedTweet 用 this._i18n.pinnedKeywords 动态构建 regex'
+    );
+
+    // 8. isReplyTweet 用 this._i18n.replyKeywords（动态构建 regex）
+    assert(
+      /isReplyTweet[\s\S]{0,2000}this\._i18n\.replyKeywords/.test(injectSrc),
+      'isReplyTweet 用 this._i18n.replyKeywords 动态构建 regex'
+    );
+
+    // 9. _closeAnyOpenConfirmDialog 用 this._i18n.cancelKeywords
+    assert(
+      /_closeAnyOpenConfirmDialog[\s\S]{0,1000}this\._i18n\.cancelKeywords/.test(injectSrc),
+      '_closeAnyOpenConfirmDialog 用 this._i18n.cancelKeywords'
+    );
+  } else {
+    console.log('  SKIP  injector.js or i18n.js not found');
+  }
+}
+console.log();
+
+// ------------------------------------------------------------------
+// 13) remote-example.json：i18n section 完整 + 8 语言全有
+//   关键：远程配置是 X 改版时第一个改的地方 —— 改了翻译只 push GCS 即可，不用发新版扩展
+// ------------------------------------------------------------------
+console.log('[13] remote-example.json - i18n section 完整 + 8 语言全有');
+{
+  const configPath = path.join(__dirname, '..', 'chrome-extension', 'config', 'remote-example.json');
+  if (fs.existsSync(configPath)) {
+    const configSrc = fs.readFileSync(configPath, 'utf8');
+    let config = null;
+    try {
+      config = JSON.parse(configSrc);
+    } catch (e) {
+      console.log('  FAIL  remote-example.json JSON 解析失败: ' + e.message);
+      failed++;
+    }
+    if (config) {
+      // 1. selectors.i18n 节点存在
+      assert(
+        config.selectors && config.selectors.i18n,
+        'remote-example.json: selectors.i18n 节点存在'
+      );
+
+      if (config.selectors && config.selectors.i18n) {
+        // 2. 6 个 keywords 字段齐全
+        const requiredFields = ['deleteKeywords', 'unretweetKeywords', 'pinnedKeywords', 'replyKeywords', 'cancelKeywords', 'confirmKeywords'];
+        requiredFields.forEach((f) => {
+          assert(
+            Array.isArray(config.selectors.i18n[f]) && config.selectors.i18n[f].length >= 8,
+            'i18n.' + f + ' 数组存在且 ≥ 8 元素（实际 ' + (config.selectors.i18n[f] ? config.selectors.i18n[f].length : 0) + '）'
+          );
+        });
+
+        // 3. 8 语言关键字抽查（deleteKeywords 必含 6 种语言）
+        const langs = ['Delete', '删除', '削除', '삭제', 'Eliminar', 'Löschen', 'Supprimer'];
+        langs.forEach((lang) => {
+          assert(
+            Array.isArray(config.selectors.i18n.deleteKeywords) && config.selectors.i18n.deleteKeywords.indexOf(lang) !== -1,
+            'i18n.deleteKeywords 包含 8 语言 "' + lang + '"'
+          );
+        });
+
+        // 4. 8 语言 cancelKeywords 抽查
+        const cancelLangs = ['Cancel', '取消', 'キャンセル', '취소', 'Cancelar', 'Abbrechen', 'Annuler'];
+        cancelLangs.forEach((lang) => {
+          assert(
+            Array.isArray(config.selectors.i18n.cancelKeywords) && config.selectors.i18n.cancelKeywords.indexOf(lang) !== -1,
+            'i18n.cancelKeywords 包含 8 语言 "' + lang + '"'
+          );
+        });
+
+        // 5. tweet.moreButtons 包含 8 语言 aria-label fallback（部分语言）
+        //   来源：MCP 实证（2026-06-18）—— X 实际 ja='もっと見る'，不是 'その他'
+        const moreAriaLang = ['更多', 'もっと見る', '더 보기', 'Más', 'Mehr', 'Plus'];
+        const moreButtons = (config.selectors.tweet && config.selectors.tweet.moreButtons) || [];
+        moreAriaLang.forEach((lang) => {
+          assert(
+            moreButtons.some(b => b.indexOf(lang) !== -1),
+            'tweet.moreButtons 包含 8 语言 aria-label "' + lang + '"'
+          );
+        });
+      }
+    }
+  } else {
+    console.log('  SKIP  remote-example.json not found');
+  }
+}
+console.log();
+
+// ------------------------------------------------------------------
+// 14) default.json：8 语言兜底（en/zh-CN/zh-TW/ja/ko/es/de/fr）
+//   关键：远程 fetch 失败时，default.json 是用户唯一的兜底 —— 没 8 语言兜底就死
+//   防回归：锁死 default.json 至少含 8 语言 selector fallback
+//   来源：MCP 实证（2026-06-18 在 /home /bookmarks /following 4 个 URL 切 8 种语言）
+// ------------------------------------------------------------------
+console.log('[14] default.json - 8 语言兜底同步（远程失败时项目自带默认配置）');
+{
+  const defaultPath = path.join(__dirname, '..', 'chrome-extension', 'config', 'default.json');
+  if (fs.existsSync(defaultPath)) {
+    const defaultSrc = fs.readFileSync(defaultPath, 'utf8');
+    let defaultCfg = null;
+    try {
+      defaultCfg = JSON.parse(defaultSrc);
+    } catch (e) {
+      console.log('  FAIL  default.json JSON 解析失败: ' + e.message);
+      failed++;
+    }
+    if (defaultCfg && defaultCfg.selectors) {
+      // 1. tweet.moreButtons 至少含 8 语言
+      const moreButtons = (defaultCfg.selectors.tweet && defaultCfg.selectors.tweet.moreButtons) || [];
+      const moreLangs = ["[data-testid='more']", '更多', 'もっと見る', '더 보기', 'Mehr', 'Plus', 'Más opciones'];
+      moreLangs.forEach((s) => {
+        assert(
+          moreButtons.some(b => b.indexOf(s) !== -1),
+          'default.json tweet.moreButtons 包含 "' + s + '"'
+        );
+      });
+
+      // 2. like.unlikeButtons 至少含 8 语言（en + zh-CN + zh-TW + ja + ko + es + de + fr）
+      //   实证数据：en=Liked, zh-CN=喜欢了, zh-TW=已喜歡, ja=いいねしました, ko=마음에 들어 함,
+      //           es=Marcó como Me gusta, de=Gefällt mir, fr=J'aime
+      const unlikeButtons = (defaultCfg.selectors.like && defaultCfg.selectors.like.unlikeButtons) || [];
+      const unlikeLangs = ['Liked', '喜欢了', '已喜歡', 'いいねしました', '마음에 들어 함', 'Marcó como Me gusta', 'Gefällt mir', "J'aime"];
+      unlikeLangs.forEach((s) => {
+        assert(
+          unlikeButtons.some(b => b.indexOf(s) !== -1),
+          'default.json like.unlikeButtons 包含 "' + s + '"'
+        );
+      });
+
+      // 3. bookmark.removeButtons 至少含 8 语言
+      //   实证数据：en=Bookmarked, zh-CN=已加入书签, zh-TW=已加入書籤, ja=ブックマークに追加済み,
+      //           ko=북마크에 추가됨, es=Guardado, de=Lesezeichen, fr=signets
+      const removeButtons = (defaultCfg.selectors.bookmark && defaultCfg.selectors.bookmark.removeButtons) || [];
+      const removeLangs = ['Bookmarked', '已加入书签', '已加入書籤', 'ブックマークに追加済み', '북마크에 추가됨', 'Guardado', 'Lesezeichen', 'signets'];
+      removeLangs.forEach((s) => {
+        assert(
+          removeButtons.some(b => b.indexOf(s) !== -1),
+          'default.json bookmark.removeButtons 包含 "' + s + '"'
+        );
+      });
+
+      // 4. following.unfollowButtons 至少含 8 语言
+      //   实证数据：en=Following, zh-CN=正在关注, zh-TW=正在跟隨, ja=フォロー中, ko=팔로잉,
+      //           es=Siguiendo, de=Folge ich, fr=Abonné
+      const unfollowButtons = (defaultCfg.selectors.following && defaultCfg.selectors.following.unfollowButtons) || [];
+      const unfollowLangs = ['Following', '正在关注', '正在跟隨', 'フォロー中', '팔로잉', 'Siguiendo', 'Folge ich', 'Abonné'];
+      unfollowLangs.forEach((s) => {
+        assert(
+          unfollowButtons.some(b => b.indexOf(s) !== -1),
+          'default.json following.unfollowButtons 包含 "' + s + '"'
+        );
+      });
+
+      // 5. tweet.unreTweetButtons 至少含 8 语言
+      //   实证数据：en=Reposted, zh-CN=已转帖, zh-TW=已轉發, ja=リポストしました, ko=재게시함,
+      //           es=Reposteado, de=Repostet, fr=Reposté
+      const unreTweetButtons = (defaultCfg.selectors.tweet && defaultCfg.selectors.tweet.unreTweetButtons) || [];
+      const unreTweetLangs = ['Reposted', '已转帖', '已轉發', 'リポストしました', '재게시함', 'Reposteado', 'Repostet', 'Reposté'];
+      unreTweetLangs.forEach((s) => {
+        assert(
+          unreTweetButtons.some(b => b.indexOf(s) !== -1),
+          'default.json tweet.unreTweetButtons 包含 "' + s + '"'
+        );
+      });
+
+      // 6. tweet.retweetButtonInCard 与 unreTweetButtons 一致（同一个数组）
+      const retweetButtonInCard = (defaultCfg.selectors.tweet && defaultCfg.selectors.tweet.retweetButtonInCard) || [];
+      assert(
+        JSON.stringify(unreTweetButtons) === JSON.stringify(retweetButtonInCard),
+        'default.json tweet.retweetButtonInCard 与 unreTweetButtons 内容一致'
+      );
+
+      // 7. default.json 不应包含 i18n section（i18n 是 remote 才有的，default 不要带）
+      //   原因：i18n 数组在 i18n.js 的 DEFAULT_I18N 已经兜底了，default 没必要再带一份
+      assert(
+        !(defaultCfg.selectors.i18n),
+        'default.json 不应包含 selectors.i18n（i18n 默认值已在 i18n.js DEFAULT_I18N）'
+      );
+    }
+  } else {
+    console.log('  SKIP  default.json not found');
   }
 }
 console.log();

@@ -59,3 +59,26 @@ X-Eraser 是 X/Twitter 跨平台批量清理工具，支持 Chrome 扩展和 And
    - 拆分多个 commit 时，**优先用 `git add <具体文件>` 而不是 `git add -p`**（patch 拆分易出错）。单文件多 hunks 拆 commit 时，必须在 split 前后 `git diff --cached` 验证，避免错位。
 
    - **铁律**：如果发现自己在 git 操作中"反复 apply / reverse 同一个 hunk"——**立即停止**，向用户报告现状，让用户决定后续。**不要试图"再试一次"突破死循环**。
+
+6. **⚠️ 铁律：分析 X 实际 DOM 必须用 MCP 实证，绝不靠猜：**
+
+   - 任何"X 改版后 menuitem text 是不是 X" / "X 改版后 selector 还在不在" / "X 改版后 DOM 结构" / "X 实际页面弹窗 / 菜单项 / 按钮 aria-label"等
+     涉及 X 实际页面结构的问题，**必须**用 chrome-devtools-mcp 工具实证：
+     - `evaluate_script` 跑在 user 实际 X 页面（user Chrome = MCP Chrome，先跟 user 确认）
+     - `puppeteer_click` 模拟 user 操作（点 caret 弹菜单、抓菜单 text 真实值）
+     - `puppeteer_screenshot` 必要时截图取证
+   - **绝对禁止**靠"经验推断" / "我觉得 X 应该会改成" / "之前测试是这样推论现在"等
+     经验假设写代码 —— 错误率极高。
+   - **错误示范**（tweets-bug-3 2026-06-17 教训）：
+     - AI 猜 "X 2026 改版后菜单文字可能带后缀变体（'Delete post' / 'Delete this post'）"
+     - AI **没**用 MCP click xiangping 自己的推文 caret 抓 11 菜单项实际 text
+     - AI **没**用 MCP 测 substring 匹配能否命中
+     - AI **直接**改 `waitForMenuItemByText` 严格相等 → substring 匹配 + 失败标 'failed'
+     - user 一句话："你有运行 MCP 去抓去 DOM 分析吗？是不是在靠猜？"—— 戳穿
+   - **正确流程**：
+     1. 用 MCP 抓 X 实际 DOM / click 弹菜单抓 menuitem 真实 text + aria-label + testid
+     2. 把抓到的实际值粘到代码注释里（"X 2026-06-17 MCP 实证：Delete menuitem text = 'Delete' / aria-label = null"）
+     3. 基于实证改代码 + 写 verify 脚本断言实证值
+   - **误判成本**：猜错 → verify 全过但 user 端到端失败 → 浪费时间 debug 修代码
+   - **这条铁律适用于**：X 实际页面 DOM / 弹窗 / 菜单 / 按钮 / selector / aria-label / role / className
+     等**所有**依赖 X 实际渲染的判断。**不**适用于纯文档 / 纯业务逻辑改动。

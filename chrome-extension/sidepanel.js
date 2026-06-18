@@ -10,7 +10,11 @@
     isPaused: false,
     processedItems: 0,
     statusHideTimer: null,
-    totalItems: 0
+    totalItems: 0,
+    // 登录态持续 8s 卡在"检测中"时弹出"请刷新 X 页面"提示
+    // 触发条件：state.isX && state.checkingLogin 进入 8s 后仍未变
+    // 清除条件：state.checkingLogin 翻转为 false
+    refreshHintTimer: null
   };
 
   // 每日额度配置
@@ -111,6 +115,7 @@
     els.statusText = document.getElementById('status-x-text');
     els.loginDot = document.getElementById('status-login-dot');
     els.loginText = document.getElementById('status-login-text');
+    els.loginHint = document.getElementById('status-login-hint');
     els.openSection = document.getElementById('open-x-section');
     els.loginSection = document.getElementById('login-section');
     els.optionsSection = document.getElementById('options-section');
@@ -516,6 +521,27 @@
     if (els.loginText) {
       if (els.loginText.textContent !== newLText) els.loginText.textContent = newLText;
       if (els.loginText.className !== newLTextClass) els.loginText.className = newLTextClass;
+    }
+
+    // 登录态卡"检测中"8s 后弹刷新提示（content script 未注入的兜底引导）
+    // 一次性 setTimeout：进入检测中起 8s 触发一次；状态翻转就清掉
+    var shouldHint = state.isX && state.checkingLogin;
+    if (shouldHint && !state.refreshHintTimer) {
+      state.refreshHintTimer = setTimeout(function() {
+        state.refreshHintTimer = null;
+        // 8s 后还在"检测中"才真显示；中途已翻就不显示
+        if (state.isX && state.checkingLogin && els.loginHint) {
+          els.loginHint.textContent = t('pleaseRefreshXPage');
+          els.loginHint.style.display = 'block';
+        }
+      }, 8000);
+    } else if (!shouldHint && state.refreshHintTimer) {
+      clearTimeout(state.refreshHintTimer);
+      state.refreshHintTimer = null;
+    }
+    // 状态从检测中翻转过来：隐藏提示（清除显示由 status-card 收回负责，hint 跟着清）
+    if (!state.checkingLogin && els.loginHint) {
+      els.loginHint.style.display = 'none';
     }
 
     var showOpen = !state.isX;

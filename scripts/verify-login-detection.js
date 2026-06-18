@@ -14,17 +14,22 @@ function check(name, cond, detail) {
   if (!cond) fail.push({ name, detail });
 }
 
-// 1. 读取 4 个文件
+// 1. 读取 3 个文件（lib/config.js 已删 —— 2026-XX-XX 重构移除了死代码）
 const contentJs = fs.readFileSync(path.join(ROOT, 'chrome-extension/content.js'), 'utf8');
-const configLib = fs.readFileSync(path.join(ROOT, 'chrome-extension/lib/config.js'), 'utf8');
 const defaultCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'chrome-extension/config/default.json'), 'utf8'));
 const remoteCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'chrome-extension/config/remote-example.json'), 'utf8'));
 
 // 2. 必须含有的侧栏稳定 selector（任何登录页都有）
+// 2026-XX-XX 精简：删 a[href='/i/bookmarks']（X 2026 侧栏已无 bookmarks 直链）
+//   改测 a[href='/home'] + a[href^='/i/chat']（X 2026 真实路径）
 const REQUIRED_SIDEBAR_ANCHORS = [
-  "a[href='/compose/post']",       // 撰写链接
-  "a[href='/i/bookmarks']",        // 书签链接
-  "[data-testid^='AppTabBar_']",   // 任意侧栏 tab
+  "a[href='/compose/post']",                  // 撰写链接
+  "a[href='/home']",                          // Home 链接
+  "a[href^='/i/chat']",                       // Direct Messages（X 2026 路径）
+  "a[href^='/notifications']",                // 通知链接
+  "[data-testid^='AppTabBar_']",              // 任意侧栏 tab
+  "[data-testid^='SideNav_AccountSwitcher']", // 账户切换（前缀匹配，X 加了 _Button 后缀）
+  "[data-testid^='UserAvatar-Container']",    // 用户头像（前缀匹配，X 加了 -<username> 后缀）
 ];
 
 // 3. 必须删除的脆弱 selector（已 X 改版 / 仅 /home 存在）
@@ -67,11 +72,33 @@ for (const cfgName of ['default.json', 'remote-example.json']) {
   }
 }
 
-// 7. lib/config.js DEFAULT 兜底也必须包含侧栏锚点
+// 7. content.js DEFAULT_CHECK_ELEMENTS_8LANG 必须 8 语言齐全 + 包含 loginButton 稳定 selector
+//    （原本是 lib/config.js DEFAULT_CONFIG.selectors.login.checkElements，
+//      2026-XX-XX 重构移到这里 —— lib/config.js 已删，兜底统一在 content.js）
+const CHECK_ELEMENTS_8LANG = ['zh-CN', 'zh-TW', 'en', 'ja', 'ko', 'es', 'de', 'fr'];
+const checkElementsStart = contentJs.indexOf('DEFAULT_CHECK_ELEMENTS_8LANG = {');
+const checkElementsEnd = checkElementsStart >= 0 ? contentJs.indexOf('};', checkElementsStart) + 2 : -1;
+const checkElementsBlock = checkElementsStart >= 0 ? contentJs.substring(checkElementsStart, checkElementsEnd) : '';
+
+check('content.js DEFAULT_CHECK_ELEMENTS_8LANG 存在', checkElementsBlock.length > 0);
+for (const lang of CHECK_ELEMENTS_8LANG) {
+  const langStart = checkElementsBlock.indexOf("'" + lang + "':");
+  check('DEFAULT_CHECK_ELEMENTS_8LANG 含 ' + lang, langStart > 0);
+  if (langStart > 0) {
+    const langEnd = checkElementsBlock.indexOf(']', langStart) + 1;
+    const langBlock = checkElementsBlock.substring(langStart, langEnd);
+    check(lang + ' 块含 [data-testid=\'loginButton\']', langBlock.includes("'loginButton'"));
+    check(lang + ' 块至少有 2 条文字 + 1 条 selector', langBlock.split('{').length >= 4); // { type:..., value:... } × 3
+  }
+}
+check('getLoginConfig 兜底引用 DEFAULT_CHECK_ELEMENTS_8LANG',
+  contentJs.includes('checkElements: DEFAULT_CHECK_ELEMENTS_8LANG'));
+
+// 8. content.js getLoginConfig() 兜底也必须包含
+//    注：extractArrayBlock 函数定义在 section 7 之前（与配置扫描逻辑共享）
 function extractArrayBlock(source, key) {
   const start = source.indexOf(key + ': [');
   if (start < 0) return '';
-  // 从 start 位置开始匹配方括号深度，找到匹配的 ]
   let depth = 0;
   for (let i = start + key.length + 2; i < source.length; i++) {
     const ch = source[i];
@@ -83,15 +110,6 @@ function extractArrayBlock(source, key) {
   }
   return source.substring(start);
 }
-const configBlock = extractArrayBlock(configLib, 'loggedInElements');
-for (const anchor of REQUIRED_SIDEBAR_ANCHORS) {
-  check('lib/config.js DEFAULT loggedInElements 含 ' + anchor, configBlock.includes(anchor));
-}
-for (const bad of FORBIDDEN) {
-  check('lib/config.js DEFAULT loggedInElements 不含 ' + bad, !configBlock.includes(bad));
-}
-
-// 8. content.js getLoginConfig() 兜底也必须包含
 const glcBlock = extractArrayBlock(
   contentJs.substring(contentJs.indexOf('getLoginConfig')),
   'loggedInElements'

@@ -15,6 +15,7 @@
       pleaseLogin: 'Please Login First',
       checking: 'Checking...',
       checkingLogin: 'Checking login status...',
+      pleaseRefreshXPage: 'Login status stuck. Please refresh the X page (F5)',
       xWebsiteDetected: 'X website detected',
       pleaseOpenX: 'Please open X website',
       loggedIn: 'Logged in',
@@ -77,10 +78,8 @@
       pageTypeMismatch: 'Page type mismatch, aborting',
       startingLikesCleanup: 'Starting likes cleanup on {url}',
       noUnlikeButtons: 'No processable content found',
-      triedSelectors: 'Tried: {selectors}',
       noMoreLikes: 'No more likes',
       endOfLikes: 'End of likes',
-      foundButtons: 'Found {count} buttons with: {selector}',
       clickedUnlike: 'Clicked unlike button #{count}',
       unlikeFailed: 'Unlike failed: {error}',
       clickReturnedFalse: 'Click returned false for unlike button',
@@ -223,7 +222,7 @@
       endDiagnostics: '=== 诊断结束 ===',
       totalTestIdElements: 'data-testid 元素总数: {count}',
       topTestIds: '常用 data-testid: {list}',
-      totalLabeledButtons: '带 aria-label 按钮总数: {count}',
+      totalLabeledButtons: '可处理的带 aria-label 按钮总数: {count}',
       topAriaLabels: '常用 aria-label: {list}',
 
       // 每日额度
@@ -343,10 +342,8 @@
       pageTypeMismatch: '頁面類型不符，中止',
       startingLikesCleanup: '開始在 {url} 清理讚',
       noUnlikeButtons: '未找到可處理的內容',
-      triedSelectors: '已嘗試: {selectors}',
       noMoreLikes: '沒有更多讚了',
       endOfLikes: '讚已全部處理',
-      foundButtons: '找到 {count} 個按鈕，選擇器: {selector}',
       clickedUnlike: '已點擊 unlike 按鈕 #{count}',
       unlikeFailed: '取消讚失敗: {error}',
       clickReturnedFalse: 'unlike 按鈕點擊返回 false',
@@ -355,7 +352,7 @@
       endDiagnostics: '=== 診斷結束 ===',
       totalTestIdElements: 'data-testid 元素總數: {count}',
       topTestIds: '常用 data-testid: {list}',
-      totalLabeledButtons: '帶 aria-label 按鈕總數: {count}',
+      totalLabeledButtons: '可處理的帶 aria-label 按鈕總數: {count}',
       topAriaLabels: '常用 aria-label: {list}',
 
       // 每日額度
@@ -416,6 +413,7 @@
       pleaseLogin: '先にログインしてください',
       checking: '確認中...',
       checkingLogin: 'ログイン状態を確認中...',
+      pleaseRefreshXPage: 'ログイン状態を確認できません。Xページを再読み込みしてください（F5）',
       xWebsiteDetected: 'X ウェブサイト検出',
       pleaseOpenX: 'X ウェブサイトを開いてください',
       loggedIn: 'ログイン済み',
@@ -488,7 +486,7 @@
       endDiagnostics: '=== 診断終了 ===',
       totalTestIdElements: 'data-testid 要素総数: {count}',
       topTestIds: '主要 data-testid: {list}',
-      totalLabeledButtons: 'aria-label 付きボタン総数: {count}',
+      totalLabeledButtons: '処理対象の aria-label 付きボタン総数: {count}',
       topAriaLabels: '主要 aria-label: {list}',
 
       // 毎日の上限
@@ -741,10 +739,8 @@
       pageTypeMismatch: 'Tipo de página no coincide, abortando',
       startingLikesCleanup: 'Iniciando limpieza de likes en {url}',
       noUnlikeButtons: 'No se encontró contenido procesable',
-      triedSelectors: 'Intentado: {selectors}',
       noMoreLikes: 'No hay más likes',
       endOfLikes: 'Likes terminados',
-      foundButtons: '{count} botones encontrados con: {selector}',
       clickedUnlike: 'Clic en botón unlike #{count}',
       unlikeFailed: 'Error al quitar like: {error}',
       clickReturnedFalse: 'El clic en unlike devolvió false',
@@ -874,10 +870,8 @@
       pageTypeMismatch: 'Seitentyp stimmt nicht, abgebrochen',
       startingLikesCleanup: 'Starte Likes-Bereinigung auf {url}',
       noUnlikeButtons: 'Kein verarbeitbarer Inhalt gefunden',
-      triedSelectors: 'Versucht: {selectors}',
       noMoreLikes: 'Keine weiteren Likes',
       endOfLikes: 'Likes beendet',
-      foundButtons: '{count} Buttons gefunden mit: {selector}',
       clickedUnlike: 'unlike-Button #{count} geklickt',
       unlikeFailed: 'Unlike fehlgeschlagen: {error}',
       clickReturnedFalse: 'unlike-Klick gab false zurück',
@@ -947,6 +941,7 @@
       pleaseLogin: 'Veuillez vous connecter d\'abord',
       checking: 'Vérification...',
       checkingLogin: 'Vérification du statut de connexion...',
+      pleaseRefreshXPage: 'Statut de connexion bloqué. Veuillez actualiser la page X (F5)',
       xWebsiteDetected: 'Site X détecté',
       pleaseOpenX: 'Veuillez ouvrir le site X',
       loggedIn: 'Connecté',
@@ -1007,10 +1002,8 @@
       pageTypeMismatch: 'Type de page incorrect, annulé',
       startingLikesCleanup: 'Démarrage nettoyage des j\'aime sur {url}',
       noUnlikeButtons: 'Aucun contenu traitable trouvé',
-      triedSelectors: 'Essayé: {selectors}',
       noMoreLikes: 'Plus de j\'aime',
       endOfLikes: 'J\'aime terminés',
-      foundButtons: '{count} boutons trouvés avec: {selector}',
       clickedUnlike: 'Clic sur bouton unlike #{count}',
       unlikeFailed: 'Échec unlike: {error}',
       clickReturnedFalse: 'Le clic unlike a renvoyé false',
@@ -1076,6 +1069,88 @@
     },
   };
 
+  // ============================================================================
+  // DEFAULT_I18N：8 语言 selector 关键字默认集合
+  //   - 这些不是 UI 文案，是「X 改版时要改的 selector 关键字」（Delete / 撤销转推 / Cancel 等）
+  //   - 项目惯例：i18n.js = 所有 8 语言数据的家
+  //   - 运行时合并：injector.js 的 setConfig 用 window.XEraseri18n.DEFAULT_I18N 作默认值
+  //     再叠加 remote-example.json 的 selectors.i18n 覆盖
+  //   - X 改版改了翻译时，改这里或远程配置即可（不用动 injector.js）
+  // ============================================================================
+  const DEFAULT_I18N = {
+    // 推文删除菜单的 "Delete" 菜单项（role=menuitem）
+    deleteKeywords: [
+      'Delete',                  // en
+      '删除',                    // zh-CN
+      '刪除',                    // zh-TW
+      '削除',                    // ja
+      '삭제',                    // ko
+      'Eliminar',                // es
+      'Löschen',                 // de
+      'Supprimer',               // fr
+      'Elimina'                  // it
+    ],
+    // 撤销 repost 菜单项（role=menuitem）
+    unretweetKeywords: [
+      'Undo repost', 'Undo Repost', // en（两种大小写 X 都用）
+      '撤销转推',                    // zh-CN
+      '取消轉推',                    // zh-TW
+      'リポストを取り消す',          // ja
+      '리트윗 취소',                  // ko
+      'Cancelar repost',             // es
+      'Repost rückgängig machen',    // de
+      'Annuler le repost',           // fr
+      'Annulla repost'               // it
+    ],
+    // 置顶推文 socialContext 文字（X 旧版行为 + X 不显示 socialContext 时的兜底）
+    pinnedKeywords: [
+      'pinned',                    // en
+      '已置顶',                    // zh-CN
+      '已釘選',                    // zh-TW
+      'ピン留め',                  // ja
+      '고정',                      // ko
+      'fijado',                    // es
+      'angeheftet',                // de
+      'épinglé'                    // fr
+    ],
+    // 回复卡片 socialContext 文字（X 旧版行为 + X 不显示 socialContext 时的兜底）
+    replyKeywords: [
+      'replying to', 'in reply to', // en
+      '回复',                       // zh-CN
+      '回覆',                       // zh-TW
+      '返信',                       // ja
+      '답장',                       // ko
+      'respondiendo a',             // es
+      'antworten',                  // de
+      'répondre',                   // fr
+      'rispondendo a'               // it
+    ],
+    // 弹窗 Cancel 按钮（role=button）
+    cancelKeywords: [
+      'Cancel',                    // en
+      '取消',                      // zh-CN / zh-TW
+      'キャンセル',                // ja
+      '취소',                      // ko
+      'Cancelar',                  // es
+      'Abbrechen',                 // de
+      'Annuler',                   // fr
+      'Annulla'                    // it
+    ],
+    // 弹窗 Confirm 按钮（role=button）—— 仅放"确认删除"流程最稳的几个
+    // 不用 "Confirm" / "确认" 这种通用词（容易误匹配普通确认按钮）
+    confirmKeywords: [
+      'Delete',                    // en
+      '删除',                      // zh-CN
+      '刪除',                      // zh-TW
+      '削除',                      // ja
+      '삭제',                      // ko
+      'Eliminar',                  // es
+      'Löschen',                   // de
+      'Supprimer',                 // fr
+      'Elimina'                    // it
+    ]
+  };
+
   // 检测浏览器语言
   function detectLanguage() {
     var lang = (navigator.language || 'en').toLowerCase();
@@ -1122,6 +1197,7 @@
   // 暴露到全局
   window.XEraseri18n = {
     t: t,
+    DEFAULT_I18N: DEFAULT_I18N,
     setLanguage: function(lang) {
       if (TRANSLATIONS[lang]) {
         currentLang = lang;

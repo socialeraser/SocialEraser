@@ -709,3 +709,382 @@ AI 跑完给你结果。
 - ❌ 沙盒内独立爬虫（登录态过不去）
 - ❌ 绕过 X / Google 反爬虫（做不到）
 - ❌ 跨用户/跨账号（每个 MCP 只能连一个 Chrome 实例）
+
+---
+
+## 十五、案例 10：X 把按钮 aria-label 也按 UI 语言翻译 —— 8 语言文字兜底
+
+### 症状
+
+之前以为「按钮的 aria-label 是英文固定」（类似 `data-testid`），所以只写 `button[aria-label*='Cancel']`（英文）就行。
+
+**实际**（2026-06-15 用 chrome-devtools-mcp 切换 X 显示语言发现）：
+
+| aria-label | en | zh-CN | ja | 状态 |
+|-----------|----|----|----|------|
+| 关注按钮 | `Following` | `Following` | `フォロー中` | 🟡 en 对，2 错 |
+| 取消按钮 | `Cancel` | `取消` | `キャンセル` | 🔴 全错 |
+| 确认按钮 | `Confirm` | `确认` | `確認` | 🔴 全错 |
+| More 按钮 | `More` | `更多` | `その他` | 🔴 全错（之前已加 8 语言兜底）|
+
+X 2026 当前版本：**`aria-label` 跟 `visible text` 一起翻译**。**只有 `data-testid` 和 `role` 永远是英文**。
+
+### 根因
+
+`aria-label` 是**面向用户**（屏幕阅读器、辅助技术）的属性，X 把它当可见文字一样本地化。
+
+**而 `data-testid` 是面向开发者**（测试、自动化）的 React 内部 ID，永远不会本地化。
+
+**而 `role` 是 ARIA 语义规范强制英文**（W3C 标准），不可能本地化。
+
+**所以**：
+
+| 属性 | 翻译？ | 用于 selector 安全性 |
+|------|-------|-----------------|
+| `data-testid` | ❌ 永远不 | 🟢 最稳（首选）|
+| `role` | ❌ 永远不 | 🟢 最稳（首选）|
+| `aria-label` | ✅ **会** | 🔴 必须 8 语言兜底 |
+| visible text | ✅ **会** | 🔴 必须 8 语言兜底 |
+
+### 修复
+
+#### 1. 新增 8 语言常量（[chrome-extension/lib/injector.js 第 67-99 行](file:///Volumes/XPSSD/workspaces/X-Eraser/chrome-extension/lib/injector.js)）
+
+```javascript
+const CANCEL_KEYWORDS_8LANG = [
+  'Cancel', '取消', 'キャンセル', '취소',
+  'Cancelar', 'Abbrechen', 'Annuler', 'Annulla'
+];
+
+const CONFIRM_KEYWORDS_8LANG = [
+  'Delete', '删除', '刪除', '削除', '삭제',
+  'Eliminar', 'Löschen', 'Supprimer', 'Elimina'
+];
+```
+
+#### 2. 新增 `findButtonByText(keywords, timeout)` helper
+
+跟 `waitForMenuItemByText` 复刻的轮询模式，唯一区别是查 `[role="button"]`（弹窗按钮）而不是 `[role="menuitem"]`（下拉菜单项）。
+
+#### 3. 改 `stop()` 时关闭弹窗
+
+之前 `stop()` 只设 `isRunning = false`，**没关 confirm 弹窗**。现在：
+
+```javascript
+stop() {
+  this.isRunning = false;
+  this.isPaused = false;
+  this._closeAnyOpenConfirmDialog();  // ← 新增：用户中断时点 Cancel 关闭弹窗
+  this.log('Stopped');
+}
+
+_closeAnyOpenConfirmDialog() {
+  this.findButtonByText(CANCEL_KEYWORDS_8LANG, 300)
+    .then(btn => btn ? this.safeClick(btn, 200) : false)
+    .catch(() => {});  // 失败安全
+}
+```
+
+### 经验
+
+1. **「以为是 X」≠「事实是 X」** —— 跟案例 7 一样，selector 决策必须用真实 DOM 验证，不能凭直觉
+2. **属性按「面向谁」分类**：
+   - 面向开发者：`data-testid`（永不翻译）→ 最稳
+   - 面向规范：`role`（永不翻译）→ 最稳
+   - 面向用户：`aria-label` / `visible text`（会翻译）→ 必须 i18n 兜底
+3. **多语言项目里，「单点英文 selector」是隐藏炸弹** —— 用户切到任何非 en 语言就 0 命中
+4. **关闭弹窗不要阻塞 stop** —— 找 Cancel 失败时不能 throw，否则影响整体 stop 行为（用 `.catch(() => {})` 兜底）
+
+### 回归测试
+
+[scripts/verify-actual-x-selectors.js 第 11 节](file:///Volumes/XPSSD/workspaces/X-Eraser/scripts/verify-actual-x-selectors.js) 锁 6 个断言：
+
+1. `CANCEL_KEYWORDS_8LANG` 常量存在
+2. 8 语言 Cancel 关键字齐全（7 语言 × 1 = 7 个）
+3. `CONFIRM_KEYWORDS_8LANG` 常量存在
+4. 8 语言 Confirm 关键字齐全
+5. `findButtonByText(keywords, timeout)` 函数存在
+6. `findButtonByText` 内部查 `[role="button"]`
+7. `stop()` 调用 `_closeAnyOpenConfirmDialog`
+8. `_closeAnyOpenConfirmDialog` 用 `findButtonByText(CANCEL_KEYWORDS_8LANG)`
+
+### AI 协作提醒
+
+- **不要凭「我以为 X 不翻译」写 selector** —— 用 chrome-devtools-mcp 切语言实测一下，1 分钟确认
+- **任何面向用户的属性**（aria-label / placeholder / title / alt）**都可能被翻译**
+- **「单语种英文 selector」** 是 AI 写的最容易翻车的模式 —— 默认加 8 语言兜底
+- **stop() / cleanup() / close() 类收尾方法** 一定要考虑残留弹窗 —— 别让用户看到「我点了 Stop 但弹窗还开着」
+
+---
+
+## 十六、案例 11：i18n 全部配置化重构 —— 数据离开代码
+
+### 症状
+
+之前（案例 10 之后）8 语言关键字数组在 `injector.js` 里**写死**为 `CANCEL_KEYWORDS_8LANG` / `CONFIRM_KEYWORDS_8LANG` 等 module-level 常量，还有 `deleteTweet` / `unreTweet` / `isPinnedTweet` / `isReplyTweet` 里 **inline 写死的 8 语言数组**。
+
+**问题**：X 改版改了某个翻译（比如把「Annuler」改成别的），要改 5 个地方（5 个函数），还涉及发新版扩展。
+
+### 根因
+
+之前的「8 语言关键字」思维还是**代码视角**：「反正 8 语言也得写出来，不如直接写在代码里」。
+
+**但 X 翻译是高变动性数据**，应该跟 selector 一样处理：**默认在代码里兜底，远程配置可覆盖**。
+
+### 修复
+
+#### 1. 提取 `DEFAULT_I18N` 常量（[chrome-extension/lib/injector.js 第 67-148 行](file:///Volumes/XPSSD/workspaces/X-Eraser/chrome-extension/lib/injector.js)）
+
+```javascript
+const DEFAULT_I18N = {
+  deleteKeywords: ['Delete', '删除', '削除', ...],
+  unretweetKeywords: ['Undo repost', '撤销转推', ...],
+  pinnedKeywords: ['pinned', '已置顶', ...],
+  replyKeywords: ['replying to', '回复', ...],
+  cancelKeywords: ['Cancel', '取消', 'キャンセル', ...],
+  confirmKeywords: ['Delete', '删除', '削除', ...]
+};
+```
+
+#### 2. setConfig 末尾合并 i18n（[chrome-extension/lib/injector.js 第 211-227 行](file:///Volumes/XPSSD/workspaces/X-Eraser/chrome-extension/lib/injector.js)）
+
+```javascript
+var i18nRemote = (config && config.selectors && config.selectors.i18n) || {};
+this._i18n = {};
+for (var i18nKey in DEFAULT_I18N) {
+  if (DEFAULT_I18N.hasOwnProperty(i18nKey)) {
+    this._i18n[i18nKey] = (Array.isArray(i18nRemote[i18nKey]) && i18nRemote[i18nKey].length > 0)
+      ? i18nRemote[i18nKey].slice()  // 浅拷贝，不污染 DEFAULT
+      : DEFAULT_I18N[i18nKey].slice();
+  }
+}
+this.config.i18n = this._i18n;
+```
+
+#### 3. 5 处运行时读取（替换 inline 数组）
+
+| 位置 | 原来 | 现在 |
+|------|------|------|
+| `deleteTweet` | inline 8 语言 Delete 数组 | `this._i18n.deleteKeywords` |
+| `unreTweet` | inline 8 语言 Undo repost 数组 | `this._i18n.unretweetKeywords` |
+| `isPinnedTweet` | inline 8 语言 pinned regex | `this._i18n.pinnedKeywords` 动态构建 regex |
+| `isReplyTweet` | 2 个 inline 8 语言 reply regex | `this._i18n.replyKeywords` 动态构建 regex |
+| `_closeAnyOpenConfirmDialog` | `CANCEL_KEYWORDS_8LANG` 常量 | `this._i18n.cancelKeywords` |
+
+#### 4. 远程配置加 i18n section（[chrome-extension/config/remote-example.json](file:///Volumes/XPSSD/workspaces/X-Eraser/chrome-extension/config/remote-example.json)）
+
+```json
+"i18n": {
+  "_comment": "X 2026 当前版本会把按钮 aria-label + 菜单文字 都按用户 X 显示语言翻译",
+  "deleteKeywords": [...],
+  "unretweetKeywords": [...],
+  ...
+}
+```
+
+#### 5. 远程配置补全 4 类 cleanup 的 8 语言 aria-label
+
+| 类型 | 之前（config）| 之后（config）|
+|------|------------|------------|
+| tweet.moreButtons | 4 个全英文 | 4 + 6 个 8 语言 aria-label = 10 个 |
+| like.unlikeButtons | 4 个全英文 | 4 + 4 个 8 语言 = 8 个 |
+| bookmark.removeButtons | 6 个全英文 | 6 + 4 个 8 语言 = 10 个 |
+| following.unfollowButtons | 4 个全英文 | 4 + 3 个 8 语言 = 7 个 |
+
+### 经验
+
+1. **数据与代码分离**：
+   - **代码 = 行为**（函数、helper、控制流）—— 写代码
+   - **数据 = 内容**（selector、关键字、配置值）—— 放 config
+   - **X 翻译 = 典型「数据」** —— 必然走 config
+2. **「数据可能 X 改」就**必须**走 config**：
+   - 9 成场景：X 改版时改翻译只 push GCS 即可，不发新版
+   - 1 成场景：DEFAULT 不够准确（X 实际有第 9 种语言），还是得发新版
+3. **远程配置数组**整体覆盖**默认**（不是合并）：
+   - 关键词是「X 改版才会变」不是「叠加」场景
+   - 远程给一个完整新翻译集合比 merge 直观
+4. **Backwards-compat 别名**保持 verify 旧断言不破：
+   - `CANCEL_KEYWORDS_8LANG` / `CONFIRM_KEYWORDS_8LANG` 留作 `DEFAULT_I18N.X` 的别名
+   - 旧 verify grep 还认这些名字
+5. **动态构建 regex** 避免转义地狱：
+   - 关键词里可能有特殊字符（`.` `*` `+` `?` 等）
+   - 统一 `.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')` escape 再 `|`
+6. **8 语言 aria-label selector 也进 config**（不仅 keyword）：
+   - `tweet.moreButtons` 之前只有英文
+   - 现在加上 `button[aria-label*='更多']` 等 6 个 fallback
+   - 远程配置可继续加新语言
+
+### 回归测试
+
+[scripts/verify-actual-x-selectors.js 第 12-13 节](file:///Volumes/XPSSD/workspaces/X-Eraser/scripts/verify-actual-x-selectors.js) 锁 **50+ 个新断言**：
+
+#### 第 12 节（injector.js 源码层）
+- `DEFAULT_I18N` 常量定义存在（1）
+- `DEFAULT_I18N` 6 个字段齐全（6）
+- setConfig 内部 `this._i18n` 初始化（1）
+- setConfig 内部用 `DEFAULT_I18N` 兜底（1）
+- deleteTweet 用 `this._i18n.deleteKeywords`（1）
+- unreTweet 用 `this._i18n.unretweetKeywords`（1）
+- isPinnedTweet 用 `this._i18n.pinnedKeywords`（1）
+- isReplyTweet 用 `this._i18n.replyKeywords`（1）
+- _closeAnyOpenConfirmDialog 用 `this._i18n.cancelKeywords`（1）
+
+#### 第 13 节（remote-example.json 配置层）
+- `selectors.i18n` 节点存在（1）
+- 6 个 keywords 字段齐全 + 长度 ≥ 8（6）
+- 8 语言 deleteKeywords 关键字（7）
+- 8 语言 cancelKeywords 关键字（7）
+- tweet.moreButtons 6 语言 aria-label fallback（6）
+
+### AI 协作提醒
+
+- **「写死英文」的判定标准 = 翻译是否可能变**：
+  - 翻译可能变 → 必须走 config（X 翻译、菜单文字、按钮 aria-label、占位符、alt 文本等）
+  - 翻译不会变 → 可以写代码（`data-testid` / `role` / 内部 ID / 协议名）
+- **「数据 vs 行为」**是更普适的判断标准：
+  - 行为（执行流程）放代码
+  - 数据（具体值）放 config
+  - 远程可改的好处 = 不用发新版 / A/B 测试 / 灰度发布
+- **写一个 helper 处理「数据 = 数组」**（如 `findButtonByText` / `waitForMenuItemByText` / `findElements` 多 selector 轮询）—— 一份代码适用所有 8 语言
+- **regex 关键字别忘了 escape** —— 特殊字符 `.` `*` `+` `?` 在 regex 里是元字符
+
+---
+
+## 十七、案例 12：MV3 content script 只在「页面新加载」时注入 —— 已开标签页需 F5
+
+**症状**：扩展已加载 + 已启用 + manifest matches 正确 + 4/8 selector 命中 → 但 Side panel 一直 "Checking login status..."
+
+**根因**：用户的 X 标签页在扩展安装/启用前就已打开，**MV3 规定 content script 只在新页面加载时注入**，已开标签页不会自动注入。`window.__XEraserContentInjected` = `undefined` / `chrome.runtime.id` = `null`。
+
+**修复**：
+- 短：用户在 X 标签页按 **F5** 刷新拿新代码
+- 长：sidepanel 加 8s 兜底 "请刷新 X 页面" 提示（避免静默卡死）
+
+**经验**：
+- MV3 / MV2 都如此——**安装扩展后必须刷新相关标签页**
+- chrome-devtools-mcp 测扩展时，第一次连 X 页面必须用 `navigate_page type:reload` 拉新 code
+- Sidepanel 8s 兜底提示是关键 UX 改进（`docs/debug-history/debug-login-stuck-checking.md`）
+
+---
+
+## 十八、案例 13：`moreButtons` 用 wildcard selector 会误中侧栏 / trend 按钮
+
+**症状**：推文删除 0 命中，console 显示 8 次 "Tweet delete failed: no more button or confirm"。
+
+**根因**：`button[aria-label*='More']` + `[data-testid='caret']` 没用 `article` 容器限定，匹配到 X 2026 侧边栏 `AppTabBar_More_Menu` 和 trend 区域 caret（实测 6 个非推文 button），全进 `processTweets` → 调 `deleteTweet` → 拿 fake container（`btn.parentElement`）找 more button → 0 命中 → 失败。
+
+**修复**：[lib/injector.js collectCandidates addAll](file:///Volumes/XPSSD/workspaces/X-Eraser/chrome-extension/lib/injector.js#L1112-L1123) 加 6 行 filter：btn 必须有 `closest('article')` 或 `findClosest(articleContainers)` 祖先。
+
+**经验**：
+- **任何「列表项」selector 都必须用 `closest('article')` 或更严限定**（避免误中 sidebar / trend / related 区块）
+- 写 selector 时先在真 X DOM 跑「>0 命中 + 看每个命中是不是真目标」—— 不能只看 `document.querySelectorAll` 总数
+- aria-label wildcard 特别危险：X 2026 多个无关按钮都用 "More" 系列
+- `isRetweetCard` 只过滤了 retweet 卡片，**没过滤 sidebar / trend 按钮** —— 这种"过滤器"必须覆盖所有非目标区域
+
+---
+
+## 十九、案例 14：X 2026 reply 卡片不显示 "Replying to" 文字 → isReplyTweet 假阴性
+
+**症状**：勾选 `Include replies=true` 但 reply 没被处理。X 2026 reply 卡片顶部 `socialContext=null`，全文也无 "Replying to" 关键字。
+
+**根因**：`isReplyTweet` 的检测逻辑是「socialContext 关键字 + 全文关键字回退」，但 X 2026 reply 卡片完全去掉 "Replying to" 文字（视觉上用"在 xxx 推文下"等新方式），`replyRe.test(fullText)` 永远不命中 → 假阴性。
+
+**修复**：**不动代码**。原因：
+- 假阴性对 `includeReplies=true` 无影响（filter `includeReplies === false` 不命中，reply 仍进 `deleteTweet`）
+- `includeReplies=false` 时假阴性会让 reply 被误删（理论 bug，但用户目前勾选 true）
+- 更可靠的检测 = 菜单项数（reply 8 项 vs 原创 11 项），但需要 click 才能用 —— 改造成本 > 收益
+
+**经验**：
+- **X 2026 reply 卡片用菜单项数区分**：8 项（无 Edit / Add content disclosure / Change reply 权限）vs 11 项
+- 关键字检测不可靠——X 改版时**先消失的往往就是 UI 文字**，不是 DOM 结构
+- 假阴性/假阳性的影响 = **看后续 filter 逻辑是否假设方向**：false negative + filter 假设 true = 不影响，false positive + filter 假设 false = bug
+- 完整 session：[docs/debug-history/debug-tweet-reply-broken.md](file:///Volumes/XPSSD/workspaces/X-Eraser/docs/debug-history/debug-tweet-reply-broken.md)
+
+---
+
+## 调试 session 归档规范
+
+TRAE-debugger skill 协议要求每个 session 写 `debug-<sessionId>.md` 在项目根目录。debug session [CLOSED] 后归档到 **`docs/debug-history/`**（不删，保留完整 record），关键 wisdom 提炼到本文件 `lessons-learned.md` 的下一个案例号（保持搜索友好）。
+
+完整归档列表：
+- [docs/debug-history/debug-login-stuck-checking.md](file:///Volumes/XPSSD/workspaces/X-Eraser/docs/debug-history/debug-login-stuck-checking.md) → 案例 12
+- [docs/debug-history/debug-tweet-delete-broken.md](file:///Volumes/XPSSD/workspaces/X-Eraser/docs/debug-history/debug-tweet-delete-broken.md) → 案例 13
+- [docs/debug-history/debug-tweet-reply-broken.md](file:///Volumes/XPSSD/workspaces/X-Eraser/docs/debug-history/debug-tweet-reply-broken.md) → 案例 14
+- [docs/debug-history/debug-tweet-delete-regression.md](file:///Volumes/XPSSD/workspaces/X-Eraser/docs/debug-history/debug-tweet-delete-regression.md) → 案例 15
+
+---
+
+## 二十、案例 15：retweet 卡片不显示 retweeter 头像 → `_isOwnArticle` 误判
+
+**症状**：勾选 `Tweets + Include retweets` 但撤销 retweet 永远 0 命中。X /with_replies 上明明有 2 条自己的 retweet，但 `unreTweet` 函数一个都没调。
+
+**根因**：`_isOwnArticle` 函数要求 article 内有 `UserAvatar-Container-{username}`（OP 独占标记），但 **X 2026 retweet 卡片只显示原作者头像，不显示 retweeter（自己）的头像**。所以 retweet 卡片用 `_isOwnArticle` 判断永远 = false。
+
+旧代码 `processTweets` 的 `collectCandidates` 在 unretweet 路径也走 `_isOwnArticle` 过滤（跟 moreButtons 路径复用）→ 所有 retweet 卡片被判定为"他人推文"过滤掉 → 0 候选 → 0 命中。
+
+**修复**：
+1. `lib/injector.js` unretweet 路径**移除** `_isOwnArticle` 过滤（保留 top-level article 过滤防 nested-article）
+2. 理由：retweet 按钮（`[data-testid='unretweet']` / `aria-label*='已转帖'` 等）是 X 唯一给"自己已转发"卡片渲染的按钮，本身就是"自己已转发"的最强语义证据
+3. `_isOwnArticle` 注释加"⚠️ 重要使用前提"：**只用于 deleteTweet（caret 路径），不用于 unreTweet 路径**——防下个会话再次误用
+4. 配套：`unreTweetButtons` / `retweetButtonInCard` 加 8 语言 aria-label 兜底（X 改 testid 后仍能命中）
+
+**实测**（X 2026 retweet 按钮 aria-label，2026-06-17 用 MCP Chrome 切语言验证）：
+
+| lang | aria-label (已转发) | aria-label (未转发) |
+|------|-------------------|-------------------|
+| en | `882 reposts. Reposted` | `2616 reposts. Repost` |
+| zh-CN | `882 次转帖。已转帖` | `2616 次转帖。转帖` |
+| zh-TW | `882 次轉發。已轉發` | `2620 次轉發。轉發` |
+| ja | `882 件のリポスト件。リポストしました` | `2618 件のリポスト件。リポスト` |
+| ko | `882 재게시. 재게시함` | `2619 재게시. 재게시` |
+| de | `882 Reposts. Repostet` | `2618 Reposts. Repost` |
+| fr | `882 reposts. Reposté` | `2619 reposts. Repost` |
+| es | `882 reposts. Reposteado` | `2619 reposts. Repostear` |
+| it | `882 repost. Ripostato` | `2620 repost. Riposta` |
+
+**经验**：
+- **X 2026 retweet 卡片有特殊渲染规则**："You reposted" 标签强调原作者，自己头像不显示。任何"自己推文"判断在 retweet 卡片上**必须改用 retweet 按钮本身**作为依据，不能用 UserAvatar / User-Name（这些只显示原作者）。
+- **X 2026 retweet 按钮 aria-label 用过去时态标识"已转发"**：每种语言都有自己的过去时态后缀（en `Reposted` / zh-CN `已转帖` / ja `リポストしました` / ko `재게시함` / de `Repostet` / fr `Reposté` / es `Reposteado` / it `Ripostato`）。这些是 `unreTweetButtons` 兜底 selector 的唯一可靠锚点。
+- **`_isOwnArticle` 严格判断专门为 caret 路径设计**——它要求"OP 独占标记"（自己头像），retweet 卡片永远不满足。下个会话复用时**必须**看清楚调用上下文。
+- **调试前先确认环境**——之前 H6 假设（"MCP Chrome ≠ user Chrome"）导致 debug 方向跑偏。用户 2026-06-17 明确："MCP Chrome 和 user Chrome 是同一个"。下次调试前**先问 user 确认**。
+- 完整 session：[docs/debug-history/debug-tweet-delete-regression.md](file:///Volumes/XPSSD/workspaces/X-Eraser/docs/debug-history/debug-tweet-delete-regression.md)
+- 防回归：[scripts/verify-tweets-bug-3.js](file:///Volumes/XPSSD/workspaces/X-Eraser/scripts/verify-tweets-bug-3.js)（65 项 assert）
+
+---
+
+## 二十一、案例 16：⚠️ 铁律——分析 X 实际 DOM 必须用 MCP 实证，绝不靠猜
+
+**症状**：
+user 反馈 tweets 删除卡死。AI **没** click xiangping 自己的推文 caret 抓 11 菜单项实际 text，就**猜** "X 2026 改版后菜单文字可能带后缀变体（'Delete post' / 'Delete this post' 等）"，直接改 `waitForMenuItemByText` 严格相等匹配 → substring 匹配 + 失败标 'failed'。user 一句话戳穿："你有运行 MCP 去抓去 DOM 分析吗？是不是在靠猜？"
+
+**根因**：
+AI 调试 X 实际页面（menuitem text / DOM 结构 / 弹窗 / 菜单 / 按钮 testid / aria-label / role / className）时**靠经验推断**，**没用** chrome-devtools-mcp 工具实证 X 实际 DOM。错误率极高：
+- 经验推断 "X 改版后 menuitem text 带后缀" → 没 click 实际菜单 → 抓不到 text → 猜错
+- "之前测试中 OK 的 selector" → 推论 "现在也 OK" → X 改版后失效 → 盲改失效
+- "X 应该会改成" → X 实际改成 Y → 改错
+
+**修复**：
+加铁律到 3 个地方（影响后续所有 AI 行为）：
+1. [.cursor/rules/x-eraser-spec.mdc.md](file:///Volumes/XPSSD/workspaces/X-Eraser/.cursor/rules/x-eraser-spec.mdc.md) — Cursor IDE 全局规则（alwaysApply: true，AI 每次操作都加载）
+2. [.trae/skills/x-eraser-debugging/SKILL.md](file:///Volumes/XPSSD/workspaces/X-Eraser/.trae/skills/x-eraser-debugging/SKILL.md) — Trae debug skill（AI 调试时加载）
+3. 本案例 — 项目 lessons learned（次要参考）
+
+**正确流程**：
+1. **先确认** MCP Chrome 是否 = user Chrome（不要凭"感觉"假设隔离）
+2. 用 MCP 抓 X 实际 DOM / click 弹菜单抓 menuitem 真实 text + aria-label + testid
+3. **把抓到的实际值粘到代码注释里**（"X 2026-06-17 MCP 实证：Delete menuitem text = 'Delete' / aria-label = null"）
+4. 基于实证改代码 + 写 verify 脚本断言实证值
+5. user 端到端验证
+
+**绝对禁止**：
+- 靠"经验推断" / "我觉得 X 应该会改成" / "之前测试是这样推论现在"等假设写代码
+- 改代码前没在 X 实际页面 click / evaluate_script 抓实证
+- 只看 verify 脚本全过就声称修复成功（verify 测的是代码符合预期，**不等于**预期符合 X 实际）
+
+**经验**：
+- **AI 调试 X 实际页面 = 必须用 MCP 实证** —— 这是铁律
+- 经验推断在 X 改版场景下错误率 100%（X 改版频率高，selector / text / DOM 都会变）
+- verify 脚本全过 ≠ user 端到端 OK
+- user 是"X 实际"的最佳权威 —— 多问 user "X 实际长什么样" / "你能截屏吗"
+- 完整 session：[docs/debug-history/debug-tweet-delete-regression.md](file:///Volumes/XPSSD/workspaces/X-Eraser/docs/debug-history/debug-tweet-delete-regression.md)
+- 防回归：[scripts/verify-tweets-bug-3.js](file:///Volumes/XPSSD/workspaces/X-Eraser/scripts/verify-tweets-bug-3.js)（87 项 assert）

@@ -44,10 +44,15 @@ check('content.js detectPageType 含 /following 检测', content.includes("url.i
 
 // 4. injector.js 改动
 const injector = fs.readFileSync(path.join(ROOT, 'chrome-extension/lib/injector.js'), 'utf8');
-check('injector DEFAULT_SELECTORS 含 unfollowButtons 数组',
-  /DEFAULT_SELECTORS\s*=\s*{[\s\S]*?following:\s*{[\s\S]*?unfollowButtons:\s*\[/.test(injector));
-check('injector DEFAULT_SELECTORS 含 following.confirmButton',
-  /following:\s*{[\s\S]*?confirmButton:/.test(injector));
+// 2026-XX-XX 案例 6 改造后 selector 不再走 DEFAULT_SELECTORS 而是从 config.following 读
+// 改测：injector 内部有 following 分支 + 引用 this.config.following.unfollowButtons / confirmButton
+check('injector 读 this.config.following.unfollowButtons 数组',
+  /this\.config\.following\s*\n?\s*\.unfollowButtons/.test(injector) ||
+  /this\.config\s*&&\s*this\.config\.following\s*&&\s*Array\.isArray\(\s*this\.config\.following\.unfollowButtons/.test(injector) ||
+  /Array\.isArray\(\s*selectors\.unfollowButtons\s*\)/.test(injector));
+check('injector 读 this.config.following.confirmButton（带回退到 common.confirmButton）',
+  /following\.confirmButton[\s\S]{0,80}common\.confirmButton/.test(injector) ||
+  /following\s*&&\s*this\.config\.following\.confirmButton/.test(injector));
 check('injector 含 processFollowing 方法',
   /async\s+processFollowing\s*\(\s*maxItems\s*\)/.test(injector));
 check('injector processItems 含 following 分支',
@@ -56,8 +61,10 @@ check('injector shouldFilter 含 following',
   /shouldFilter\s*\([^)]*\)\s*{[\s\S]*?itemType\s*===\s*['"]following['"]/.test(injector));
 check('injector unfollowUser 兼容 unfollowButtons 数组',
   /unfollowUser[\s\S]*?Array\.isArray\(selectors\.unfollowButtons\)/.test(injector));
-check('injector extractMeta 支持 following 文本提取',
-  /extractMeta[\s\S]*?itemType\s*===\s*['"]following['"][\s\S]*?User-Name/.test(injector));
+// 2026-XX-XX 案例 6 改造后：extractMeta for following 不再硬编码 User-Name selector，改从 this.config.common.userInfo.userName 读
+// 改测：extractMeta 内部有 following 分支 + 读 userInfo.userName
+check('injector extractMeta 支持 following 文本提取（走 config.common.userInfo）',
+  /extractMeta[\s\S]*?itemType\s*===\s*['"]following['"][\s\S]*?userInfo/.test(injector));
 
 // Bug fix：无进展超时（订阅用户不应被批量时长卡住）
 const oldTotalTimeout = injector.match(/MAX_DURATION_MS|startedAt/g);
@@ -144,7 +151,10 @@ check('sidepanel.js auto-hide 异常时立即重新展开（clearTimeout + remov
 
 // 结构性检查：每个 UI checkbox 都有对应的 getXxxPageURL + processXxx / handler
 // 防止"checkbox 在 UI 上但底层未实现"的状态混淆
-const uiTypes = ['tweets', 'likes', 'bookmarks', 'following', 'messages'];
+// 注意：不包含 'messages' —— X 的消息按钮 click handler 校验 isTrusted
+//   content script 注入的 click 事件 isTrusted=false，会被静默忽略
+//   详见 README "已知限制" + lessons-learned 案例，特性主动不支持
+const uiTypes = ['tweets', 'likes', 'bookmarks', 'following'];
 uiTypes.forEach(function(type) {
   // 1. UI checkbox 存在
   const checkboxRe = new RegExp('id="opt-' + type + '"');

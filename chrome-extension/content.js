@@ -1,5 +1,23 @@
 // X-Eraser Content Script
-// 注入到 X 网站
+// 注入到 X 网站，跑在 X 页面 DOM 上下文里
+//
+// 职责:
+//   1. 启动时加载远程配置（从 chrome.storage.local 读，background 已预拉好）
+//   2. 初始化 XEraserInjector 实例（核心清理引擎，跑在 lib/injector.js）
+//   3. 包装 injector 的回调（onLog / onProgress / onComplete）→ 通过 chrome.runtime.sendMessage 发给 sidepanel
+//   4. 检测登录状态、页面类型（likes/bookmarks/tweets/following）
+//   5. 处理「跨页面清理」的 auto-resume（用户点了 Start，跳页后再回来自动继续）
+//   6. 接收 sidepanel 的 startCleanup / pauseCleanup 等命令 → 转发给 injector
+//
+// 与其他层的关系:
+//   - sidepanel（用户控制面板）→ background → content
+//   - content（这一层）→ sidepanel（直接 broadcast，不经 background，避免收到 2 次）
+//   - background 预拉远程配置 → content 从 chrome.storage.local 读
+//
+// 注入时机:
+//   - manifest content_scripts: 每次 X 页面加载时自动注入
+//   - chrome.scripting.executeScript: 已开的 tab 由 background 手动注入
+//   防重复注入: 用 window.__XEraserContentInjected flag 守护
 
 // 防止 manifest content_scripts + chrome.scripting.executeScript 重复注入同一个 content.js
 // 重复注入会导致 2 个 injector 实例、2 个 onLog 包装、日志面板重复输出
@@ -20,15 +38,20 @@
   // - a[href="/compose/post"] / [data-testid^="AppTabBar_"]：侧栏常驻元素，不依赖具体 testid
   // - 其余：之前用过的 testid，作为兜底
   // 不再用 [data-testid='tweetTextarea_0']（仅 /home 存在）和 [data-testid='AppBody-Assistor']（X 已移除）
+  // 2026-XX-XX 精简：X 改版后 a[href='/i/bookmarks'] / a[href^='/messages'] /
+  //   精确 [data-testid='SideNav_AccountSwitcher'] / 精确 [data-testid='UserAvatar'] 都已失效
+  //   （实测在 x.com/i/bookmarks 的 X 2026 DOM 全部 MISS，详见 debug-login-stuck-checking.md）
+  // 删除 [aria-label*='Account menu']：X 把 aria-label 当 visible text 翻译，
+  //   案例 10 已记录此现象，非英文 locale 100% 失效
+  // 7 个 selector 在 X 2026 实测全部 HIT，做减法：原 8 个 → 现 7 个
   const GLOBAL_LOGIN_INDICATORS = [
-    "a[href='/compose/post']",
-    "a[href='/i/bookmarks']",
-    "[data-testid^='AppTabBar_']",
-    "a[href^='/messages']",
-    "a[href^='/notifications']",
-    "[data-testid='SideNav_AccountSwitcher']",
-    "[data-testid='UserAvatar']",
-    "[aria-label*='Account menu']",
+    "a[href='/compose/post']",                  // ✅ 仍能用
+    "a[href='/home']",                          // ← 新增
+    "a[href^='/i/chat']",                       // ← 新增（X 2026 Direct Messages 真实路径）
+    "a[href^='/notifications']",                // ✅ 仍能用
+    "[data-testid^='AppTabBar_']",              // ✅ 仍能用（前缀匹配，7 个）
+    "[data-testid^='SideNav_AccountSwitcher']", // ← 改为前缀匹配（X 加了 _Button 后缀）
+    "[data-testid^='UserAvatar-Container']",    // ← 改为前缀匹配（X 加了 -<username> 后缀）
   ];
 
   // X 的保留路径（导航/系统页），不能被当成 user profile/tweets 源
@@ -45,6 +68,9 @@
   let cachedIsLoggedIn = null;
 
   // 直接从 storage 读远程配置（中间不再经过 background）
+  // 设计：background service worker 启动时已预拉远程配置 → 存 chrome.storage.local
+  //       content 启动时直接读 storage 拿就行（不再绕一圈 background，省 1 次 IPC）
+  // 返回: 远程配置对象 或 null（storage 也没 → 用 injector 内置 DEFAULT_SELECTORS 兜底）
   async function getRemoteConfig() {
     try {
       const stored = await chrome.storage.local.get('remoteConfig');
@@ -55,49 +81,116 @@
     return null;
   }
 
+  // 8 语言登录页文字检测（兜底用）—— 远程配置缺失时按用户 X 显示语言检测登录页
+  // 来源：原 lib/config.js 的 DEFAULT_CONFIG.selectors.login.checkElements（lib/config.js 已删）
+  // 每个语言: 2 个文字 + 1 个稳定 selector
+  // 关键 selector: data-testid='loginButton' 是 X 登录页稳定的标记（多语言一致）
+  const DEFAULT_CHECK_ELEMENTS_8LANG = {
+    'zh-CN': [
+      { type: 'text', value: '继续' },
+      { type: 'text', value: '创建您的账户' },
+      { type: 'selector', value: "[data-testid='loginButton']" }
+    ],
+    'zh-TW': [
+      { type: 'text', value: '繼續' },
+      { type: 'text', value: '建立您的帳戶' },
+      { type: 'selector', value: "[data-testid='loginButton']" }
+    ],
+    'en': [
+      { type: 'text', value: 'Sign in' },
+      { type: 'text', value: 'Create your account' },
+      { type: 'selector', value: "[data-testid='loginButton']" }
+    ],
+    'ja': [
+      { type: 'text', value: 'サインイン' },
+      { type: 'text', value: 'アカウントを作成' },
+      { type: 'selector', value: "[data-testid='loginButton']" }
+    ],
+    'ko': [
+      { type: 'text', value: '로그인' },
+      { type: 'text', value: '계정 만들기' },
+      { type: 'selector', value: "[data-testid='loginButton']" }
+    ],
+    'es': [
+      { type: 'text', value: 'Iniciar sesión' },
+      { type: 'text', value: 'Crea tu cuenta' },
+      { type: 'selector', value: "[data-testid='loginButton']" }
+    ],
+    'de': [
+      { type: 'text', value: 'Anmelden' },
+      { type: 'text', value: 'Konto erstellen' },
+      { type: 'selector', value: "[data-testid='loginButton']" }
+    ],
+    'fr': [
+      { type: 'text', value: 'Se connecter' },
+      { type: 'text', value: 'Créer votre compte' },
+      { type: 'selector', value: "[data-testid='loginButton']" }
+    ]
+  };
+
+  // 把远程配置封装成 window.XEraserConfig 给 page 上下文用
+  //   远程配置优先 → 没有就用本地默认（兜底）
+  // 设计：getter 形式（每次读都重新判断 remoteConfig），方便运行时 remote 变化后能立刻生效
   function initXEraserConfig(remoteConfig) {
     window.XEraserConfig = {
+      // 匹配的网站域名模式（用于 chrome.tabs.query 查 X tab）
       getWebsitePatterns() {
         if (remoteConfig && remoteConfig.selectors && remoteConfig.selectors.xWebsite && remoteConfig.selectors.xWebsite.patterns) {
           return remoteConfig.selectors.xWebsite.patterns;
         }
         return ['x.com', 'twitter.com'];
       },
+      // 登录检测配置（checkElements 是按语言登录页文字，loggedInElements 是已登录元素）
+      // 8 语言 checkElements 兜底：远程配置失败 → 默认按用户 X 显示语言检测登录页文字
+      //   来源：原 lib/config.js 的 DEFAULT_CONFIG，2026-XX-XX 移到此处（lib/config.js 已删）
       getLoginConfig() {
         if (remoteConfig && remoteConfig.selectors && remoteConfig.selectors.login) {
           return remoteConfig.selectors.login;
         }
         return {
-          checkElements: {},
+          checkElements: DEFAULT_CHECK_ELEMENTS_8LANG,
+          // 与 GLOBAL_LOGIN_INDICATORS 同步精简（2026-XX-XX）：
+          //   删 4 个失效（/i/bookmarks / /messages / 精确 SideNav_AccountSwitcher / 精确 UserAvatar）
+          //   删 1 个 aria-label 翻译死（[aria-label*='Account menu']）
+          //   加 2 个新工作（/home / /i/chat），2 个改前缀匹配（SideNav_AccountSwitcher / UserAvatar-Container）
           loggedInElements: [
             { type: 'selector', value: "a[href='/compose/post']" },
-            { type: 'selector', value: "a[href='/i/bookmarks']" },
-            { type: 'selector', value: "[data-testid^='AppTabBar_']" },
-            { type: 'selector', value: "a[href^='/messages']" },
+            { type: 'selector', value: "a[href='/home']" },
+            { type: 'selector', value: "a[href^='/i/chat']" },
             { type: 'selector', value: "a[href^='/notifications']" },
-            { type: 'selector', value: "[data-testid='SideNav_AccountSwitcher']" },
-            { type: 'selector', value: "[data-testid='UserAvatar']" },
-            { type: 'selector', value: "[aria-label*='Account menu']" }
+            { type: 'selector', value: "[data-testid^='AppTabBar_']" },
+            { type: 'selector', value: "[data-testid^='SideNav_AccountSwitcher']" },
+            { type: 'selector', value: "[data-testid^='UserAvatar-Container']" }
           ]
         };
       },
+      // 全局登录 indicator（任何登录页都有的稳定元素）
       getGlobalLoginIndicators() {
         if (remoteConfig && remoteConfig.selectors && remoteConfig.selectors.login && remoteConfig.selectors.login.globalIndicators) {
           return remoteConfig.selectors.login.globalIndicators;
         }
         return GLOBAL_LOGIN_INDICATORS;
       },
+      // 暴露完整 selectors 给 injector
       getSelectors() {
         return (remoteConfig && remoteConfig.selectors) || {};
       }
     };
   }
 
+  // 初始化 XEraserInjector（lib/injector.js 的主引擎类）并包装回调
+  // 包装内容：injector.onLog / onProgress / onComplete / onError / onTypeStart / onTypeComplete
+  //   全部桥接到 chrome.runtime.sendMessage 发给 sidepanel（用户控制面板）
+  // 失败保护：如果 window.XEraserInjector 不存在（injector.js 没加载完），静默 return
   function initInjector(remoteConfig) {
     if (window.XEraserInjector) {
       injector = new window.XEraserInjector();
       injector.setConfig(remoteConfig);
+      // 关键修复（debug-tweet-delete-regression）：把当前登录用户名传给 injector
+      //   用于 collectCandidates 过滤掉他人 quoted 推文（X 2026 把 quoted 推文渲染成顶层 article）
+      injector.setCurrentUsername(getCurrentUsername());
 
+      // 进度更新（每处理一条推文 → 发一次）
       injector.onProgress = function(count, message) {
         chrome.runtime.sendMessage({
           type: 'cleanupProgress',
@@ -105,6 +198,7 @@
         }).catch(function() {});
       };
 
+      // 日志输出（每步操作都发一条，侧边栏实时显示）
       injector.onLog = function(message, type) {
         chrome.runtime.sendMessage({
           type: 'cleanupLog',
@@ -112,6 +206,7 @@
         }).catch(function() {});
       };
 
+      // 整个 cleanup 跑完
       injector.onComplete = function(result) {
         chrome.runtime.sendMessage({
           type: 'cleanupComplete',
@@ -119,6 +214,7 @@
         });
       };
 
+      // 错误
       injector.onError = function(message) {
         chrome.runtime.sendMessage({
           type: 'cleanupError',
@@ -126,6 +222,7 @@
         }).catch(function() {});
       };
 
+      // 每个 type（likes/bookmarks/following/tweets）开始
       injector.onTypeStart = function(type) {
         chrome.runtime.sendMessage({
           type: 'cleanupTypeStart',
@@ -133,6 +230,7 @@
         }).catch(function() {});
       };
 
+      // 每个 type 跑完（带处理条数）
       injector.onTypeComplete = function(type, processed) {
         chrome.runtime.sendMessage({
           type: 'cleanupTypeComplete',
@@ -144,6 +242,8 @@
     }
   }
 
+  // 启动入口：加载远程配置 → 初始化 XEraserConfig 和 Injector → 500ms 后检查登录状态
+  // 同时启动 MutationObserver 监听 article 元素出现，触发 auto-resume 检查
   async function loadConfig() {
     const remoteConfig = await getRemoteConfig();
     if (remoteConfig) {
@@ -167,6 +267,30 @@
       console.error('[X-Eraser] waitForArticles failed:', e);
     });
   }
+
+  // 监听 storage.onChanged：用户点「重载配置」按钮后，background 把新 config 写到 storage.local
+  //   修法：content 自己监听 storage.onChanged，remoteConfig 变了就 setConfig 到现有 injector
+  //   关键：复用同一 instance（不新建）→ sidepanel 后续 getStatus / pause / stop 仍打到同一对象
+  //         本次 cleanup 不会被打断（processXxx 循环照旧跑完），但下一轮 iteration 立刻用新 config
+  //         （X 改版中途切选择器的风险：旧 config 的 selector 找不到按钮 → 跳过 → 新 config 顶上）
+  //         选 setConfig 而非 initInjector：initInjector 会替换模块级 injector 变量，导致
+  //         sidepanel 后续消息打到一个 isRunning=false 的新 instance，UI 错位显示已停止
+  chrome.storage.onChanged.addListener(function(changes, area) {
+    if (area !== 'local' || !changes.remoteConfig) return;
+    getRemoteConfig().then(function(newConfig) {
+      if (!newConfig) return;
+      console.log('[X-Eraser] remoteConfig changed, applying via setConfig');
+      initXEraserConfig(newConfig);
+      if (injector && typeof injector.setConfig === 'function') {
+        injector.setConfig(newConfig);
+        if (typeof injector.setCurrentUsername === 'function') {
+          injector.setCurrentUsername(getCurrentUsername());
+        }
+      }
+    }).catch(function(e) {
+      console.warn('[X-Eraser] re-init on storage change failed:', e.message);
+    });
+  });
 
   // 监听 X 推文卡片（<article> 标签）出现，立即 resolve；超时兜底
   function waitForArticles(timeout) {
@@ -307,6 +431,7 @@
       if (injector) {
         const remoteConfig = await getRemoteConfig();
         injector.setConfig(remoteConfig);
+        injector.setCurrentUsername(getCurrentUsername());
         const isLast = remainingTypes.length === 0;
         // 旧实现：runCleanupWithRetry 调用 maxAttempts=2 会在 0 命中时无条件重试一次。
         // 这与前面 waitForArticles(3000) 的职责重复，导致每页跑 2 次（4s 浪费 + 用户困惑）。
@@ -472,7 +597,10 @@
     return false;
   }
 
-  // 检测当前 URL 类型
+  // 检测当前 URL 类型 —— 决定调用哪个 processXxx
+  // 返回: 'likes' | 'bookmarks' | 'following' | 'tweets' | 'other'
+  //   'other' 包括 home / explore / notifications / 单条推文详情页（status/...）
+  // 关键: 用于 auto-resume 跳页后判断当前页面是不是目标 type（不是就 forcePageLoad 跳到对应 URL）
   function detectPageType() {
     const url = window.location.href.toLowerCase();
     const path = window.location.pathname;
@@ -492,7 +620,13 @@
     return 'other';
   }
 
-  // 从页面上获取当前登录用户的用户名
+  // 从 X 页面上提取当前登录用户的用户名（用于拼 /{username}/likes 等 URL）
+  // 4 个 fallback 源（按可靠性顺序）:
+  //   1. 侧栏 AppTabBar_Profile_Link 的 href —— 最直接最稳定
+  //   2. AccountSwitcher 的 LogoutLink —— 父节点有用户信息（X 改版可能失效）
+  //   3. 头像 / profile 链接 —— 看 aria-label 包含 'profile' 才算
+  //   4. 当前 URL path —— 如果当前在 profile 页面（兜底）
+  // 返回: username 字符串 或 null
   function getCurrentUsername() {
     // 尝试 1: 从导航栏 Profile 链接获取
     var profileLink = document.querySelector('a[data-testid="AppTabBar_Profile_Link"]');
@@ -536,6 +670,9 @@
     return null;
   }
 
+  // 获取用户 likes 页面 URL（用于 forcePageLoad 跳页）
+  // 优先用用户名拼个人 likes URL（如 https://x.com/elonmusk/likes）→ 用户能看到自己点过哪些 like
+  // 兜底用 /i/likes —— 不需要用户名但可能显示已 like 列表而非个人 like 列表
   function getLikesPageURL() {
     var username = getCurrentUsername();
     if (username) {
@@ -545,10 +682,12 @@
     return 'https://x.com/i/likes';
   }
 
+  // Bookmarks 是全局的（不像 likes 是用户维度的）→ 固定 URL
   function getBookmarksPageURL() {
     return 'https://x.com/i/bookmarks';
   }
 
+  // Following 是用户维度的 → 需要用户名
   function getFollowingPageURL() {
     var username = getCurrentUsername();
     if (username) {
@@ -615,6 +754,9 @@
     return null;
   }
 
+  // 综合状态查询 —— 一次返回所有 sidepanel 需要的状态
+  // 返回: { isX, isLoggedIn, isLoginPage, pageType, url }
+  //   sidepanel 启动时 + 3s 轮询都调这个
   function checkXStatus() {
     const isX = isTargetWebsite();
     const isLoggedIn = isX ? getEffectiveLoginStatus() : false;
@@ -630,6 +772,15 @@
     };
   }
 
+  // 处理 sidepanel 的 startCleanup 消息 —— cleanup 入口
+  // 关键: 不同 type 对应的 X 页面 URL 不同（likes/following 需要用户名，tweets 需要 profile 页）
+  //       如果当前页面不对，必须先 forcePageLoad 跳到目标页 → 等文章加载完 → 才能开始清理
+  // 流程:
+  //   1. 检查 injector 是否就绪
+  //   2. 检查当前 pageType 和所选 types 是否匹配
+  //      - 不匹配 → 发 cleanupLog + sendResponse({ needsNavigation: true }) + 100ms 后 forcePageLoad
+  //      - 匹配 → 调 injector.startCleanup(options)
+  // 返回: 通过 sendResponse 异步返回 { started: true } 或 { started: true, needsNavigation: true }
   async function handleStartCleanup(message, sendResponse) {
     if (!injector) {
       sendResponse({ error: 'Injector not ready' });
@@ -694,10 +845,21 @@
     // 从 storage 读最新配置（不再依赖模块级 remoteConfig）
     const remoteConfig = await getRemoteConfig();
     injector.setConfig(remoteConfig);
+    injector.setCurrentUsername(getCurrentUsername());
     injector.startCleanup(message.options);
     sendResponse({ started: true });
   }
 
+  // 消息路由总入口（content 这边的 onMessage）
+  //   收到的消息分两类:
+  //     A. sidepanel / background 转发过来的命令（message.target === 'content'）
+  //        - getStatus: 综合状态查询（sidepanel 启动时 + 3s 轮询用）
+  //        - ping: 心跳检测（看 content 是否还活着）
+  //        - startCleanup / pauseCleanup / resumeCleanup / stopCleanup: 控制 injector
+  //        - getCleanupStatus: 查 cleanup 当前进度
+  //        - setFilters: 设置日期/关键字过滤器
+  //     B. background 转发过来但非 target=content 的消息（如 background / refreshConfig）
+  //        → 忽略，让 background 自己处理
   chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     if (message.target !== 'content') return;
 
@@ -745,6 +907,8 @@
     }
   });
 
+  // 主动推送状态变化给 sidepanel（被 3s setInterval 调用）
+  // 与 sidepanel 主动调 getStatus 的区别: 这个是「状态变化才发」，减少无意义消息
   function notifyStatus() {
     const status = checkXStatus();
     // 只在登录状态变化时广播，避免无意义消息

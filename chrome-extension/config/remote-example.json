@@ -53,13 +53,12 @@
       },
       "loggedInElements": [
         { "type": "selector", "value": "a[href='/compose/post']" },
-        { "type": "selector", "value": "a[href='/i/bookmarks']" },
-        { "type": "selector", "value": "[data-testid^='AppTabBar_']" },
-        { "type": "selector", "value": "a[href^='/messages']" },
+        { "type": "selector", "value": "a[href='/home']" },
+        { "type": "selector", "value": "a[href^='/i/chat']" },
         { "type": "selector", "value": "a[href^='/notifications']" },
-        { "type": "selector", "value": "[data-testid='SideNav_AccountSwitcher']" },
-        { "type": "selector", "value": "[data-testid='UserAvatar']" },
-        { "type": "selector", "value": "[aria-label*='Account menu']" }
+        { "type": "selector", "value": "[data-testid^='AppTabBar_']" },
+        { "type": "selector", "value": "[data-testid^='SideNav_AccountSwitcher']" },
+        { "type": "selector", "value": "[data-testid^='UserAvatar-Container']" }
       ]
     },
     "tweet": {
@@ -68,16 +67,40 @@
         "[data-testid='more']",
         "[data-testid='caret']",
         "button[aria-label='More']",
-        "button[aria-label*='More']"
+        "button[aria-label*='More']",
+        "button[aria-label*='更多']",
+        "button[aria-label*='もっと見る']",
+        "button[aria-label*='더 보기']",
+        "button[aria-label*='Mehr']",
+        "button[aria-label*='Plus']",
+        "button[aria-label*='Más opciones']"
       ],
-      "deleteButton": "[data-testid='Delete']",
+      "socialContext": ["[data-testid='socialContext']"],
       "confirmButton": "[data-testid='confirmationSheetConfirm']",
       "unreTweetButtons": [
         "[data-testid='unretweet']",
-        "[data-testid='Unretweet']",
-        "button[aria-label*='Undo repost']",
-        "button[aria-label*='Undo Repost']",
-        "[data-testid='undoRepost']"
+        "[data-testid='undoRepost']",
+        "button[aria-label*='Reposted']",
+        "button[aria-label*='已转帖']",
+        "button[aria-label*='已轉發']",
+        "button[aria-label*='リポストしました']",
+        "button[aria-label*='재게시함']",
+        "button[aria-label*='Reposteado']",
+        "button[aria-label*='Repostet']",
+        "button[aria-label*='Reposté']"
+      ],
+      "unretweetConfirmButtons": ["[data-testid='unretweetConfirm']"],
+      "retweetButtonInCard": [
+        "[data-testid='unretweet']",
+        "[data-testid='undoRepost']",
+        "button[aria-label*='Reposted']",
+        "button[aria-label*='已转帖']",
+        "button[aria-label*='已轉發']",
+        "button[aria-label*='リポストしました']",
+        "button[aria-label*='재게시함']",
+        "button[aria-label*='Reposteado']",
+        "button[aria-label*='Repostet']",
+        "button[aria-label*='Reposté']"
       ]
     },
     "like": {
@@ -86,29 +109,127 @@
         "[data-testid='unlike']",
         "[data-testid='unlike-react']",
         "button[aria-label*='Liked']",
-        "button[aria-label*='Unlike']"
+        "button[aria-label*='Unlike']",
+        "button[aria-label*='喜欢了']",
+        "button[aria-label*='已喜歡']",
+        "button[aria-label*='いいねしました']",
+        "button[aria-label*='마음에 들어 함']",
+        "button[aria-label*='Marcó como Me gusta']",
+        "button[aria-label*='Me gusta']",
+        "button[aria-label*='Gefällt mir']",
+        "button[aria-label*=\"J'aime\"]"
       ]
     },
     "bookmark": {
       "container": "[data-testid='tweet']",
       "removeButtons": [
-        "button[aria-label='Bookmarked']",
-        "button[aria-label*='Bookmarked']",
-        "[data-testid='bookmark']",
         "[data-testid='removeBookmark']",
-        "[data-testid='unbookmark']",
-        "button[aria-label*='Remove']"
+        "button[aria-label*='Bookmarked']",
+        "button[aria-label*='已加入书签']",
+        "button[aria-label*='已加入書籤']",
+        "button[aria-label*='ブックマークに追加済み']",
+        "button[aria-label*='북마크에 추가됨']",
+        "button[aria-label*='Guardado']",
+        "button[aria-label*='Lesezeichen']",
+        "button[aria-label*='signets']"
       ]
     },
     "following": {
       "container": "[data-testid='cellInnerDiv']",
       "unfollowButtons": [
-        "[data-testid='unfollow']",
-        "[data-testid='UserUnfollow']",
+        "[data-testid$='-unfollow']",
         "button[aria-label*='Following']",
-        "button[aria-label*='Unfollow']"
+        "button[aria-label*='Unfollow']",
+        "button[aria-label*='正在关注']",
+        "button[aria-label*='正在跟隨']",
+        "button[aria-label*='フォロー中']",
+        "button[aria-label*='팔로잉']",
+        "button[aria-label*='Siguiendo']",
+        "button[aria-label*='Folge ich']",
+        "button[aria-label*='Abonné']"
       ],
       "confirmButton": "[data-testid='confirmationSheetConfirm']"
+    },
+    "common": {
+      "_comment": "4 种清理类型共用的 DOM 选择器（2026-XX-XX 抽出）",
+      "confirmButton": ["[data-testid='confirmationSheetConfirm']"],
+      "articleContainers": ["[data-testid='tweet']", "[data-testid='cellInnerDiv']", "article"],
+      "timeElement": ["time[datetime]"],
+      "tweetText": ["[data-testid='tweetText']"],
+      "userInfo": {
+        "userCell": ["[data-testid='UserCell']", "[data-testid='userCell']"],
+        "userName": ["[data-testid='User-Name']", "[data-testid='UserName']"],
+        "userDescription": ["[data-testid='UserDescription']"]
+      }
+    },
+    "i18n": {
+      "_comment": "X 2026 当前版本会把按钮 aria-label + 菜单文字 都按用户 X 显示语言翻译（'Cancel' → '取消'/'キャンセル'/'취소' 等），selector 必须配 8 语言文字兜底。X 改版改了翻译时，改这里不用发新版扩展",
+      "deleteKeywords": [
+        "Delete",
+        "删除",
+        "刪除",
+        "削除",
+        "삭제",
+        "Eliminar",
+        "Löschen",
+        "Supprimer",
+        "Elimina"
+      ],
+      "unretweetKeywords": [
+        "Undo repost",
+        "Undo Repost",
+        "撤销转推",
+        "取消轉推",
+        "リポストを取り消す",
+        "리트윗 취소",
+        "Cancelar repost",
+        "Repost rückgängig machen",
+        "Annuler le repost",
+        "Annulla repost"
+      ],
+      "pinnedKeywords": [
+        "pinned",
+        "已置顶",
+        "已釘選",
+        "ピン留め",
+        "고정",
+        "fijado",
+        "angeheftet",
+        "épinglé"
+      ],
+      "replyKeywords": [
+        "replying to",
+        "in reply to",
+        "回复",
+        "回覆",
+        "返信",
+        "답장",
+        "respondiendo a",
+        "antworten",
+        "répondre",
+        "rispondendo a"
+      ],
+      "cancelKeywords": [
+        "Cancel",
+        "取消",
+        "キャンセル",
+        "취소",
+        "Cancelar",
+        "Abbrechen",
+        "Annuler",
+        "Annulla"
+      ],
+      "confirmKeywords": [
+        "Delete",
+        "删除",
+        "刪除",
+        "削除",
+        "삭제",
+        "Eliminar",
+        "Löschen",
+        "Supprimer",
+        "Elimina"
+      ]
     }
   }
 }

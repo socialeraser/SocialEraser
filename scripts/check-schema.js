@@ -2,54 +2,35 @@
 /**
  * Schema 对齐检查
  *
- * 验证 DEFAULT_SELECTORS（lib/injector.js）/ config/default.json /
- * config/remote-example.json 三处的 selector schema 完全一致。
+ * 验证 config/default.json / config/remote-example.json 两处 selector schema 完全一致。
  *
- * 目的：避免 X 改版时只更新了 config 没更新 DEFAULT_SELECTORS 导致
- *       远程热修失效的设计原则违反。
+ * 目的：避免 X 改版时只更新了其中一个 config 导致远程热修失效。
+ * 历史：2026-XX-XX 之前还对比 lib/injector.js 的 DEFAULT_SELECTORS 块，
+ *   案例 6 改造后 DEFAULT_SELECTORS 已删除，schema 单一来源是 config 文件
+ *   （default 是内置兜底，remote 是远程热修源），二者必须字段对齐。
  *
  * 排除：
- *   - login: 由 config.js 独立 merge（content.js 消费），不入 DEFAULT_SELECTORS
- *   - xWebsite: 由 config.js 独立 merge（background.js 消费），不入 DEFAULT_SELECTORS
+ *   - login: 由 content.js 独立 merge，不入此 schema 检查（README 已说明）
+ *   - xWebsite: 由 background.js 独立 merge，不入此 schema 检查
+ *   - i18n: i18n.js DEFAULT_I18N 已是单一来源，config 里的 i18n 块是远程覆盖
+ *   - _comment: 元数据，非 selector
  */
 const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
-const INJECTOR = path.join(ROOT, 'chrome-extension/lib/injector.js');
 const DEFAULT_CFG = path.join(ROOT, 'chrome-extension/config/default.json');
 const REMOTE_CFG = path.join(ROOT, 'chrome-extension/config/remote-example.json');
 
-const EXCLUDE_FROM_DEFAULT = new Set(['login', 'xWebsite']);
-
-function readDefaultSelectors() {
-  const src = fs.readFileSync(INJECTOR, 'utf8');
-  const m = src.match(/const DEFAULT_SELECTORS = \{(.+?)\n  \};/s);
-  if (!m) throw new Error('DEFAULT_SELECTORS block not found');
-  const body = m[1];
-  // split by top-level "key: {" pattern
-  const sections = body.split(/\n\s+(\w+):\s*\{/);
-  const out = {};
-  // sections = ['', 'like', '{...', 'bookmark', '{...', ...]
-  for (let i = 1; i < sections.length; i += 2) {
-    const k = sections[i];
-    const sub = sections[i + 1] || '';
-    const end = sub.search(/\n  \},?\s*\n/);
-    const block = end >= 0 ? sub.slice(0, end) : sub;
-    const keys = new Set();
-    const re = /^\s*(\w+)\s*:/gm;
-    let mm;
-    while ((mm = re.exec(block)) !== null) keys.add(mm[1]);
-    out[k] = Array.from(keys);
-  }
-  return out;
-}
+const EXCLUDE_FROM_CHECK = new Set(['login', 'xWebsite', 'i18n']);
 
 function readConfigSelectors(p) {
   const j = JSON.parse(fs.readFileSync(p, 'utf8'));
   const out = {};
   for (const [k, v] of Object.entries(j.selectors || {})) {
-    out[k] = Object.keys(v);
+    // 排除元数据字段（_comment），只比 selector 字段名
+    const fields = Object.keys(v).filter(function(name) { return !name.startsWith('_'); });
+    out[k] = fields;
   }
   return out;
 }
@@ -71,24 +52,22 @@ function check(name, cond, extra) {
 }
 function skip(name) { console.log('[SKIP] ' + name); }
 
-const def = readDefaultSelectors();
 const cfgA = readConfigSelectors(DEFAULT_CFG);
 const cfgB = readConfigSelectors(REMOTE_CFG);
 
-const allKeys = new Set([...Object.keys(def), ...Object.keys(cfgA), ...Object.keys(cfgB)]);
+const allKeys = new Set([...Object.keys(cfgA), ...Object.keys(cfgB)]);
 for (const k of allKeys) {
-  if (EXCLUDE_FROM_DEFAULT.has(k)) {
-    skip(k + ': 仅在 config 中（独立 merge 路径，不入 DEFAULT_SELECTORS）');
+  if (EXCLUDE_FROM_CHECK.has(k)) {
+    skip(k + ': 独立 merge 路径，不入 schema 检查');
     continue;
   }
-  const d = def[k] || [];
   const a = cfgA[k] || [];
   const b = cfgB[k] || [];
-  const dStr = d.length ? d.join(', ') : '(empty)';
-  if (arrEq(d, a) && arrEq(d, b)) {
-    check(`${k}: ${d.length} keys aligned`, true);
+  if (arrEq(a, b)) {
+    check(`${k}: ${a.length} keys aligned`, true);
   } else {
-    check(`${k}: ${d.length} keys aligned`, false, `DEFAULT: ${dStr}\n       cfgA:  ${a.join(', ')}\n       cfgB:  ${b.join(', ')}`);
+    check(`${k}: ${a.length} keys aligned`, false,
+      `default:  ${a.join(', ')}\n       remote:  ${b.join(', ')}`);
   }
 }
 
