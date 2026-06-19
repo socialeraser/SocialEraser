@@ -182,6 +182,24 @@
   // 包装内容：injector.onLog / onProgress / onComplete / onError / onTypeStart / onTypeComplete
   //   全部桥接到 chrome.runtime.sendMessage 发给 sidepanel（用户控制面板）
   // 失败保护：如果 window.XEraserInjector 不存在（injector.js 没加载完），静默 return
+  // M++ 修复（2026-06-19 tweets-bug-8）：sendToBackground 提到顶层（initInjector 外）
+  //   这样 content script 里所有 fire-and-forget 消息（cleanupLog / cleanupAborted / cleanupComplete / cleanupError 等）
+  //   都能用同一个 helper，不用每个都内嵌一份
+  let _bgPort = null;
+  function sendToBackground(data) {
+    if (_bgPort) {
+      try { _bgPort.postMessage(data); return; } catch (e) { _bgPort = null; }
+    }
+    try {
+      _bgPort = chrome.runtime.connect({ name: 'xeraser-logger' });
+      _bgPort.onDisconnect.addListener(function() { _bgPort = null; });
+      _bgPort.postMessage(data);
+    } catch (e) {
+      _bgPort = null;
+      chrome.runtime.sendMessage(data).catch(function() {});
+    }
+  }
+
   function initInjector(remoteConfig) {
     if (window.XEraserInjector) {
       injector = new window.XEraserInjector();
@@ -192,50 +210,34 @@
 
       // 进度更新（每处理一条推文 → 发一次）
       injector.onProgress = function(count, message) {
-        chrome.runtime.sendMessage({
-          type: 'cleanupProgress',
-          data: { count: count, message: message }
-        }).catch(function() {});
+        sendToBackground({ type: 'cleanupProgress', data: { count: count, message: message } });
       };
 
       // 日志输出（每步操作都发一条，侧边栏实时显示）
       injector.onLog = function(message, type) {
-        chrome.runtime.sendMessage({
-          type: 'cleanupLog',
-          data: { message: message, level: type }
-        }).catch(function() {});
+        sendToBackground({ type: 'cleanupLog', data: { message: message, level: type } });
       };
 
       // 整个 cleanup 跑完
       injector.onComplete = function(result) {
-        chrome.runtime.sendMessage({
-          type: 'cleanupComplete',
-          data: result
-        });
+        sendToBackground({ type: 'cleanupComplete', data: result });
       };
 
       // 错误
       injector.onError = function(message) {
-        chrome.runtime.sendMessage({
-          type: 'cleanupError',
-          data: { message: message }
-        }).catch(function() {});
+        sendToBackground({ type: 'cleanupError', data: { message: message } });
       };
 
-      // 每个 type（likes/bookmarks/following/tweets）开始
+      // 每个 type（likes/bookmarks/following/originalTweets/replies/retweets）开始
+      // M++ 修复（2026-06-19 tweets-bug-8）：用 sendToBackground 替代 sendMessage
+      //   之前 sendMessage race condition 失败时 sidepanel 收不到 → option-count 数字不更新
       injector.onTypeStart = function(type) {
-        chrome.runtime.sendMessage({
-          type: 'cleanupTypeStart',
-          data: { type: type }
-        }).catch(function() {});
+        sendToBackground({ type: 'cleanupTypeStart', data: { type: type } });
       };
 
       // 每个 type 跑完（带处理条数）
       injector.onTypeComplete = function(type, processed) {
-        chrome.runtime.sendMessage({
-          type: 'cleanupTypeComplete',
-          data: { type: type, processed: processed }
-        }).catch(function() {});
+        sendToBackground({ type: 'cleanupTypeComplete', data: { type: type, processed: processed } });
       };
 
       console.log('[X-Eraser] Injector initialized');
@@ -256,16 +258,35 @@
     initInjector(remoteConfig);
 
     console.log('[X-Eraser] Config initialized, checking status...');
-    setTimeout(checkXStatus, 500);
+    // 不用 setTimeout 猜延迟（500ms 是靠经验），等 window 'load' 事件 = page + 资源完全加载
+    if (document.readyState === 'complete') {
+      checkXStatus();
+    } else {
+      window.addEventListener('load', checkXStatus, { once: true });
+    }
 
     // 用 MutationObserver 监听 article 元素出现，触发后立即启动 auto-resume
-    // 比固定 setTimeout 更稳：早触发立即启动，晚触发不等满 timeout，3s 兜底防 observer 漏
-    waitForArticles(3000).then(function(count) {
-      console.log('[X-Eraser] Articles detected:', count, '— proceeding to auto-resume');
+    // 2026-06-18 修复：timeout 8s（X 慢网/弱网时 page load 完要 4-6s，3s 太短）
+    //   + 0 article 时不调 auto-resume（让用户在 sidepanel 手动 retry，避免 0 命中）
+    //   injector 内部 waitForContentStable 仍有 1.5s 稳定 + 5s 兜底，足够 cover 0 article 场景
+    //
+    // M++ 修复（2026-06-18 tweets-bug-6 用户反馈）：
+    //   原版**无条件**等 article + 打印 "proceeding to auto-resume" + "No articles detected" warn
+    //   → 用户**没点开始**时也看到这 2 条日志，误以为扩展在偷偷删东西
+    //   修法：把 pending 检查**前移**到 `checkAndResumePendingCleanup` 内部，
+    //         **没 pending 就直接 return 静默**，根本**不**走 `waitForArticles` 路径
+    //   效果：用户没点开始 / 上次没残留 cleanup → content.js 启动完全静默
+    //
+    // M++ 修复（2026-06-18 tweets-bug-6 用户再次反馈"页面没加载完就干完了"）：
+    //   根因：checkAndResumePendingCleanup 在 IIFE 启动时**立即调**，**不等 window.load**
+    //   → page 资源还没下载完就开始 cleanup → waitForContentStable 0 article 兜底 → 0 candidates
+    //   修法：必须等 document.readyState === 'complete'（window.load 触发）才调
+    //         X 内部 React hydration 在 load 后才开始，waitForContentStable 才有意义
+    if (document.readyState === 'complete') {
       checkAndResumePendingCleanup();
-    }).catch(function(e) {
-      console.error('[X-Eraser] waitForArticles failed:', e);
-    });
+    } else {
+      window.addEventListener('load', checkAndResumePendingCleanup, { once: true });
+    }
   }
 
   // 监听 storage.onChanged：用户点「重载配置」按钮后，background 把新 config 写到 storage.local
@@ -292,9 +313,23 @@
     });
   });
 
-  // 监听 X 推文卡片（<article> 标签）出现，立即 resolve；超时兜底
-  function waitForArticles(timeout) {
-    if (timeout === undefined) timeout = 3000;
+  // 监听 X 推文卡片（<article> 标签）出现，立即 resolve
+  //
+  // 设计原则（2026-06-18 tweets-bug-6 用户反馈）：
+  //   **不靠经验猜等几秒**。M++ 撤销 M+ 的 8s timeout 改用：
+  //   1. MutationObserver 立即检测 article 出现 → resolve
+  //   2. 兜底：X 真挂了或选择器失效 → 连续 N 次空 mutation 才算"加载完（其实是失败）"
+  //      N 是"观察次数"，不是"时间"（观察一次 = DOM 一次变化或一次 RAF）
+  //      X 真的在 lazy load 时 mutation 频繁，N=20 也就 1-2s
+  //      X 真挂了时 N=20 也很快（mutation 不会有，直接 20 帧空）
+  //   3. 极端兜底：连续 maxIdleFrames 没任何 mutation 也算加载完
+  //      帧数是浏览器节奏，不靠经验数字
+  //
+  // 注：实际本函数在 tweets-bug-6 后**不再被自动调用**——`checkAndResumePendingCleanup`
+  //     内部直接用 `runCleanupOnce`（内部 `waitForContentStable` 处理"加载完"判断）。
+  //     本函数保留以备其他场景用 + 防御性。
+  function waitForArticles() {
+    var MAX_IDLE_MUTATIONS = 20;  // 连续 20 次空 mutation 算"无新 article"（不靠时间）
     return new Promise(function(resolve) {
       // document_start 注入时 <body> 还没创建，MutationObserver.observe(null) 会抛
       // 等 DOMContentLoaded 后再启动 observer
@@ -303,8 +338,7 @@
           if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', startObserving, { once: true });
           } else {
-            // 极端情况：readyState 不是 loading 但 body 仍 null（极少见）
-            setTimeout(startObserving, 10);
+            requestAnimationFrame(startObserving);
           }
           return;
         }
@@ -314,25 +348,36 @@
         if (initial > 0) { resolve(initial); return; }
 
         // 2. MutationObserver 监听 DOM 变化
+        //    连续 N 次 mutation 后 article 数仍 = 0 → resolve(0)（X 没渲染，不是没加载完）
+        //    一旦 article > 0 → resolve(n)
         var resolved = false;
+        var idleCount = 0;
+        function done(n) {
+          if (resolved) return;
+          resolved = true;
+          observer.disconnect();
+          cancelAnimationFrame(rafId);
+          resolve(n);
+        }
         var observer = new MutationObserver(function() {
           if (resolved) return;
           var n = document.querySelectorAll('article').length;
-          if (n > 0) {
-            resolved = true;
-            observer.disconnect();
-            resolve(n);
+          if (n > 0) { done(n); return; }
+          // 有 mutation 但 article 仍 = 0 → 计数 +1
+          idleCount++;
+          if (idleCount >= MAX_IDLE_MUTATIONS) {
+            done(0);  // X 真的没渲染，resolve(0) 让 caller 决定下一步
           }
         });
         observer.observe(document.body, { childList: true, subtree: true });
 
-        // 3. 兜底超时（X 真的挂了或 article 选择器失效也不会永远等）
-        setTimeout(function() {
+        // 3. 极端兜底：连 RAF 都没触发（X 真挂了）→ 下一帧检查
+        var rafId = requestAnimationFrame(function watchIdle() {
           if (resolved) return;
-          resolved = true;
-          observer.disconnect();
-          resolve(0);
-        }, timeout);
+          var n = document.querySelectorAll('article').length;
+          if (n > 0) { done(n); return; }
+          rafId = requestAnimationFrame(watchIdle);
+        });
       }
 
       startObserving();
@@ -374,21 +419,24 @@
       chrome.runtime.sendMessage({
         type: 'cleanupLog',
         data: { message: t('pageLoadedResuming'), level: 'info' }
-      }).catch(function() {});
+      });
 
       // 找到 pageType 匹配的那个 type（仅一个）
+      //   5 个 type 关系：originalTweets → 'originalTweets'，replies/retweets → 'tweetTimeline'（共用 /with_replies）
       const matchedType = types.find(function(t) {
         if (t === 'likes') return pageType === 'likes';
         if (t === 'bookmarks') return pageType === 'bookmarks';
-        if (t === 'tweets') return pageType === 'tweets';
         if (t === 'following') return pageType === 'following';
+        if (t === 'originalTweets') return pageType === 'originalTweets';
+        if (t === 'replies') return pageType === 'tweetTimeline';
+        if (t === 'retweets') return pageType === 'tweetTimeline';
         return false;
       });
 
       if (!matchedType) {
         // 当前页面不匹配任何 type，兜底跳到第一个
         const firstType = types[0];
-        const nextUrl = getPageURLForType(firstType, pending && pending.tweetOptions);
+        const nextUrl = getPageURLForType(firstType);
         if (nextUrl) {
           // 关键修复：retry 计数防止无限 forcePageLoad
           // 场景：X 把 /messages 重定向到 Create Passcode / Settings 等页面，
@@ -400,14 +448,14 @@
             console.warn('[X-Eraser] Retry limit reached (' + retryCount + '), aborting cleanup. Current page:', pageType);
             await chrome.runtime.sendMessage({ target: 'clearPendingCleanup' });
             // 通知 sidepanel：cleanup 已中止 + 错误原因（chrome.runtime.sendMessage 是广播，sidepanel 直接收到）
-            chrome.runtime.sendMessage({
+            sendToBackground({
               type: 'cleanupLog',
               data: { message: t('cleanupAbortedPageNotFound'), level: 'error' }
-            }).catch(function() {});
-            chrome.runtime.sendMessage({
+            });
+            sendToBackground({
               type: 'cleanupAborted',
               data: { reason: 'page_not_found', retries: retryCount }
-            }).catch(function() {});
+            });
             return;
           }
           // 更新 retry 计数并跳页
@@ -440,25 +488,51 @@
         await runCleanupOnce(optionsForCurrent, 1, isLast);
 
         // 跑完后处理 remainingTypes
-        if (remainingTypes.length > 0) {
-          // 更新 session，移除已处理的 type
-          const newPending = Object.assign({}, pending, { types: remainingTypes });
-          await chrome.runtime.sendMessage({ target: 'updatePendingCleanup', pending: newPending });
-          // 跳到下一个 type 的页面
-          const nextType = remainingTypes[0];
-          const nextUrl = getPageURLForType(nextType, pending && pending.tweetOptions);
-          if (nextUrl) {
-            console.log('[X-Eraser] Processed ' + matchedType + ', navigating to:', nextType);
-            chrome.runtime.sendMessage({
+        // 2026-06-18 优化：用 while 循环替代递归 + 同 URL 跳过 forcePageLoad
+        //   场景：replies + retweets 共享 /username/with_replies，
+        //         旧实现强制刷新浪费 2-3s + 经常 0 命中
+        //   解决：比较 nextUrl pathname 与 window.location.pathname，相同就直接处理
+        let pendingToProcess = remainingTypes;
+        while (pendingToProcess.length > 0) {
+          const nextType = pendingToProcess[0];
+          const nextUrl = getPageURLForType(nextType);
+          if (!nextUrl) {
+            // 未知 type：跳过这个，处理剩下的（防御性，正常不会到这里）
+            pendingToProcess = pendingToProcess.slice(1);
+            continue;
+          }
+          const nextPath = nextUrl.split('?')[0];
+          if (nextPath === window.location.pathname) {
+            // 同 URL：直接处理（replies/retweets 共享 /with_replies 场景）
+            console.log('[X-Eraser] Same URL for ' + nextType + ', skip forcePageLoad and process directly');
+            sendToBackground({
               type: 'cleanupLog',
               data: { message: t('processedNavigatingTo', {next: t(nextType)}), level: 'info' }
-            }).catch(function() {});
-            forcePageLoad(nextUrl);
+            });
+            const subRemaining = pendingToProcess.slice(1);
+            const isLast = subRemaining.length === 0;
+            const subOptions = Object.assign({}, pending, { types: [nextType] });
+            await runCleanupOnce(subOptions, 1, isLast);
+            if (isLast) {
+              await chrome.runtime.sendMessage({ target: 'clearPendingCleanup' });
+              return;
+            }
+            pendingToProcess = subRemaining;
+            continue;
           }
-        } else {
-          // 全部完成，清空 session
-          await chrome.runtime.sendMessage({ target: 'clearPendingCleanup' });
+          // 不同 URL：更新 session + forcePageLoad 跳出当前 resume，等下次 page load 自动 resume
+          const newPending = Object.assign({}, pending, { types: pendingToProcess });
+          await chrome.runtime.sendMessage({ target: 'updatePendingCleanup', pending: newPending });
+          console.log('[X-Eraser] Processed ' + matchedType + ', navigating to:', nextType);
+          sendToBackground({
+            type: 'cleanupLog',
+            data: { message: t('processedNavigatingTo', {next: t(nextType)}), level: 'info' }
+          });
+          forcePageLoad(nextUrl);
+          return;
         }
+        // 全部 remainingTypes 同 URL 走完
+        await chrome.runtime.sendMessage({ target: 'clearPendingCleanup' });
       }
     } catch (error) {
       console.warn('[X-Eraser] Failed to check pending cleanup:', error.message);
@@ -466,12 +540,14 @@
   }
 
   // 根据 type 返回对应页面 URL
-  // tweetOptions 仅 tweets 类型使用：{ includeReplies: bool, includeRetweets: bool }
-  function getPageURLForType(type, tweetOptions) {
+  // 6 type 完全独立，每个 type 自己专属 URL（不再共享 tweetOptions）
+  function getPageURLForType(type) {
     if (type === 'likes') return getLikesPageURL();
     if (type === 'bookmarks') return getBookmarksPageURL();
     if (type === 'following') return getFollowingPageURL();
-    if (type === 'tweets') return getTweetsPageURL(tweetOptions);
+    if (type === 'originalTweets') return getOriginalTweetsPageURL();
+    if (type === 'replies') return getRepliesPageURL();
+    if (type === 'retweets') return getRetweetsPageURL();
     return null;
   }
 
@@ -598,7 +674,8 @@
   }
 
   // 检测当前 URL 类型 —— 决定调用哪个 processXxx
-  // 返回: 'likes' | 'bookmarks' | 'following' | 'tweets' | 'other'
+  // 返回: 'likes' | 'bookmarks' | 'following' | 'originalTweets' | 'tweetTimeline' | 'other'
+  //   'tweetTimeline' = /with_replies 页（同时是 replies 和 retweets 的合法页）
   //   'other' 包括 home / explore / notifications / 单条推文详情页（status/...）
   // 关键: 用于 auto-resume 跳页后判断当前页面是不是目标 type（不是就 forcePageLoad 跳到对应 URL）
   function detectPageType() {
@@ -609,12 +686,14 @@
     if (url.includes('/bookmarks')) return 'bookmarks';
     if (url.includes('/following') && !url.match(/\/following\//)) return 'following';
 
-    // Tweets timeline: /{username} 或 /{username}/with_replies
+    // 6 个 type 的 URL 关系：
+    //   originalTweets = /username（默认 Posts，不含 reply/retweet）
+    //   replies + retweets = /username/with_replies（reply/retweet 不在默认 profile 显示）
     // 显式不匹配 /{username}/status/{id}（单条推文详情页，不是列表）
     // 显式不匹配保留路径（home/explore/...）
     var tweetsMatch = path.match(/^\/([^\/?#]+)(?:\/(with_replies))?\/?$/);
     if (tweetsMatch && RESERVED_PATHS.indexOf(tweetsMatch[1].toLowerCase()) === -1) {
-      return 'tweets';
+      return tweetsMatch[2] === 'with_replies' ? 'tweetTimeline' : 'originalTweets';
     }
 
     return 'other';
@@ -671,15 +750,18 @@
   }
 
   // 获取用户 likes 页面 URL（用于 forcePageLoad 跳页）
-  // 优先用用户名拼个人 likes URL（如 https://x.com/elonmusk/likes）→ 用户能看到自己点过哪些 like
-  // 兜底用 /i/likes —— 不需要用户名但可能显示已 like 列表而非个人 like 列表
+  // M++ 修复（2026-06-18 tweets-bug-7）：X 2026 改版后 user 的 likes **只**在 profile 的 Likes tab 里
+  //   MCP session 是空 user 测不出真东西 → 之前误以为 /i/likes 是真 likes 列表
+  //   user 实测 /i/likes 0 数据（emptyState），/xiangping5211/likes 是 profile 6 tabs 页（Posts/Replies/Highlights/Articles/Media/Likes）
+  //   → likes 列表**必须**在 /xiangping5211/likes 页 + 点 Likes tab 激活
+  // 流程：navigate 到 profile likes 页 → processLikes 入口找 Likes tab 点击 → 等 article 渲染
   function getLikesPageURL() {
     var username = getCurrentUsername();
     if (username) {
       return 'https://x.com/' + username + '/likes';
     }
-    console.warn('[X-Eraser] Could not get username, using /i/likes fallback');
-    return 'https://x.com/i/likes';
+    console.warn('[X-Eraser] Could not get username for likes page');
+    return null;  // 拿不到 username 就放弃
   }
 
   // Bookmarks 是全局的（不像 likes 是用户维度的）→ 固定 URL
@@ -697,24 +779,26 @@
     return 'https://x.com/i/following';
   }
 
-  // Tweets 页面 URL：/{username}/with_replies（含回复+retweet）或 /{username}（仅原创）
-  // opts.includeReplies 默认 true；opts.includeRetweets 默认 true
-  // 关键修复：只要 retweets 或 replies 任何一个要处理，都走 /with_replies
-  //   原因：默认 profile /{username} 不显示 retweets 也不显示 replies
-  //   即使 includeReplies=false，只要 includeRetweets=true 也要走 /with_replies（retweet 不在默认 profile 显示）
-  //   现象：用户实测反馈"还没开始就结束了" —— 导航到默认 profile，0 文章可见
-  function getTweetsPageURL(opts) {
-    opts = opts || {};
-    var includeReplies = opts.includeReplies !== false;
-    var includeRetweets = opts.includeRetweets !== false;  // 关键新增
+  // 3 个推文子类型 URL：6 type 完全独立
+  //   originalTweets: /{username}（默认 Posts，不含 reply/retweet）
+  //   replies:        /{username}/with_replies（reply 不在默认 profile 显示）
+  //   retweets:       /{username}/with_replies（retweet 不在默认 profile 显示；与 replies 共享 URL）
+  function getOriginalTweetsPageURL() {
     var username = getCurrentUsername();
-    if (username) {
-      // 关键：retweet 或 reply 任一要处理 → 必须 /with_replies（默认 profile 不显示它们）
-      var needsFullTimeline = includeReplies || includeRetweets;
-      return 'https://x.com/' + username + (needsFullTimeline ? '/with_replies' : '');
-    }
-    // 无 username 时退回 /home（兜底，至少能进入 X 域；retry 机制会处理）
-    console.warn('[X-Eraser] Could not get username for tweets, using /home fallback');
+    if (username) return 'https://x.com/' + username;
+    console.warn('[X-Eraser] Could not get username for originalTweets, using /home fallback');
+    return 'https://x.com/home';
+  }
+  function getRepliesPageURL() {
+    var username = getCurrentUsername();
+    if (username) return 'https://x.com/' + username + '/with_replies';
+    console.warn('[X-Eraser] Could not get username for replies, using /home fallback');
+    return 'https://x.com/home';
+  }
+  function getRetweetsPageURL() {
+    var username = getCurrentUsername();
+    if (username) return 'https://x.com/' + username + '/with_replies';
+    console.warn('[X-Eraser] Could not get username for retweets, using /home fallback');
     return 'https://x.com/home';
   }
 
@@ -794,27 +878,27 @@
     if (types.indexOf('likes') >= 0 && pageType !== 'likes') {
       const likesUrl = getLikesPageURL();
       console.log('[X-Eraser] Likes requires /likes page, current:', pageType);
-      chrome.runtime.sendMessage({
+      sendToBackground({
         type: 'cleanupLog',
         data: { message: t('likesRequiresNav'), level: 'info' }
-      }).catch(function() {});
+      });
       // 先 sendResponse（避免跳页后 message channel 关闭），再 forcePageLoad
       sendResponse({ started: true, needsNavigation: true });
       // 延迟 100ms 让 sendResponse 完整投递到 background + sidepanel，
       // 然后再 forcePageLoad 触发 chrome.tabs.update 卸载 content
-      setTimeout(function() { forcePageLoad(likesUrl); }, 100);
+      Promise.resolve().then(function() { forcePageLoad(likesUrl); });
       return;
     }
 
     if (types.indexOf('bookmarks') >= 0 && pageType !== 'bookmarks') {
       const bookmarksUrl = getBookmarksPageURL();
       console.log('[X-Eraser] Bookmarks requires /bookmarks page, current:', pageType);
-      chrome.runtime.sendMessage({
+      sendToBackground({
         type: 'cleanupLog',
         data: { message: t('bookmarksRequiresNav'), level: 'info' }
-      }).catch(function() {});
+      });
       sendResponse({ started: true, needsNavigation: true });
-      setTimeout(function() { forcePageLoad(bookmarksUrl); }, 100);
+      Promise.resolve().then(function() { forcePageLoad(bookmarksUrl); });
       return;
     }
 
@@ -826,19 +910,43 @@
         data: { message: t('followingRequiresNav'), level: 'info' }
       }).catch(function() {});
       sendResponse({ started: true, needsNavigation: true });
-      setTimeout(function() { forcePageLoad(followingUrl); }, 100);
+      Promise.resolve().then(function() { forcePageLoad(followingUrl); });
       return;
     }
 
-    if (types.indexOf('tweets') >= 0 && pageType !== 'tweets') {
-      const tweetsUrl = getTweetsPageURL(message.options.tweetOptions);
-      console.log('[X-Eraser] Tweets requires profile page, current:', pageType);
+    if (types.indexOf('originalTweets') >= 0 && pageType !== 'originalTweets') {
+      const url = getOriginalTweetsPageURL();
+      console.log('[X-Eraser] originalTweets requires profile page, current:', pageType);
       chrome.runtime.sendMessage({
         type: 'cleanupLog',
-        data: { message: t('tweetsRequiresNav'), level: 'info' }
+        data: { message: t('originalTweetsRequiresNav'), level: 'info' }
       }).catch(function() {});
       sendResponse({ started: true, needsNavigation: true });
-      setTimeout(function() { forcePageLoad(tweetsUrl); }, 100);
+      Promise.resolve().then(function() { forcePageLoad(url); });
+      return;
+    }
+
+    if (types.indexOf('replies') >= 0 && pageType !== 'tweetTimeline') {
+      const url = getRepliesPageURL();
+      console.log('[X-Eraser] replies requires /with_replies page, current:', pageType);
+      chrome.runtime.sendMessage({
+        type: 'cleanupLog',
+        data: { message: t('repliesRequiresNav'), level: 'info' }
+      }).catch(function() {});
+      sendResponse({ started: true, needsNavigation: true });
+      Promise.resolve().then(function() { forcePageLoad(url); });
+      return;
+    }
+
+    if (types.indexOf('retweets') >= 0 && pageType !== 'tweetTimeline') {
+      const url = getRetweetsPageURL();
+      console.log('[X-Eraser] retweets requires /with_replies page, current:', pageType);
+      chrome.runtime.sendMessage({
+        type: 'cleanupLog',
+        data: { message: t('retweetsRequiresNav'), level: 'info' }
+      }).catch(function() {});
+      sendResponse({ started: true, needsNavigation: true });
+      Promise.resolve().then(function() { forcePageLoad(url); });
       return;
     }
 
@@ -846,7 +954,18 @@
     const remoteConfig = await getRemoteConfig();
     injector.setConfig(remoteConfig);
     injector.setCurrentUsername(getCurrentUsername());
-    injector.startCleanup(message.options);
+    // M++ 修复（2026-06-18 tweets-bug-6 用户再次反馈"页面没加载完就干完了"）：
+    //   原版 forcePageLoad 跳页后，content script 重新注入，立即调 startCleanup
+    //   → page 资源还没下载完 + X React hydration 没开始 → waitForContentStable 0 article
+    //   修法：必须等 document.readyState === 'complete'（window.load 触发）才调 startCleanup
+    //         waitForContentStable 内部会主动 scroll 触发 X 渲染 + 等 article 稳定
+    if (document.readyState === 'complete') {
+      injector.startCleanup(message.options);
+    } else {
+      window.addEventListener('load', function() {
+        injector.startCleanup(message.options);
+      }, { once: true });
+    }
     sendResponse({ started: true });
   }
 
@@ -939,8 +1058,8 @@
   setInterval(notifyStatus, LOGIN_STATUS_POLL_INTERVAL_MS);
 
   if (document.readyState === 'complete') {
-    setTimeout(notifyStatus, 1000);
+    notifyStatus();
   } else {
-    window.addEventListener('load', function() { setTimeout(notifyStatus, 1000); });
+    window.addEventListener('load', notifyStatus, { once: true });
   }
 })();

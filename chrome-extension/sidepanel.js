@@ -91,8 +91,10 @@
     if (window.XEraseri18n) {
       i18n = window.XEraseri18n;
     } else {
-      // 重试
-      setTimeout(init, 50);
+      // 不靠经验猜 50ms：用微任务延后到下一个 task 头（script 执行完）
+      //   i18n.js 是 <script src=> 同步加载，正常情况下 window.XEraseri18n 一定已就绪
+      //   这里只是防御性 retry，setTimeout(0) 而非经验 50ms
+      setTimeout(init, 0);
       return;
     }
 
@@ -140,11 +142,10 @@
     els.langFlag = document.getElementById('lang-flag');
     els.langDropdown = document.getElementById('lang-dropdown');
 
-    // Tweets 子选项（必须在 afterLangLoaded 里绑，否则 updateTweetsOptionsVisibility / getTweetsOptions 全失效）
-    els.optTweets = document.getElementById('opt-tweets');
-    els.tweetsOptionsSection = document.getElementById('tweets-options-section');
-    els.optIncludeReplies = document.getElementById('opt-include-replies');
-    els.optIncludeRetweets = document.getElementById('opt-include-retweets');
+    // 6 个顶级 checkbox DOM 引用（3 个推文子类型：original-tweets / replies / retweets）
+    els.optOriginalTweets = document.getElementById('opt-original-tweets');
+    els.optReplies = document.getElementById('opt-replies');
+    els.optRetweets = document.getElementById('opt-retweets');
 
     updateLangFlag();   // 先设置国旗
     applyI18n();        // 再应用所有翻译（不会闪）
@@ -236,11 +237,7 @@
     if (els.btnLang) els.btnLang.onclick = toggleLangDropdown;
     if (els.btnCopyDiag) els.btnCopyDiag.onclick = copyDiagnosticLog;
 
-    // Tweets 勾选状态联动：勾选时显示子选项区块
-    if (els.optTweets) {
-      els.optTweets.addEventListener('change', updateTweetsOptionsVisibility);
-      updateTweetsOptionsVisibility();
-    }
+    // Tweets 勾选状态联动：已删除（2026-06-18 重构后 3 个 type 都是顶级 checkbox，无子选项联动）
 
     // 点击其他地方关闭下拉菜单
     document.addEventListener('click', function(e) {
@@ -265,10 +262,19 @@
           });
         }
         updateProgress();
+        // M++ 修复（2026-06-19 tweets-bug-8）：实时更新当前 type 的 option-count 数字
+        //   之前只在 cleanupTypeComplete 时更新（type 跑完才看到数字，体验差）
+        //   现在每收到一次 progress 都立即更新当前 type 的数字
+        if (state.currentType) {
+          setOptionCount(state.currentType, newCount);
+        }
       } else if (msg.type === 'cleanupLog') {
         addLog(msg.data.message, msg.data.level);
       } else if (msg.type === 'cleanupComplete') {
         onCleanupComplete();
+      } else if (msg.type === 'cleanupError') {
+        // 2026-06-18 修复：之前没监听 → 关键错误（如 "No selectors for originalTweets"）用户看不到
+        addLog(msg.data.message, 'error');
       } else if (msg.type === 'cleanupPaused') {
         onPaused();
       } else if (msg.type === 'cleanupResumed') {
@@ -280,8 +286,14 @@
         // 行为等同 onStopped，但语义独立（区别于用户主动 Stop）
         onStopped();
       } else if (msg.type === 'cleanupTypeStart') {
+        // M++ 修复（2026-06-19 tweets-bug-8）：记下当前处理的 type
+        //   之前没存 → cleanupProgress 收时不知道更新哪个 option-count
+        //   UI 数字只在 cleanupTypeComplete 时才更新（实时性差）
+        //   现在存 state.currentType，cleanupProgress 收时实时更新该 type 的数字
+        state.currentType = msg.data.type;
         setOptionState(msg.data.type, 'processing');
       } else if (msg.type === 'cleanupTypeComplete') {
+        state.currentType = null;
         setOptionState(msg.data.type, 'done', msg.data.processed);
       } else if (msg.type === 'statusUpdate') {
         // content.js 主动推送状态变化（如从未登录 → 登录后）
@@ -599,8 +611,27 @@
   //   pending   → 灰 spinner（Start Cleanup 后等待处理）
   //   processing → 蓝 spinner + 高亮（正在处理该项）
   //   done      → 显示数字（该项处理完毕的本次条数）
+  //
+  // M++ 修复（2026-06-19 tweets-bug-8）：type → DOM id 映射
+  //   根因：injector 发的 type 是 camelCase（'originalTweets'），HTML id 是 kebab-case（'opt-original-tweets'）
+  //         getElementById('opt-' + 'originalTweets') 找不到 'opt-originalTweets' → return null → 不更新
+  //   为什么 likes/bookmarks/following 之前能显示：因为 type 跟 HTML id 后缀一致（'likes' → 'opt-likes'）
+  //   现在用 TYPE_ID_MAP 统一映射，所有 type 都能正确显示
+  var TYPE_ID_MAP = {
+    'originalTweets': 'original-tweets',
+    'replies': 'replies',
+    'retweets': 'retweets',
+    'likes': 'likes',
+    'bookmarks': 'bookmarks',
+    'following': 'following',
+    'messages': 'messages'
+  };
+  function resolveOptionId(type) {
+    var id = TYPE_ID_MAP[type] || type;
+    return 'opt-' + id;
+  }
   function setOptionState(type, state, count) {
-    var checkbox = document.getElementById('opt-' + type);
+    var checkbox = document.getElementById(resolveOptionId(type));
     if (!checkbox) return;
     var item = checkbox.closest('.option-item');
     if (!item) return;
@@ -622,9 +653,26 @@
     }
   }
 
+  // M++ 修复（2026-06-19 tweets-bug-8）：实时更新 option-count 数字（不重置 spinner 状态）
+  //   区别于 setOptionState(type, 'processing')：那个会重置成 spinner
+  //   这个保持 processing class，只更新数字 → 用户能看到实时处理的条数
+  function setOptionCount(type, count) {
+    var checkbox = document.getElementById(resolveOptionId(type));
+    if (!checkbox) return;
+    var item = checkbox.closest('.option-item');
+    if (!item) return;
+    var countEl = item.querySelector('.option-count');
+    if (!countEl) return;
+    var n = (typeof count === 'number') ? count : 0;
+    countEl.textContent = n > 0 ? n.toLocaleString() : '0';
+  }
+
   // 重置所有 option-count 到 idle 状态
   function resetAllOptionStates() {
-    ['tweets', 'likes', 'bookmarks', 'following', 'messages'].forEach(function(type) {
+    // M++ 修复（2026-06-19 tweets-bug-8）：用正确的 injector type key
+    //   之前用 'tweets'，但 injector 实际发 'originalTweets' + 'replies' + 'retweets' 三个独立 type
+    //   'tweets' 不在 TYPE_ID_MAP 里 → resolveOptionId('tweets') → 'opt-tweets' → 找不到 → reset 失败
+    ['originalTweets', 'replies', 'retweets', 'likes', 'bookmarks', 'following', 'messages'].forEach(function(type) {
       setOptionState(type, 'idle');
     });
   }
@@ -707,47 +755,21 @@
 
   // Tweets 勾选状态联动：勾选时显示子选项区块，并联动调整周边分割线
   // 视觉分组：Tweets + 子项 是一个组，其他 3 项是另一个组，分割线在组与组之间
-  //   - Tweets 这一行去掉 border-bottom（不然会把子项"切"到 Likes 那组）
-  //   - 子项的下一个 .option-item（Likes）加 border-top 作为新分割线
-  function updateTweetsOptionsVisibility() {
-    var checked = !!(els.optTweets && els.optTweets.checked);
-    if (els.tweetsOptionsSection) {
-      els.tweetsOptionsSection.style.display = checked ? 'block' : 'none';
-    }
-    // 联动分割线：依赖 DOM 结构（tweets-options-section 的 nextElementSibling 必须是 Likes 那个 .option-item）
-    var tweetsItem = els.optTweets && els.optTweets.closest('.option-item');
-    if (tweetsItem) {
-      tweetsItem.classList.toggle('sub-options-open', checked);
-    }
-    if (els.tweetsOptionsSection) {
-      var nextItem = els.tweetsOptionsSection.nextElementSibling;
-      if (nextItem && nextItem.classList.contains('option-item')) {
-        nextItem.classList.toggle('has-prev-sub-options', checked);
-      }
-    }
-  }
+  // Tweets 子选项联动函数已删除（2026-06-18 重构：3 个 type 全部为顶级 checkbox）
 
-  // 收集 Tweets 子选项（仅在 tweets 被勾选时有意义）
-  // 默认 true：includeReplies / includeRetweets 都默认开启（覆盖最全）
-  function getTweetsOptions() {
-    return {
-      includeReplies: !els.optIncludeReplies || els.optIncludeReplies.checked,
-      includeRetweets: !els.optIncludeRetweets || els.optIncludeRetweets.checked
-    };
-  }
+  // 收集 Tweets 子选项函数已删除（2026-06-18 重构：tweets 拆为 3 个独立顶级 type，不再有子选项）
 
   function startCleanup() {
     var options = [];
-    var checkboxIds = ['opt-tweets', 'opt-likes', 'opt-bookmarks', 'opt-following'];
-    var optionNames = ['tweets', 'likes', 'bookmarks', 'following'];
+    // 6 type 完全独立：原 tweets 拆为 originalTweets / replies / retweets
+    var checkboxIds = ['opt-original-tweets', 'opt-replies', 'opt-retweets', 'opt-likes', 'opt-bookmarks', 'opt-following'];
+    var optionNames = ['originalTweets', 'replies', 'retweets', 'likes', 'bookmarks', 'following'];
     for (var i = 0; i < checkboxIds.length; i++) {
       var el = document.getElementById(checkboxIds[i]);
       if (el && el.checked) {
         options.push(optionNames[i]);
       }
     }
-    // 收集 Tweets 子选项（与 type=tweets 一起存进 cleanupOptions）
-    var tweetOptions = (options.indexOf('tweets') >= 0) ? getTweetsOptions() : null;
     if (options.length === 0) {
       // 用进度卡片显示警告，不打断用户
       if (els.progressCard) els.progressCard.className = 'progress-card active';
@@ -805,7 +827,7 @@
         state.processedItems = 0;
         state.dailyRemaining = remaining;
         state.totalItems = isPremium ? '∞' : remaining;
-        state.cleanupOptions = { types: options, maxPerType: maxPerType, filters: filters, tweetOptions: tweetOptions };
+        state.cleanupOptions = { types: options, maxPerType: maxPerType, filters: filters };
 
         // 重置所有 option-count 到 idle（避免上次 done 数字残留），再把选中项设 pending
         resetAllOptionStates();

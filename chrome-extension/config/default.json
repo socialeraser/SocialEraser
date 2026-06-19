@@ -1,64 +1,148 @@
 {
-  "version": "1.0.0",
-  "updated": "2025-01-01",
   "selectors": {
-    "xWebsite": {
-      "patterns": [
-        "x.com",
-        "twitter.com"
+    "bookmark": {
+      "_comment": "M++ 修复（2026-06-18 tweets-bug-7）：X 2026 改版后 bookmarks page 用 cellInnerDiv 而非 tweet；removeButtons 加 unbookmark 兜底",
+      "container": "[data-testid='tweet'], [data-testid='cellInnerDiv']",
+      "removeButtons": [
+        "[data-testid='removeBookmark']",
+        "[data-testid='unbookmark']",
+        "button[aria-label*='Bookmarked']",
+        "button[aria-label*='已加入书签']",
+        "button[aria-label*='已加入書籤']",
+        "button[aria-label*='ブックマークに追加済み']",
+        "button[aria-label*='북마크에 추가됨']",
+        "button[aria-label*='Guardado']",
+        "button[aria-label*='Lesezeichen']",
+        "button[aria-label*='signets']"
       ]
     },
-    "login": {
-      "checkElements": {
-        "zh-CN": [
-          { "type": "text", "value": "继续" },
-          { "type": "text", "value": "创建您的账户" },
-          { "type": "selector", "value": "[data-testid='loginButton']" }
+    "common": {
+      "_comment": "6 种清理类型共用的 DOM 选择器（2026-XX-XX 抽出）",
+      "articleContainers": [
+        "[data-testid='tweet']",
+        "[data-testid='cellInnerDiv']",
+        "article"
+      ],
+      "confirmButton": [
+        "[data-testid='confirmationSheetConfirm']"
+      ],
+      "socialContext": [
+        "[data-testid='socialContext']"
+      ],
+      "timeElement": [
+        "time[datetime]"
+      ],
+      "tweetMoreButtons": [
+        "[data-testid='caret']",
+        "button[aria-label='More']",
+        "button[aria-label*='More']",
+        "button[aria-label*='更多']",
+        "button[aria-label*='もっと見る']",
+        "button[aria-label*='더 보기']",
+        "button[aria-label*='Mehr']",
+        "button[aria-label*='Plus']",
+        "button[aria-label*='Más opciones']"
+      ],
+      "tweetText": [
+        "[data-testid='tweetText']"
+      ],
+      "userInfo": {
+        "userCell": [
+          "[data-testid='UserCell']",
+          "[data-testid='userCell']"
         ],
-        "zh-TW": [
-          { "type": "text", "value": "繼續" },
-          { "type": "text", "value": "建立您的帳戶" },
-          { "type": "selector", "value": "[data-testid='loginButton']" }
+        "userDescription": [
+          "[data-testid='UserDescription']"
         ],
-        "en": [
-          { "type": "text", "value": "Sign in" },
-          { "type": "text", "value": "Create your account" },
-          { "type": "selector", "value": "[data-testid='loginButton']" }
-        ],
-        "ja": [
-          { "type": "text", "value": "サインイン" },
-          { "type": "text", "value": "アカウントを作成" },
-          { "type": "selector", "value": "[data-testid='loginButton']" }
-        ],
-        "ko": [
-          { "type": "text", "value": "로그인" },
-          { "type": "text", "value": "계정 만들기" },
-          { "type": "selector", "value": "[data-testid='loginButton']" }
-        ],
-        "es": [
-          { "type": "text", "value": "Iniciar sesión" },
-          { "type": "text", "value": "Crea tu cuenta" },
-          { "type": "selector", "value": "[data-testid='loginButton']" }
-        ],
-        "de": [
-          { "type": "text", "value": "Anmelden" },
-          { "type": "text", "value": "Konto erstellen" },
-          { "type": "selector", "value": "[data-testid='loginButton']" }
-        ],
-        "fr": [
-          { "type": "text", "value": "Se connecter" },
-          { "type": "text", "value": "Créer votre compte" },
-          { "type": "selector", "value": "[data-testid='loginButton']" }
+        "userName": [
+          "[data-testid='User-Name']",
+          "[data-testid='UserName']"
         ]
-      },
-      "loggedInElements": [
-        { "type": "selector", "value": "a[href='/compose/post']" },
-        { "type": "selector", "value": "a[href='/home']" },
-        { "type": "selector", "value": "a[href^='/i/chat']" },
-        { "type": "selector", "value": "a[href^='/notifications']" },
-        { "type": "selector", "value": "[data-testid^='AppTabBar_']" },
-        { "type": "selector", "value": "[data-testid^='SideNav_AccountSwitcher']" },
-        { "type": "selector", "value": "[data-testid^='UserAvatar-Container']" }
+      }
+    },
+    "following": {
+      "confirmButton": "[data-testid='confirmationSheetConfirm']",
+      "container": "[data-testid='cellInnerDiv']",
+      "unfollowButtons": [
+        "[data-testid$='-unfollow']",
+        "button[aria-label*='Following']",
+        "button[aria-label*='Unfollow']",
+        "button[aria-label*='正在关注']",
+        "button[aria-label*='正在跟隨']",
+        "button[aria-label*='フォロー中']",
+        "button[aria-label*='팔로잉']",
+        "button[aria-label*='Siguiendo']",
+        "button[aria-label*='Folge ich']",
+        "button[aria-label*='Abonné']"
+      ]
+    },
+    "i18n": {
+      "_comment": "X 2026 当前版本会把按钮 aria-label + 菜单文字 都按用户 X 显示语言翻译（'Cancel' → '取消'/'キャンセル'/'취소' 等），selector 必须配 8 语言文字兜底。X 改版改了翻译时，改这里不用发新版扩展",
+      "cancelKeywords": [
+        "Cancel",
+        "取消",
+        "キャンセル",
+        "취소",
+        "Cancelar",
+        "Abbrechen",
+        "Annuler",
+        "Annulla"
+      ],
+      "confirmKeywords": [
+        "Delete",
+        "删除",
+        "刪除",
+        "削除",
+        "삭제",
+        "Eliminar",
+        "Löschen",
+        "Supprimer",
+        "Elimina"
+      ],
+      "deleteKeywords": [
+        "Delete",
+        "删除",
+        "刪除",
+        "削除",
+        "삭제",
+        "Eliminar",
+        "Löschen",
+        "Supprimer",
+        "Elimina"
+      ],
+      "pinnedKeywords": [
+        "pinned",
+        "已置顶",
+        "已釘選",
+        "ピン留め",
+        "고정",
+        "fijado",
+        "angeheftet",
+        "épinglé"
+      ],
+      "replyKeywords": [
+        "replying to",
+        "in reply to",
+        "回复",
+        "回覆",
+        "返信",
+        "답장",
+        "respondiendo a",
+        "antworten",
+        "répondre",
+        "rispondendo a"
+      ],
+      "unretweetKeywords": [
+        "Undo repost",
+        "Undo Repost",
+        "撤销转推",
+        "取消轉推",
+        "リポストを取り消す",
+        "리트윗 취소",
+        "Cancelar repost",
+        "Repost rückgängig machen",
+        "Annuler le repost",
+        "Annulla repost"
       ]
     },
     "like": {
@@ -78,68 +162,159 @@
         "button[aria-label*=\"J'aime\"]"
       ]
     },
-    "bookmark": {
-      "container": "[data-testid='tweet']",
-      "removeButtons": [
-        "[data-testid='removeBookmark']",
-        "button[aria-label*='Bookmarked']",
-        "button[aria-label*='已加入书签']",
-        "button[aria-label*='已加入書籤']",
-        "button[aria-label*='ブックマークに追加済み']",
-        "button[aria-label*='북마크에 추가됨']",
-        "button[aria-label*='Guardado']",
-        "button[aria-label*='Lesezeichen']",
-        "button[aria-label*='signets']"
+    "login": {
+      "checkElements": {
+        "de": [
+          {
+            "type": "text",
+            "value": "Anmelden"
+          },
+          {
+            "type": "text",
+            "value": "Konto erstellen"
+          },
+          {
+            "type": "selector",
+            "value": "[data-testid='loginButton']"
+          }
+        ],
+        "en": [
+          {
+            "type": "text",
+            "value": "Sign in"
+          },
+          {
+            "type": "text",
+            "value": "Create your account"
+          },
+          {
+            "type": "selector",
+            "value": "[data-testid='loginButton']"
+          }
+        ],
+        "es": [
+          {
+            "type": "text",
+            "value": "Iniciar sesión"
+          },
+          {
+            "type": "text",
+            "value": "Crea tu cuenta"
+          },
+          {
+            "type": "selector",
+            "value": "[data-testid='loginButton']"
+          }
+        ],
+        "fr": [
+          {
+            "type": "text",
+            "value": "Se connecter"
+          },
+          {
+            "type": "text",
+            "value": "Créer votre compte"
+          },
+          {
+            "type": "selector",
+            "value": "[data-testid='loginButton']"
+          }
+        ],
+        "ja": [
+          {
+            "type": "text",
+            "value": "サインイン"
+          },
+          {
+            "type": "text",
+            "value": "アカウントを作成"
+          },
+          {
+            "type": "selector",
+            "value": "[data-testid='loginButton']"
+          }
+        ],
+        "ko": [
+          {
+            "type": "text",
+            "value": "로그인"
+          },
+          {
+            "type": "text",
+            "value": "계정 만들기"
+          },
+          {
+            "type": "selector",
+            "value": "[data-testid='loginButton']"
+          }
+        ],
+        "zh-CN": [
+          {
+            "type": "text",
+            "value": "继续"
+          },
+          {
+            "type": "text",
+            "value": "创建您的账户"
+          },
+          {
+            "type": "selector",
+            "value": "[data-testid='loginButton']"
+          }
+        ],
+        "zh-TW": [
+          {
+            "type": "text",
+            "value": "繼續"
+          },
+          {
+            "type": "text",
+            "value": "建立您的帳戶"
+          },
+          {
+            "type": "selector",
+            "value": "[data-testid='loginButton']"
+          }
+        ]
+      },
+      "loggedInElements": [
+        {
+          "type": "selector",
+          "value": "a[href='/compose/post']"
+        },
+        {
+          "type": "selector",
+          "value": "a[href='/home']"
+        },
+        {
+          "type": "selector",
+          "value": "a[href^='/i/chat']"
+        },
+        {
+          "type": "selector",
+          "value": "a[href^='/notifications']"
+        },
+        {
+          "type": "selector",
+          "value": "[data-testid^='AppTabBar_']"
+        },
+        {
+          "type": "selector",
+          "value": "[data-testid^='SideNav_AccountSwitcher']"
+        },
+        {
+          "type": "selector",
+          "value": "[data-testid^='UserAvatar-Container']"
+        }
       ]
     },
-    "following": {
-      "container": "[data-testid='cellInnerDiv']",
-      "unfollowButtons": [
-        "[data-testid$='-unfollow']",
-        "button[aria-label*='Following']",
-        "button[aria-label*='Unfollow']",
-        "button[aria-label*='正在关注']",
-        "button[aria-label*='正在跟隨']",
-        "button[aria-label*='フォロー中']",
-        "button[aria-label*='팔로잉']",
-        "button[aria-label*='Siguiendo']",
-        "button[aria-label*='Folge ich']",
-        "button[aria-label*='Abonné']"
+    "retweet": {
+      "_comment": "转推卡片选择器（X 用 socialContext 标记 'You reposted' / 8 语言）",
+      "cardMarker": [
+        "[data-testid='unretweet']"
       ],
-      "confirmButton": "[data-testid='confirmationSheetConfirm']"
-    },
-    "common": {
-      "_comment": "4 种清理类型共用的 DOM 选择器 —— X 改版只改这里即可（2026-XX-XX 抽出）",
-      "confirmButton": ["[data-testid='confirmationSheetConfirm']"],
-      "articleContainers": ["[data-testid='tweet']", "[data-testid='cellInnerDiv']", "article"],
-      "timeElement": ["time[datetime]"],
-      "tweetText": ["[data-testid='tweetText']"],
-      "userInfo": {
-        "userCell": ["[data-testid='UserCell']", "[data-testid='userCell']"],
-        "userName": ["[data-testid='User-Name']", "[data-testid='UserName']"],
-        "userDescription": ["[data-testid='UserDescription']"]
-      }
-    },
-    "tweet": {
-      "_comment": "推文特有的选择器 —— 加上 common 中没覆盖的部分（2026-XX-XX 合并）",
-      "container": "[data-testid='tweet']",
-      "moreButtons": [
-        "[data-testid='more']",
-        "[data-testid='caret']",
-        "button[aria-label='More']",
-        "button[aria-label*='More']",
-        "button[aria-label*='更多']",
-        "button[aria-label*='もっと見る']",
-        "button[aria-label*='더 보기']",
-        "button[aria-label*='Mehr']",
-        "button[aria-label*='Plus']",
-        "button[aria-label*='Más opciones']"
-      ],
-      "confirmButton": "[data-testid='confirmationSheetConfirm']",
-      "socialContext": ["[data-testid='socialContext']"],
       "unreTweetButtons": [
         "[data-testid='unretweet']",
-        "[data-testid='undoRepost']",
         "button[aria-label*='Reposted']",
         "button[aria-label*='已转帖']",
         "button[aria-label*='已轉發']",
@@ -147,21 +322,20 @@
         "button[aria-label*='재게시함']",
         "button[aria-label*='Reposteado']",
         "button[aria-label*='Repostet']",
-        "button[aria-label*='Reposté']"
+        "button[aria-label*='Reposté']",
+        "button[aria-label*='Ripostato']"
       ],
-      "unretweetConfirmButtons": ["[data-testid='unretweetConfirm']"],
-      "retweetButtonInCard": [
-        "[data-testid='unretweet']",
-        "[data-testid='undoRepost']",
-        "button[aria-label*='Reposted']",
-        "button[aria-label*='已转帖']",
-        "button[aria-label*='已轉發']",
-        "button[aria-label*='リポストしました']",
-        "button[aria-label*='재게시함']",
-        "button[aria-label*='Reposteado']",
-        "button[aria-label*='Repostet']",
-        "button[aria-label*='Reposté']"
+      "unretweetConfirmButtons": [
+        "[data-testid='unretweetConfirm']"
+      ]
+    },
+    "xWebsite": {
+      "patterns": [
+        "x.com",
+        "twitter.com"
       ]
     }
-  }
+  },
+  "updated": "2026-06-18",
+  "version": "1.0.0"
 }

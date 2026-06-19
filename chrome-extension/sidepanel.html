@@ -562,20 +562,19 @@
       <div class="section-title" data-i18n="selectOptions">Select items to delete</div>
       <div class="options-card">
         <div class="option-item">
-          <input type="checkbox" id="opt-tweets" class="option-checkbox" checked>
-          <label for="opt-tweets" class="option-label" data-i18n="tweets">Tweets</label>
+          <input type="checkbox" id="opt-original-tweets" class="option-checkbox" checked>
+          <label for="opt-original-tweets" class="option-label" data-i18n="originalTweets">Original Tweets</label>
           <span class="option-count">0</span>
         </div>
-        <!-- Tweets 子选项：紧贴主选项下方缩进展示（仅勾选 Tweets 时显示） -->
-        <div id="tweets-options-section" class="tweets-sub-options" style="display: none;">
-          <label class="checkbox-sub">
-            <input type="checkbox" id="opt-include-replies" checked>
-            <span data-i18n="includeReplies">Include replies</span>
-          </label>
-          <label class="checkbox-sub">
-            <input type="checkbox" id="opt-include-retweets" checked>
-            <span data-i18n="includeRetweets">Include retweets</span>
-          </label>
+        <div class="option-item">
+          <input type="checkbox" id="opt-replies" class="option-checkbox" checked>
+          <label for="opt-replies" class="option-label" data-i18n="replies">Replies</label>
+          <span class="option-count">0</span>
+        </div>
+        <div class="option-item">
+          <input type="checkbox" id="opt-retweets" class="option-checkbox" checked>
+          <label for="opt-retweets" class="option-label" data-i18n="retweets">Retweets</label>
+          <span class="option-count">0</span>
         </div>
         <div class="option-item">
           <input type="checkbox" id="opt-likes" class="option-checkbox" checked>

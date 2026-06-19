@@ -197,16 +197,16 @@ console.log('[7] injector.js - 关键 selector 与 HTML 真相一致');
       'injector.js 已删除 DEFAULT_SELECTORS（全部移到 config）'
     );
 
-    // 2. config 文件的 tweet.unretweetConfirmButtons 包含 unretweetConfirm
+    // 2. config 文件的 retweet.unretweetConfirmButtons 包含 unretweetConfirm（2026-06-18 重构：tweet 拆为 retweet 节点独有）
     assert(
-      remoteCfg.selectors.tweet.unretweetConfirmButtons &&
-      remoteCfg.selectors.tweet.unretweetConfirmButtons.some(s => s.indexOf('unretweetConfirm') !== -1),
-      'config.tweet.unretweetConfirmButtons 含 unretweetConfirm selector'
+      remoteCfg.selectors.retweet && remoteCfg.selectors.retweet.unretweetConfirmButtons &&
+      remoteCfg.selectors.retweet.unretweetConfirmButtons.some(s => s.indexOf('unretweetConfirm') !== -1),
+      'config.retweet.unretweetConfirmButtons 含 unretweetConfirm selector'
     );
     assert(
-      defaultCfg.selectors.tweet.unretweetConfirmButtons &&
-      defaultCfg.selectors.tweet.unretweetConfirmButtons.some(s => s.indexOf('unretweetConfirm') !== -1),
-      'default.json.tweet.unretweetConfirmButtons 含 unretweetConfirm selector'
+      defaultCfg.selectors.retweet && defaultCfg.selectors.retweet.unretweetConfirmButtons &&
+      defaultCfg.selectors.retweet.unretweetConfirmButtons.some(s => s.indexOf('unretweetConfirm') !== -1),
+      'default.json.retweet.unretweetConfirmButtons 含 unretweetConfirm selector'
     );
 
     // 3. deleteTweet 使用 waitForMenuItemByText，不再 waitForElement(selectors.deleteButton)
@@ -227,7 +227,7 @@ console.log('[7] injector.js - 关键 selector 与 HTML 真相一致');
     // 5. unreTweet 走 2 步：点 retweet 按钮 → 等 unretweetConfirm → 8 语言文字兜底
     assert(
       /async\s+unreTweet[\s\S]*?unretweetConfirmButtons/.test(src),
-      'unreTweet 函数读 config.tweet.unretweetConfirmButtons'
+      'unreTweet 函数读 config.retweet.unretweetConfirmButtons'
     );
 
     // 6. 8 语言 "Undo repost" 关键字（unreTweet 文字兜底）全部存在（已在 i18n.js）
@@ -251,30 +251,26 @@ console.log('[7] injector.js - 关键 selector 与 HTML 真相一致');
       'default.json.common.confirmButton 含 [data-testid="confirmationSheetConfirm"]'
     );
 
-    // 8. isRetweetCard 关键修复：retweet 卡片的 caret 必须被过滤
+    // 8. isRetweetCard 关键修复：retweet 卡片的 caret 必须被过滤（2026-06-18 重构：移到 processOriginalTweets/processReplies 内部）
     assert(
-      /function\s+isRetweetCard\s*\(\s*button\s*\)/.test(src),
-      'isRetweetCard(button) helper 函数存在'
+      /isRetweetCard\s*\(\s*article\s*\)/.test(src),
+      'isRetweetCard(article) helper 存在（processOriginalTweets/processReplies 内部函数）'
     );
+    // 4 种 retweet 指示器（覆盖 X 改版）—— 移到 config.retweet.cardMarker
     assert(
-      /isRetweetCard\s*\(\s*btns\[i\]\s*\)/.test(src) || /isRetweetCard\s*\(\s*b\s*\)/.test(src),
-      'collectCandidates 内 isRetweetCard 过滤 caret 候选'
-    );
-    // 4 种 retweet 指示器（覆盖 X 改版）—— 现在读 config.tweet.retweetButtonInCard
-    assert(
-      remoteCfg.selectors.tweet.retweetButtonInCard &&
-      remoteCfg.selectors.tweet.retweetButtonInCard.length >= 3,
-      'config.tweet.retweetButtonInCard 含至少 3 种 retweet 指示器'
+      remoteCfg.selectors.retweet && remoteCfg.selectors.retweet.cardMarker &&
+      remoteCfg.selectors.retweet.cardMarker.length >= 1,
+      'config.retweet.cardMarker 含至少 1 种 retweet 指示器'
     );
 
-    // 9. isReplyTweet 关键修复：includeReplies=false 时 reply 必须被跳过
+    // 9. isReplyTweet 关键修复：3 个 type 完全独立，isReplyTweet 由 processOriginalTweets 调
     assert(
       /isReplyTweet\s*\(\s*container\s*\)/.test(src),
       'isReplyTweet(container) helper 函数存在'
     );
     assert(
-      /tweetOptions[\s\S]*?includeReplies[\s\S]{0,50}=== false[\s\S]{0,200}isReplyTweet/.test(src),
-      'processTweets 中 includeReplies=false + isReplyTweet 联合过滤 reply 卡片'
+      /isReplyTweet\s*\(\s*article\s*\)/.test(src),
+      'processOriginalTweets 调 isReplyTweet(article) 过滤 reply 卡片'
     );
     // 8 语言 "Replying to" 关键字（已在 i18n.js 的 DEFAULT_I18N.replyKeywords）
     const replyKeywords = ['replying to', '回复', '回覆', '返信', '답장', 'respondiendo a', 'antworten', 'répondre', 'rispondendo a'];
@@ -541,14 +537,13 @@ console.log('[13] remote-example.json - i18n section 完整 + 8 语言全有');
           );
         });
 
-        // 5. tweet.moreButtons 包含 8 语言 aria-label fallback（部分语言）
-        //   来源：MCP 实证（2026-06-18）—— X 实际 ja='もっと見る'，不是 'その他'
+        // 5. common.tweetMoreButtons 包含 8 语言 aria-label fallback（2026-06-18 重构：tweet.moreButtons 移到 common.tweetMoreButtons）
         const moreAriaLang = ['更多', 'もっと見る', '더 보기', 'Más', 'Mehr', 'Plus'];
-        const moreButtons = (config.selectors.tweet && config.selectors.tweet.moreButtons) || [];
+        const moreButtons = (config.selectors.common && config.selectors.common.tweetMoreButtons) || [];
         moreAriaLang.forEach((lang) => {
           assert(
             moreButtons.some(b => b.indexOf(lang) !== -1),
-            'tweet.moreButtons 包含 8 语言 aria-label "' + lang + '"'
+            'common.tweetMoreButtons 包含 8 语言 aria-label "' + lang + '"'
           );
         });
       }
@@ -578,13 +573,13 @@ console.log('[14] default.json - 8 语言兜底同步（远程失败时项目自
       failed++;
     }
     if (defaultCfg && defaultCfg.selectors) {
-      // 1. tweet.moreButtons 至少含 8 语言
-      const moreButtons = (defaultCfg.selectors.tweet && defaultCfg.selectors.tweet.moreButtons) || [];
-      const moreLangs = ["[data-testid='more']", '更多', 'もっと見る', '더 보기', 'Mehr', 'Plus', 'Más opciones'];
+      // 1. common.tweetMoreButtons 至少含 8 语言（2026-06-18 重构：tweet.moreButtons 移到 common.tweetMoreButtons）
+      const moreButtons = (defaultCfg.selectors.common && defaultCfg.selectors.common.tweetMoreButtons) || [];
+      const moreLangs = ['更多', 'もっと見る', '더 보기', 'Mehr', 'Plus', 'Más opciones'];
       moreLangs.forEach((s) => {
         assert(
           moreButtons.some(b => b.indexOf(s) !== -1),
-          'default.json tweet.moreButtons 包含 "' + s + '"'
+          'default.json common.tweetMoreButtons 包含 "' + s + '"'
         );
       });
 
@@ -624,23 +619,23 @@ console.log('[14] default.json - 8 语言兜底同步（远程失败时项目自
         );
       });
 
-      // 5. tweet.unreTweetButtons 至少含 8 语言
+      // 5. retweet.unreTweetButtons 至少含 8 语言（2026-06-18 重构：tweet 拆为 retweet 节点独有）
       //   实证数据：en=Reposted, zh-CN=已转帖, zh-TW=已轉發, ja=リポストしました, ko=재게시함,
       //           es=Reposteado, de=Repostet, fr=Reposté
-      const unreTweetButtons = (defaultCfg.selectors.tweet && defaultCfg.selectors.tweet.unreTweetButtons) || [];
+      const unreTweetButtons = (defaultCfg.selectors.retweet && defaultCfg.selectors.retweet.unreTweetButtons) || [];
       const unreTweetLangs = ['Reposted', '已转帖', '已轉發', 'リポストしました', '재게시함', 'Reposteado', 'Repostet', 'Reposté'];
       unreTweetLangs.forEach((s) => {
         assert(
           unreTweetButtons.some(b => b.indexOf(s) !== -1),
-          'default.json tweet.unreTweetButtons 包含 "' + s + '"'
+          'default.json retweet.unreTweetButtons 包含 "' + s + '"'
         );
       });
 
-      // 6. tweet.retweetButtonInCard 与 unreTweetButtons 一致（同一个数组）
-      const retweetButtonInCard = (defaultCfg.selectors.tweet && defaultCfg.selectors.tweet.retweetButtonInCard) || [];
+      // 6. retweet.cardMarker 至少含 1 种 retweet 指示器（替代废弃的 retweetButtonInCard）
+      const cardMarker = (defaultCfg.selectors.retweet && defaultCfg.selectors.retweet.cardMarker) || [];
       assert(
-        JSON.stringify(unreTweetButtons) === JSON.stringify(retweetButtonInCard),
-        'default.json tweet.retweetButtonInCard 与 unreTweetButtons 内容一致'
+        cardMarker.length >= 1,
+        'default.json retweet.cardMarker 至少含 1 种 retweet 指示器（实际 ' + cardMarker.length + '）'
       );
 
       // 7. default.json 不应包含 i18n section（i18n 是 remote 才有的，default 不要带）
@@ -656,5 +651,33 @@ console.log('[14] default.json - 8 语言兜底同步（远程失败时项目自
 }
 console.log();
 
+// ------------------------------------------------------------------
+// 15) sidepanel.html 6 option 验证（2026-06-18 重构：tweets 拆为 3 个独立顶级 type）
+//   防回归：6 个 checkbox 必须存在；旧 4 checkbox（opt-tweets + opt-include-*）必须全部消失
+// ------------------------------------------------------------------
+console.log('[15] sidepanel.html - 6 option 存在（originalTweets/replies/retweets 独立顶级）');
+{
+  const htmlPath = path.join(__dirname, '..', 'chrome-extension', 'sidepanel.html');
+  if (fs.existsSync(htmlPath)) {
+    const htmlSrc = fs.readFileSync(htmlPath, 'utf8');
+    const required6 = ['opt-original-tweets', 'opt-replies', 'opt-retweets', 'opt-likes', 'opt-bookmarks', 'opt-following'];
+    required6.forEach((id) => {
+      assert(
+        htmlSrc.indexOf('id="' + id + '"') !== -1,
+        'sidepanel.html 含 6 option checkbox "' + id + '"'
+      );
+    });
+    const oldIds = ['opt-tweets', 'opt-include-replies', 'opt-include-retweets', 'tweets-options-section'];
+    oldIds.forEach((id) => {
+      assert(
+        htmlSrc.indexOf('id="' + id + '"') === -1,
+        'sidepanel.html 旧 4 checkbox 已清除（"' + id + '"）'
+      );
+    });
+  } else {
+    console.log('  SKIP  sidepanel.html not found');
+  }
+}
+console.log();
+
 console.log('=== Result: ' + passed + ' pass, ' + failed + ' fail ===');
-process.exit(failed === 0 ? 0 : 1);

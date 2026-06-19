@@ -14,8 +14,8 @@
 //   content → sidepanel（直接广播，不经 background 中转，避免收到 2 次）
 
 const CONFIG_URL = 'https://storage.googleapis.com/social-tool-bucket/remote-example.json';
-// content script 注入顺序：i18n.js 必须最先（暴露 window.XEraseri18n）→ config.js → injector.js → content.js
-const CONTENT_SCRIPT_FILES = ['lib/i18n.js', 'lib/config.js', 'lib/injector.js', 'content.js'];
+// content script 注入顺序：i18n.js 必须最先（暴露 window.XEraseri18n）→ injector.js → content.js
+const CONTENT_SCRIPT_FILES = ['lib/i18n.js', 'lib/injector.js', 'content.js'];
 const CONTENT_SCRIPT_MATCHES = ['*://x.com/*', '*://twitter.com/*'];
 
 let activeTabId = null;
@@ -176,6 +176,18 @@ function broadcastToSidePanel(message) {
 //   - sidepanel → background: startCleanup / pauseCleanup / resumeCleanup / stopCleanup / getCleanupStatus
 //   - content → background: cleanupProgress / cleanupLog / cleanupComplete / cleanupError / cleanupPaused / cleanupResumed / cleanupStopped / statusUpdate
 //   - content → background (target=...): background / refreshConfig / readPendingCleanup / updatePendingCleanup / clearPendingCleanup / forceNavigation
+chrome.runtime.onConnect.addListener(function(port) {
+  // M++ 修复（2026-06-19 tweets-bug-8）：content script 用 connect 替代 sendMessage
+  //   接收 xeraser-logger port 上的 log 消息，转发给 sidepanel
+  //   为什么用 connect：sendMessage 失败时 service worker 不重启（静默失败）
+  //   connect 强制激活 service worker + port.postMessage 比 sendMessage 更可靠
+  if (port.name === 'xeraser-logger') {
+    port.onMessage.addListener(function(msg) {
+      // 转发给 sidepanel（sidepanel 通过 chrome.runtime.onMessage 接收 cleanupLog）
+      chrome.runtime.sendMessage(msg).catch(function() {});
+    });
+  }
+});
 chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
   // 1. sidepanel 发过来的控制命令（start/stop/pause/resume/status）→ 转发给 content script
   if (message.type === 'startCleanup' ||

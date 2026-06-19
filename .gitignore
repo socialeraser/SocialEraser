@@ -6,6 +6,9 @@ node_modules/
 dist/
 build/
 
+# Gradle cache
+.gradle/
+
 # Operating System files
 .DS_Store
 Thumbs.db

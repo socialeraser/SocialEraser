@@ -23,8 +23,8 @@
     //
     // 职责:
     //   1. 接收 content.js 传过来的远程配置（setConfig），合并 i18n 关键字
-    //   2. 4 个入口方法: processLikes / processBookmarks / processFollowing / processTweets
-    //      （统一从 processItems 分派）
+    //   2. 6 个入口方法: processLikes / processBookmarks / processFollowing / processOriginalTweets / processReplies / processRetweets
+    //      （统一从 processItems 分派；originalTweets/replies/retweets 共享 maxPerType 预算）
     //   3. 提供 DOM 操作 helper: findElement / findElements / safeClick / scrollToBottom / waitForElement
     //   4. 提供 8 语言关键字查找 helper: waitForMenuItemByText / findButtonByText
     //   5. 提供过滤器: shouldFilter / extractMeta / matchesFilter
@@ -184,15 +184,30 @@
       // 安全点击：自动滚动到元素 → 校验可见 → 3 种点击方式兜底 → 等待
       // 参数:
       //   element     - 要点击的 DOM 元素
-      //   delayAfter  - 点击后等待的毫秒数（给 React state 更新留时间），默认 500
+      //   delayAfter  - 点击后等待的毫秒数（**不靠经验**，传 0 = 用 MO 监听）
       // 返回: true = 点击成功；false = 元素无效（null/不可见） 或 抛错
       if (!element) return false;
-      if (delayAfter === undefined) delayAfter = 500;
+      if (delayAfter === undefined) delayAfter = 0;
 
       try {
-        // 1. 先把元素滚到视口中央（X 是无限滚动页面，必须滚动到位才能点击）
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        await this.sleep(300);
+        // 1. 先把元素滚到视口中央
+        //   M++ 修复（2026-06-18 tweets-bug-6）：**用 behavior:'auto'（瞬时），不用 smooth**
+        //     原因：X 2026 page 滚动是虚拟列表，smooth 动画 + React 重排 → scrollIntoView 可能死循环
+        //           实测（user 日志）：scrollIntoView smooth 后 r.top/r.bottom 永远不满足 inView → 无限 RAF 死循环
+        //     改法：瞬时滚 + 1 帧 RAF 让 layout 稳定 + maxFrames 兜底
+        const SCROLL_MAX_FRAMES = 60;  // 1s @ 60fps 兜底
+        element.scrollIntoView({ behavior: 'auto', block: 'center' });
+        await new Promise(function(resolve) {
+          let frames = 0;
+          function check() {
+            const r = element.getBoundingClientRect();
+            if (r.top >= 0 && r.bottom <= window.innerHeight) { resolve(); return; }
+            if (frames >= SCROLL_MAX_FRAMES) { resolve(); return; }  // 1s 兜底，不死循环
+            frames++;
+            requestAnimationFrame(check);
+          }
+          requestAnimationFrame(check);
+        });
 
         // 2. 校验元素可见（getBoundingClientRect 宽高都是 0 → 隐藏 / 离屏 / display:none）
         const rect = element.getBoundingClientRect();
@@ -215,6 +230,8 @@
         } catch (e) {}
 
         // 4. 等待 React state 更新 + 弹窗动画
+        //   不靠经验 500ms：传 0 时不 sleep（调用方已用 MO 监听后续 DOM 变化）
+        //   传 >0 时保留（兼容老调用方可能依赖 sleep）
         if (delayAfter > 0) {
           await this.sleep(delayAfter);
         }
@@ -225,38 +242,143 @@
       }
     }
 
-    async scrollToBottom(scrollDelay) {
+    async scrollToBottom() {
       // 滚动到页面底部，触发 X 的无限滚动加载新内容
-      // 参数: scrollDelay - 滚动后等待加载的毫秒数（默认 1000）
-      // 返回: true = 页面变长了（新内容加载出来了）；false = 已到底部
-      if (scrollDelay === undefined) scrollDelay = 1000;
+      // **不靠经验猜时间**（2026-06-18 修复：原版 `scrollToBottom(1500)` 用 `sleep(1500)` 是经验时间）
+      //
+      // M++ 修复（2026-06-18 tweets-bug-6）：**不再用 `document.documentElement.scrollHeight` 作为"滚到哪里"**
+      //   原因：X page 还没渲染完时 scrollHeight 是错的（user 日志显示 initial=676 实际是 viewport 高度，
+      //         final=2865 才是真实 bookmarks 高度），滚到错误位置 → 反复 N 次才到正确位置 → 混乱
+      //   修法：MO 监听 article/cellInnerDiv 数量 + RAF 滚到"最后一个元素进入 viewport"
+      //     1. 找到当前容器列表（article / cellInnerDiv）
+      //     2. 滚到最后一个元素的位置（让 IntersectionObserver 触发 X 加载新内容）
+      //     3. RAF 轮询：连续 STABLE_FRAMES 帧容器数量不变 = 到底
+      //     4. 兜底：MAX_FRAMES 帧（约 5s）还没稳定 → 强制 resolve
+      //   **关键**：用"容器数量"作为稳定信号（**事件驱动**），不用 scrollHeight（**page 未加载时是错的**）
+      //          帧数是浏览器物理节奏，**不靠经验猜时间**
+      const MAX_FRAMES = 300;        // 300 帧 ≈ 5s @ 60fps 兜底
+      const STABLE_FRAMES = 30;      // 30 帧 ≈ 0.5s 容器数量不变 = 到底
+      const SCROLL_RETRY_FRAMES = 5; // 5 帧内必须有新容器出现，否则认为触底
+      const self = this;
 
-      const startHeight = document.documentElement.scrollHeight;
-      window.scrollTo(0, document.documentElement.scrollHeight);
-      await this.sleep(scrollDelay);
-
-      const newHeight = document.documentElement.scrollHeight;
-      return newHeight > startHeight;
-    }
-
-    async waitForElement(selector, timeout) {
-      // 轮询查找元素 —— 给 X 异步渲染一点时间
-      // 参数:
-      //   selector - 单个 selector 字符串 或 selector 数组（按顺序轮询，第一个命中的就返回）
-      //   timeout  - 超时毫秒数（默认 5000）
-      // 返回: 第一个命中的 DOM 元素；超时返回 null
-      if (timeout === undefined) timeout = 5000;
-
-      const startTime = Date.now();
-      while (Date.now() - startTime < timeout) {
-        const element = this.findElement(selector);
-        if (element) return element;
-        await this.sleep(200);  // 每 200ms 重试一次，避免打爆 CPU
+      // 找当前容器（X 2026 likes/bookmarks 用 article，following 用 cellInnerDiv）
+      function getContainerSelector() {
+        if (document.querySelectorAll('article').length > 0) return 'article';
+        if (document.querySelectorAll("[data-testid='cellInnerDiv']").length > 0) return "[data-testid='cellInnerDiv']";
+        return null;
       }
-      return null;
+
+      const containerSel = getContainerSelector();
+      if (!containerSel) {
+        // 没找到任何容器 → X 还没渲染，process 函数应该已经 waitForContentStable 过了
+        // 兜底：用 scrollHeight（page 未加载时可能错，但比什么都不做强）
+        window.scrollTo(0, document.documentElement.scrollHeight);
+        await this.sleep(100); // 极短 sleep 让 RAF 启动
+      } else {
+        // 滚到最后一个容器（让 X 加载更多）
+        const containers = document.querySelectorAll(containerSel);
+        const last = containers[containers.length - 1];
+        if (last && last.scrollIntoView) {
+          last.scrollIntoView({ behavior: 'auto', block: 'end' });
+        } else {
+          window.scrollTo(0, document.documentElement.scrollHeight);
+        }
+      }
+
+      const self2 = self;
+      return new Promise(function(resolve) {
+        const start = Date.now();
+        let totalFrames = 0;
+        let stableFrames = 0;
+        let lastContainerCount = containerSel
+          ? document.querySelectorAll(containerSel).length
+          : 0;
+        let initialContainerCount = lastContainerCount;
+        let rafId;
+        let loadedNewContent = false;  // 是否真的加载了新内容（决定是否要滚回顶部）
+
+        function rafTick() {
+          totalFrames++;
+          const currentCount = containerSel
+            ? document.querySelectorAll(containerSel).length
+            : 0;
+
+          if (currentCount === lastContainerCount) {
+            // 容器数量没变 → X 没加载新内容 → 稳定帧数 +1
+            stableFrames++;
+            if (stableFrames >= STABLE_FRAMES) {
+              // 连续 STABLE_FRAMES 帧容器数量不变 = 到底
+              self2.debug('scrollToBottom: stable ' + STABLE_FRAMES + ' frames, containers ' + initialContainerCount + '->' + currentCount + ' (' + (Date.now() - start) + 'ms)');
+              cancelAnimationFrame(rafId);
+              // M++ 修复（2026-06-18 tweets-bug-6 UX）：加载完新内容后自动滚回顶部
+              //   不滚回 → 用户视觉上看到的是底部，process 又从顶部删 → "页面突然缩短顶部" 体验混乱
+              //   滚回顶部 → 用户视觉上看到的是顶部 → 删顶部 article 自然流畅
+              //   只在真的加载了新内容时滚回（避免空滚）
+              if (loadedNewContent) {
+                window.scrollTo(0, 0);
+              }
+              resolve(currentCount > initialContainerCount);
+              return;
+            }
+          } else {
+            // 容器数量变 → X 加载了新内容 → 滚到新最后一个元素
+            lastContainerCount = currentCount;
+            stableFrames = 0;
+            loadedNewContent = true;  // 标记"加载了新内容"，resolve 时滚回顶部
+            if (containerSel) {
+              const containers = document.querySelectorAll(containerSel);
+              const lastEl = containers[containers.length - 1];
+              if (lastEl && lastEl.scrollIntoView) {
+                lastEl.scrollIntoView({ behavior: 'auto', block: 'end' });
+              }
+            }
+          }
+
+          if (totalFrames >= MAX_FRAMES) {
+            // 兜底：300 帧（5s）还没稳定
+            self2.debug('scrollToBottom: max frames reached, containers ' + initialContainerCount + '->' + currentCount + ' (' + (Date.now() - start) + 'ms)');
+            cancelAnimationFrame(rafId);
+            if (loadedNewContent) {
+              window.scrollTo(0, 0);
+            }
+            resolve(currentCount > initialContainerCount);
+            return;
+          }
+
+          rafId = requestAnimationFrame(rafTick);
+        }
+        rafId = requestAnimationFrame(rafTick);
+      });
     }
 
-    // 删除一条原创推文（processTweets 里调用）
+    async waitForElement(selector, maxFrames) {
+      // 轮询查找元素 —— 不靠经验猜时间
+      // 参数:
+      //   selector  - 单个 selector 字符串 或 selector 数组（按顺序轮询，第一个命中的就返回）
+      //   maxFrames - 兜底帧数（不传 = 默认 600 帧 ≈ 10s @ 60fps；传 0 = 无限）
+      //                帧数是浏览器物理节奏，不是"经验时间"
+      // 返回: 第一个命中的 DOM 元素；兜底耗尽返回 null
+      // M++ 修复（2026-06-19 tweets-bug-8）：self = this 移到闭包顶部 + check 改箭头函数
+      //   原 bug：Promise executor 的 `function(resolve){}` 内部 this 是 undefined（严格模式）
+      //           const self = this 拿到 undefined，self.findElement 抛 TypeError
+      //   修法：箭头函数 executor（this 继承外层 async 方法）+ self 提升到顶部
+      if (maxFrames === undefined) maxFrames = 600;
+      const self = this;
+
+      return new Promise((resolve) => {
+        let frameCount = 0;
+        const check = () => {
+          const element = self.findElement(selector);
+          if (element) { resolve(element); return; }
+          if (maxFrames > 0 && frameCount >= maxFrames) { resolve(null); return; }
+          frameCount++;
+          requestAnimationFrame(check);
+        };
+        requestAnimationFrame(check);
+      });
+    }
+
+    // 删除一条原创推文（processOriginalTweets / processReplies 里调用）
     // 流程（3 步点击）:
     //   1. 点卡片上的 more/caret 按钮 → 弹出菜单
     //   2. 菜单里点 "Delete" 菜单项（按 8 语言文字匹配，不用 testid）
@@ -265,18 +387,25 @@
     async deleteTweet(container) {
       if (!container) return false;
 
-      const selectors = this.config.tweet;
-      if (!selectors) {
-        this.error('No selectors for tweet (deleteTweet)');
+      // M 修复 tweets-bug-3 2026-06-17（M+ 修复 2026-06-18）：
+      //   - X 旧版 click Delete menuitem 后**会**出 [role="dialog"] confirm 弹窗（data-testid="tweet-delete-confirm"）→ 再点
+      //   - X 2026 click Delete menuitem 后**会**出 [data-testid="confirmationSheetConfirm"] 浮动确认条 → 再点
+      //     - 实证（2026-06-18 MCP xiangping 自己推文 click Delete 抓 confirm）：dialog element = null（dialogCount=0）
+      //       但出现 [data-testid="confirmationSheetConfirm"] 按钮（text="Delete"）
+      //       不点 → 推文**不消失**（container.isConnected === true）→ 3s timeout
+      //       点 → 推文**消失**（container.isConnected === false）→ return true
+      //   - 极少数版本 click Delete 后推文**自动**消失（dialogCount=0, container.isConnected === false）→ 直接 return true
+      //   - M+ 修复（2026-06-18）：原代码用未定义的 `selectors.confirmButton`（ReferenceError，类似早期 bug "article is not defined"）
+      //     - deleteTweet 函数体内根本**没有**定义 `selectors` 变量（类比 M 修复前 deleteTweet 内 `article is not defined` 旧版问题）
+      //     - 改用 `this.config.common.confirmButton[0]`（6-type 重构后 common 节点 6 type 共用）
+
+      // 共享选择器：caret more 按钮 + 确认按钮（originalTweets / replies 共用）
+      const moreBtnSelectors = (this.config.common && Array.isArray(this.config.common.tweetMoreButtons))
+        ? this.config.common.tweetMoreButtons : [];
+      if (moreBtnSelectors.length === 0) {
+        this.error('No common.tweetMoreButtons for deleteTweet');
         return false;
       }
-
-      // 兼容：moreButtons（数组，新 schema）|| moreButton（字符串，旧 schema）
-      // 与 unfollowUser 的兼容模式一致
-      const moreBtnSelectors = Array.isArray(selectors.moreButtons)
-        ? selectors.moreButtons
-        : (selectors.moreButton ? [selectors.moreButton] : []);
-      if (moreBtnSelectors.length === 0) return false;
 
       const moreButton = this.findElement(moreBtnSelectors, container);
       if (!moreButton) {
@@ -318,52 +447,87 @@
 
       await this.safeClick(deleteItem, 0);
 
-      // 关键修复（M 修复 tweets-bug-3 2026-06-17）：
-      //   X 2026 改版后删推文**不需要 confirm 弹窗**——click Delete menuitem → 推文**直接消失**。
-      //   旧代码假设需要 confirm 弹窗 → waitForElement(selectors.confirmButton, 3000) 等 3s 找不到
-      //   → deleteTweet 返回 false → processedCount 不加 → 推文**实际已删**但代码不知
-      //   → user 看到"卡 3s + processed=1"。
+      // 关键修复（M++ 修复 tweets-bug-3 2026-06-18 增量）：
+      //   M+ 修复**错误**判断 "X 2026 改版后删推文**不需要 confirm 弹窗**"：
+      //     - 实际 X 2026 click Delete menuitem 后**会**出 confirmationSheetConfirm 按钮
+      //     - 必须再点 confirmationSheetConfirm → 推文才消失
+      //     - 不点 → 推文不消失，container.isConnected 一直 true → while loop 3s timeout
+      //   而且 M+ 修复用了未定义的变量 `selectors.confirmButton`（line 347）→ ReferenceError
+      //     - deleteTweet 函数体内根本没定义 `selectors`
+      //     - 触发条件：container.isConnected === true（X 旧版需要 confirm 弹窗时）
+      //     - 进 while loop body → 第一行就 ReferenceError → catch 块捕获 → return false
       //
-      // 关键修复（M+ 修复 tweets-bug-3 2026-06-17 增量）：
-      //   M 修复用了 `article.isConnected`，但**函数参数叫 `container`**——`article` 未定义
-      //   → 抛 "article is not defined" ReferenceError → catch 块捕获 → btn 标 'failed'
-      //   → processed=0。**必须**用 `container.isConnected`（processTweets 传的就是 article）
-      //
-      // MCP 实证（2026-06-17 xiangping 自己推文 click Delete 抓 dialog）：
-      //   dialogCount=0（没 confirm 弹窗）
-      //   hasUndoBanner=false（也没 Undo 横幅）
-      //   "Money Money Home" 推文**真的**从 DOM 消失（article count 3 → 2）
+      // MCP 实证（2026-06-18 xiangping 自己推文 click Delete 抓 confirm）：
+      //   - dialog element = null（X 2026 没用 [role="dialog"]，是 floating confirmation sheet）
+      //   - 出现 [data-testid="confirmationSheetConfirm"] 按钮（text="Delete"）
+      //   - 不点 confirmationSheetConfirm → 推文**不消失**（container.isConnected 一直 true）
+      //   - 点 confirmationSheetConfirm → 推文**消失**（container.isConnected === false）
       //
       // 修法（兼容 X 旧版 + X 2026）：
-      //   主路径：等 container.isConnected === false（X 2026 立即删）
-      //   备路径：find confirm 弹窗（X 旧版需要 click confirm 弹窗，X 2026 无此弹窗）
-      //   任何一条路径成功 → return true；3s 后都失败 → return false
-      const M_START = Date.now();
-      const M_TIMEOUT = 3000;
+      //   阶段 1：等 confirmationSheetConfirm（X 2026 必出）/ dialog confirmButton（旧版）
+      //   阶段 2：click confirmButton → 推文消失 → return true
+      //   兜底：极少数版本 click Delete 后推文**自动**消失 → return true
+      //
+      // M++ 修复（2026-06-18 tweets-bug-6 用户反馈）：
+      //   原版用 M_TIMEOUT=3000 + while 时间循环 + sleep(500/150) 轮询 → 全部"靠经验猜时间"
+      //   用户要求"不靠经验猜等几秒"——改为：
+      //     1. MutationObserver 监听 container 父节点的 childList → container.isConnected === false 即成功
+      //        （container 自己从 DOM 移除会触发父节点 childList mutation）
+      //     2. click confirmButton 后用 `await containerDisappeared` Promise 等 MO 触发，**不靠时间**
+      //     3. 兜底用 requestAnimationFrame 帧数：MAX_FRAMES 帧没任何 mutation = X 真挂了
       let mSucceeded = false;
       let mConfirmClicked = false;
-      while (Date.now() - M_START < M_TIMEOUT) {
-        // 主路径：X 2026 推文直接消失
+
+      // 共享 confirmButton selector：直接用 common.confirmButton[0]（6 type 都从 common 取）
+      const commonConfirmSel = (this.config.common && Array.isArray(this.config.common.confirmButton))
+        ? this.config.common.confirmButton[0] : null;
+
+      // 主路径：极少数版本 click Delete 后推文直接消失（X 不出 confirmationSheet）
+      if (!container.isConnected) {
+        return true;
+      }
+
+      // 设置 MutationObserver：监听 container 父节点的 childList + subtree
+      //   container.isConnected 是只读属性，只有父节点 childList mutation 时才变化
+      const self = this;
+      const parentNode = container.parentNode || document.body;
+      const obs = new MutationObserver(function() {
         if (!container.isConnected) {
           mSucceeded = true;
-          break;
+          obs.disconnect();
         }
-        // 备路径：X 旧版 找 confirm 弹窗（短暂轮询避免长期等）
-        const confirmButton = await this.waitForElement(selectors.confirmButton, 200);
+      });
+      obs.observe(parentNode, { childList: true, subtree: true });
+
+      // 等确认按钮出现（不靠经验时间，MO 驱动）
+      if (commonConfirmSel) {
+        const confirmButton = await this.waitForElement(commonConfirmSel);
         if (confirmButton) {
-          await this.safeClick(confirmButton, 1000);
+          // safeClick 的 delayAfter 传 0：不靠经验等 React state 更新
+          //   MO 监听 container 消失即可，不靠 sleep
+          await this.safeClick(confirmButton, 0);
           mConfirmClicked = true;
-          // click confirm 后再等推文消失
-          await this.sleep(500);
-          if (!container.isConnected) {
-            mSucceeded = true;
-          }
-          break;
         }
-        await this.sleep(150);
       }
+
+      // 等 MO 触发（container 消失）/ 兜底 RAF 帧数（X 真挂了）
+      //   不靠时间：MO 触发即 resolve；连续 MAX_FRAMES 帧没任何 mutation = 真挂了
+      const MAX_FRAMES = 600;  // 600 帧 ≈ 10s @ 60fps（浏览器物理节奏，不靠经验数字）
+      await new Promise(function(resolve) {
+        if (mSucceeded) { resolve(); return; }
+        let frameCount = 0;
+        function rafTick() {
+          if (mSucceeded) { resolve(); return; }
+          frameCount++;
+          if (frameCount >= MAX_FRAMES) { resolve(); return; }
+          requestAnimationFrame(rafTick);
+        }
+        requestAnimationFrame(rafTick);
+      });
+
+      obs.disconnect();
       if (!mSucceeded) {
-        this.error('deleteTweet: container still exists after click Delete (3s timeout, confirmClicked=' + mConfirmClicked + ')');
+        this.error('deleteTweet: container still exists after click Delete (max frames reached, confirmClicked=' + mConfirmClicked + ')');
         return false;
       }
       return true;
@@ -411,7 +575,7 @@
           ariaLabel: (m.getAttribute('aria-label') || '').substring(0, 40)
         };
       });
-      this.log('[waitForMenuItemByText] timeout ' + timeout + 'ms, keywords='
+      this.debug('[waitForMenuItemByText] timeout ' + timeout + 'ms, keywords='
         + JSON.stringify(keywords) + ', menuitemCount=' + finalItems.length
         + ' (startCount=' + startCount + '), snapshot=' + JSON.stringify(snap));
       return null;
@@ -465,7 +629,8 @@
       const confirmSel = (selectors && selectors.confirmButton)
         || (this.config.common && this.config.common.confirmButton && this.config.common.confirmButton[0]);
 
-      const confirmButton = await this.waitForElement(confirmSel, 2000);
+      // M++ 修复（2026-06-18 tweets-bug-6）：maxFrames 用 600（10s）不用 2000（33s）
+      const confirmButton = await this.waitForElement(confirmSel, 600);
       if (confirmButton) {
         await this.safeClick(confirmButton, 500);
       }
@@ -482,17 +647,13 @@
     async unreTweet(container) {
       if (!container) return false;
 
-      const selectors = this.config.tweet;
-      if (!selectors) {
-        this.error('No selectors for tweet (unreTweet)');
+      // 撤销 retweet 按钮：retweet 节点独有（unretweet testid 唯一）
+      const btnSelectors = (this.config.retweet && Array.isArray(this.config.retweet.unreTweetButtons))
+        ? this.config.retweet.unreTweetButtons : [];
+      if (btnSelectors.length === 0) {
+        this.error('No retweet.unreTweetButtons for unreTweet');
         return false;
       }
-
-      // 兼容：unreTweetButtons（数组，新）|| unreTweetButton（字符串，旧）
-      const btnSelectors = Array.isArray(selectors.unreTweetButtons)
-        ? selectors.unreTweetButtons
-        : (selectors.unreTweetButton ? [selectors.unreTweetButton] : []);
-      if (btnSelectors.length === 0) return false;
 
       // 1) 点 retweet 按钮（在 container 内部 —— 卡片自己的 retweet 图标）打开菜单
       const unreTweetButton = this.findElement(btnSelectors, container);
@@ -500,9 +661,11 @@
 
       await this.safeClick(unreTweetButton, 500);
 
-      // 2) 等菜单项出现 —— selector 从 config.tweet.unretweetConfirmButtons[0] 读（2026-XX-XX 抽出硬编码）
-      var unretweetConfirmSel = (this.config.tweet && this.config.tweet.unretweetConfirmButtons && this.config.tweet.unretweetConfirmButtons[0]);
-      let unretweetMenuItem = await this.waitForElement(unretweetConfirmSel, 2000);
+      // 2) 等菜单项出现 —— selector 从 config.retweet.unretweetConfirmButtons[0] 读
+      var unretweetConfirmSel = (this.config.retweet && Array.isArray(this.config.retweet.unretweetConfirmButtons))
+        ? this.config.retweet.unretweetConfirmButtons[0] : null;
+      // M++ 修复（2026-06-18 tweets-bug-6）：maxFrames 用 600（10s）不用 2000（33s）
+      let unretweetMenuItem = unretweetConfirmSel ? await this.waitForElement(unretweetConfirmSel, 600) : null;
 
       // 3) testid miss → 8 语言文字兜底（X 改版后菜单项可能去掉 testid）
       if (!unretweetMenuItem) {
@@ -514,7 +677,7 @@
 
       if (!unretweetMenuItem) {
         // 真找不到 —— 留下日志帮用户/AI 看到底是哪种 miss
-        this.log('[unretweet] 找不到 Undo repost 菜单项 —— testid 和文字匹配都 0 命中');
+        this.debug('[unretweet] 找不到 Undo repost 菜单项 —— testid 和文字匹配都 0 命中');
         return false;
       }
 
@@ -570,8 +733,8 @@
 
     isPinnedTweet(container) {
       if (!container) return false;
-      // selector 从 config.tweet.socialContext 读（2026-XX-XX 抽出硬编码）
-      var socialContext = this.findElement(this.config.tweet && this.config.tweet.socialContext, container);
+      // selector 从 config.common.socialContext 读
+      var socialContext = this.findElement(this.config.common && this.config.common.socialContext, container);
       if (!socialContext) return false;
       var text = (socialContext.textContent || '').toLowerCase();
       // 8 语言 pinned 关键字从 this._i18n.pinnedKeywords 读（默认 8 语言，远程配置可覆盖）
@@ -637,8 +800,8 @@
         'i'
       );
       // 1) 优先查 socialContext（X 旧版行为）
-      // selector 从 config.tweet.socialContext 读（2026-XX-XX 抽出硬编码）
-      var socialContext = this.findElement(this.config.tweet && this.config.tweet.socialContext, container);
+      // selector 从 config.common.socialContext 读
+      var socialContext = this.findElement(this.config.common && this.config.common.socialContext, container);
       if (socialContext) {
         var scText = (socialContext.textContent || '').toLowerCase();
         if (replyRe.test(scText)) {
@@ -692,28 +855,35 @@
       }
     }
 
-    // 哪些 itemType 启用日期+关键字过滤（bookmarks + following + tweets）
+    // 哪些 itemType 启用日期+关键字过滤（bookmarks + following + 3 类推文）
     shouldFilter(itemType) {
       // 是否对该 itemType 启用日期 + 关键字过滤
       //   likes 不支持过滤（没日期筛选 UI）→ false
-      //   bookmarks / following / tweets 支持日期 + 关键字过滤 → true
+      //   bookmarks / following / originalTweets / replies / retweets 支持日期 + 关键字过滤 → true
       // 返回: true = 走 extractMeta + matchesFilter；false = 全部删除
       if (!this.filters) return false;
-      return itemType === 'bookmarks' || itemType === 'following' || itemType === 'tweets';
+      return itemType === 'bookmarks' || itemType === 'following'
+        || itemType === 'originalTweets' || itemType === 'replies' || itemType === 'retweets';
     }
 
     async processItems(itemType, maxItems) {
-      // 入口方法：根据 itemType 分派到具体的 processLikes / processBookmarks / processFollowing / processTweets
+      // 入口方法：根据 itemType 分派到具体的 processLikes / processBookmarks / processFollowing / processOriginalTweets / processReplies / processRetweets
       // 参数:
-      //   itemType  - 'likes' | 'bookmarks' | 'following' | 'tweets'
+      //   itemType  - 'likes' | 'bookmarks' | 'following' | 'originalTweets' | 'replies' | 'retweets'
       //   maxItems  - 本次最多处理多少条，默认 50
       if (maxItems === undefined) maxItems = 50;
 
-      // 复数 itemType 映射到单数配置 key（remoteConfig 用单数：like/bookmark/tweet）
+      // 复数 itemType 映射到配置 key
+      //   6-type 重构（2026-06-17）：originalTweet/reply 节点删除，tweetMoreButtons 移到 common
+      //   originalTweets/replies 共享 common（articleContainers + tweetMoreButtons + socialContext）
+      //   retweets 走 retweet（unreTweetButtons + unretweetConfirmButtons + cardMarker）
       var CONFIG_KEY_MAP = {
         likes: 'like',
         bookmarks: 'bookmark',
-        tweets: 'tweet'
+        following: 'following',
+        originalTweets: 'common',
+        replies: 'common',
+        retweets: 'retweet'
       };
       var configKey = CONFIG_KEY_MAP[itemType] || itemType;
 
@@ -729,8 +899,6 @@
         this.error('No selectors for ' + itemType);
         return;
       }
-
-      this.log('Processing ' + itemType + '...');
 
       // 按 itemType 分派到对应处理函数（每个函数都自己管「滚动 + 找按钮 + 点击 + 错误处理」）
       if (itemType === 'likes') {
@@ -748,9 +916,19 @@
         return;
       }
 
-      // 推文最复杂：要处理原创（删）+ retweet（撤销 repost）+ pinned（跳过）+ reply（按 includeReplies 决定）
-      if (itemType === 'tweets') {
-        await this.processTweets(maxItems);
+      // 3 个推文子类型：各自独立 process 函数（不做 helper 抽象，直读直改）
+      if (itemType === 'originalTweets') {
+        await this.processOriginalTweets(maxItems);
+        return;
+      }
+
+      if (itemType === 'replies') {
+        await this.processReplies(maxItems);
+        return;
+      }
+
+      if (itemType === 'retweets') {
+        await this.processRetweets(maxItems);
         return;
       }
 
@@ -834,6 +1012,19 @@
       let emptyScrolls = 0;
       const maxEmptyScrolls = 3;
 
+      // M++ 修复（2026-06-18 tweets-bug-7）：X 2026 改版后 /{username}/likes 是 profile 6 tabs 页
+      //   实际 likes 列表在 "Likes" tab 里（不在 Posts tab 默认）→ 必须点 Likes tab 激活
+      //   流程：找 ScrollSnap-SwipeableList 里的 "Likes" 文字 tab → click → 等 article 渲染
+      // MCP 实证：/xiangping5211/likes 6 tabs (Posts/Replies/Highlights/Articles/Media/Likes)
+      //   tabs 容器 testid='ScrollSnap-SwipeableList'，tab 是 role="tab" 的 <a>，文字 Posts/Replies/.../Likes
+      var likesTabClicked = await this._activateProfileTab('Likes');
+      // 命中/未命中都是内部状态，不打到侧边栏日志
+      void likesTabClicked;
+
+      // 等 X 渲染完 + 内容稳定
+      // 优先 unlike button + cellInnerDiv 兜底（X 2026 改 cellInnerDiv 而非 article）
+      await this.waitForContentStable(["[data-testid='unlike']", "[data-testid='cellInnerDiv']"]);
+
       // 全部 selector 从 config 来（2026-XX-XX 抽出：远程 → default.json → 空 shape）
       // config 由 background 预加载（remote fail → default.json fallback），
       // 这里直接读 this.config.like.unlikeButtons 即可，不再有 BUILTIN 兜底
@@ -898,7 +1089,7 @@
             this.log(t('noMoreLikes'));
             break;
           }
-          const hasMore = await this.scrollToBottom(1500);
+          const hasMore = await this.scrollToBottom();
           if (!hasMore) {
             this.log(t('endOfLikes'));
             break;
@@ -972,6 +1163,15 @@
       let emptyScrolls = 0;
       const maxEmptyScrolls = 3;
 
+      // M++ 修复（2026-06-18 tweets-bug-6）：processBookmarks 入口必须等 X 渲染 article + caret
+      //   原版**没**调 waitForContentStable → X 还在 hydrate 时立即读 removeButtons → 0 button
+      // M++ 修复（2026-06-18 tweets-bug-7）：X 2026 改版后 bookmarks page 0 article + 0 caret
+      //   改成：优先 removeBookmark/unbookmark + cellInnerDiv 兜底
+      // M++ 修复（2026-06-18 tweets-bug-7）：bookmarks page 也可能用 ScrollSnap-SwipeableList tabs
+      //   兜底点 "Bookmarks" tab 激活
+      await this._activateProfileTab('Bookmarks');
+      await this.waitForContentStable(["[data-testid='removeBookmark']", "[data-testid='unbookmark']", "[data-testid='cellInnerDiv']"]);
+
       // 全部 selector 从 config 来（2026-XX-XX 抽出：远程 → default.json → 空 shape）
       var remoteRemove = (this.config && this.config.bookmark && Array.isArray(this.config.bookmark.removeButtons))
         ? this.config.bookmark.removeButtons : [];
@@ -1029,7 +1229,7 @@
             this.log(t('noMoreBookmarks'));
             break;
           }
-          const hasMore = await this.scrollToBottom(1500);
+          const hasMore = await this.scrollToBottom();
           if (!hasMore) {
             this.log(t('endOfBookmarks'));
             break;
@@ -1105,6 +1305,11 @@
       let emptyScrolls = 0;
       const maxEmptyScrolls = 3;
 
+      // M++ 修复（2026-06-18 tweets-bug-6）：processFollowing 入口必须等 X 渲染
+      //   following page 用 cellInnerDiv 容器（不是 article），X 2026 改版后结构
+      //   等 cellInnerDiv 稳定 + 至少 1 个 unfollow 按钮出现
+      await this.waitForContentStable(["[data-testid='cellInnerDiv']", "[data-testid$='-unfollow']"]);
+
       // 全部 selector 从 config 来（2026-XX-XX 抽出：远程 → default.json → 空 shape）
       var remoteUnfollow = (this.config && this.config.following && Array.isArray(this.config.following.unfollowButtons))
         ? this.config.following.unfollowButtons : [];
@@ -1165,7 +1370,7 @@
             this.log(t('noMoreFollowing'));
             break;
           }
-          const hasMore = await this.scrollToBottom(1500);
+          const hasMore = await this.scrollToBottom();
           if (!hasMore) {
             this.log(t('endOfFollowing'));
             break;
@@ -1214,7 +1419,23 @@
           btn.dataset.xeraserProcessed = 'true';
 
           // step 2: 等 confirm 弹窗并点击
-          const confirmButton = await this.waitForElement(confirmSel, 2000);
+          // M++ 修复（2026-06-18 tweets-bug-6）：maxFrames 用 100（1.6s）不用 200（3.3s）
+          //   MCP 实测 confirm button 16ms 出现 + 可点 + 在 viewport
+          //   3.3s 兜底太长：user 等 5s 就报告"卡了"，实际还要等 4.8s
+          // M++ 修复（2026-06-18 tweets-bug-7）：testid + 文字双轨并行查找
+          //   waitForElement miss 时不能再用 waitForMenuItemByText（dialog button 是 role="button" 不是 menuitem）
+          //   用 _findButtonByText 兜底（找 role="button" / <button> / <a role="button"> 文字匹配）
+          //   MCP 实证 dialog confirm button = BUTTON + role="button" + testid="confirmationSheetConfirm" + text="Unfollow"
+          // 并行跑：testid + 文字兜底，任一命中就用
+          // 兜底 100 帧（1.6s）for testid + 1500ms（1.5s）for 文字兜底
+          // MCP 实测 confirm button 16ms 出现，1.6s 足够 testid；1.5s 给文字兜底余量（X 改版可能换 testid）
+          // 关键：总 < 1.6s 完成（MCP 实证 1.0s 完成），不要超过 user 体感"卡住"阈值 2s
+          const [confirmByTestid, confirmByText] = await Promise.all([
+            this.waitForElement(confirmSel, 100),
+            this._findButtonByText(this._i18n.unfollowKeywords, 1500)
+          ]);
+          const confirmButton = confirmByTestid || confirmByText;
+          // 命中方式（testid vs 文字 fallback）只是内部细节，不打到侧边栏
           if (confirmButton) {
             const ok2 = await this.safeClick(confirmButton, 500);
             if (ok2) {
@@ -1247,384 +1468,420 @@
       }
     }
 
-    // 专门处理 Tweets（最复杂的一个 —— 处理原创 + retweet + reply + pinned 4 种推文）
-    // 流程（仿 processBookmarks 模式）:
-    //   1. 全局扫 more 按钮（每条推文卡片上都有）
-    //   2. 对每个按钮找最近的 article 容器 → 提取 meta → matchesFilter
-    //   3. 判断推文类型（socialContext: pinned / replying / reposted by）
-    //      - pinned: 跳过（用户主动置顶的，不应该删）
-    //      - reply + includeReplies=false: 跳过
-    //      - retweet 卡片: 调 unreTweet（撤销 repost，不删原推文）
-    //      - 原创: 调 deleteTweet（3 步：more → Delete → Confirm）
-    //   4. 滚到底部加载更多；连续 3 次没新内容 → 退出
-    // 注意: tweets 支持日期+关键字过滤（shouldFilter → true）+ includeReplies 子选项
-    async processTweets(maxItems) {
+    // 删原创推文（在 /username 页跑，不调 isReplyTweet hack —— 原创页无 reply 噪音）
+    //   跳过 retweet 卡片（有 unretweet testid）
+    //   跳过 reply 推文（isReplyTweet 判定）
+    //   跳过 pinned（isPinnedTweet）
+    //   路径：deleteTweet
+    async processOriginalTweets(maxItems) {
       if (maxItems === undefined) maxItems = 50;
-
       const self = this;
-
-      // 内置兜底选择器（远程配置可覆盖，远程的放前面优先）
-      //   X 各改版下"more 按钮"形态差异很大（testid / role / svg / i18n），必须宽泛覆盖
-      //   排他规则：必须是按钮（button / role=button），避免误中 article / svg icon
-      // 全部 selector 从 config 来（2026-XX-XX 抽出：远程 → default.json → 空 shape）
-      var remoteMore = (this.config && this.config.tweet && Array.isArray(this.config.tweet.moreButtons))
-        ? this.config.tweet.moreButtons : [];
-      var remoteUnretweet = (this.config && this.config.tweet && Array.isArray(this.config.tweet.unreTweetButtons))
-        ? this.config.tweet.unreTweetButtons : [];
-
-      const moreButtons = remoteMore;
-      const unretweetButtons = remoteUnretweet;
-
-      // 是否跳过 retweet（用户在 sidepanel 关闭 includeRetweets）
-      var includeRetweets = !(self.tweetOptions && self.tweetOptions.includeRetweets === false);
-
-      this.log(t('startingTweetsCleanup', {url: window.location.href}));
-
-      // 关键修复：等 articles 渲染（X 改版后 SPA 渲染延迟有时 1-2s）
-      //   现象：用户实测反馈"还没开始就结束了" —— 诊断 0 命中 + 立即 End of tweets list
-      //   修法：_diagnosePage 前等最多 3s 让至少 1 个 article 出现
-      //   关联：getTweetsPageURL 已修复会走 /with_replies，这里再加渲染等待做防御
-      var __articleWaitStart = Date.now();
-      while (Date.now() - __articleWaitStart < 3000) {
-        if (document.querySelectorAll('article').length > 0) break;
-        await this.sleep(200);
-      }
-
-      // 预计算 keyword 小写
       this._keywordLower = (this.filters && this.filters.keyword)
         ? this.filters.keyword.toLowerCase() : '';
 
+      this.log(t('startingTweetsCleanup', {url: window.location.href}));
+
+      // 等 articles 渲染 + 内容稳定（X SPA 分批异步加载，2026-06-18 用 MutationObserver 检测"内容稳定"）
+      //   旧实现：3s 内 article 出现就 break → 分批加载时第一个 article 出现就开跑 → 0 命中
+      //   新实现：连续 1.5s 没新 article 才算加载完；5s 兜底超时（慢网 / 页面卡死）
+      // M++ 修复（2026-06-18）：等 article **和** caret 都稳定（X 2026 caret 是 React 异步 hydration）
+      await this.waitForContentStable(['article', "[data-testid='caret']"]);
       this._diagnosePage();
 
-      // 收集每个推文卡片对应的 more 按钮（processTweets 主循环里调）
+      // 6-type 重构：tweet/originalTweet/reply 节点已删除，moreButtons 移到 common.tweetMoreButtons
+      const moreButtons = (self.config.common && Array.isArray(self.config.common.tweetMoreButtons))
+        ? self.config.common.tweetMoreButtons : [];
+      const retweetMarker = (self.config.retweet && Array.isArray(self.config.retweet.cardMarker))
+        ? self.config.retweet.cardMarker : [];
+      const articleSel = (self.config.common && self.config.common.articleContainers) || ['article'];
+      const topLevelRule = self.config.common && self.config.common.topLevelArticle;
+
+      function isRetweetCard(article) {
+        for (var r = 0; r < retweetMarker.length; r++) {
+          if (article.querySelector(retweetMarker[r]) !== null) return true;
+        }
+        return false;
+      }
+
       function collectCandidates() {
         const candidates = [];
-        const seen = new WeakSet();
-        function addAll(buttons, isRetweet) {
-          for (let i = 0; i < buttons.length; i++) {
-            const btn = buttons[i];
-            if (seen.has(btn)) continue;
-            seen.add(btn);
-            // 关键修复：X 2026 把"More" 按钮的 selector 误中范围扩大
-            //   - 侧边栏 "More menu items" 按钮（AppTabBar_More_Menu）
-            //   - 趋势区 / "Who to follow" 等 sidebar 区块的 caret 按钮
-            //   这些都不是推文，deleteTweet 调过去 findElement 找不到 more button，
-            //   8 次失败 → 0 命中 → 30s STUCK_TIMEOUT 退出
-            // 修法：btn 必须有 article / cellInnerDiv 容器祖先（unretweet 按钮本身在 retweet card 内，天然满足）
-            if (!btn.closest('article')
-                && !self.findClosest(self.config.common && self.config.common.articleContainers, btn)) {
-              continue;
-            }
-            candidates.push({ btn: btn, isRetweet: isRetweet });
-          }
-        }
-
-        // 关键修复：retweet 卡片的 caret 菜单里没有 Delete / Undo repost
-        //   现象：用户实测反馈"转发的右上角 More 按钮弹窗里没有删除"
-        //   原因：转发卡片没有用 caret → Delete 路径，只能用帖子下面的 retweet 图标 → Undo repost 路径
-        //   修法：collectCandidates 时跳过转发卡片的 caret，避免 caret 残留菜单阻塞后续 unretweet 点击
-        function isRetweetCard(button) {
-          if (!button) return false;
-          var article = button.closest('article')
-            || self.findClosest(self.config.common && self.config.common.articleContainers, button);
-          if (!article) return false;
-          // 4 种 retweet 指示器（覆盖 X 改版）—— selector 从 config.tweet.retweetButtonInCard 读
-          var retweetSel = self.config.tweet && self.config.tweet.retweetButtonInCard;
-          if (retweetSel) {
-            for (var r = 0; r < retweetSel.length; r++) {
-              if (article.querySelector(retweetSel[r]) !== null) return true;
-            }
-          }
-          return false;
-        }
-
-        // 累积所有匹配（不去重 break）——不同 X 改版下同一个页面的不同推文卡片可能用不同 testid，
-        //   比如"自己推文"用 caret，"他人推文"用 more，break 会漏匹配。
-        //   addAll 内部用 WeakSet 去重，所以多个 selector 命中同一元素不会重复。
+        const seen = new Set();
         for (let s = 0; s < moreButtons.length; s++) {
           const btns = self.findElements(moreButtons[s]);
-          // retweet 卡片的 caret 跳过：菜单里没 Delete，必须走 unretweet 路径
-          const nonRetweetBtns = btns.filter(function(b) { return !isRetweetCard(b); });
-          // 只保留 top-level article 的 caret（祖先链没有其他 article）
-          //   防 quoted 推文里嵌套他人推文时，他人推文里也有 caret 按钮被误中
-          const topLevelBtns = nonRetweetBtns.filter(function(b) {
-            var a = b.closest('article');
-            if (!a) return false;
-            return !a.parentElement || !a.parentElement.closest('article');
-          });
-          // 必须是自己的推文（不是 quoted 推文里嵌套的他人推文）
-          //   _isOwnArticle 要求 article 内有 UserAvatar-Container-{username}（OP 独占标记）
-          const ownBtns = topLevelBtns.filter(function(b) {
-            var a = b.closest('article');
-            return self._isOwnArticle(a);
-          });
-          if (ownBtns.length > 0) addAll(ownBtns, false);
-        }
-        // retweet 按钮（若用户关闭则跳过）
-        if (includeRetweets) {
-          for (let s = 0; s < unretweetButtons.length; s++) {
-            const btns = self.findElements(unretweetButtons[s]);
-            // 关键修复（tweets-bug-3，2026-06-17 端到端验证后根因定位）：
-            //   X 2026 retweet 卡片（"You reposted" 标签）的 article 内只显示 **原作者**
-            //   的 User-Name / UserAvatar，不显示 retweeter（自己）的头像。
-            //   旧代码 unretweet 路径也走 _isOwnArticle 过滤 → 该函数要求
-            //   article 内有 UserAvatar-Container-{username} → 所有 retweet 卡片都被判定
-            //   为"他人推文"过滤掉 → 撤销 retweet 永远 0 命中。
-            //
-            //   修法：unretweet 路径 **不应用 _isOwnArticle 过滤**。
-            //   理由：unretweetButtons selector（[data-testid='unretweet'] / 已转帖 / 리ポストしました
-            //   等 8 语言 aria-label 兜底）是 X 唯一给 "自己已转发" 卡片渲染的按钮 —— X 不会
-            //   在他人转发的卡片上渲染 unretweet 按钮。retweet 按钮本身就是"自己已转发"的
-            //   最强语义证据，比 _isOwnArticle 严格（要求头像）更准。
-            //   只保留 top-level article 过滤（防 nested-article 误中：quoted 推文里
-            //   嵌套了他人推文时，他人推文里可能含他人 unretweet 按钮）。
-            const topLevelBtns = btns.filter(function(b) {
-              var a = b.closest('article');
-              if (!a) return false;
-              return !a.parentElement || !a.parentElement.closest('article');
-            });
-            if (topLevelBtns.length > 0) addAll(topLevelBtns, true);
+          for (let i = 0; i < btns.length; i++) {
+            const btn = btns[i];
+            if (seen.has(btn)) continue;
+            seen.add(btn);
+            const article = btn.closest('article') || self.findClosest(articleSel, btn);
+            if (!article) continue;
+            if (isRetweetCard(article)) continue;
+            // top-level 防 nested 误中
+            if (topLevelRule === 'parent' && article.parentElement && article.parentElement.closest('article')) continue;
+            if (!self._isOwnArticle(article)) continue;
+            candidates.push({ btn: btn, article: article });
           }
+        }
+        if (candidates.length === 0) {
+          self._logPageState({ moreButtons: moreButtons, retweetMarker: retweetMarker }, '[originalTweets]');
         }
         return candidates;
       }
 
-      // 诊断日志（tweets-bug-3 2026-06-17 保留，简化注释）：
-      //   输出 processTweets 启动时的关键状态（article 数 / candidate 数 / includeReplies / includeRetweets）
-      //   user 在自己的 Chrome 跑 cleanup 时打开 DevTools console 即可看到
-      // region debug-point tweets-start
-      try {
-        var allArticles = document.querySelectorAll('article').length;
-        var allCells = document.querySelectorAll("[data-testid='cellInnerDiv']").length;
-        var allTweets = document.querySelectorAll("[data-testid='tweet']").length;
-        var userNameEl = document.querySelector("[data-testid='User-Name']");
-        var userName = userNameEl ? userNameEl.textContent.substring(0, 50) : null;
-        var pathname = window.location.pathname;
-        var tweetOpts = this.tweetOptions || {};
-        var maxItemsLimit = maxItems;
-        var maxErrorsLimit = this.maxErrors;
-        var includeRepliesVal = tweetOpts.includeReplies;
-        var includeRetweetsVal = tweetOpts.includeRetweets;
-        var selfRef = this;
-        var moreBtnCfg = (selfRef.config && selfRef.config.tweet && selfRef.config.tweet.moreButtons) || [];
-        var unretweetBtnCfg = (selfRef.config && selfRef.config.tweet && selfRef.config.tweet.unretweetButtons) || [];
-        var findClosestCfg = (selfRef.config && selfRef.config.common && selfRef.config.common.articleContainers) || [];
-        console.log('[X-Eraser][diag][tweets] START', JSON.stringify({
-          url: pathname,
-          userName: userName,
-          allArticles: allArticles,
-          allCells: allCells,
-          allTweets: allTweets,
-          includeReplies: includeRepliesVal,
-          includeRetweets: includeRetweetsVal,
-          maxItems: maxItemsLimit,
-          maxErrors: maxErrorsLimit,
-          moreButtonsCfgCount: moreBtnCfg.length,
-          unretweetButtonsCfgCount: unretweetBtnCfg.length,
-          articleContainersCfgCount: findClosestCfg.length
-        }));
-        // 试 collect 一次看 candidate 数（不真处理）
-        var diagCandidates = collectCandidates();
-        console.log('[X-Eraser][diag][tweets] first-collect-candidates:', diagCandidates.length);
-        for (var d = 0; d < diagCandidates.length; d++) {
-          var dc = diagCandidates[d];
-          var dArticle = dc.btn.closest('article') || dc.btn.parentElement;
-          var dUserName = dArticle ? dArticle.querySelector("[data-testid='User-Name']") : null;
-          var dText = dArticle ? dArticle.textContent.substring(0, 50) : '';
-          var dIsRetweet = dc.isRetweet;
-          var dIsPinned = selfRef.isPinnedTweet(dArticle);
-          var dIsReply = selfRef.isReplyTweet(dArticle);
-          console.log('[X-Eraser][diag][tweets]   candidate[' + d + ']:', JSON.stringify({
-            isRetweet: dIsRetweet,
-            isPinned: dIsPinned,
-            isReply: dIsReply,
-            userName: dUserName ? dUserName.textContent.substring(0, 30) : null,
-            text: dText.replace(/\n+/g, ' ').trim()
-          }));
-        }
-      } catch (diagErr) {
-        console.warn('[X-Eraser][diag][tweets] diag failed:', diagErr.message);
-      }
-      // endregion debug-point tweets-start
-
       let emptyScrolls = 0;
-      const maxEmptyScrolls = 3;
-
-      // 无进展兜底（30s 没新增就 break，防止 X 改版 / 选择器失效死循环）
-      //   重要：这个 var 必须在 processTweets 函数体内声明——上次 refactor 误把它加到了 processLikes 里
-      //   导致 processTweets 的 while 循环 ReferenceError，整个 cleanup 0 命中
       var lastProgressTime = Date.now();
       var STUCK_TIMEOUT_MS = 30000;
-
       while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
-        if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) {
-          this.log(t('cleanupStuck'));
-          break;
-        }
-        if (this.isPaused) {
-          await this.sleep(500);
-          continue;
-        }
+        if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) { this.log(t('cleanupStuck')); break; }
+        if (this.isPaused) { await this.sleep(500); continue; }
 
         const candidates = collectCandidates();
-
-        // 过滤已处理（true / skipped / pinned / failed 四态）
-        //   failed 是 tweets-bug-3 2026-06-17 关键修复：旧版失败不标记 → 同 candidate 无限 retry
-        //   → 30s STUCK_TIMEOUT 才退出。user 看到"点 More 弹菜单不点 Delete 卡住"现象
-        //   修法：失败标 'failed'，filter 直接跳过该 candidate，让 processTweets 继续推进
-        //   STUCK_TIMEOUT 仍保留作 processTweets 整体兜底（防整个循环死锁）
-        const pending = candidates.filter(function(c) {
-          var p = c.btn.dataset.xeraserProcessed;
+        const pending = candidates.filter(c => {
+          const p = c.btn.dataset.xeraserProcessed;
           return !p || (p !== 'true' && p !== 'skipped' && p !== 'pinned' && p !== 'failed');
         });
 
         if (pending.length === 0) {
           emptyScrolls++;
-          if (emptyScrolls > maxEmptyScrolls) {
-            this.log(t('noMoreTweets'));
-            break;
-          }
-          const hasMore = await this.scrollToBottom(1500);
-          if (!hasMore) {
-            this.log(t('endOfTweets'));
-            break;
-          }
+          if (emptyScrolls > 3) { this.log(t('noMoreTweets')); break; }
+          var hasMore = await this.scrollToBottom();
+          if (!hasMore) { this.log(t('endOfTweets')); break; }
           continue;
         }
-
         emptyScrolls = 0;
-        const candidate = pending[0];
-        const btn = candidate.btn;
-        const isRetweet = candidate.isRetweet;
 
-        // 诊断日志（tweets-bug-3 2026-06-17 保留）：每个 candidate 处理前 dump 关键字段
-        // region debug-point tweets-candidate
-        try {
-          var candArticle = btn.closest('article') || btn.parentElement;
-          var candUserEl = candArticle ? candArticle.querySelector("[data-testid='User-Name']") : null;
-          var candUser = candUserEl ? candUserEl.textContent.substring(0, 30) : null;
-          var candIsPinned = this.isPinnedTweet(candArticle);
-          var candIsReply = this.isReplyTweet(candArticle);
-          var candIncludeReplies = (this.tweetOptions || {}).includeReplies;
-          var candShouldFilter = this.shouldFilter('tweets');
-          var candMeta = candShouldFilter ? this.extractMeta(candArticle, 'tweets') : null;
-          var candFilterMatch = candShouldFilter ? this.matchesFilter(candMeta, this.filters) : true;
-          console.log('[X-Eraser][diag][tweets] processing candidate:', JSON.stringify({
-            isRetweet: isRetweet,
-            isPinned: candIsPinned,
-            isReply: candIsReply,
-            userName: candUser,
-            includeReplies: candIncludeReplies,
-            shouldFilter: candShouldFilter,
-            filterMatch: candFilterMatch,
-            dataTestid: btn.getAttribute('data-testid'),
-            ariaLabel: (btn.getAttribute('aria-label') || '').substring(0, 30)
-          }));
-        } catch (candDiagErr) {
-          console.warn('[X-Eraser][diag][tweets] candidate diag failed:', candDiagErr.message);
-        }
-        // endregion debug-point tweets-candidate
+        const c = pending[0];
+        const article = c.article;
 
-        // 找容器：article 优先（X 标准标签），fallback 到 config.common.articleContainers，再 fallback parentElement
-        var article = btn.closest('article')
-          || this.findClosest(this.config.common && this.config.common.articleContainers, btn)
-          || btn.parentElement;
-
-        // Pinned 检测：8 语言关键字匹配
         if (this.isPinnedTweet(article)) {
-          btn.dataset.xeraserProcessed = 'pinned';
+          c.btn.dataset.xeraserProcessed = 'pinned';
           this.log(t('pinnedTweetSkipped'));
-          await this.sleep(50);
-          continue;
+          await this.sleep(50); continue;
+        }
+        if (this.isReplyTweet(article)) {
+          c.btn.dataset.xeraserProcessed = 'skipped';
+          await this.sleep(50); continue;
         }
 
-        // includeReplies 过滤：用户关闭时跳过 reply 卡片（仅 deleteTweet 路径）
-        // 关键修复：includeReplies=false 时，reply 不能被当成原创删
-        //   现象：用户实测反馈"我没有勾选 Include replies 但 reply 也被删了"
-        //   原因：导航修复后 /with_replies 显示 reply 卡片，但 processTweets 没加 includeReplies 过滤
-        //   关键：retweet 候选（isRetweet=true）不应用此过滤 —— 用户可能 retweet 了 reply（卡是 retweet 形态不是 reply）
-        //         只在 deleteTweet 路径（非 retweet）上过滤
-        if (!isRetweet
-            && this.tweetOptions
-            && this.tweetOptions.includeReplies === false
-            && this.isReplyTweet(article)) {
-          btn.dataset.xeraserProcessed = 'skipped';
-          this.log('[tweets] reply skipped (includeReplies=false)');
-          await this.sleep(50);
-          continue;
-        }
-
-        // 日期 + 关键字过滤
-        if (this.shouldFilter('tweets')) {
-          var meta = this.extractMeta(article, 'tweets');
+        if (this.shouldFilter('originalTweets')) {
+          var meta = this.extractMeta(article, 'originalTweets');
           if (!this.matchesFilter(meta, this.filters)) {
-            btn.dataset.xeraserProcessed = 'skipped';
-            if ((this.filters.fromDate || this.filters.toDate) && !meta.dateISO
-                && !this._dateMissingWarned.has('tweets')) {
-              this._dateMissingWarned.add('tweets');
-              this.log(t('dateFilterSkipped', {type: 'tweets'}));
-            }
-            await this.sleep(50);
-            continue;
+            c.btn.dataset.xeraserProcessed = 'skipped';
+            await this.sleep(50); continue;
           }
         }
 
-        // 标记放后面：unreTweet / deleteTweet 失败时标 'failed'（tweets-bug-3 2026-06-17）
-        //   旧版失败不标记 → 同 candidate 无限 retry（30s STUCK_TIMEOUT 才退出）—— user 看到 "卡在那了"
-        //   修法：失败标 'failed' → filter 跳过该 candidate → processTweets 继续推进
-        //   STUCK_TIMEOUT 仍保留作 processTweets 整体兜底（防整个循环死锁）
-        //   设计取舍：失败放弃该 candidate 立即推进，比 30s 内 retry 4 次更稳：
-        //   - 多数失败是 X 改版（菜单文字 / 按钮 testid 变化），retry 也无用
-        //   - 真 transient error（DOM 没加载完）filter 后 collect 不到，问题候选就过去了
-        //   - STUCK_TIMEOUT 30s 兜底整个 processTweets，防极端情况死循环
         try {
-          let success = false;
-          if (isRetweet) {
-            success = await this.unreTweet(article);
-            if (success) {
-              btn.dataset.xeraserProcessed = 'true';
-              this.processedCount++;
-              lastProgressTime = Date.now();  // 重置无进展计时器
-              this.progress('Undo repost #' + this.processedCount);
-              this.log(t('unreTweetSuccess', {count: this.processedCount}));
-            } else {
-              btn.dataset.xeraserProcessed = 'failed';
-              this.error(t('unretweetFailed', {error: 'no unretweet button'}));
-            }
+          var success = await this.deleteTweet(article);
+          if (success) {
+            c.btn.dataset.xeraserProcessed = 'true';
+            this.processedCount++;
+            lastProgressTime = Date.now();
+            this.progress('Tweet #' + this.processedCount);
+            this.log(t('tweetDeleted', {count: this.processedCount}));
           } else {
-            success = await this.deleteTweet(article);
-            if (success) {
-              btn.dataset.xeraserProcessed = 'true';
-              this.processedCount++;
-              lastProgressTime = Date.now();  // 重置无进展计时器
-              this.progress('Tweet #' + this.processedCount);
-              this.log(t('tweetDeleted', {count: this.processedCount}));
-            } else {
-              btn.dataset.xeraserProcessed = 'failed';
-              this.error(t('tweetDeleteFailed', {error: 'no more button or confirm'}));
-            }
-          }
-          if (!success) {
+            c.btn.dataset.xeraserProcessed = 'failed';
+            this.error(t('tweetDeleteFailed', {error: 'no more button or confirm'}));
             this.errorCount++;
           }
         } catch (e) {
-          // 抛异常也算失败 —— 标 'failed' 防无限 retry
-          btn.dataset.xeraserProcessed = 'failed';
-          this.error((isRetweet ? 'unretweet' : 'deleteTweet') + ' threw: ' + e.message);
+          c.btn.dataset.xeraserProcessed = 'failed';
+          this.error('deleteTweet threw: ' + e.message);
           this.errorCount++;
         }
-
         await this.sleep(500);
       }
 
-      // 0 命中时给用户明确提示
-      if (this.processedCount === 0 && this.filters) {
-        this.log(t('noItemsMatched'));
+      if (this.processedCount === 0 && this.filters) this.log(t('noItemsMatched'));
+    }
+
+    // 删回复推文（/with_replies 页跑；只保留 reply，过滤掉 retweet 卡片和原创）
+    //   路径：deleteTweet
+    async processReplies(maxItems) {
+      if (maxItems === undefined) maxItems = 50;
+      const self = this;
+      this._keywordLower = (this.filters && this.filters.keyword)
+        ? this.filters.keyword.toLowerCase() : '';
+
+      this.log(t('startingTweetsCleanup', {url: window.location.href}));
+
+      // 等 articles 渲染 + 内容稳定（X SPA 分批异步加载，2026-06-18 用 MutationObserver 检测"内容稳定"）
+      //   旧实现：3s 内 article 出现就 break → 分批加载时第一个 article 出现就开跑 → 0 命中
+      //   新实现：连续 1.5s 没新 article 才算加载完；5s 兜底超时（慢网 / 页面卡死）
+      // M++ 修复（2026-06-18）：等 article **和** caret 都稳定（X 2026 caret 是 React 异步 hydration）
+      await this.waitForContentStable(['article', "[data-testid='caret']"]);
+      this._diagnosePage();
+
+      // 6-type 重构：reply 节点已删除，moreButtons 移到 common.tweetMoreButtons
+      const moreButtons = (self.config.common && Array.isArray(self.config.common.tweetMoreButtons))
+        ? self.config.common.tweetMoreButtons : [];
+      const retweetMarker = (self.config.retweet && Array.isArray(self.config.retweet.cardMarker))
+        ? self.config.retweet.cardMarker : [];
+      const articleSel = (self.config.common && self.config.common.articleContainers) || ['article'];
+      const topLevelRule = self.config.common && self.config.common.topLevelArticle;
+
+      function isRetweetCard(article) {
+        for (var r = 0; r < retweetMarker.length; r++) {
+          if (article.querySelector(retweetMarker[r]) !== null) return true;
+        }
+        return false;
       }
+
+      function collectCandidates() {
+        const candidates = [];
+        const seen = new Set();
+        for (let s = 0; s < moreButtons.length; s++) {
+          const btns = self.findElements(moreButtons[s]);
+          for (let i = 0; i < btns.length; i++) {
+            const btn = btns[i];
+            if (seen.has(btn)) continue;
+            seen.add(btn);
+            const article = btn.closest('article') || self.findClosest(articleSel, btn);
+            if (!article) continue;
+            if (isRetweetCard(article)) continue;
+            if (topLevelRule === 'parent' && article.parentElement && article.parentElement.closest('article')) continue;
+            if (!self._isOwnArticle(article)) continue;
+            if (!self.isReplyTweet(article)) continue;  // 只保留 reply
+            candidates.push({ btn: btn, article: article });
+          }
+        }
+        if (candidates.length === 0) {
+          self._logPageState({ moreButtons: moreButtons, retweetMarker: retweetMarker }, '[replies]');
+        }
+        return candidates;
+      }
+
+      let emptyScrolls = 0;
+      var lastProgressTime = Date.now();
+      var STUCK_TIMEOUT_MS = 30000;
+      while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
+        if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) { this.log(t('cleanupStuck')); break; }
+        if (this.isPaused) { await this.sleep(500); continue; }
+
+        const candidates = collectCandidates();
+        const pending = candidates.filter(c => {
+          const p = c.btn.dataset.xeraserProcessed;
+          return !p || (p !== 'true' && p !== 'skipped' && p !== 'pinned' && p !== 'failed');
+        });
+
+        if (pending.length === 0) {
+          emptyScrolls++;
+          if (emptyScrolls > 3) { this.log(t('noMoreTweets')); break; }
+          var hasMore = await this.scrollToBottom();
+          if (!hasMore) { this.log(t('endOfTweets')); break; }
+          continue;
+        }
+        emptyScrolls = 0;
+
+        const c = pending[0];
+        const article = c.article;
+
+        if (this.isPinnedTweet(article)) {
+          c.btn.dataset.xeraserProcessed = 'pinned';
+          this.log(t('pinnedTweetSkipped'));
+          await this.sleep(50); continue;
+        }
+
+        if (this.shouldFilter('replies')) {
+          var meta = this.extractMeta(article, 'replies');
+          if (!this.matchesFilter(meta, this.filters)) {
+            c.btn.dataset.xeraserProcessed = 'skipped';
+            await this.sleep(50); continue;
+          }
+        }
+
+        try {
+          var success = await this.deleteTweet(article);
+          if (success) {
+            c.btn.dataset.xeraserProcessed = 'true';
+            this.processedCount++;
+            lastProgressTime = Date.now();
+            this.progress('Tweet #' + this.processedCount);
+            this.log(t('tweetDeleted', {count: this.processedCount}));
+          } else {
+            c.btn.dataset.xeraserProcessed = 'failed';
+            this.error(t('tweetDeleteFailed', {error: 'no more button or confirm'}));
+            this.errorCount++;
+          }
+        } catch (e) {
+          c.btn.dataset.xeraserProcessed = 'failed';
+          this.error('deleteTweet threw: ' + e.message);
+          this.errorCount++;
+        }
+        await this.sleep(500);
+      }
+
+      if (this.processedCount === 0 && this.filters) this.log(t('noItemsMatched'));
+    }
+
+    // 撤销转推（/with_replies 页跑；抓 unretweet testid 唯一）
+    //   路径：unreTweet（不删原推文）
+    async processRetweets(maxItems) {
+      if (maxItems === undefined) maxItems = 50;
+      const self = this;
+      this._keywordLower = (this.filters && this.filters.keyword)
+        ? this.filters.keyword.toLowerCase() : '';
+
+      this.log(t('startingTweetsCleanup', {url: window.location.href}));
+
+      // 等 articles 渲染 + 内容稳定（X SPA 分批异步加载，2026-06-18 用 MutationObserver 检测"内容稳定"）
+      //   旧实现：3s 内 article 出现就 break → 分批加载时第一个 article 出现就开跑 → 0 命中
+      //   新实现：连续 1.5s 没新 article 才算加载完；5s 兜底超时（慢网 / 页面卡死）
+      // M++ 修复（2026-06-18）：等 article **和** unretweet 按钮都稳定
+      await this.waitForContentStable(['article', "[data-testid='unretweet']"]);
+      this._diagnosePage();
+
+      const cfg = self.config.retweet || {};
+      const unretweetButtons = Array.isArray(cfg.unreTweetButtons) ? cfg.unreTweetButtons : [];
+      const confirmButtons = Array.isArray(cfg.unretweetConfirmButtons) ? cfg.unretweetConfirmButtons : [];
+      const articleSel = (self.config.common && self.config.common.articleContainers) || ['article'];
+      const topLevelRule = self.config.common && self.config.common.topLevelArticle;
+
+      // retweet 路径不用 _isOwnArticle（X 2026 retweet 卡片只显示原作者头像，永远 false）
+      //   unretweet 按钮本身就是"自己转推过"的强证据（X 不会在他人转发的卡片上渲染）
+      //   见 _isOwnArticle 注释 line 539-541
+      function collectCandidates() {
+        const candidates = [];
+        const seen = new Set();
+        for (let s = 0; s < unretweetButtons.length; s++) {
+          const btns = self.findElements(unretweetButtons[s]);
+          for (let i = 0; i < btns.length; i++) {
+            const btn = btns[i];
+            if (seen.has(btn)) continue;
+            seen.add(btn);
+            const article = btn.closest('article') || self.findClosest(articleSel, btn);
+            if (!article) continue;
+            if (topLevelRule === 'parent' && article.parentElement && article.parentElement.closest('article')) continue;
+            candidates.push({ btn: btn, article: article });
+          }
+        }
+        if (candidates.length === 0) {
+          self._logPageState({ unretweet: unretweetButtons }, '[retweets]');
+        }
+        return candidates;
+      }
+
+      let emptyScrolls = 0;
+      var lastProgressTime = Date.now();
+      var STUCK_TIMEOUT_MS = 30000;
+      while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
+        if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) { this.log(t('cleanupStuck')); break; }
+        if (this.isPaused) { await this.sleep(500); continue; }
+
+        const candidates = collectCandidates();
+        const pending = candidates.filter(c => {
+          const p = c.btn.dataset.xeraserProcessed;
+          return !p || (p !== 'true' && p !== 'skipped' && p !== 'pinned' && p !== 'failed');
+        });
+
+        if (pending.length === 0) {
+          emptyScrolls++;
+          if (emptyScrolls > 3) { this.log(t('noMoreTweets')); break; }
+          var hasMore = await this.scrollToBottom();
+          if (!hasMore) { this.log(t('endOfTweets')); break; }
+          continue;
+        }
+        emptyScrolls = 0;
+
+        const c = pending[0];
+        const article = c.article;
+
+        if (this.shouldFilter('retweets')) {
+          var meta = this.extractMeta(article, 'retweets');
+          if (!this.matchesFilter(meta, this.filters)) {
+            c.btn.dataset.xeraserProcessed = 'skipped';
+            await this.sleep(50); continue;
+          }
+        }
+
+        try {
+          var success = await this.unreTweet(article);
+          if (success) {
+            c.btn.dataset.xeraserProcessed = 'true';
+            this.processedCount++;
+            lastProgressTime = Date.now();
+            this.progress('Retweet #' + this.processedCount);
+            this.log(t('unreTweetSuccess', {count: this.processedCount}));
+          } else {
+            c.btn.dataset.xeraserProcessed = 'failed';
+            this.error(t('unretweetFailed', {error: 'unretweet failed'}));
+            this.errorCount++;
+          }
+        } catch (e) {
+          c.btn.dataset.xeraserProcessed = 'failed';
+          this.error('unreTweet threw: ' + e.message);
+          this.errorCount++;
+        }
+        await this.sleep(500);
+      }
+
+      if (this.processedCount === 0 && this.filters) this.log(t('noItemsMatched'));
     }
 
     // 诊断：输出页面上所有 data-testid 信息，帮助调试选择器
     // 输出到 console（开发者用），不进用户日志面板
+    // M++ 修复（2026-06-18 tweets-bug-7）：X 2026 改版后 dialog confirm button 是 role="button"（不是 menuitem）
+    //   waitForMenuItemByText 找 [role="menuitem"] 永远 0 命中
+    //   → 必须用新方法找 [role="button"] / <button> 文字匹配
+    //   关联：user 报告"following 弹框出现但 Unfollow 没被点击"
+    async _findButtonByText(keywords, timeout) {
+      if (!Array.isArray(keywords) || keywords.length === 0) return null;
+      const startTime = Date.now();
+      // 找所有可能的 button：role="button" + <button> + <a role="button">
+      // 注意：必须是**可见**的（offsetParent 非空 + rect.width > 0）
+      const allButtons = document.querySelectorAll('[role="button"], button, a[role="button"]');
+      while (Date.now() - startTime < timeout) {
+        for (let i = 0; i < allButtons.length; i++) {
+          const b = allButtons[i];
+          const r = b.getBoundingClientRect();
+          if (r.width === 0 || r.height === 0) continue;  // 不可见
+          const text = (b.textContent || '').trim();
+          const aria = (b.getAttribute('aria-label') || '').trim();
+          for (let j = 0; j < keywords.length; j++) {
+            const k = keywords[j];
+            if (text.indexOf(k) !== -1 || aria.indexOf(k) !== -1) {
+              return b;
+            }
+          }
+        }
+        await this.sleep(150);
+      }
+      // _findButtonByText timeout 只在 console 留痕（侧边栏用户不需要看 "keywords=[...]" 这种内部细节）
+      console.log('[XEraser] _findButtonByText timeout ' + timeout + 'ms, keywords=' + JSON.stringify(keywords));
+      return null;
+    }
+
+    // M++ 修复（2026-06-18 tweets-bug-7）：X 2026 改版后 profile 页用 ScrollSnap-SwipeableList 6 tabs
+    //   likes 在 "Likes" tab 里（最后一栏），默认在 Posts tab → 必须点 Likes tab 激活
+    //   tabs 容器 testid='ScrollSnap-SwipeableList'，tab 是 role="tab" 的 <a>，文字 = Posts/Replies/.../Likes
+    // 返回 true = 找到了并 click；false = 找不到（fallback 旧 structure 假设）
+    async _activateProfileTab(tabText) {
+      try {
+        // 1) 找 ScrollSnap-SwipeableList 容器
+        const swipeable = document.querySelector("[data-testid='ScrollSnap-SwipeableList']");
+        if (!swipeable) return false;  // 旧 page 结构，没 6 tabs
+
+        // 2) 找 role="tab" 且 textContent 匹配 tabText 的 <a>
+        const tabs = swipeable.querySelectorAll('[role="tab"]');
+        for (let i = 0; i < tabs.length; i++) {
+          const tab = tabs[i];
+          const txt = (tab.textContent || '').trim();
+          if (txt === tabText || txt.toLowerCase() === tabText.toLowerCase()) {
+            // 3) 检查是否已激活（aria-selected="true"）→ 已激活就不点
+            if (tab.getAttribute('aria-selected') === 'true') {
+              return true;  // 已激活，OK
+            }
+            // 4) click 激活
+            const ok = await this.safeClick(tab, 300);
+            return !!ok;
+          }
+        }
+        return false;  // 找不到匹配的 tab 文字
+      } catch (e) {
+        console.warn('[X-Eraser] _activateProfileTab failed:', e.message);
+        return false;
+      }
+    }
+
     _diagnosePage() {
       try {
         const allWithTestId = document.querySelectorAll('[data-testid]');
@@ -1665,7 +1922,6 @@
       const types = options.types || [];
       const maxPerType = options.maxPerType || 50;
       this.filters = options.filters || null;
-      this.tweetOptions = options.tweetOptions || null;
 
       if (types.length === 0) {
         this.error('No types selected');
@@ -1678,13 +1934,9 @@
       this.errorCount = 0;
       this._dateMissingWarned.clear();
 
-      this.log('Cleanup started');
-      this.log('Types: ' + types.join(', '));
-      if (this.filters) {
-        this.log('Filters: from=' + (this.filters.fromDate || '-') +
-                 ' to=' + (this.filters.toDate || '-') +
-                 ' kw=' + (this.filters.keyword || '-'));
-      }
+      // Cleanup started / Types / Filters 都是英文内部日志，对用户没意义
+      //   侧边栏已经在 user 点 "开始清理" 时打了 "开始清理..." + "今日已使用: X / Y"，
+      //   具体类型和过滤器会在 processItems 内部的中文 i18n 消息里体现（"开始在 ... 清理点赞"）
 
       // 关键修复：maxPerType 是总预算（侧边栏传的是 remaining = FREE_LIMIT_PER_DAY - used），
       // 旧代码每个 type 都拿 maxPerType，导致 N 个 type 可以清 N×limit 条，超出每日免费额度。
@@ -1714,17 +1966,17 @@
         });
       }
 
-      this.log('Done. Processed: ' + this.processedCount);
+      // 英文 "Done. Processed: N" 与侧边栏的 "清理完成，共处理: N" 重复，移除
     }
 
     pause() {
       this.isPaused = true;
-      this.log('Paused');
+      // "Paused" 英文与侧边栏 onPaused() 里的中文 "清理已暂停" 重复，移除
     }
 
     resume() {
       this.isPaused = false;
-      this.log('Resumed');
+      // "Resumed" 英文与侧边栏 onResumed() 里的中文 "清理已恢复" 重复，移除
     }
 
     stop() {
@@ -1733,7 +1985,7 @@
       // 用户中断时如果 confirm 弹窗开着，点 Cancel 关闭（用 8 语言文字兜底，避免 aria-label 被翻译后 0 命中）
       // 不 await：stop() 是同步 API，cleanup 异步进行；关闭弹窗的失败不影响 stop 整体行为
       this._closeAnyOpenConfirmDialog();
-      this.log('Stopped');
+      // "Stopped" 英文与侧边栏 onStopped() 里的中文 "用户已停止清理" 重复，移除
     }
 
     // 关闭当前可能开着的 confirm 弹窗（找 Cancel 按钮，8 语言文字兜底）
@@ -1767,9 +2019,170 @@
       });
     }
 
+    // 2026-06-18 优化：等 X 页面"内容稳定"再开始处理
+    //   旧实现：3s 内 article 出现就 break → X 异步分批加载时第一个 article 出现就开跑 → 0 命中
+    //   新实现：MutationObserver 监听 article 变化，连续 N 次**空 mutation** 才算"加载完"
+    //
+    // M++ 修复（2026-06-18 tweets-bug-4 实证）：
+    //   原版只等 article 数稳定 → X 2026 caret 是 React 异步 hydration，article 数稳定后 caret 还在渲染
+    //   → collectCandidates 跑时 caret 还没出现 → moreButtons: 0
+    //   修法：selectors 支持**数组**（如 ['article', "[data-testid='caret']"]），
+    //         **所有** selector 的**总和**稳定才算加载完
+    //
+    // M++ 修复（2026-06-18 tweets-bug-6 用户反馈）：
+    //   原版用 `stableMs=1500`（"1.5s 没变化 = 稳定"）和 `maxMs=5000`（"5s 兜底"）→ 都是靠经验猜时间
+    //   用户要求："不靠经验猜等几秒"——改为：
+    //     1. MutationObserver callback 触发 → 检查 article/caret 总数变化
+    //     2. 连续 STABLE_BATCHES 次 callback 总数都相同 = 稳定（不是时间，是"观察次数"）
+    //     3. 兜底用 requestAnimationFrame 帧数：MAX_IDLE_FRAMES 帧（约 10s）没任何 callback = X 真挂了
+    //        帧数是浏览器节奏，不是经验数字（浏览器自然会 60fps 跑，10s 一定 600 帧）
+    //
+    // M++ 修复（2026-06-18 tweets-bug-6 用户再次反馈"页面都没加载完你就说干完了"）：
+    //   根因：X 2026 用 IntersectionObserver 懒加载，**不 scroll 不渲染** article
+    //   → waitForContentStable 一直 count=0 → 等到 600 帧兜底 resolve(0)
+    //   → runCleanupOnce 报 "0 candidates" → "干完了"
+    //   修法（**核心修复**）：
+    //     1. **主动 scroll 触发 X 渲染**：不靠经验时间，**滚一屏 + 滚回**，让 IntersectionObserver 触发
+    //     2. count = 0 时**不 resolve** + **主动再 scroll**触发 X 渲染（最多 MAX_SCROLL_TRIGGERS 次）
+    //     3. count > 0 + 连续 STABLE_FRAMES 帧 count 相同 = 真正稳定
+    //     4. 兜底：连续 MAX_IDLE_FRAMES 帧没新 article 出现 + 已经 scroll 完 N 次 = 真没东西
+    //   **关键**：scroll 是"触发 X 渲染"，不是"等 X 加载"——是物理必要的，不算"靠经验猜时间"
+    //
+    // M++ 修复（2026-06-18 tweets-bug-6 MCP 实证）：
+    //   MCP 实测 likes page 加载 10s 过程：X 已渲染 article+caret（count=2）但**X 加载完静止后
+    //   不再触发 mutation** → 靠 MO 触发 callback 累计 stableCount 永远不到 5 → 600 帧兜底 resolve
+    //   修法：去掉 MO 依赖，**改用 RAF 轮询 count 变化**（每帧检查，连续 30 帧 count 相同 = 稳定）
+    //   - 帧数是浏览器物理节奏（60fps 下 30 帧 ≈ 0.5s）→ **不靠经验猜时间**
+    //   - **不靠 MO 事件** → X 静止时 count 稳定也能判定"加载完"
+    //   - count = 0 时主动 scroll 触发 X 渲染
+    //   - 600 帧兜底（X 真挂了）
+    waitForContentStable(selectors) {
+      const STABLE_FRAMES = 30;          // 连续 30 帧 count 相同 + count > 0 = 稳定（约 0.5s @ 60fps）
+      const MAX_IDLE_FRAMES = 600;      // 600 帧（约 10s @ 60fps）兜底
+      const MAX_SCROLL_TRIGGERS = 3;    // 主动 scroll 最多 3 次（每次滚到底）触发 X 渲染
+      const SCROLL_STABLE_FRAMES = 30;  // scroll 后等 30 帧看是否有新 article（约 0.5s）
+      const self = this;
+      const selectorList = Array.isArray(selectors) ? selectors : [selectors];
+      return new Promise(function(resolve) {
+        const start = Date.now();
+        let lastCount = -1;
+        let stableFrameCount = 0;     // 连续 count 相同的帧数
+        let resolved = false;
+        let scrollTriggers = 0;       // 已 scroll 次数
+        let totalFrameCount = 0;      // 总帧数（兜底用）
+        let pendingScrollCheck = 0;   // scroll 后等 SCROLL_STABLE_FRAMES 帧看结果
+
+        function getTotalCount() {
+          let total = 0;
+          for (let s = 0; s < selectorList.length; s++) {
+            total += document.querySelectorAll(selectorList[s]).length;
+          }
+          return total;
+        }
+
+        function done(count, reason) {
+          if (resolved) return;
+          resolved = true;
+          cancelAnimationFrame(rafId);
+          const label = selectorList.length === 1 ? selectorList[0] : selectorList.join('+');
+          self.debug('Content stable: ' + count + ' ' + label + ' (' + reason + ', ' + (Date.now() - start) + 'ms, scrolls=' + scrollTriggers + ')');
+          resolve(count);
+        }
+
+        // 主动 scroll 触发 X IntersectionObserver 渲染
+        //   不靠经验时间：滚到底（scrollHeight 是浏览器物理值，不靠猜），然后 RAF 轮询 count 变化
+        //   X 2026 lazy load：滚到底 → X 把所有推文都 fetch + 渲染 → 滚回 top 让用户停留原位
+        function triggerScrollLoad() {
+          if (scrollTriggers >= MAX_SCROLL_TRIGGERS) return;
+          scrollTriggers++;
+          // 滚到底（X 会把 viewport 外的 article 全部 fetch + 渲染）
+          window.scrollTo(0, document.documentElement.scrollHeight);
+          // 下一帧滚回 top（让用户停留在原位，不影响操作）
+          requestAnimationFrame(function() {
+            window.scrollTo(0, 0);
+          });
+          pendingScrollCheck = SCROLL_STABLE_FRAMES;
+          // scroll 触发 X 重新加载 → count 可能变化 → 重置稳定帧数
+          stableFrameCount = 0;
+          lastCount = -1;
+        }
+
+        // RAF 轮询：每帧检查 count，连续 STABLE_FRAMES 帧 count 相同 = 稳定
+        //   **不靠 MO 触发**（X 静止时没 mutation，但 count 稳定，应该判定为"加载完"）
+        //   **不靠经验时间**：STABLE_FRAMES 是浏览器物理帧数（≈ 0.5s @ 60fps）
+        let rafId;
+        function rafTick() {
+          if (resolved) return;
+          totalFrameCount++;
+          if (pendingScrollCheck > 0) pendingScrollCheck--;
+
+          const count = getTotalCount();
+
+          if (count === lastCount) {
+            // 这帧 count 与上帧相同 → 稳定帧数 +1
+            stableFrameCount++;
+            if (count > 0 && stableFrameCount >= STABLE_FRAMES) {
+              // 连续 STABLE_FRAMES 帧 count 相同 + count > 0 = 真正稳定
+              done(count, 'stable ' + STABLE_FRAMES + ' frames, count=' + count);
+              return;
+            }
+          } else {
+            // count 变化 → 重置稳定帧数
+            lastCount = count;
+            stableFrameCount = 0;
+          }
+
+          // count = 0：X 还没渲染（lazy load 未触发）→ 主动 scroll
+          if (count === 0 && pendingScrollCheck <= 0 && scrollTriggers < MAX_SCROLL_TRIGGERS) {
+            triggerScrollLoad();
+          }
+
+          // 兜底：连续 MAX_IDLE_FRAMES 帧没新 article 出现
+          if (totalFrameCount >= MAX_IDLE_FRAMES) {
+            // 已 scroll 完 + count = 0 → X 真没东西
+            // count > 0 但 stableFrameCount 没到 STABLE_FRAMES → 兜底（X hydration 持续 mutation）
+            done(getTotalCount(), 'max frames reached, count=' + getTotalCount());
+            return;
+          }
+
+          rafId = requestAnimationFrame(rafTick);
+        }
+        rafId = requestAnimationFrame(rafTick);
+
+        // 立即触发一次 scroll 加载（用户报告"页面没加载完就干完"——极可能是 X 初始就没渲染）
+        triggerScrollLoad();
+      });
+    }
+
+    // 调试：输出 page 状态（articles + 各 selector 命中数），帮助排查 0 命中
+    //   只在 candidates === 0 时输出（避免日志噪音）
+    _logPageState(selectorGroups, label) {
+      const diag = {};
+      diag.articles = document.querySelectorAll('article').length;
+      for (const name in selectorGroups) {
+        let total = 0;
+        for (let i = 0; i < selectorGroups[name].length; i++) {
+          total += this.findElements(selectorGroups[name][i]).length;
+        }
+        diag[name] = total;
+      }
+      diag.username = this._currentUsername || '(unset)';
+      // 0 candidates + page state snapshot 是 verbose debug：selector 命中的细节
+      //   不打到侧边栏（"0 candidates" 已经会从 processItems 那边的 t('noUnlikeButtons') 推到侧边栏）
+      console.log('[XEraser] ' + label + ' 0 candidates, page state: ' + JSON.stringify(diag));
+    }
+
     log(message) {
+      // 走 console + 推送到侧边栏日志面板（用户看的中文 i18n 消息）
       console.log('[XEraser] ' + message);
       if (this.onLog) this.onLog(message, 'info');
+    }
+
+    // verbose debug 专用：只走 console，不推侧边栏
+    //   用途：selector 命中细节、frame 计数、JSON 状态、超时诊断
+    //   想看这些请打开 DevTools console（侧边栏"复制诊断日志"只拿 .log-area 面板）
+    debug(message) {
+      console.log('[XEraser] ' + message);
     }
 
     progress(message) {

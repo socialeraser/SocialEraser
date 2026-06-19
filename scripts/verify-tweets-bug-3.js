@@ -66,30 +66,18 @@ const EXPECTED_ARIA_LABELS = [
   "button[aria-label*='Ripostato']"        // it
 ];
 
-// 1a) default.json
-const defaultUnreTweet = defaultCfg.selectors && defaultCfg.selectors.tweet && defaultCfg.selectors.tweet.unreTweetButtons;
-assert(Array.isArray(defaultUnreTweet), 'default.json: tweet.unreTweetButtons 是数组');
+// 1a) default.json（6-type 重构：unreTweetButtons 已从 tweet 节点挪到 retweet 节点；retweetButtonInCard 已删除）
+const defaultUnreTweet = defaultCfg.selectors && defaultCfg.selectors.retweet && defaultCfg.selectors.retweet.unreTweetButtons;
+assert(Array.isArray(defaultUnreTweet), 'default.json: retweet.unreTweetButtons 是数组');
 for (const sel of EXPECTED_ARIA_LABELS) {
-  assert(arrayContains(defaultUnreTweet, sel), 'default.json: unreTweetButtons 含 ' + sel);
-}
-
-const defaultRetweetInCard = defaultCfg.selectors && defaultCfg.selectors.tweet && defaultCfg.selectors.tweet.retweetButtonInCard;
-assert(Array.isArray(defaultRetweetInCard), 'default.json: tweet.retweetButtonInCard 是数组');
-for (const sel of EXPECTED_ARIA_LABELS) {
-  assert(arrayContains(defaultRetweetInCard, sel), 'default.json: retweetButtonInCard 含 ' + sel);
+  assert(arrayContains(defaultUnreTweet, sel), 'default.json: retweet.unreTweetButtons 含 ' + sel);
 }
 
 // 1b) remote-example.json
-const remoteUnreTweet = remoteCfg.selectors && remoteCfg.selectors.tweet && remoteCfg.selectors.tweet.unreTweetButtons;
-assert(Array.isArray(remoteUnreTweet), 'remote-example.json: tweet.unreTweetButtons 是数组');
+const remoteUnreTweet = remoteCfg.selectors && remoteCfg.selectors.retweet && remoteCfg.selectors.retweet.unreTweetButtons;
+assert(Array.isArray(remoteUnreTweet), 'remote-example.json: retweet.unreTweetButtons 是数组');
 for (const sel of EXPECTED_ARIA_LABELS) {
-  assert(arrayContains(remoteUnreTweet, sel), 'remote-example.json: unreTweetButtons 含 ' + sel);
-}
-
-const remoteRetweetInCard = remoteCfg.selectors && remoteCfg.selectors.tweet && remoteCfg.selectors.tweet.retweetButtonInCard;
-assert(Array.isArray(remoteRetweetInCard), 'remote-example.json: tweet.retweetButtonInCard 是数组');
-for (const sel of EXPECTED_ARIA_LABELS) {
-  assert(arrayContains(remoteRetweetInCard, sel), 'remote-example.json: retweetButtonInCard 含 ' + sel);
+  assert(arrayContains(remoteUnreTweet, sel), 'remote-example.json: retweet.unreTweetButtons 含 ' + sel);
 }
 
 console.log();
@@ -231,9 +219,7 @@ console.log();
 console.log('[3] data-testid 强 selector 必须保留');
 
 const REQUIRED_TESTID_SELECTORS = [
-  "[data-testid='unretweet']",
-  "[data-testid='Unretweet']",
-  "[data-testid='undoRepost']"
+  "[data-testid='unretweet']"  // X 2026 唯一用小写；旧版 Unretweet/undoRepost X 已弃用，不再保留
 ];
 
 for (const sel of REQUIRED_TESTID_SELECTORS) {
@@ -309,11 +295,8 @@ assert(/重要使用前提[\s\S]{0,500}_isOwnArticle/.test(injectorSrc),
 assert(/不用于 unreTweet 路径/.test(injectorSrc),
   'injector.js: _isOwnArticle 注释明确"不用于 unreTweet 路径"');
 
-// 5b) 诊断日志 region 存在
-assert(/region debug-point tweets-start/.test(injectorSrc),
-  'injector.js: 诊断日志 region "tweets-start" 存在');
-assert(/region debug-point tweets-candidate/.test(injectorSrc),
-  'injector.js: 诊断日志 region "tweets-candidate" 存在');
+// 5b) 诊断日志 region 存在（早期 debug 用，2026-06-18 重构后已删除—— verify 也跟随删）
+// （MCP 调试现在用 [X-Eraser] console + cleanupError 消息，不再用 debug-point region）
 
 // 5c) H6 假设已更正（"MCP Chrome ≠ user Chrome"错误假设必须被删除）
 assert(!/让 user 在 user Chrome 跑一次，把 console 输出贴回来/.test(injectorSrc),
@@ -346,12 +329,15 @@ console.log();
 // ------------------------------------------------------------------
 console.log('[7] unretweetConfirmButtons 保持现状（有文字兜底）');
 
-const defaultUnretweetConfirm = defaultCfg.selectors && defaultCfg.selectors.tweet && defaultCfg.selectors.tweet.unretweetConfirmButtons;
-const remoteUnretweetConfirm = remoteCfg.selectors && remoteCfg.selectors.tweet && remoteCfg.selectors.tweet.unretweetConfirmButtons;
+// 6-type 重构：unretweetConfirmButtons 已从 tweet 节点挪到 retweet 节点
+const defaultUnretweetConfirm = defaultCfg.selectors && defaultCfg.selectors.retweet && defaultCfg.selectors.retweet.unretweetConfirmButtons;
+const remoteUnretweetConfirm = remoteCfg.selectors && remoteCfg.selectors.retweet && remoteCfg.selectors.retweet.unretweetConfirmButtons;
+assert(Array.isArray(defaultUnretweetConfirm), 'default.json: retweet.unretweetConfirmButtons 是数组');
+assert(Array.isArray(remoteUnretweetConfirm), 'remote-example.json: retweet.unretweetConfirmButtons 是数组');
 assert(arrayContains(defaultUnretweetConfirm, "[data-testid='unretweetConfirm']"),
-  'default.json: unretweetConfirmButtons 含 [data-testid=unretweetConfirm]');
+  'default.json: retweet.unretweetConfirmButtons 含 [data-testid=unretweetConfirm]');
 assert(arrayContains(remoteUnretweetConfirm, "[data-testid='unretweetConfirm']"),
-  'remote-example.json: unretweetConfirmButtons 含 [data-testid=unretweetConfirm]');
+  'remote-example.json: retweet.unretweetConfirmButtons 含 [data-testid=unretweetConfirm]');
 
 console.log();
 
@@ -402,8 +388,8 @@ console.log();
 // ------------------------------------------------------------------
 console.log('[9] L 修复：失败 candidate 标 failed + filter 4 态');
 
-// 抓 processTweets 主循环 filter
-const pendingFilterMatch = injectorSrc.match(/candidates\.filter\(function\(c\)\s*\{[\s\S]*?return[\s\S]*?\}\);/);
+// 抓 processTweets 主循环 filter（regex 允许 in-line 箭头函数 c => 形式）
+const pendingFilterMatch = injectorSrc.match(/candidates\.filter\(c\s*=>\s*\{[\s\S]*?return[\s\S]*?\}\)/);
 const pendingFilterBody = pendingFilterMatch ? pendingFilterMatch[0] : '';
 assert(pendingFilterBody.length > 0, 'injector.js: 找到 candidates.filter 函数体');
 
