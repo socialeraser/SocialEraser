@@ -129,70 +129,68 @@ assert(/menuitemCount\s*=\s*0/.test(dtFnBody),
 console.log();
 
 // ------------------------------------------------------------------
-// [12] N 修复：isReplyTweet 改 caret 菜单项数检测（8 = reply / 11 = 原创）
-//   根因：X 2026 reply 推文**完全**去除 "Replying to" 文字 → socialContext + 全文搜都 miss
-//   → 假阴性 → includeReplies=false 时 reply 被误删
-//   修法：click caret 弹菜单 → 数 [role="menuitem"] 数量 → **不**关菜单（留 page 上给 X-Eraser 用）
-//        count == 8 → reply / count == 11 → 原创
+// [12] isReplyTweet 改 URL 判断取代 caret 菜单项数检测（N++ 再修复 2026-06-19）
+//   N 修复（2026-06-17）：X 2026 reply 推文**完全**去除 "Replying to" 文字
+//     → socialContext + 全文搜都 miss → 假阴性 → includeReplies=false 时 reply 被误删
+//     N 修法：click caret 弹菜单 → 数 [role="menuitem"] → 8 = reply / 11 = 原创
 //   N+ 增量修复：ESC dispatchEvent 完全失败（X 用 React synthetic keydown）
-//   N++ 增量修复：N+ click body 仍污染 X 内部 popup state → 后续 X-Eraser click caret toggle 关掉
-//     → N++ 修复**不**关菜单（留 page 上）—— X-Eraser 直接 wait menuitem 命中 → click deleteItem
+//   N++ 增量修复：N+ click body 仍污染 X 内部 popup state
+//     → N++ 修复**不**关菜单（留 page 上）—— X-Eraser 直接 wait menuitem 命中
+//
+//   N++ 再修复（2026-06-19）：X 2026 caret 菜单项数再次改版
+//     实证：reply = 7 / original = 10（不再是 8 / 11）
+//     8 vs 11 差异来源（Edit / Add or remove content disclosure / Change who can reply）已被 X 删除
+//     reply vs original 菜单**文字**也高度重叠，靠 caret 菜单项数判断**永远**脆弱
+//     新修法：**改用 URL 判断**为主路径
+//       /username/with_replies → 全 reply（X 2026 已分页）
+//       /username 根 profile → 全 original
+//     保留兼容：socialContext + 全文 replyKeywords 检测作 X 旧版 fallback
 // ------------------------------------------------------------------
-console.log('[12] N 修复：isReplyTweet caret 菜单项数检测（8 vs 11）+ N++ 不关菜单');
+console.log('[12] isReplyTweet URL 判断（N++ 再修复：X 2026 菜单项数 8/11 → 7/10）');
 
 // 抓 isReplyTweet 函数体
 const isReplyFnMatch = injectorSrc.match(/isReplyTweet\(container\)\s*\{[\s\S]*?\n    \}/);
 const isReplyFnBody = isReplyFnMatch ? isReplyFnMatch[0] : '';
 assert(isReplyFnBody.length > 0, 'injector.js: 找到 isReplyTweet 函数体');
 
-// 关键：必须保留 socialContext 检测（X 旧版兼容）
-assert(/socialContext/.test(isReplyFnBody),
-  'isReplyTweet 保留 socialContext 检测（X 旧版兼容）');
+// 主路径：URL 判断（X 2026 with_replies 页 = 全 reply）
+assert(/pathname\.endsWith\(['"]\/with_replies['"]\)/.test(isReplyFnBody),
+  'isReplyTweet 主路径：pathname.endsWith("/with_replies") → return true（with_replies 页 = 全 reply）');
+assert(/pathname\s*=\s*location\.pathname/.test(isReplyFnBody),
+  'isReplyTweet 读 location.pathname');
 
-// 关键：必须保留全文搜 replyKeywords（X 旧版兼容）
-const replyKwReCheck = /replyRe\.test\(fullText\)/;
-assert(replyKwReCheck.test(isReplyFnBody),
-  'isReplyTweet 保留全文 replyKeywords 检测（X 旧版兼容）');
+// 根 profile 页 = 全 original
+assert(/location\.pathname|pathname/.test(isReplyFnBody) &&
+       /A-Za-z0-9_\]\+\$\//.test(isReplyFnBody),
+  'isReplyTweet 根 profile 页正则匹配 → return false');
 
-// 关键：必须有 caret 菜单项数检测（X 2026 主路径）
-assert(/caret\.click\(\)/.test(isReplyFnBody),
-  'isReplyTweet 有 caret.click() 弹菜单（X 2026 主路径）');
-assert(/menuitems|menuitem|\[role="menuitem"\]/.test(isReplyFnBody),
-  'isReplyTweet 数 menuitem 数量');
-
-// 关键（N++ 修复）：**不**关菜单（留 page 上给 X-Eraser 用）
-const nppCodeOnly = isReplyFnBody.split('\n').filter(function(l) {
+// 关键（N++ 再修复）：**不**再 click caret 弹菜单（X 改版后菜单项数判断不可靠）
+const npp2CodeOnly = isReplyFnBody.split('\n').filter(function(l) {
   return !/^\s*\/\//.test(l);
 }).join('\n');
-assert(!/document\.body\.dispatchEvent[\s\S]*?mousedown/.test(nppCodeOnly),
-  'isReplyTweet **不** dispatch mousedown 到 body（N++ 修复：留菜单 page 上，不污染 X 内部 popup state）');
-assert(!/document\.body\.dispatchEvent[\s\S]*?pointerdown/.test(nppCodeOnly),
-  'isReplyTweet **不** dispatch pointerdown 到 body（N++ 修复）');
-assert(!/document\.body\.click\(\)/.test(nppCodeOnly),
-  'isReplyTweet **不** click body（N++ 修复：留菜单 page 上）');
-// 关键：必须**不**再用 ESC（X 用 React synthetic keydown，document.dispatchEvent 收不到）
-assert(!/new KeyboardEvent[\s\S]*?['"]Escape['"]/.test(isReplyFnBody),
-  'isReplyTweet **不**用 ESC（X 2026 React keydown 收不到，N+ 修复删掉）');
+assert(!/caret\.click\(\)/.test(npp2CodeOnly),
+  'isReplyTweet **不**再 caret.click() 弹菜单（N++ 再修复：X 改版后菜单项数无法区分 reply vs original）');
+assert(!/\[role="menuitem"\]/.test(npp2CodeOnly),
+  'isReplyTweet **不**再数 [role="menuitem"] 数量（N++ 再修复）');
+assert(!/nCount\s*===\s*(7|8|10|11)/.test(npp2CodeOnly),
+  'isReplyTweet **不**再 hardcode 7/8/10/11 菜单项数阈值（N++ 再修复）');
+assert(!/busy wait/.test(npp2CodeOnly),
+  'isReplyTweet **不**再 busy wait 250ms 弹菜单（N++ 再修复）');
 
-// 关键：8 项 = reply / 11 项 = 原创
-assert(/nCount\s*===\s*8[\s\S]*?return\s+true/.test(isReplyFnBody),
-  'isReplyTweet nCount == 8 → return true（reply 推文）');
-assert(/nCount\s*===\s*11[\s\S]*?return\s+false/.test(isReplyFnBody),
-  'isReplyTweet nCount == 11 → return false（原创推文）');
+// 关键：必须保留 socialContext 检测（X 旧版 fallback）
+assert(/socialContext/.test(isReplyFnBody),
+  'isReplyTweet 保留 socialContext 检测（X 旧版 fallback）');
 
-// 关键：异常路径保守按 "非 reply" 处理
-assert(/catch\s*\(\s*e\s*\)[\s\S]*?return\s+false/.test(isReplyFnBody),
-  'isReplyTweet catch 异常 → 保守 return false（避免误删）');
+// 关键：必须保留全文搜 replyKeywords（X 旧版 fallback）
+const replyKwReCheck = /replyRe\.test\(fullText\)/;
+assert(replyKwReCheck.test(isReplyFnBody),
+  'isReplyTweet 保留全文 replyKeywords 检测（X 旧版 fallback）');
 
-// 关键：N + N++ 修复必须引用 tweets-bug-3 + MCP 实证
-assert(/N 修复 tweets-bug-3 2026-06-17/.test(isReplyFnBody),
-  'isReplyTweet 有 N 修复 tweets-bug-3 注释');
-assert(/N\+\+ 修复/.test(isReplyFnBody),
-  'isReplyTweet 有 N++ 修复增量注释（N+ → 不关菜单）');
+// 关键：注释引用 MCP 实证
 assert(/MCP 实证/.test(isReplyFnBody),
   'isReplyTweet 注释引用 MCP 实证（不是猜）');
-assert(/8 = reply|11 = 原创|11\s*=\s*原创/.test(isReplyFnBody),
-  'isReplyTweet 注释明确 8 vs 11 项对应关系');
+assert(/URL 判断/.test(isReplyFnBody),
+  'isReplyTweet 注释明确"URL 判断"主路径');
 
 console.log();
 

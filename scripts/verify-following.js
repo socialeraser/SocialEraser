@@ -72,13 +72,14 @@ check('injector 不再有"总时长超时"（订阅用户不受批量时长限�
   !oldTotalTimeout || oldTotalTimeout.length === 0,
   '仍存在 ' + (oldTotalTimeout && oldTotalTimeout.length) + ' 处旧字段');
 const stuckTimeoutCount = injector.match(/STUCK_TIMEOUT_MS\s*=\s*30000/g);
-check('injector 使用"无进展超时"（4 处：processTweets / processLikes / processBookmarks / processFollowing 各 1）',
-  stuckTimeoutCount && stuckTimeoutCount.length === 4,
+check('injector 使用"无进展超时"（6 处：6-type 重构后 6 个 process 函数各 1：processLikes / processBookmarks / processFollowing / processOriginalTweets / processReplies / processRetweets）',
+  stuckTimeoutCount && stuckTimeoutCount.length === 6,
   '实际 ' + (stuckTimeoutCount && stuckTimeoutCount.length) + ' 处');
-const resetCount = injector.match(/lastProgressTime\s*=\s*Date\.now\(\)\s*;\s*\/\/\s*重置无进展计时器/g);
-check('injector 每个 processedCount++ 都重置无进展计时器（6 处：tweets 2 + likes 1 + bookmarks 1 + following 2）',
-  resetCount && resetCount.length === 6,
-  '实际 ' + (resetCount && resetCount.length) + ' 处（预期 6：tweets 2 个 success 分支 + likes/bookmarks 各 1 + following 2 个 success 分支）');
+// 6-type 重构后：likes/bookmarks/originalTweets/replies/retweets 各 1 处，following 2 处（confirmByTestid 命中 + no confirm dialog 兜底）
+const resetCount = injector.match(/processedCount\+\+[\s\S]{0,100}lastProgressTime\s*=\s*Date\.now\(\)/g);
+check('injector 每个 processedCount++ 都重置无进展计时器（7 处：6 个 process 函数 success 分支，但 processFollowing 有 2 个 success 分支）',
+  resetCount && resetCount.length === 7,
+  '实际 ' + (resetCount && resetCount.length) + ' 处（预期 7：likes 1 + bookmarks 1 + following 2 + originalTweets 1 + replies 1 + retweets 1）');
 check('injector 使用 cleanupStuck i18n key（不再有 cleanupTimeout）',
   injector.includes("t('cleanupStuck')") && !injector.includes("t('cleanupTimeout')"));
 
@@ -154,11 +155,23 @@ check('sidepanel.js auto-hide 异常时立即重新展开（clearTimeout + remov
 // 注意：不包含 'messages' —— X 的消息按钮 click handler 校验 isTrusted
 //   content script 注入的 click 事件 isTrusted=false，会被静默忽略
 //   详见 README "已知限制" + lessons-learned 案例，特性主动不支持
-const uiTypes = ['tweets', 'likes', 'bookmarks', 'following'];
-uiTypes.forEach(function(type) {
-  // 1. UI checkbox 存在
-  const checkboxRe = new RegExp('id="opt-' + type + '"');
-  check('结构完整性：UI 有 opt-' + type + ' checkbox', checkboxRe.test(sidepanelHtml2));
+// 6-type 重构（2026-06-17）：tweets 拆成 originalTweets / replies / retweets 3 个独立顶层类型
+//   - type 用 camelCase（processXxx 函数名 + getPageURLForType 分支 key 一致）
+//   - domId 用 kebab-case（sidepanel.html 实际 id 形式：opt-original-tweets 而非 opt-originalTweets）
+const uiTypes = [
+  { type: 'originalTweets', domId: 'original-tweets' },
+  { type: 'replies',        domId: 'replies' },
+  { type: 'retweets',       domId: 'retweets' },
+  { type: 'likes',          domId: 'likes' },
+  { type: 'bookmarks',      domId: 'bookmarks' },
+  { type: 'following',      domId: 'following' },
+];
+uiTypes.forEach(function(item) {
+  const type = item.type;
+  const domId = item.domId;
+  // 1. UI checkbox 存在（用 domId 匹配 HTML id）
+  const checkboxRe = new RegExp('id="opt-' + domId + '"');
+  check('结构完整性：UI 有 opt-' + domId + ' checkbox', checkboxRe.test(sidepanelHtml2));
 
   // 2. content.js 有 getPageURLForType 分支
   const getUrlRe = new RegExp("type === '" + type + "'[\\s\\S]{0,80}get\\w*PageURL\\([^)]*\\)");
@@ -179,9 +192,12 @@ const sidepanelJs = fs.readFileSync(path.join(ROOT, 'chrome-extension/sidepanel.
 check('sidepanel.js checkboxIds 含 following', /checkboxIds\s*=\s*\[[\s\S]*?['"]opt-following['"]/.test(sidepanelJs));
 check('sidepanel.js optionNames 含 following', /optionNames\s*=\s*\[[\s\S]*?['"]following['"]/.test(sidepanelJs));
 
-// 7. 不留死代码：content.js handleStartCleanup 中 4 个跳转分支应保持一致结构
-const navBranches = content.match(/if\s*\(\s*types\.indexOf\(['"](\w+)['"]\)\s*>=\s*0\s*&&\s*pageType\s*!==\s*['"]\1['"]\)/g);
-check('handleStartCleanup 含 4 个跳转分支', navBranches && navBranches.length === 4,
+// 7. 不留死代码：content.js handleStartCleanup 中 6 个跳转分支应保持一致结构
+//   6-type 重构后：replies/retweets 跳 /with_replies（pageType === 'tweetTimeline'），
+//   所以 pageType 判定值与 types.indexOf 的 type 不一定一致（replies/retweets 用 tweetTimeline，其他 4 个用 type 自身），
+//   不再用 \1 反向引用，直接数 types.indexOf('X') 出现次数
+const navBranches = content.match(/types\.indexOf\(['"](\w+)['"]\)\s*>=\s*0\s*&&/g);
+check('handleStartCleanup 含 6 个跳转分支（6-type 重构后）', navBranches && navBranches.length === 6,
   '实际: ' + (navBranches && navBranches.length));
 
 // 报告

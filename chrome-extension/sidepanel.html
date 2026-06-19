@@ -135,15 +135,33 @@
     .option-item {
       display: flex;
       align-items: center;
+      flex-wrap: wrap;        /* 让 .backup-tip 用 flex-basis:100% 换到下一行 */
       gap: 10px;
       padding: 8px 0;
       border-bottom: 1px solid #27272a;
     }
     .option-item:last-child { border-bottom: none; padding-bottom: 0; }
     .option-item:first-child { padding-top: 0; }
-    /* Tweets 子项展开时联动分割线：让 Tweets+子项 视觉上是一个组，与其他 3 项用分割线隔开 */
-    .option-item.sub-options-open { border-bottom-color: transparent; }
-    .option-item.has-prev-sub-options { border-top: 1px solid #27272a; }
+    /* Original Tweets 备份提示：默认隐藏，勾选时给 .option-item 加 .show-backup-tip 展开
+       用 flex-basis:100% 强制换到下一行 + 父级 flex-wrap:wrap，实现全宽另起一行 */
+    .backup-tip {
+      display: none;
+      flex: 0 0 100%;         /* 等价 flex-basis:100% + 不缩不放 */
+      margin-top: 8px;        /* 与上方 label 行的间距 */
+      padding: 8px 10px;
+      background: rgba(245, 158, 11, 0.12);
+      border-left: 3px solid #f59e0b;
+      border-radius: 4px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #fde68a;
+      box-sizing: border-box;
+    }
+    .option-item.show-backup-tip .backup-tip { display: flex; align-items: flex-start; gap: 4px; }
+    .backup-tip-icon { flex-shrink: 0; line-height: 1.5; }
+    .backup-tip-text { flex: 1; }
+    .backup-tip a { color: #fbbf24; text-decoration: underline; }
+    .backup-tip a:hover { color: #fcd34d; }
     .option-checkbox {
       width: 18px;
       height: 18px;
@@ -562,9 +580,15 @@
       <div class="section-title" data-i18n="selectOptions">Select items to delete</div>
       <div class="options-card">
         <div class="option-item">
-          <input type="checkbox" id="opt-original-tweets" class="option-checkbox" checked>
+          <input type="checkbox" id="opt-original-tweets" class="option-checkbox">
           <label for="opt-original-tweets" class="option-label" data-i18n="originalTweets">Original Tweets</label>
           <span class="option-count">0</span>
+          <!-- 备份提示：勾选 Original Tweets 时展开，提醒用户先到 X 申请归档下载
+               内嵌 HTML 通过 applyI18n 里的 backup-tip 特殊处理注入（{link} 占位符 → <a> 标签） -->
+          <div class="backup-tip">
+            <span class="backup-tip-icon" aria-hidden="true">⚠️</span>
+            <span class="backup-tip-text" data-i18n-html="originalTweetsBackupTip">推文一旦删除无法恢复，建议先去 <a href="https://help.x.com/en/managing-your-account/how-to-download-your-x-archive" target="_blank" rel="noopener" data-i18n="archiveLinkText">X 申请归档下载</a> 再清理。</span>
+          </div>
         </div>
         <div class="option-item">
           <input type="checkbox" id="opt-replies" class="option-checkbox" checked>
@@ -587,7 +611,7 @@
           <span class="option-count">0</span>
         </div>
         <div class="option-item">
-          <input type="checkbox" id="opt-following" class="option-checkbox">
+          <input type="checkbox" id="opt-following" class="option-checkbox" checked>
           <label for="opt-following" class="option-label" data-i18n="following">Following</label>
           <span class="option-count">0</span>
         </div>

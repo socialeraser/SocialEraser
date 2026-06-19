@@ -150,6 +150,9 @@
     updateLangFlag();   // 先设置国旗
     applyI18n();        // 再应用所有翻译（不会闪）
     bindEvents();
+    // Original Tweets 默认 checked → 初始化时同步展开备份提示
+    //   必须在 bindEvents 之后调，确保 els.optOriginalTweets 已就绪
+    syncBackupTip();
     checkXTabStatus();
 
     // 监听 tab 切换事件，切换时重新检查
@@ -181,6 +184,21 @@
     // （旧的 10s silent 轮询每 10s 重检一次，会把"检测中→已确认"的瞬态错位带回来，反而误报）
   }
 
+  // 同步 Original Tweets 备份提示的展开状态
+  //   勾上 → 显示黄色警告条；取消 → 收起
+  //   设计：完全跟随 checkbox 当前状态，不引入额外持久化（用户取消后刷新，HTML 默认 checked
+  //   决定 tip 初始可见性，与用户期待一致）
+  function syncBackupTip() {
+    if (!els.optOriginalTweets) return;
+    var item = els.optOriginalTweets.closest('.option-item');
+    if (!item) return;
+    if (els.optOriginalTweets.checked) {
+      item.classList.add('show-backup-tip');
+    } else {
+      item.classList.remove('show-backup-tip');
+    }
+  }
+
   // 应用翻译到所有 UI 元素
   function applyI18n() {
     // 静态文本
@@ -197,7 +215,21 @@
     var labels = document.querySelectorAll('[data-i18n]');
     for (var i = 0; i < labels.length; i++) {
       var key = labels[i].getAttribute('data-i18n');
+      // backup-tip 里的 <a data-i18n="archiveLinkText"> 由下面 data-i18n-html 块处理
+      // （整段会一起 innerHTML 覆盖），这里跳过避免 textContent 把 <a> 标签冲掉
+      if (labels[i].closest('[data-i18n-html]')) continue;
       labels[i].textContent = t(key);
+    }
+
+    // data-i18n-html: 整段需要 innerHTML 注入（用于含 <a> 的富文本，目前只有 backup-tip）
+    //   {link} 占位符会被替换为带 i18n 链接文字的 <a> 标签
+    var htmlLabels = document.querySelectorAll('[data-i18n-html]');
+    for (var m = 0; m < htmlLabels.length; m++) {
+      var hkey = htmlLabels[m].getAttribute('data-i18n-html');
+      var linkHTML =
+        '<a href="https://help.x.com/en/managing-your-account/how-to-download-your-x-archive" ' +
+        'target="_blank" rel="noopener">' + t('archiveLinkText') + '</a>';
+      htmlLabels[m].innerHTML = t(hkey, { link: linkHTML });
     }
 
     // placeholder
@@ -236,6 +268,13 @@
     if (els.btnRefresh) els.btnRefresh.onclick = refreshConfig;
     if (els.btnLang) els.btnLang.onclick = toggleLangDropdown;
     if (els.btnCopyDiag) els.btnCopyDiag.onclick = copyDiagnosticLog;
+
+    // Original Tweets 备份提示联动：
+    //   勾上 → .option-item 加 .show-backup-tip → CSS 把内嵌 .backup-tip 从 display:none 切到 display:flex
+    //   取消 → 移除 class → 收起
+    if (els.optOriginalTweets) {
+      els.optOriginalTweets.addEventListener('change', syncBackupTip);
+    }
 
     // Tweets 勾选状态联动：已删除（2026-06-18 重构后 3 个 type 都是顶级 checkbox，无子选项联动）
 
@@ -398,13 +437,24 @@
 
     addLog(t('refreshingConfig'), 'info');
 
+    // 顺带刷新所有 X tab，让 content script 有机会重新注入
+    //   场景：先打开 x.com 再装/重载扩展 → content script 不会自动注入 → 必须整页刷新
+    //   reload 是 fire-and-forget；content.js 重新加载后会主动推 statusUpdate，UI 自动恢复
+    //   与 config refresh 并行，不互相阻塞
+    var patterns = getPatterns();
+    chrome.tabs.query({url: patterns}, function(tabs) {
+      if (tabs && tabs.length > 0) {
+        tabs.forEach(function(tab) { chrome.tabs.reload(tab.id); });
+      }
+    });
+
     chrome.runtime.sendMessage({target: 'refreshConfig'}, function(resp) {
       checkXTabStatus().then(function() {
         if (resp && resp.config) {
-          addLog(t('configRefreshed', {
-            xStatus: state.isX ? t('statusYes') : t('statusNo'),
-            loginStatus: state.isLoggedIn ? t('statusYes') : t('statusNo')
-          }), 'success');
+          // 不带任何状态字段：
+          //   X 状态虽然在 reload 期间相对稳定，但和 login 一样都是侧栏实时态信息，
+          //   日志记录"刚才发生了什么"就够，让 UI badge 作为状态的唯一实时源
+          addLog(t('configRefreshed'), 'success');
         } else {
           addLog(t('configRefreshFailed'), 'error');
         }

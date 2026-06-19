@@ -49,15 +49,7 @@ check('所有 els.<name> 引用都有对应 getElementById 绑定',
   missing.length === 0,
   '缺失: ' + (missing.length ? missing.join(', ') : '无'));
 
-// 4. 专项：tweets 子选项的 4 个绑定必须存在（之前 bug 的具体锚点）
-const mustBind = ['optTweets', 'tweetsOptionsSection', 'optIncludeReplies', 'optIncludeRetweets'];
-for (const name of mustBind) {
-  check('绑定锚点存在: els.' + name,
-    binds.has(name),
-    'afterLangLoaded() 缺 els.' + name + ' = document.getElementById(...)');
-}
-
-// 5. 反向：每个绑定都对应 HTML 里真实的 id（防止"绑了一个不存在的 id"这种错位）
+// 4. 反向：每个绑定都对应 HTML 里真实的 id（防止"绑了一个不存在的 id"这种错位）
 const htmlIds = new Set([...html.matchAll(/id=['"]([^'"]+)['"]/g)].map(x => x[1]));
 const reIdRe = /els\.([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*document\.getElementById\(['"]([^'"]+)['"]\)/g;
 const orphanBinds = [];

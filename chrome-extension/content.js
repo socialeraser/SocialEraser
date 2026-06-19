@@ -568,6 +568,9 @@
         }
         if (!resolved) {
           resolved = true;
+          // 恢复原始 onComplete，避免下一轮 runCleanupOnce 拿到被覆盖的版本
+          // 否则最后一轮完成后 cleanupComplete 事件链断裂，sidepanel 永远卡 Processing...
+          injector.onComplete = origOnComplete;
           console.log('[X-Eraser] Auto-resume attempt ' + attempt + ': processed=' + result.processed + (isLast ? ' (final)' : ' (continuing)'));
           resolve(result);
         }
@@ -740,7 +743,13 @@
     }
 
     // 尝试 4: 从当前 URL（如果在 profile 页面）
-    var urlMatch = window.location.pathname.match(/^\/([^\/]+)\/?$/);
+    //   M++ 修复（2026-06-19 bug-replies-QioHub）：原正则 `^\/([^\/]+)\/?$` 只匹配 1 段 path，
+    //   在 /{user}/with_replies、/{user}/likes、/{user}/following 等 profile 子页面下无法提取 username
+    //   → getCurrentUsername() 返回 null → _isOwnArticle 兜底 return true → 误删他人推文
+    //   新正则支持 "username + 可选子页面" 两段结构
+    var urlMatch = window.location.pathname.match(
+      /^\/([^\/]+)(?:\/(with_replies|likes|following|highlights|articles|media))?\/?$/
+    );
     if (urlMatch && urlMatch[1] && RESERVED_PATHS.indexOf(urlMatch[1]) === -1) {
       console.log('[X-Eraser] Got username from URL path:', urlMatch[1]);
       return urlMatch[1];

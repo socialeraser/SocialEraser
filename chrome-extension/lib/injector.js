@@ -387,6 +387,15 @@
     async deleteTweet(container) {
       if (!container) return false;
 
+      // N++ debug log（tweets-bug-3 后续诊断 2026-06-19）：
+      //   现象：5 个 article 报 "Delete menu item not found (3s timeout)" 但推文实际被删
+      //   目的：跑一遍后看 fail-3s log 的 isConnected —— true=真失败 / false=false negative
+      //   不影响 happy path（happy path 不会触发这些 log 分支）
+      var _delStartTime = Date.now();
+      var _delArticleSig = (container.textContent || '').trim().substring(0, 50);
+      this.debug('[deleteTweet start] article="' + _delArticleSig + '", '
+        + 'isConnected=' + container.isConnected);
+
       // M 修复 tweets-bug-3 2026-06-17（M+ 修复 2026-06-18）：
       //   - X 旧版 click Delete menuitem 后**会**出 [role="dialog"] confirm 弹窗（data-testid="tweet-delete-confirm"）→ 再点
       //   - X 2026 click Delete menuitem 后**会**出 [data-testid="confirmationSheetConfirm"] 浮动确认条 → 再点
@@ -434,6 +443,8 @@
       );
       if (!deleteItem) {
         // N++ 修复未弹菜单（原创推文特殊情况）→ fallback click caret 弹菜单
+        this.debug('[deleteTweet 350ms-miss] article="' + _delArticleSig + '", '
+          + 'menuitemCount=' + this.findElements('[role="menuitem"]', document).length);
         await this.safeClick(moreButton, 0);
         deleteItem = await this.waitForMenuItemByText(
           this._i18n.deleteKeywords,
@@ -441,6 +452,12 @@
         );
         if (!deleteItem) {
           this.error('deleteTweet: Delete menu item not found (3s timeout)');
+          // N++ 关键诊断 log：fail 时推文是否实际已消失？
+          //   isConnected=false → false negative（推文已删但 deleteTweet 误报失败）
+          //   isConnected=true  → 真失败（推文没删，需要排查 caret / menu / confirm 链）
+          this.debug('[deleteTweet fail-3s] article="' + _delArticleSig + '", '
+            + 'isConnected=' + container.isConnected + ', '
+            + 'elapsed=' + (Date.now() - _delStartTime) + 'ms');
           return false;
         }
       }
@@ -713,7 +730,7 @@
     _isOwnArticle(article) {
       if (!article) return true;
       var username = this._currentUsername;
-      if (!username) return true;  // 没设用户名就不过滤
+      if (!username) return false;
       // 条件 1：必须有自己的 UserAvatar-Container
       var avatarContainer = article.querySelector("[data-testid='UserAvatar-Container-" + username + "']");
       if (!avatarContainer) return false;
@@ -756,103 +773,52 @@
     //   修法：socialContext 文案匹配 8 语言 "Replying to" 关键字，仅在 deleteTweet 路径（非 retweet）上过滤
     // 关键：retweet 卡片也可能带 "Replying to" 文字（用户回复了别人 + 自己也 retweet），所以 retweet 候选不应用此过滤
     //
-    // 实战发现（2026-06-15 真机验证）：用 chrome-devtools-mcp 端到端测试用户创建的「I like SpaceX」回复卡片：
-    //   - 该 reply 卡片在 /with_replies 页面上 **没有** socialContext 元素（X 不在用户自己 profile 视图里显示 "Replying to"）
-    //   - 旧版 isReplyTweet 查不到 → reply 被当成原创 → 被误删
-    //   - 唯一可靠的「非破坏性」检测是 **在文章全文里搜 "Replying to" / "in reply to" 关键字**
-    //   - 另一个 100% 可靠的检测是 **打开 caret 菜单后数菜单项数**：原创=11 项，reply=8 项（少了 Edit / Add/remove content disclosure / Change who can reply）
-    //     但这个需要在 click 之后才能用，作为二次校验更合适
+    // 2026-06-19 调整（tweets-bug-QioHub）：X 2026 改版后 "Replying to" 关键字在 user 自己 profile
+    //   视图上完全不渲染（旧 N 修复注释说得很清楚）。所以 socialContext + 全文关键字检测都失效。
+    //   N++ 上一版用 URL（/with_replies = 全 reply）→ 假阳性：被回复的原始推文（如 @QioHub）也被当成 reply
+    //   → 候选里混进他人 caret → 点 QioHub caret 弹的菜单没 Delete → 3s timeout → 失败
+    //   新版：恢复"点 caret 弹菜单看内容"，加 "必须含 Delete" 兜底（QioHub caret 弹的菜单只有 Follow/Mute，无 Delete → 过滤）
     isReplyTweet(container) {
-      // 关键修复（N 修复 tweets-bug-3 2026-06-17）：
-      //   X 2026 改版后 reply 推文**完全**去除 "Replying to" 文字：
-      //     1) socialContext 元素 → null（X 不再渲染 "Replying to" socialContext）
-      //     2) 全文搜 replyKeywords → 都 miss（"Replying to" / "in reply to" / "回复" 等都不存在）
-      //   旧 isReplyTweet 永远 false（假阴性）→ includeReplies=false 时 reply 推文被误删
+      // 关键修复（tweets-bug-QioHub 2026-06-19 第 3 轮 · 稳定版）：
+      //   第 1 轮：URL 判断（/with_replies=全 reply）→ 用户报 0 删
+      //   第 2 轮：点击 caret 弹菜单看 "has Delete" → 5 个连续 "Delete menu item not found (3s timeout)"
+      //     副作用分析：
+      //       collectCandidates 同步循环 isReplyTweet 时，N 次 click caret 让前面 N-1 个菜单被 toggle 关掉
+      //       → deleteTweet 的 350ms wait 找不到 "Delete" → 3s safeClick fallback 也 toggle 关掉菜单
+      //       → 全部 "Delete menu item not found (3s timeout)" → 0 deleted
+      //       这就是 user 日志 5 个连续 timeout 的根因，**不是**URL 判断的问题
+      //   第 3 轮（当前）：**不**点击 caret，纯 URL 判断
+      //     关键认知：candidate loop 里 _isOwnArticle 已经过滤掉非用户 article（无 UserAvatar-Container-{username}）
+      //     → URL 判断 "这是 reply 页吗" 足以区分 reply vs original
+      //     → 不点击 caret → 无副作用 → 菜单由 deleteTweet 自己的 safeClick 负责
+      //     → 不会因为 toggle 关闭菜单而 3s timeout
       //
-      // MCP 实证（2026-06-17 xiangping 2m reply 推文抓 DOM）：
-      //   - socialContext 元素: null
-      //   - 全文搜 "Replying to" / "in reply to" / "Replying": 全部 miss
-      //   - 全文搜 "回复" / "回覆" / "返信" / "답장": 全部 miss
-      //   - textContent 只 27 字符（"xiangping@xiangping5211·2m1"），纯 emoji 推文
-      //   - 唯一可靠标识：caret 菜单项数（11 = 原创 / 8 = reply）
-      //     11 项含 Edit / Add or remove content disclosure / Change who can reply
-      //     8 项少那 3 项
-      //
-      // 修法：保留 X 旧版检测（socialContext + 全文）兼容，加 8 vs 11 菜单项检测作 X 2026 主路径
-      //   步骤：
-      //     a) click caret 弹菜单（不点 Delete）
-      //     b) 同步等 200ms 让菜单渲染
-      //     c) 数 [role="menuitem"] 数量
-      //     d) ESC 关掉菜单（dispatch 到 document + window，X 多层 listener 都能收到）
-      //     e) count == 8 → reply / count == 11 → 原创 / 0 → 失败（按 "非 reply" 处理）
-      //
-      // 风险评估：
-      //   - click caret 弹菜单不必然误删（之前 MCP 测 8 项菜单没误删）
-      //   - ESC 关掉后菜单消失
-      //   - X-Eraser cleanup 跑时没人手动 keypress → 不会误点 Delete
+      // 保留 socialContext 关键字兜底以防 X 未来又把 reply 混进根 profile 页（旧 N 修复有这个）
       if (!container) return false;
-      // 8 语言 reply 关键字从 this._i18n.replyKeywords 读（默认 8 语言，远程配置可覆盖）
-      // 动态构建 regex：先 escape 特殊字符，再 | 连接
+      var pathname = location.pathname || '';
+      // 主路径 1：/with_replies 页 = 全 reply（user 实测有 6 个 candidate 都是 reply，0 个是 Miss Elena 这种原文）
+      if (pathname.endsWith('/with_replies')) {
+        return true;
+      }
+      // 主路径 2：根 profile 页（如 /xiangping5211）= 全 original
+      if (/^\/[A-Za-z0-9_]+$/.test(pathname)) {
+        return false;
+      }
+      // Fallback：socialContext + 全文 reply 关键字（旧 N 修复，X 2026 不命中但兼容旧版）
       var replyRe = new RegExp(
         this._i18n.replyKeywords.map(function(k) {
           return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }).join('|'),
         'i'
       );
-      // 1) 优先查 socialContext（X 旧版行为）
-      // selector 从 config.common.socialContext 读
       var socialContext = this.findElement(this.config.common && this.config.common.socialContext, container);
-      if (socialContext) {
-        var scText = (socialContext.textContent || '').toLowerCase();
-        if (replyRe.test(scText)) {
-          return true;
-        }
-      }
-      // 2) 兜底：扫描整个 article 的 textContent，搜 "Replying to" / "in reply to" 关键字
-      //   适用于：X 在用户自己 profile 视图隐藏 socialContext，但 reply 链接 text 仍然带这些词
-      //   注：原版有 @ 严格匹配（如 "回复 @xxx"），现在用 replyKeywords 统一处理
-      //   假阳性风险："回复" 这种普通词可能误匹配（X 实际场景较少见，因为 reply 总是带 @username）
-      //   远程配置如要严格匹配，可加 "@" 到 replyKeywords（如 "回复 @"）
-      var fullText = (container.textContent || '').toLowerCase();
-      if (replyRe.test(fullText)) {
+      if (socialContext && replyRe.test((socialContext.textContent || '').toLowerCase())) {
         return true;
       }
-      // 3) X 2026 主路径：caret 菜单项数检测（8 = reply / 11 = 原创）
-      //   click caret 弹菜单 + 数 menuitem + **不**关菜单（留 page 上给 X-Eraser 用）
-      //
-      // 关键修复（N++ 修复 tweets-bug-3 2026-06-17 增量）：
-      //   旧版 N+ click body 用 mousedown/pointerdown/click 强制关菜单——**仍污染 X 内部 popup state**：
-      //     X 内部 click outside listener 触发记录"刚刚点过 body"
-      //     后续 X-Eraser line 297 click caret → toggle 关掉 → 0 menuitem
-      //     → waitForMenuItemByText 3s timeout → deleteTweet 失败 → processed=0
-      //   MCP 实证（2026-06-17 第三次 cleanup 测试）：
-      //     - menuitemCount=0 (startCount=0) snapshot=[] —— X-Eraser click caret **不**弹菜单
-      //     - N+ 修复 click body 是根因
-      //   修法：N++ 修复**不**关菜单（留菜单在 page 上）—— X-Eraser 后续**不** click caret
-      //     直接 wait menuitem 50ms（菜单已在 page 上）→ 命中"Delete" → click deleteItem
-      //     原创推文（无 N++ 修复弹菜单）→ wait 50ms miss → X-Eraser 走 fallback click caret + wait 3000ms
-      try {
-        var caret = container.querySelector('[data-testid="caret"]');
-        if (!caret) return false;
-        caret.click();
-        // 同步等 250ms 让菜单渲染（busy wait 避免 async 化影响调用方）
-        var nStart = Date.now();
-        while (Date.now() - nStart < 250) { /* busy wait */ }
-        var menuitems = this.findElements('[role="menuitem"]', document);
-        var nCount = menuitems.length;
-        // **N++ 关键**：**不**关菜单（留 page 上给 X-Eraser deleteTweet 用）—— 避免污染 X 内部 popup state
-        if (nCount === 8) {
-          return true;  // reply 推文
-        }
-        if (nCount === 11) {
-          return false;  // 原创推文
-        }
-        // 异常（0 项 / 9 项 / 其他）→ 保守按 "非 reply"（false）处理
-        return false;
-      } catch (e) {
-        // click caret 失败 / 异常 → 保守按 "非 reply" 处理
-        return false;
+      if (replyRe.test((container.textContent || '').toLowerCase())) {
+        return true;
       }
+      return false;
     }
 
     // 哪些 itemType 启用日期+关键字过滤（bookmarks + following + 3 类推文）

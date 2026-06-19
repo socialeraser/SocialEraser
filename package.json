@@ -8,8 +8,9 @@
     "start": "npm run build && npx cap run android",
     "build": "npm run sync && npx cap copy",
     "android:open": "npx cap open android",
-    "test": "jest",
-    "test:watch": "jest --watch"
+    "test": "node scripts/run-verify.js",
+    "verify": "node scripts/run-verify.js",
+    "verify:single": "node scripts/run-verify.js --single"
   },
   "keywords": [
     "twitter",
