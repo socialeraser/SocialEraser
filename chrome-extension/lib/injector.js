@@ -1032,7 +1032,7 @@
         ? this.config.like.unlikeButtons : [];
       const unlikeSelectors = remoteUnlike;
 
-      this.log(t('startingLikesCleanup', {url: window.location.href}));
+      this.log(t('startingLikesCleanup'));
 
       // 预计算 keyword 小写，避免循环里重复 toLowerCase
       this._keywordLower = (this.filters && this.filters.keyword)
@@ -1479,7 +1479,7 @@
       this._keywordLower = (this.filters && this.filters.keyword)
         ? this.filters.keyword.toLowerCase() : '';
 
-      this.log(t('startingTweetsCleanup', {url: window.location.href}));
+      this.log(t('startingTweetsCleanup'));
 
       // 等 articles 渲染 + 内容稳定（X SPA 分批异步加载，2026-06-18 用 MutationObserver 检测"内容稳定"）
       //   旧实现：3s 内 article 出现就 break → 分批加载时第一个 article 出现就开跑 → 0 命中
@@ -1602,7 +1602,7 @@
       this._keywordLower = (this.filters && this.filters.keyword)
         ? this.filters.keyword.toLowerCase() : '';
 
-      this.log(t('startingTweetsCleanup', {url: window.location.href}));
+      this.log(t('startingTweetsCleanup'));
 
       // 等 articles 渲染 + 内容稳定（X SPA 分批异步加载，2026-06-18 用 MutationObserver 检测"内容稳定"）
       //   旧实现：3s 内 article 出现就 break → 分批加载时第一个 article 出现就开跑 → 0 命中
@@ -1721,7 +1721,7 @@
       this._keywordLower = (this.filters && this.filters.keyword)
         ? this.filters.keyword.toLowerCase() : '';
 
-      this.log(t('startingTweetsCleanup', {url: window.location.href}));
+      this.log(t('startingTweetsCleanup'));
 
       // 等 articles 渲染 + 内容稳定（X SPA 分批异步加载，2026-06-18 用 MutationObserver 检测"内容稳定"）
       //   旧实现：3s 内 article 出现就 break → 分批加载时第一个 article 出现就开跑 → 0 命中
