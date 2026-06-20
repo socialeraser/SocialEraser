@@ -16,7 +16,8 @@
 //                    + mirrors sidepanel.html as index.html (Capacitor entry point)
 //   2. Syncs src/  +  scripts/  +  *-source/  →  extensions/<browser>-<prefix>/
 //                    (chrome-source/ → extensions/chrome-<prefix>/ and edge-<prefix>/,
-//                     see BROWSER_ALIASES below for the alias map)
+//                     see BROWSER_ALIASES below for the alias map. A more specific
+//                     source like edge-source/, if present, takes over edge-<prefix>.)
 //                    where <prefix> is the part before "-project" in the folder
 //                    name (e.g. platforms/x-project → chrome-x / edge-x).
 //   3. If capacitor.config.json exists, runs `npx cap copy` in the platform
@@ -93,16 +94,39 @@ function syncPlatform(platformDir) {
   // 2. src/ + scripts/ + *-source/ → extensions/<browser>-<prefix>/
   // Find all chrome-source/, edge-source/, etc. Each source may produce
   // multiple extension folders via BROWSER_ALIASES (chrome-source/ → both
-  // extensions/chrome-x/ and extensions/edge-x/).
+  // extensions/chrome-x/ and extensions/edge-x/ BY DEFAULT). If a more
+  // specific source exists for an aliased target (e.g. edge-source/ for the
+  // 'edge' target), the more specific source owns the target and the alias
+  // is skipped — so chrome-source/ won't overwrite edge-source/'s output.
   const platformEntries = fs.readdirSync(platformDir, { withFileTypes: true });
   const browserSources = platformEntries.filter(e =>
     e.isDirectory() && /-(?:source|template)$/.test(e.name)
   );
+
+  // First pass: each source claims its own target first (no alias needed),
+  // so a direct source like edge-source/ outranks chrome-source/'s alias
+  // for the 'edge' target. Only after direct claims do alias targets get
+  // assigned to whichever source first offered them.
+  const targetOwner = new Map(); // target browser name → source folder name
+  for (const srcEntry of browserSources) {
+    const browser = srcEntry.name.replace(/-source$/, '').replace(/-template$/, '');
+    targetOwner.set(browser, srcEntry.name);
+  }
+  for (const srcEntry of browserSources) {
+    const browser = srcEntry.name.replace(/-source$/, '').replace(/-template$/, '');
+    const targets = BROWSER_ALIASES[browser] || [browser];
+    for (const t of targets) {
+      if (!targetOwner.has(t)) targetOwner.set(t, srcEntry.name);
+    }
+  }
+
   if (fs.existsSync(scripts) || browserSources.length > 0) {
     for (const srcEntry of browserSources) {
       const browser = srcEntry.name.replace(/-source$/, '').replace(/-template$/, '');
       const targetBrowsers = BROWSER_ALIASES[browser] || [browser];
       for (const targetBrowser of targetBrowsers) {
+        // Skip if a more specific source already owns this target.
+        if (targetOwner.get(targetBrowser) !== srcEntry.name) continue;
         const extDir = path.join(EXTENSIONS_DIR, `${targetBrowser}-${prefix}`);
         rmrf(extDir);
         // copy src/ first
