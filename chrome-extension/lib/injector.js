@@ -821,14 +821,16 @@
       return false;
     }
 
-    // 哪些 itemType 启用日期+关键字过滤（bookmarks + following + 3 类推文）
+    // 哪些 itemType 启用日期+关键字过滤（6 type 全部支持）
     shouldFilter(itemType) {
       // 是否对该 itemType 启用日期 + 关键字过滤
-      //   likes 不支持过滤（没日期筛选 UI）→ false
-      //   bookmarks / following / originalTweets / replies / retweets 支持日期 + 关键字过滤 → true
-      // 返回: true = 走 extractMeta + matchesFilter；false = 全部删除
+      //   2026-06-19 统一（tweets-bug-QioHub 同日重构）：likes / bookmarks / following / originalTweets / replies / retweets
+      //   6 type 全部 true，统一走 extractMeta + matchesFilter
+      //   注：following 的 dateISO 通常为 null（X profile 页不显示"关注时间"）→ 日期过滤对 following 自动失效
+      //       matchesFilter 在 dateISO=null 时跳过日期比较（只看 keyword），所以不会误杀全部 following
+      //   返回: true = 走 extractMeta + matchesFilter；false = 全部删除
       if (!this.filters) return false;
-      return itemType === 'bookmarks' || itemType === 'following'
+      return itemType === 'likes' || itemType === 'bookmarks' || itemType === 'following'
         || itemType === 'originalTweets' || itemType === 'replies' || itemType === 'retweets';
     }
 
@@ -1072,7 +1074,8 @@
         const btn = pending[0];
 
         // 过滤判断：不通过则标记 'skipped'，下次扫描跳过（不重复提取 meta）
-        if (this.filters) {
+        // 2026-06-19 统一（tweets-bug-QioHub 同日重构）：改走 shouldFilter，与其他 5 type 保持一致
+        if (this.shouldFilter('likes')) {
           var article = this.findClosest(this.config.common && this.config.common.articleContainers, btn) || btn.parentElement;
           var meta = this.extractMeta(article, 'likes');
           if (!this.matchesFilter(meta, this.filters)) {
