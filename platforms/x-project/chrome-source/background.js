@@ -15,7 +15,7 @@
 
 const CONFIG_URL = 'https://storage.googleapis.com/social-tool-bucket/remote-example.json';
 // content script 注入顺序：i18n.js 必须最先（暴露 window.SocialEraseri18n）→ injector.js → content.js
-const CONTENT_SCRIPT_FILES = ['lib/i18n.js', 'lib/injector.js', 'content.js'];
+const CONTENT_SCRIPT_FILES = ['i18n.js', 'x-automation.js', 'content.js'];
 const CONTENT_SCRIPT_MATCHES = ['*://x.com/*', '*://twitter.com/*'];
 
 let activeTabId = null;

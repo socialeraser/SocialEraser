@@ -28,7 +28,7 @@
   "content_scripts": [
     {
       "matches": ["*://x.com/*", "*://twitter.com/*"],
-      "js": ["lib/i18n.js", "lib/injector.js", "content.js"],
+      "js": ["i18n.js", "x-automation.js", "content.js"],
       "run_at": "document_start"
     }
   ]
