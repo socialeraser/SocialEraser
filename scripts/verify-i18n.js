@@ -2,7 +2,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const file = path.join(__dirname, '..', 'chrome-extension/lib/i18n.js');
+const file = path.join(__dirname, '..', 'platforms/x-project/scripts/i18n.js');
 const src = fs.readFileSync(file, 'utf8');
 
 const required = [

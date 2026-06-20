@@ -1,0 +1,6 @@
+{
+  "name": "@social-eraser/shared-core",
+  "version": "0.0.0",
+  "description": "Cross-platform shared logic (i18n, config, subscription, storage).",
+  "private": true
+}

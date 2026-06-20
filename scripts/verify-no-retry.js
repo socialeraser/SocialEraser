@@ -14,8 +14,8 @@ function check(name, cond, detail) {
   if (!cond) fail.push({ name, detail });
 }
 
-const contentJs = fs.readFileSync(path.join(ROOT, 'chrome-extension/content.js'), 'utf8');
-const i18nJs = fs.readFileSync(path.join(ROOT, 'chrome-extension/lib/i18n.js'), 'utf8');
+const contentJs = fs.readFileSync(path.join(ROOT, 'platforms/x-project/scripts/content.js'), 'utf8');
+const i18nJs = fs.readFileSync(path.join(ROOT, 'platforms/x-project/scripts/i18n.js'), 'utf8');
 
 // 1. content.js 必须不再有 runCleanupWithRetry 函数定义
 check('content.js 已删除 runCleanupWithRetry 函数',

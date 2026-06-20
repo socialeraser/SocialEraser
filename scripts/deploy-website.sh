@@ -15,7 +15,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
-WEBSITE_DIR="$ROOT_DIR/website"
+WEBSITE_DIR="$ROOT_DIR/packages/marketing-website"
 
 echo "==> Deploying website from $WEBSITE_DIR"
 cd "$WEBSITE_DIR"

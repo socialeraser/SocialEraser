@@ -7,8 +7,8 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.join(__dirname, '..');
-const SRC = path.join(ROOT, 'chrome-extension/sidepanel.js');
-const HTML = path.join(ROOT, 'chrome-extension/sidepanel.html');
+const SRC = path.join(ROOT, 'platforms/x-project/src/sidepanel.js');
+const HTML = path.join(ROOT, 'platforms/x-project/src/sidepanel.html');
 const js = fs.readFileSync(SRC, 'utf8');
 const html = fs.readFileSync(HTML, 'utf8');
 

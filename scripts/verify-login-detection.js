@@ -15,9 +15,9 @@ function check(name, cond, detail) {
 }
 
 // 1. 读取 3 个文件（lib/config.js 已删 —— 2026-XX-XX 重构移除了死代码）
-const contentJs = fs.readFileSync(path.join(ROOT, 'chrome-extension/content.js'), 'utf8');
-const defaultCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'chrome-extension/config/default.json'), 'utf8'));
-const remoteCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'chrome-extension/config/remote-example.json'), 'utf8'));
+const contentJs = fs.readFileSync(path.join(ROOT, 'platforms/x-project/scripts/content.js'), 'utf8');
+const defaultCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'platforms/x-project/src/config/default.json'), 'utf8'));
+const remoteCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'platforms/x-project/src/config/remote-example.json'), 'utf8'));
 
 // 2. 必须含有的侧栏稳定 selector（任何登录页都有）
 // 2026-XX-XX 精简：删 a[href='/i/bookmarks']（X 2026 侧栏已无 bookmarks 直链）
@@ -126,7 +126,7 @@ if (glcBlock) {
 // ============================================================
 // 9. sticky 状态机（修复 /home→/likes 闪 Not logged in 的核心）
 // ============================================================
-const sidepanelJs = fs.readFileSync(path.join(ROOT, 'chrome-extension/sidepanel.js'), 'utf8');
+const sidepanelJs = fs.readFileSync(path.join(ROOT, 'platforms/x-project/src/sidepanel.js'), 'utf8');
 
 // 9.1 content.js 必须有 sticky 缓存变量
 check('content.js 有 cachedIsLoggedIn sticky 变量',

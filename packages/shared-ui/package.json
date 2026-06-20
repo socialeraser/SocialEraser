@@ -1,0 +1,6 @@
+{
+  "name": "@social-eraser/shared-ui",
+  "version": "0.0.0",
+  "description": "Cross-platform shared UI components (HTML/CSS).",
+  "private": true
+}

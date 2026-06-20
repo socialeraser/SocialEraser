@@ -8,7 +8,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const INJECTOR_PATH = path.join(__dirname, '..', 'chrome-extension', 'lib', 'injector.js');
+const INJECTOR_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'scripts', 'x-automation.js');
 const injectorSrc = fs.readFileSync(INJECTOR_PATH, 'utf8');
 
 let passed = 0;

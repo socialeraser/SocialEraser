@@ -21,7 +21,7 @@ const path = require('path');
 const vm = require('vm');
 
 const ROOT = path.resolve(__dirname, '..');
-const INJECTOR = path.join(ROOT, 'chrome-extension/lib/injector.js');
+const INJECTOR = path.join(ROOT, 'platforms/x-project/scripts/x-automation.js');
 const src = fs.readFileSync(INJECTOR, 'utf8');
 
 const sandbox = {

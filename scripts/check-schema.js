@@ -19,8 +19,8 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
-const DEFAULT_CFG = path.join(ROOT, 'chrome-extension/config/default.json');
-const REMOTE_CFG = path.join(ROOT, 'chrome-extension/config/remote-example.json');
+const DEFAULT_CFG = path.join(ROOT, 'platforms/x-project/src/config/default.json');
+const REMOTE_CFG = path.join(ROOT, 'platforms/x-project/src/config/remote-example.json');
 
 const EXCLUDE_FROM_CHECK = new Set(['login', 'xWebsite', 'i18n']);
 

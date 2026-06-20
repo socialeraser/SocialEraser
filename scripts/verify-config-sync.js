@@ -16,8 +16,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const DEFAULT_CFG_PATH = path.join(__dirname, '..', 'chrome-extension', 'config', 'default.json');
-const REMOTE_CFG_PATH = path.join(__dirname, '..', 'chrome-extension', 'config', 'remote-example.json');
+const DEFAULT_CFG_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'default.json');
+const REMOTE_CFG_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'remote-example.json');
 
 const defaultCfg = JSON.parse(fs.readFileSync(DEFAULT_CFG_PATH, 'utf8'));
 const remoteCfg = JSON.parse(fs.readFileSync(REMOTE_CFG_PATH, 'utf8'));

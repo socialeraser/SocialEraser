@@ -1,0 +1,12 @@
+{
+  "name": "@social-eraser/x-project",
+  "version": "1.0.0",
+  "description": "X (Twitter) bulk-delete platform. Web UI + Capacitor Android/iOS.",
+  "private": true,
+  "dependencies": {
+    "@capacitor/android": "^2.5.0",
+    "@capacitor/cli": "^2.5.0",
+    "@capacitor/core": "^2.5.0",
+    "cordova-android": "^9.1.0"
+  }
+}

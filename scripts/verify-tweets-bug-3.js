@@ -21,9 +21,9 @@
 const fs = require('fs');
 const path = require('path');
 
-const DEFAULT_CFG_PATH = path.join(__dirname, '..', 'chrome-extension', 'config', 'default.json');
-const REMOTE_CFG_PATH = path.join(__dirname, '..', 'chrome-extension', 'config', 'remote-example.json');
-const INJECTOR_PATH = path.join(__dirname, '..', 'chrome-extension', 'lib', 'injector.js');
+const DEFAULT_CFG_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'default.json');
+const REMOTE_CFG_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'remote-example.json');
+const INJECTOR_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'scripts', 'x-automation.js');
 
 const defaultCfg = JSON.parse(fs.readFileSync(DEFAULT_CFG_PATH, 'utf8'));
 const remoteCfg = JSON.parse(fs.readFileSync(REMOTE_CFG_PATH, 'utf8'));
@@ -422,7 +422,7 @@ console.log();
 // ------------------------------------------------------------------
 console.log('[10] i18n.js deleteKeywords 保持最小关键字（substring 命中变体）');
 
-const i18nPath = path.join(__dirname, '..', 'chrome-extension', 'lib', 'i18n.js');
+const i18nPath = path.join(__dirname, '..', 'platforms', 'x-project', 'scripts', 'i18n.js');
 const i18nSrc = fs.readFileSync(i18nPath, 'utf8');
 const deleteKwMatch = i18nSrc.match(/deleteKeywords:\s*\[([\s\S]*?)\]/);
 const deleteKwBlock = deleteKwMatch ? deleteKwMatch[1] : '';

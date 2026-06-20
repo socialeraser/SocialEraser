@@ -1,29 +1,29 @@
 {
-  "name": "social-eraser",
+  "name": "social-eraser-monorepo",
   "version": "1.0.0",
-  "description": "SocialEraser - Batch Delete Twitter History",
-  "main": "www/index.html",
+  "description": "SocialEraser — multi-platform batch-delete tools (X, TikTok, YouTube, Facebook)",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "platforms/*"
+  ],
   "scripts": {
     "sync": "node scripts/sync-shared.js",
-    "start": "npm run build && npx cap run android",
-    "build": "npm run sync && npx cap copy",
-    "android:open": "npx cap open android",
+    "build": "npm run sync && cd platforms/x-project && npx cap copy",
+    "start": "npm run build && cd platforms/x-project && npx cap run android",
+    "android:open": "cd platforms/x-project && npx cap open android",
     "test": "node scripts/run-verify.js",
     "verify": "node scripts/run-verify.js",
-    "verify:single": "node scripts/run-verify.js --single"
+    "verify:single": "node scripts/run-verify.js --single",
+    "deploy:website": "./scripts/deploy-website.sh"
   },
   "keywords": [
     "twitter",
+    "tiktok",
     "delete",
     "batch",
     "cleanup"
   ],
   "author": "",
-  "license": "MIT",
-  "dependencies": {
-    "@capacitor/android": "^2.5.0",
-    "@capacitor/cli": "^2.5.0",
-    "@capacitor/core": "^2.5.0",
-    "cordova-android": "^9.1.0"
-  }
+  "license": "MIT"
 }

@@ -11,8 +11,8 @@ function check(name, cond, detail) {
 }
 
 // 1. JSON 合法性
-const defaultCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'chrome-extension/config/default.json'), 'utf8'));
-const remoteCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'chrome-extension/config/remote-example.json'), 'utf8'));
+const defaultCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'platforms/x-project/src/config/default.json'), 'utf8'));
+const remoteCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'platforms/x-project/src/config/remote-example.json'), 'utf8'));
 check('default.json JSON 合法', true);
 check('remote-example.json JSON 合法', true);
 
@@ -34,7 +34,7 @@ for (const cfgName of ['default.json', 'remote-example.json']) {
 }
 
 // 3. content.js 改动
-const content = fs.readFileSync(path.join(ROOT, 'chrome-extension/content.js'), 'utf8');
+const content = fs.readFileSync(path.join(ROOT, 'platforms/x-project/scripts/content.js'), 'utf8');
 check('content.js 含 getFollowingPageURL', content.includes('function getFollowingPageURL()'));
 check('content.js getPageURLForType 含 following 分支',
   /getPageURLForType\s*\([^)]*\)\s*{[\s\S]*?if\s*\(\s*type\s*===\s*['"]following['"]\s*\)\s*return\s+getFollowingPageURL\(\)/.test(content));
@@ -43,7 +43,7 @@ check('content.js handleStartCleanup 含 following 跳转',
 check('content.js detectPageType 含 /following 检测', content.includes("url.includes('/following')"));
 
 // 4. injector.js 改动
-const injector = fs.readFileSync(path.join(ROOT, 'chrome-extension/lib/injector.js'), 'utf8');
+const injector = fs.readFileSync(path.join(ROOT, 'platforms/x-project/scripts/x-automation.js'), 'utf8');
 // 2026-XX-XX 案例 6 改造后 selector 不再走 DEFAULT_SELECTORS 而是从 config.following 读
 // 改测：injector 内部有 following 分支 + 引用 this.config.following.unfollowButtons / confirmButton
 check('injector 读 this.config.following.unfollowButtons 数组',
@@ -98,8 +98,8 @@ check('injector 在每个 type 循环里调 onTypeStart + onTypeComplete',
   /this\.onTypeStart\s*\(\s*type\s*\)/.test(injector) &&
   /this\.onTypeComplete\s*\(\s*type\s*,\s*typeProcessed\s*\)/.test(injector));
 
-const sidepanelJs2 = fs.readFileSync(path.join(__dirname, '..', 'chrome-extension/sidepanel.js'), 'utf8');
-const sidepanelHtml2 = fs.readFileSync(path.join(__dirname, '..', 'chrome-extension/sidepanel.html'), 'utf8');
+const sidepanelJs2 = fs.readFileSync(path.join(__dirname, '..', 'platforms/x-project/src/sidepanel.js'), 'utf8');
+const sidepanelHtml2 = fs.readFileSync(path.join(__dirname, '..', 'platforms/x-project/src/sidepanel.html'), 'utf8');
 
 check('content.js 转发 cleanupTypeStart / cleanupTypeComplete 到 sidepanel',
   content.includes("type: 'cleanupTypeStart'") && content.includes("type: 'cleanupTypeComplete'"));
@@ -186,9 +186,9 @@ uiTypes.forEach(function(item) {
 // 5. i18n.js 改动（已有脚本 verify-i18n.js 检查，跳过）
 
 // 6. sidepanel.html / sidepanel.js 不应破坏
-const sidepanelHtml = fs.readFileSync(path.join(ROOT, 'chrome-extension/sidepanel.html'), 'utf8');
+const sidepanelHtml = fs.readFileSync(path.join(ROOT, 'platforms/x-project/src/sidepanel.html'), 'utf8');
 check('sidepanel.html 含 opt-following checkbox', sidepanelHtml.includes('id="opt-following"'));
-const sidepanelJs = fs.readFileSync(path.join(ROOT, 'chrome-extension/sidepanel.js'), 'utf8');
+const sidepanelJs = fs.readFileSync(path.join(ROOT, 'platforms/x-project/src/sidepanel.js'), 'utf8');
 check('sidepanel.js checkboxIds 含 following', /checkboxIds\s*=\s*\[[\s\S]*?['"]opt-following['"]/.test(sidepanelJs));
 check('sidepanel.js optionNames 含 following', /optionNames\s*=\s*\[[\s\S]*?['"]following['"]/.test(sidepanelJs));
 

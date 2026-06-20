@@ -17,8 +17,8 @@ const fs = require('fs');
 const path = require('path');
 
 const TESTS_DIR = path.join(__dirname, '..', 'tests');
-const INJECTOR_PATH = path.join(__dirname, '..', 'chrome-extension', 'lib', 'injector.js');
-const I18N_PATH = path.join(__dirname, '..', 'chrome-extension', 'lib', 'i18n.js');
+const INJECTOR_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'scripts', 'x-automation.js');
+const I18N_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'scripts', 'i18n.js');
 
 let passed = 0;
 let failed = 0;
@@ -28,8 +28,8 @@ let failed = 0;
 const i18nSrc = fs.existsSync(I18N_PATH) ? fs.readFileSync(I18N_PATH, 'utf8') : '';
 
 // 加载 config 文件（2026-XX-XX 重构：section 7 改为检查 config 而非 DEFAULT_SELECTORS）
-const DEFAULT_CFG_PATH = path.join(__dirname, '..', 'chrome-extension', 'config', 'default.json');
-const REMOTE_CFG_PATH = path.join(__dirname, '..', 'chrome-extension', 'config', 'remote-example.json');
+const DEFAULT_CFG_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'default.json');
+const REMOTE_CFG_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'remote-example.json');
 const defaultCfg = fs.existsSync(DEFAULT_CFG_PATH) ? JSON.parse(fs.readFileSync(DEFAULT_CFG_PATH, 'utf8')) : {};
 const remoteCfg = fs.existsSync(REMOTE_CFG_PATH) ? JSON.parse(fs.readFileSync(REMOTE_CFG_PATH, 'utf8')) : {};
 
@@ -410,7 +410,7 @@ console.log();
 console.log('[12] i18n 全部配置化（DEFAULT_I18N 在 i18n.js + injector.js 引用 + 5 处运行时读取）');
 {
   const INJECT_PATH = INJECTOR_PATH;
-  const I18N_PATH = path.join(__dirname, '..', 'chrome-extension', 'lib', 'i18n.js');
+  const I18N_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'scripts', 'i18n.js');
 
   if (fs.existsSync(INJECT_PATH) && fs.existsSync(I18N_PATH)) {
     const injectSrc = fs.readFileSync(INJECT_PATH, 'utf8');
@@ -492,7 +492,7 @@ console.log();
 // ------------------------------------------------------------------
 console.log('[13] remote-example.json - i18n section 完整 + 8 语言全有');
 {
-  const configPath = path.join(__dirname, '..', 'chrome-extension', 'config', 'remote-example.json');
+  const configPath = path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'remote-example.json');
   if (fs.existsSync(configPath)) {
     const configSrc = fs.readFileSync(configPath, 'utf8');
     let config = null;
@@ -562,7 +562,7 @@ console.log();
 // ------------------------------------------------------------------
 console.log('[14] default.json - 8 语言兜底同步（远程失败时项目自带默认配置）');
 {
-  const defaultPath = path.join(__dirname, '..', 'chrome-extension', 'config', 'default.json');
+  const defaultPath = path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'default.json');
   if (fs.existsSync(defaultPath)) {
     const defaultSrc = fs.readFileSync(defaultPath, 'utf8');
     let defaultCfg = null;
@@ -657,7 +657,7 @@ console.log();
 // ------------------------------------------------------------------
 console.log('[15] sidepanel.html - 6 option 存在（originalTweets/replies/retweets 独立顶级）');
 {
-  const htmlPath = path.join(__dirname, '..', 'chrome-extension', 'sidepanel.html');
+  const htmlPath = path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'sidepanel.html');
   if (fs.existsSync(htmlPath)) {
     const htmlSrc = fs.readFileSync(htmlPath, 'utf8');
     const required6 = ['opt-original-tweets', 'opt-replies', 'opt-retweets', 'opt-likes', 'opt-bookmarks', 'opt-following'];

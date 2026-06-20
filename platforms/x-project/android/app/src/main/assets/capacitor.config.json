@@ -1,0 +1,35 @@
+{
+  "appId": "com.socialeraser.app",
+  "appName": "SocialEraser",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": true,
+    "webContentsDebuggingEnabled": true,
+    "backgroundColor": "#09090b"
+  },
+  "ios": {
+    "allowsLinkPreview": true,
+    "webviewSnapshots": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#09090b",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#09090b"
+    },
+    "CapacitorStorage": {
+      "clearOnUpgrade": false
+    },
+    "WebView": {
+      "allowFileAccess": true,
+      "allowFileAccessFromFileURLs": true,
+      "allowUniversalAccessFromFileURLs": true,
+      "interceptNavigation": true
+    }
+  },
+  "bundledWebRuntime": false
+}
