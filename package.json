@@ -25,9 +25,5 @@
     "@capacitor/cli": "^2.5.0",
     "@capacitor/core": "^2.5.0",
     "cordova-android": "^9.1.0"
-  },
-  "devDependencies": {
-    "jest": "^29.7.0",
-    "jest-environment-jsdom": "^29.7.0"
   }
 }

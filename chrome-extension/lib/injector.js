@@ -794,6 +794,7 @@
       //     → 不会因为 toggle 关闭菜单而 3s timeout
       //
       // 保留 socialContext 关键字兜底以防 X 未来又把 reply 混进根 profile 页（旧 N 修复有这个）
+      // 上述三段结论均来自 MCP 实证（user Chrome 实测 HTML 抓取 + sidepanel 日志）
       if (!container) return false;
       var pathname = location.pathname || '';
       // 主路径 1：/with_replies 页 = 全 reply（user 实测有 6 个 candidate 都是 reply，0 个是 Miss Elena 这种原文）
@@ -805,6 +806,8 @@
         return false;
       }
       // Fallback：socialContext + 全文 reply 关键字（旧 N 修复，X 2026 不命中但兼容旧版）
+      // fullText 提一次，socialContext / container.textContent 都基于它
+      var fullText = (container.textContent || '').toLowerCase();
       var replyRe = new RegExp(
         this._i18n.replyKeywords.map(function(k) {
           return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -815,7 +818,7 @@
       if (socialContext && replyRe.test((socialContext.textContent || '').toLowerCase())) {
         return true;
       }
-      if (replyRe.test((container.textContent || '').toLowerCase())) {
+      if (replyRe.test(fullText)) {
         return true;
       }
       return false;
