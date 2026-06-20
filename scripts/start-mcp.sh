@@ -1,7 +1,7 @@
 #!/bin/bash
 # start-mcp.sh
 # 一键启动 MCP 浏览器环境（Chrome 带调试端口 + chrome-devtools-mcp 服务）
-# 适用于 X-Eraser 调试、以及其他需要登录态、要操作用户浏览器的项目
+# 适用于 SocialEraser 调试、以及其他需要登录态、要操作用户浏览器的项目
 #
 # 用法：
 #   chmod +x scripts/start-mcp.sh

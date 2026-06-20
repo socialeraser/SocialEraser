@@ -2,7 +2,7 @@
 import Cocoa
 
 let emoji = "🗑️"
-let chromeDir = "/Volumes/XPSSD/workspaces/X-Eraser/chrome-extension/icons"
+let chromeDir = "/Volumes/XPSSD/workspaces/SocialEraser/chrome-extension/icons"
 
 // Matches .btn-primary in chrome-extension/sidepanel.html (linear-gradient
 // 135deg #f59e0b → #d97706); we use the lighter end of the gradient as the
@@ -17,7 +17,7 @@ let paddingRatio: CGFloat = 0.14
 let androidBuckets: [(String, Int)] = [
     ("mdpi", 48), ("hdpi", 72), ("xhdpi", 96), ("xxhdpi", 144), ("xxxhdpi", 192)
 ]
-let androidBase = "/Volumes/XPSSD/workspaces/X-Eraser/android/app/src/main/res"
+let androidBase = "/Volumes/XPSSD/workspaces/SocialEraser/android/app/src/main/res"
 
 // AppleColorEmoji is a fixed-size bitmap font: it renders at native sizes of
 // 16/20/24/32/40/48/64 px regardless of the requested point size, but

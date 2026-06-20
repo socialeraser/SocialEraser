@@ -14,7 +14,7 @@
 | **H1** | `tweet.moreButtons` selector 在 X 2026 失效（X 改版"更多"按钮）| 在真实 X /home 跑 7 个 moreButtons selector 单测 | 待验证 |
 | **H2** | `tweet.confirmButton` selector 失效（X 改版 confirm dialog）| 真实 X DOM 测 `[data-testid='confirmationSheetConfirm']` | 待验证 |
 | **H3** | 8 语言 menu 文字匹配失效（X 改版 "Delete" 文字 / 改了按钮顺序）| 用 chrome-devtools-mcp 打开更多菜单，看实际菜单文字 | 待验证 |
-| **H4** | processTweets 流程逻辑错误（filter 把所有推文都判为 skip / pinned / reply 跳过）| 看 startCleanup 时 console 的 `[X-Eraser] Skipping pinned: ...` 日志量 | 待验证 |
+| **H4** | processTweets 流程逻辑错误（filter 把所有推文都判为 skip / pinned / reply 跳过）| 看 startCleanup 时 console 的 `[SocialEraser] Skipping pinned: ...` 日志量 | 待验证 |
 | **H5** | deleteTweet 8 语言菜单匹配后没正确点击菜单项 | 跑 8 语言关键词看是否都还在 X 菜单上 | 待验证 |
 
 ---
@@ -103,8 +103,8 @@
 
 | 改动 | 文件 | 行数 |
 |------|------|------|
-| addAll 增加 `closest('article') || findClosest(articleContainers, btn)` 过滤 | [lib/injector.js](file:///Volumes/XPSSD/workspaces/X-Eraser/chrome-extension/lib/injector.js#L1112-L1123) | +9 行 |
-| deleteTweet instrumentation（已清理，回归原始 4 步简单 return false）| [lib/injector.js](file:///Volumes/XPSSD/workspaces/X-Eraser/chrome-extension/lib/injector.js#L261-L300) | 0 行（清理回原状）|
+| addAll 增加 `closest('article') || findClosest(articleContainers, btn)` 过滤 | [lib/injector.js](file:///Volumes/XPSSD/workspaces/SocialEraser/chrome-extension/lib/injector.js#L1112-L1123) | +9 行 |
+| deleteTweet instrumentation（已清理，回归原始 4 步简单 return false）| [lib/injector.js](file:///Volumes/XPSSD/workspaces/SocialEraser/chrome-extension/lib/injector.js#L261-L300) | 0 行（清理回原状）|
 
 ### 证据对比
 

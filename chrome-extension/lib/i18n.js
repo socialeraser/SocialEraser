@@ -1,10 +1,10 @@
-// X-Eraser i18n - Multi-language Support
+// SocialEraser i18n - Multi-language Support
 // 8 languages: en, zh-CN, zh-TW, ja, ko, es, de, fr
 
 (function() {
   'use strict';
 
-  console.log('[X-Eraser] i18n.js loading...');
+  console.log('[SocialEraser] i18n.js loading...');
 
   // 中文文案需要更细粒度的处理
   // 使用 {var} 作为占位符
@@ -1190,7 +1190,7 @@
   var SUPPORTED_LANGS = ['en', 'zh-CN', 'zh-TW', 'ja', 'ko', 'es', 'de', 'fr'];
 
   var currentLang = detectLanguage();
-  console.log('[X-Eraser] Detected language:', currentLang);
+  console.log('[SocialEraser] Detected language:', currentLang);
 
   // 翻译函数 - 支持 {var} 占位符
   function t(key, vars) {
@@ -1220,7 +1220,7 @@
   // 兼容老代码：content.js 直接调 t()，挂到 window.t
   window.t = t;
 
-  console.log('[X-Eraser] i18n.js ready, language:', currentLang);
+  console.log('[SocialEraser] i18n.js ready, language:', currentLang);
 
   // 关键修复：用户保存的 preferredLang 必须覆盖 navigator.language 自动检测
   // 否则用户选了 English，但 content.js / injector.js 跑在 X 页面上下文，
@@ -1238,7 +1238,7 @@
       if (result && result.preferredLang && TRANSLATIONS[result.preferredLang]) {
         if (result.preferredLang !== currentLang) {
           currentLang = result.preferredLang;
-          console.log('[X-Eraser] Applied preferred language:', currentLang);
+          console.log('[SocialEraser] Applied preferred language:', currentLang);
         }
       }
     });
@@ -1248,7 +1248,7 @@
           var newLang = changes.preferredLang.newValue;
           if (newLang && TRANSLATIONS[newLang]) {
             currentLang = newLang;
-            console.log('[X-Eraser] Language changed to:', currentLang);
+            console.log('[SocialEraser] Language changed to:', currentLang);
           }
         }
       });

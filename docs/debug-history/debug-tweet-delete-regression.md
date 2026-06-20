@@ -72,7 +72,7 @@
 ## 三、修复方案
 
 ### 3.1 `lib/injector.js` A 修复
-[unretweet 路径移除 `_isOwnArticle` 过滤](file:///Volumes/XPSSD/workspaces/X-Eraser/chrome-extension/lib/injector.js#L1212-L1241)：
+[unretweet 路径移除 `_isOwnArticle` 过滤](file:///Volumes/XPSSD/workspaces/SocialEraser/chrome-extension/lib/injector.js#L1212-L1241)：
 - 保留 top-level article 过滤（防 nested-article 误中）
 - 删除 `_isOwnArticle` 过滤
 - 注释说明 retweet 按钮天然是"自己已转发"的最强语义证据
@@ -98,14 +98,14 @@
 1. F5 刷新 X 标签页（拿新代码）
 2. sidepanel 勾选 **Tweets** + **Include retweets** + **Include replies** → Start Cleanup
 3. 打开 X 页面 DevTools console（F12 → Console）
-4. 等待 5-10 秒，看 `[X-Eraser]` 开头日志
+4. 等待 5-10 秒，看 `[SocialEraser]` 开头日志
 
 **预期**：
-- `[X-Eraser][diag][tweets] first-collect-candidates: 3`（3 candidates: 2 retweets + 1 reply）
+- `[SocialEraser][diag][tweets] first-collect-candidates: 3`（3 candidates: 2 retweets + 1 reply）
 - `candidate[0]: isRetweet=true` → 撤销 retweet（`Undo repost #1` / `Undo repost #2`）
 - `candidate[1]: isRetweet=true` → 撤销 retweet
 - `candidate[2]: isRetweet=false, isReply=true` → 删 reply（`Tweet #3`）
-- `[X-Eraser] Done. Processed: 3`
+- `[SocialEraser] Done. Processed: 3`
 
 ---
 

@@ -84,7 +84,7 @@ console.log();
 
 // ------------------------------------------------------------------
 // [13] M++ 修复：deleteTweet 改先 wait 50ms menuitem 命中 N++ 修复弹的菜单
-//   根因：N++ 修复 isReplyTweet click caret 弹菜单后，X-Eraser line 297 safeClick(moreButton, 0)
+//   根因：N++ 修复 isReplyTweet click caret 弹菜单后，SocialEraser line 297 safeClick(moreButton, 0)
 //     再次 click caret → toggle 关掉 → 0 menuitem → waitForMenuItemByText 3s timeout → 失败
 //   修法：先 wait 50ms（菜单已在 page 上，N++ 修复弹的）—— 命中"Delete" → click deleteItem
 //         miss（N++ 修复未弹菜单）→ fallback click caret 弹菜单 + wait 3000ms
@@ -135,7 +135,7 @@ console.log();
 //     N 修法：click caret 弹菜单 → 数 [role="menuitem"] → 8 = reply / 11 = 原创
 //   N+ 增量修复：ESC dispatchEvent 完全失败（X 用 React synthetic keydown）
 //   N++ 增量修复：N+ click body 仍污染 X 内部 popup state
-//     → N++ 修复**不**关菜单（留 page 上）—— X-Eraser 直接 wait menuitem 命中
+//     → N++ 修复**不**关菜单（留 page 上）—— SocialEraser 直接 wait menuitem 命中
 //
 //   N++ 再修复（2026-06-19）：X 2026 caret 菜单项数再次改版
 //     实证：reply = 7 / original = 10（不再是 8 / 11）
@@ -294,7 +294,7 @@ assert(/不用于 unreTweet 路径/.test(injectorSrc),
   'injector.js: _isOwnArticle 注释明确"不用于 unreTweet 路径"');
 
 // 5b) 诊断日志 region 存在（早期 debug 用，2026-06-18 重构后已删除—— verify 也跟随删）
-// （MCP 调试现在用 [X-Eraser] console + cleanupError 消息，不再用 debug-point region）
+// （MCP 调试现在用 [SocialEraser] console + cleanupError 消息，不再用 debug-point region）
 
 // 5c) H6 假设已更正（"MCP Chrome ≠ user Chrome"错误假设必须被删除）
 assert(!/让 user 在 user Chrome 跑一次，把 console 输出贴回来/.test(injectorSrc),

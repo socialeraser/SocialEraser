@@ -1,4 +1,4 @@
-// X-Eraser Side Panel Script - i18n enabled
+// SocialEraser Side Panel Script - i18n enabled
 (function() {
   'use strict';
 
@@ -45,7 +45,7 @@
       return used;
     }).catch(function(err) {
       // 单步失败不能毒化整条链，否则后续 increment 会永远排队
-      console.warn('[X-Eraser] getDailyUsage chain step failed:', err && err.message);
+      console.warn('[SocialEraser] getDailyUsage chain step failed:', err && err.message);
       if (callback) callback(0);
       return 0;
     });
@@ -71,7 +71,7 @@
         });
       });
     }).catch(function(err) {
-      console.warn('[X-Eraser] incrementDailyUsage chain step failed:', err && err.message);
+      console.warn('[SocialEraser] incrementDailyUsage chain step failed:', err && err.message);
       if (callback) callback(null);
     });
     return _dailyUsageChain;
@@ -103,9 +103,9 @@
     chrome.storage.local.get(['preferredLang'], function(result) {
       if (result.preferredLang && i18n.setLanguage) {
         i18n.setLanguage(result.preferredLang);
-        console.log('[X-Eraser] Loaded preferred language:', result.preferredLang);
+        console.log('[SocialEraser] Loaded preferred language:', result.preferredLang);
       } else {
-        console.log('[X-Eraser] Using detected language:', i18n.getLanguage());
+        console.log('[SocialEraser] Using detected language:', i18n.getLanguage());
       }
       // 语言确定后，才继续初始化 UI
       afterLangLoaded();
@@ -764,7 +764,7 @@
         return (time ? time.textContent : '') + ' ' + text;
       }).join('\n');
 
-      var diagText = '=== X-Eraser Diagnostic Log ===\n' +
+      var diagText = '=== SocialEraser Diagnostic Log ===\n' +
         'Timestamp: ' + new Date().toISOString() + '\n' +
         'X website: ' + (state.isX ? 'yes' : 'no') + '\n' +
         'Logged in: ' + (state.isLoggedIn ? 'yes' : 'no') + '\n' +
@@ -901,7 +901,7 @@
         addLog(t('usedToday', {used: used, limit: isPremium ? '∞' : FREE_LIMIT_PER_DAY}), 'info');
         addLog(t('startingCleanup'), 'info');
 
-        console.log('[X-Eraser sidepanel] state.cleanupOptions:', state.cleanupOptions);
+        console.log('[SocialEraser sidepanel] state.cleanupOptions:', state.cleanupOptions);
 
         // 写 session 后必须 readback 确认（MV3 service worker cold start / 写失败时 session 可能丢）
         function writeSessionAndStart() {
@@ -909,9 +909,9 @@
             // 写后立即 readback 确认
             return chrome.storage.session.get('pendingCleanup');
           }).then(function(readback) {
-            console.log('[X-Eraser sidepanel] session readback:', readback);
+            console.log('[SocialEraser sidepanel] session readback:', readback);
             if (!readback || !readback.pendingCleanup) {
-              console.warn('[X-Eraser sidepanel] session write/readback failed, retrying...');
+              console.warn('[SocialEraser sidepanel] session write/readback failed, retrying...');
               // 重试一次
               return chrome.storage.session.set({ pendingCleanup: state.cleanupOptions }).then(function() {
                 return chrome.storage.session.get('pendingCleanup');
@@ -920,7 +920,7 @@
             return readback;
           }).then(function(finalReadback) {
             if (!finalReadback || !finalReadback.pendingCleanup) {
-              console.error('[X-Eraser sidepanel] session write FAILED after retry, pending cleanup will not work');
+              console.error('[SocialEraser sidepanel] session write FAILED after retry, pending cleanup will not work');
               addLog(t('sessionWriteFailed'), 'error');
               // 即便失败也发 startCleanup（让单页流程仍能 work）
             }
@@ -928,7 +928,7 @@
               chrome.runtime.sendMessage({type: 'startCleanup', options: state.cleanupOptions});
             });
           }).catch(function(err) {
-            console.error('[X-Eraser sidepanel] session write error:', err);
+            console.error('[SocialEraser sidepanel] session write error:', err);
             activateXTab(function() {
               chrome.runtime.sendMessage({type: 'startCleanup', options: state.cleanupOptions});
             });

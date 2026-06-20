@@ -46,20 +46,20 @@
 
 ### 证据 2：扩展自身完全正常
 - chrome://extensions 显示：**已启用 + 在所有网站上 + 允许访问文件网址**
-- 来源：`/Volumes/XPSSD/workspaces/X-Eraser/chrome-extension`（本地工作目录）
+- 来源：`/Volumes/XPSSD/workspaces/SocialEraser/chrome-extension`（本地工作目录）
 - manifest content_scripts matches `*://x.com/*` —— 与用户 URL 完全匹配
 - 扩展 ID：`hhlogeplejoiaogpcibdgebfloiokegl`
 
 ### 证据 3：刷新 X 页面后扩展正常注入 + 检测成功
 ```
-[X-Eraser] i18n.js loading...
-[X-Eraser] Detected language: zh-CN
-[X-Eraser] Content script loaded on https://x.com/i/bookmarks
-[X-Eraser] Config loaded from storage
-[X-Eraser] Injector initialized
-[X-Eraser] Config initialized, checking status...
-[X-Eraser] Global login indicator found: a[href='/compose/post']
-[X-Eraser] Login confirmed (sticky cached)
+[SocialEraser] i18n.js loading...
+[SocialEraser] Detected language: zh-CN
+[SocialEraser] Content script loaded on https://x.com/i/bookmarks
+[SocialEraser] Config loaded from storage
+[SocialEraser] Injector initialized
+[SocialEraser] Config initialized, checking status...
+[SocialEraser] Global login indicator found: a[href='/compose/post']
+[SocialEraser] Login confirmed (sticky cached)
 ```
 
 ### 证据 4：8 个 login selector 在 X 2026 实测（刷新后）

@@ -1,4 +1,4 @@
-// X-Eraser Injector
+// SocialEraser Injector
 // 健壮的 DOM 操作引擎，支持远程配置选择器
 
 (function() {
@@ -19,7 +19,7 @@
   const CONFIRM_KEYWORDS_8LANG = (window.XEraseri18n && window.XEraseri18n.DEFAULT_I18N) ? window.XEraseri18n.DEFAULT_I18N.confirmKeywords : ['Delete'];
 
   class XEraserInjector {
-    // X-Eraser 主引擎 —— 在 X 页面上下文里跑（被 content.js 注入）
+    // SocialEraser 主引擎 —— 在 X 页面上下文里跑（被 content.js 注入）
     //
     // 职责:
     //   1. 接收 content.js 传过来的远程配置（setConfig），合并 i18n 关键字
@@ -1053,7 +1053,7 @@
             // 第二次 0 命中才打（避免第一次就误判 X 改版——首次 0 也可能是真没书签）
             this.log(t('noUnlikeButtons'));
             // 调试细节：把候选选择器输出到 console（不进用户面板）
-            console.log('[X-Eraser] Tried selectors:', unlikeSelectors);
+            console.log('[SocialEraser] Tried selectors:', unlikeSelectors);
           }
           emptyScrolls++;
           if (emptyScrolls > maxEmptyScrolls) {
@@ -1194,7 +1194,7 @@
             // 第二次 0 命中才打（避免第一次就误判 X 改版——首次 0 也可能是真没书签）
             this.log(t('noRemoveBookmarkButtons'));
             // 调试细节：把候选选择器输出到 console（不进用户面板）
-            console.log('[X-Eraser] Tried selectors:', removeSelectors);
+            console.log('[SocialEraser] Tried selectors:', removeSelectors);
           }
           emptyScrolls++;
           if (emptyScrolls > maxEmptyScrolls) {
@@ -1335,7 +1335,7 @@
           if (unfollowButtons.length === 0 && emptyScrolls === 1) {
             // 第二次 0 命中才打（避免首次误判 X 改版）
             this.log(t('noUnfollowButtons'));
-            console.log('[X-Eraser] Tried selectors:', unfollowSelectors);
+            console.log('[SocialEraser] Tried selectors:', unfollowSelectors);
           }
           emptyScrolls++;
           if (emptyScrolls > maxEmptyScrolls) {
@@ -1849,7 +1849,7 @@
         }
         return false;  // 找不到匹配的 tab 文字
       } catch (e) {
-        console.warn('[X-Eraser] _activateProfileTab failed:', e.message);
+        console.warn('[SocialEraser] _activateProfileTab failed:', e.message);
         return false;
       }
     }
@@ -1865,7 +1865,7 @@
         const sorted = Object.keys(testIdCounts).sort(function(a, b) {
           return testIdCounts[b] - testIdCounts[a];
         });
-        console.log('[X-Eraser Diagnostics] === Page Diagnostics ===');
+        console.log('[SocialEraser Diagnostics] === Page Diagnostics ===');
         console.log('Total data-testid elements:', allWithTestId.length);
         console.log('Top data-testids:', sorted.slice(0, 20).map(function(k) {
           return k + '(' + testIdCounts[k] + ')';
@@ -1883,9 +1883,9 @@
         console.log('Top aria-labels:', topLabels.map(function(k) {
           return '"' + k + '"(' + uniqueLabels[k] + ')';
         }).join(', '));
-        console.log('[X-Eraser Diagnostics] === End Diagnostics ===');
+        console.log('[SocialEraser Diagnostics] === End Diagnostics ===');
       } catch (e) {
-        console.warn('[X-Eraser Diagnostics] failed:', e.message);
+        console.warn('[SocialEraser Diagnostics] failed:', e.message);
       }
     }
 

@@ -1,4 +1,4 @@
-// X-Eraser Background Script (Service Worker)
+// SocialEraser Background Script (Service Worker)
 // 处理 Side Panel ↔ Content Script 之间的消息转发 + 远程配置预加载
 //
 // 职责分层:
@@ -29,10 +29,10 @@ async function injectContentScriptToMatchingTabs() {
     // 查所有匹配 URL 的 tab（x.com / twitter.com）
     const tabs = await chrome.tabs.query({ url: CONTENT_SCRIPT_MATCHES });
     if (!tabs || tabs.length === 0) {
-      console.log('[X-Eraser] No matching tabs to inject into');
+      console.log('[SocialEraser] No matching tabs to inject into');
       return;
     }
-    console.log('[X-Eraser] Injecting content script into', tabs.length, 'matching tab(s)');
+    console.log('[SocialEraser] Injecting content script into', tabs.length, 'matching tab(s)');
     // 逐个 tab 注入（任何一个失败不影响其他）
     for (const tab of tabs) {
       try {
@@ -42,17 +42,17 @@ async function injectContentScriptToMatchingTabs() {
         });
       } catch (e) {
         // 注入失败（如 chrome:// 页面、PDF viewer 等特殊 tab）—— 跳过
-        console.log('[X-Eraser] Skip inject tab', tab.id, ':', e.message);
+        console.log('[SocialEraser] Skip inject tab', tab.id, ':', e.message);
       }
     }
   } catch (e) {
-    console.warn('[X-Eraser] Failed to query matching tabs:', e);
+    console.warn('[SocialEraser] Failed to query matching tabs:', e);
   }
 }
 
 // 插件安装 / 更新触发：拉配置 + 注入已有 tab
 chrome.runtime.onInstalled.addListener(() => {
-  console.log('[X-Eraser] Extension installed');
+  console.log('[SocialEraser] Extension installed');
   loadConfigInBackground();
   injectContentScriptToMatchingTabs();
 });
@@ -60,7 +60,7 @@ chrome.runtime.onInstalled.addListener(() => {
 // Chrome 启动触发：拉配置 + 注入已有 tab
 // 关键：打开插件就去 fetch 远程配置，不等用户点 Start 才 fetch
 chrome.runtime.onStartup.addListener(() => {
-  console.log('[X-Eraser] Chrome started');
+  console.log('[SocialEraser] Chrome started');
   loadConfigInBackground();
   injectContentScriptToMatchingTabs();
 });
@@ -69,9 +69,9 @@ chrome.runtime.onStartup.addListener(() => {
 async function saveConfigToStorage(config) {
   try {
     await chrome.storage.local.set({ remoteConfig: config, configUpdatedAt: Date.now() });
-    console.log('[X-Eraser] Config saved to storage');
+    console.log('[SocialEraser] Config saved to storage');
   } catch (e) {
-    console.warn('[X-Eraser] Failed to save config to storage:', e);
+    console.warn('[SocialEraser] Failed to save config to storage:', e);
   }
 }
 
@@ -80,11 +80,11 @@ async function loadConfigFromStorage() {
   try {
     const result = await chrome.storage.local.get('remoteConfig');
     if (result && result.remoteConfig) {
-      console.log('[X-Eraser] Config loaded from storage');
+      console.log('[SocialEraser] Config loaded from storage');
       return result.remoteConfig;
     }
   } catch (e) {
-    console.warn('[X-Eraser] Failed to load config from storage:', e);
+    console.warn('[SocialEraser] Failed to load config from storage:', e);
   }
   return null;
 }
@@ -101,7 +101,7 @@ async function loadConfigInBackground(forceReload) {
 
     // 每次 service worker 启动都重新拉取最新配置
     try {
-      console.log('[X-Eraser] Background: Fetching config from:', CONFIG_URL);
+      console.log('[SocialEraser] Background: Fetching config from:', CONFIG_URL);
       const response = await fetch(CONFIG_URL, {
         cache: 'no-store',  // 强制不走 HTTP 缓存，每次都拉新的
         headers: {
@@ -112,38 +112,38 @@ async function loadConfigInBackground(forceReload) {
       if (response.ok) {
         const config = await response.json();
         await saveConfigToStorage(config);  // 顺便缓存到 storage（下次 fetch 失败时用）
-        console.log('[X-Eraser] Background: Config loaded successfully');
+        console.log('[SocialEraser] Background: Config loaded successfully');
         return config;
       } else {
-        console.warn('[X-Eraser] Background: Config fetch failed, HTTP', response.status);
+        console.warn('[SocialEraser] Background: Config fetch failed, HTTP', response.status);
       }
     } catch (error) {
       // 网络异常 / CORS / 超时等都到这里
-      console.warn('[X-Eraser] Background: Config fetch failed:', error.message);
+      console.warn('[SocialEraser] Background: Config fetch failed:', error.message);
     }
 
     // 远程 fetch 失败 → 从 storage 拿上次缓存的（兜底）
     const stored = await loadConfigFromStorage();
     if (stored) {
-      console.log('[X-Eraser] Background: Using stored config as fallback');
+      console.log('[SocialEraser] Background: Using stored config as fallback');
       return stored;
     }
 
     // storage 也是空 → 读 bundled default.json（绝对兜底，2026-XX-XX 新增）
     try {
       const defaultUrl = chrome.runtime.getURL('config/default.json');
-      console.log('[X-Eraser] Background: Loading bundled default config from:', defaultUrl);
+      console.log('[SocialEraser] Background: Loading bundled default config from:', defaultUrl);
       const defaultResponse = await fetch(defaultUrl);
       if (defaultResponse.ok) {
         const defaultConfig = await defaultResponse.json();
         await saveConfigToStorage(defaultConfig);  // 顺便缓存，下次直接读 storage
-        console.log('[X-Eraser] Background: Bundled default config loaded as fallback');
+        console.log('[SocialEraser] Background: Bundled default config loaded as fallback');
         return defaultConfig;
       } else {
-        console.warn('[X-Eraser] Background: Bundled default config fetch failed, HTTP', defaultResponse.status);
+        console.warn('[SocialEraser] Background: Bundled default config fetch failed, HTTP', defaultResponse.status);
       }
     } catch (e) {
-      console.warn('[X-Eraser] Background: Failed to load bundled default config:', e.message);
+      console.warn('[SocialEraser] Background: Failed to load bundled default config:', e.message);
     }
 
     return null;
@@ -204,9 +204,9 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
         chrome.tabs.sendMessage(tab.id, forwardedMessage).then(sendResponse).catch(function(e) {
           // "message channel closed" 是跳页时的预期行为（content 在 sendResponse 前被 unload），不报警
           if (e && e.message && e.message.indexOf('message channel closed') >= 0) {
-            console.log('[X-Eraser] Content page navigated, message channel closed (expected)');
+            console.log('[SocialEraser] Content page navigated, message channel closed (expected)');
           } else {
-            console.error('[X-Eraser] Failed to send to content:', e);
+            console.error('[SocialEraser] Failed to send to content:', e);
           }
           sendResponse({ error: 'Content script not ready' });
         });
@@ -279,10 +279,10 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     getXTab().then(function(tab) {
       if (tab) {
         chrome.tabs.update(tab.id, { url: message.url }).catch(function(e) {
-          console.error('[X-Eraser] Failed to navigate tab:', e);
+          console.error('[SocialEraser] Failed to navigate tab:', e);
         });
       } else {
-        console.warn('[X-Eraser] forceNavigation: no X tab found');
+        console.warn('[SocialEraser] forceNavigation: no X tab found');
       }
     });
     sendResponse({ success: true });
@@ -297,7 +297,7 @@ function handleBackgroundMessage(message, sendResponse) {
       sendResponse({ status: 'ok' });
       break;
     case 'log':
-      console.log('[X-Eraser]', message.data);
+      console.log('[SocialEraser]', message.data);
       sendResponse({ success: true });
       break;
     default:
@@ -307,5 +307,5 @@ function handleBackgroundMessage(message, sendResponse) {
 
 // 点击工具栏图标时自动打开 side panel（Chrome 114+ 行为）
 chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(function(err) {
-  console.error('[X-Eraser] Failed to set panel behavior:', err);
+  console.error('[SocialEraser] Failed to set panel behavior:', err);
 });

@@ -1,7 +1,7 @@
 {
-  "name": "x-eraser",
+  "name": "social-eraser",
   "version": "1.0.0",
-  "description": "X-Eraser - Batch Delete Twitter History",
+  "description": "SocialEraser - Batch Delete Twitter History",
   "main": "www/index.html",
   "scripts": {
     "sync": "node scripts/sync-shared.js",
