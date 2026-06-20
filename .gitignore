@@ -12,16 +12,11 @@ www/
 # Capacitor native assets (synced from platforms/*/www/)
 /platforms/*/android/app/src/main/assets/public/
 /platforms/*/ios/App/public/
-# Chrome/Firefox extensions are synced from platforms/*/src
-# Ignore all contents, then re-include the chrome-specific source files.
-# (manifest.json + background.js live in extensions/chrome-x/ as the
-# canonical source — everything else there is build output.)
-/extensions/chrome-x/*
-!/extensions/chrome-x/manifest.json
-!/extensions/chrome-x/background.js
-# Future Firefox / Edge ports use the same pattern
-/extensions/firefox-x/*
-/extensions/edge-x/*
+# Chrome/Firefox/Edge browser extensions are 100% build output
+# (synced from platforms/*/src + scripts + *-source/).
+/extensions/chrome-x/
+/extensions/firefox-x/
+/extensions/edge-x/
 
 # Gradle cache
 .gradle/

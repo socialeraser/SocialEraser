@@ -8,8 +8,8 @@
     "platforms/*"
   ],
   "scripts": {
-    "sync": "node scripts/sync-shared.js",
-    "build": "npm run sync && cd platforms/x-project && npx cap copy",
+    "sync": "node scripts/sync-shared.js --no-cap",
+    "build": "node scripts/sync-shared.js",
     "start": "npm run build && cd platforms/x-project && npx cap run android",
     "android:open": "cd platforms/x-project && npx cap open android",
     "test": "node scripts/run-verify.js",
