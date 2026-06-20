@@ -10,15 +10,15 @@
   //   "Undo repost" → "撤销转推" / "リポストを取り消す" / "리트윗 취소" 等
   // 之前我们只用英文 selector / 英文文字（0 命中非 en 用户），现在统一在 DEFAULT_I18N 里维护 8 语言默认值
   // 远程配置（remote-example.json 的 selectors.i18n）可覆盖这些数组 —— X 改了翻译时改配置即可，不用发新版
-  // 8 语言 selector 关键字默认值已挪到 lib/i18n.js 的 DEFAULT_I18N（window.XEraseri18n.DEFAULT_I18N）
+  // 8 语言 selector 关键字默认值已挪到 lib/i18n.js 的 DEFAULT_I18N（window.SocialEraseri18n.DEFAULT_I18N）
   //   - i18n.js = 所有 8 语言数据的家（TRANSLATIONS 给 UI 文案用，DEFAULT_I18N 给 selector 关键字用）
-  //   - 运行时合并：setConfig 用 window.XEraseri18n.DEFAULT_I18N 作默认 + remote-example.json 的 selectors.i18n 覆盖
+  //   - 运行时合并：setConfig 用 window.SocialEraseri18n.DEFAULT_I18N 作默认 + remote-example.json 的 selectors.i18n 覆盖
   //   - X 改版改了翻译：改 i18n.js 或远程配置即可，不用动 injector.js
   // Backwards-compat 别名（让旧 verify 断言不破）：CANCEL_KEYWORDS_8LANG / CONFIRM_KEYWORDS_8LANG 来自 i18n.js DEFAULT_I18N
-  const CANCEL_KEYWORDS_8LANG = (window.XEraseri18n && window.XEraseri18n.DEFAULT_I18N) ? window.XEraseri18n.DEFAULT_I18N.cancelKeywords : ['Cancel'];
-  const CONFIRM_KEYWORDS_8LANG = (window.XEraseri18n && window.XEraseri18n.DEFAULT_I18N) ? window.XEraseri18n.DEFAULT_I18N.confirmKeywords : ['Delete'];
+  const CANCEL_KEYWORDS_8LANG = (window.SocialEraseri18n && window.SocialEraseri18n.DEFAULT_I18N) ? window.SocialEraseri18n.DEFAULT_I18N.cancelKeywords : ['Cancel'];
+  const CONFIRM_KEYWORDS_8LANG = (window.SocialEraseri18n && window.SocialEraseri18n.DEFAULT_I18N) ? window.SocialEraseri18n.DEFAULT_I18N.confirmKeywords : ['Delete'];
 
-  class XEraserInjector {
+  class SocialEraserInjector {
     // SocialEraser 主引擎 —— 在 X 页面上下文里跑（被 content.js 注入）
     //
     // 职责:
@@ -31,7 +31,7 @@
     //
     // 设计原则:
     //   - 字段级合并 selector（远程只覆盖显式提供的字段，缺键时保留 DEFAULT）
-    //   - i18n 关键字从 window.XEraseri18n.DEFAULT_I18N（i18n.js）读，远程可整体覆盖
+    //   - i18n 关键字从 window.SocialEraseri18n.DEFAULT_I18N（i18n.js）读，远程可整体覆盖
     //   - selector / 关键字都先查远程、再查内置兜底；X 改版时改配置即可
     //   - 每个 click 都有 3 种事件兜底（click / MouseEvent / PointerEvent），兼容 React 事件代理
     constructor() {
@@ -100,9 +100,9 @@
       //   远程字段是数组时整体替换；远程字段不是数组 / 缺失 → 用默认
       // this._i18n 是运行时读的源（被 deleteTweet / unreTweet / isPinnedTweet / isReplyTweet / _closeAnyOpenConfirmDialog 用）
       // 不再写到 this.config.i18n（避免污染 this.config，让 config 保持纯 selector）
-      // 从 window.XEraseri18n.DEFAULT_I18N 读（i18n.js 暴露的全局 8 语言 selector 关键字默认集合）
+      // 从 window.SocialEraseri18n.DEFAULT_I18N 读（i18n.js 暴露的全局 8 语言 selector 关键字默认集合）
       // 兜底：万一 i18n.js 没加载完（极少数情况），用空对象避免脚本崩溃
-      var DEFAULT_I18N_REF = (window.XEraseri18n && window.XEraseri18n.DEFAULT_I18N) || {};
+      var DEFAULT_I18N_REF = (window.SocialEraseri18n && window.SocialEraseri18n.DEFAULT_I18N) || {};
       var i18nRemote = (config && config.selectors && config.selectors.i18n) || {};
       this._i18n = {};
       for (var i18nKey in DEFAULT_I18N_REF) {
@@ -1044,7 +1044,7 @@
 
         // 过滤已处理（clicked='true' 或 filtered='skipped'）
         const pending = unlikeButtons.filter(function(btn) {
-          var p = btn.dataset.xeraserProcessed;
+          var p = btn.dataset.socialEraserProcessed;
           return !p || (p !== 'true' && p !== 'skipped');
         });
 
@@ -1082,7 +1082,7 @@
           var article = this.findClosest(this.config.common && this.config.common.articleContainers, btn) || btn.parentElement;
           var meta = this.extractMeta(article, 'likes');
           if (!this.matchesFilter(meta, this.filters)) {
-            btn.dataset.xeraserProcessed = 'skipped';
+            btn.dataset.socialEraserProcessed = 'skipped';
             // 日期缺失提示（每类型最多 1 次）
             if ((this.filters.fromDate || this.filters.toDate) && !meta.dateISO
                 && !this._dateMissingWarned.has('likes')) {
@@ -1098,7 +1098,7 @@
         try {
           const ok = await this.safeClick(btn, 800);
           if (ok) {
-            btn.dataset.xeraserProcessed = 'true';
+            btn.dataset.socialEraserProcessed = 'true';
             this.processedCount++;
             lastProgressTime = Date.now();  // 重置无进展计时器
             this.progress('Unlike #' + this.processedCount);
@@ -1185,7 +1185,7 @@
 
         // 过滤已处理（clicked='true' 或 filtered='skipped'）
         const pending = removeButtons.filter(function(btn) {
-          var p = btn.dataset.xeraserProcessed;
+          var p = btn.dataset.socialEraserProcessed;
           return !p || (p !== 'true' && p !== 'skipped');
         });
 
@@ -1224,7 +1224,7 @@
           var article = this.findClosest(this.config.common && this.config.common.articleContainers, btn) || btn.parentElement;
           var meta = this.extractMeta(article, 'bookmarks');
           if (!this.matchesFilter(meta, this.filters)) {
-            btn.dataset.xeraserProcessed = 'skipped';
+            btn.dataset.socialEraserProcessed = 'skipped';
             if ((this.filters.fromDate || this.filters.toDate) && !meta.dateISO
                 && !this._dateMissingWarned.has('bookmarks')) {
               this._dateMissingWarned.add('bookmarks');
@@ -1239,7 +1239,7 @@
         try {
           const ok = await this.safeClick(btn, 800);
           if (ok) {
-            btn.dataset.xeraserProcessed = 'true';
+            btn.dataset.socialEraserProcessed = 'true';
             this.processedCount++;
             lastProgressTime = Date.now();  // 重置无进展计时器
             this.progress('Bookmark #' + this.processedCount);
@@ -1327,7 +1327,7 @@
 
         // 过滤已处理（clicked='true' 或 filtered='skipped'）
         const pending = unfollowButtons.filter(function(btn) {
-          var p = btn.dataset.xeraserProcessed;
+          var p = btn.dataset.socialEraserProcessed;
           return !p || (p !== 'true' && p !== 'skipped');
         });
 
@@ -1363,7 +1363,7 @@
           var cell = this.findClosest(this.config.common && this.config.common.articleContainers, btn) || btn.parentElement;
           var meta = this.extractMeta(cell, 'following');
           if (!this.matchesFilter(meta, this.filters)) {
-            btn.dataset.xeraserProcessed = 'skipped';
+            btn.dataset.socialEraserProcessed = 'skipped';
             // following 页通常没有 <time datetime>，日期过滤会全部跳过 → 提示一次
             if ((this.filters.fromDate || this.filters.toDate) && !meta.dateISO
                 && !this._dateMissingWarned.has('following')) {
@@ -1388,7 +1388,7 @@
           // step 1 成功 → step 2 即便失败，下一轮也别再点同一个 btn
           // 语义：unfollow 主按钮已点过，X 通常此时已解除关注（confirm 只是二次确认）；
           //       即便 confirm 没出现/没点到，重复点 unfollow 按钮会把已 unfollow 的人重新关注
-          btn.dataset.xeraserProcessed = 'true';
+          btn.dataset.socialEraserProcessed = 'true';
 
           // step 2: 等 confirm 弹窗并点击
           // M++ 修复（2026-06-18 tweets-bug-6）：maxFrames 用 100（1.6s）不用 200（3.3s）
@@ -1508,7 +1508,7 @@
 
         const candidates = collectCandidates();
         const pending = candidates.filter(c => {
-          const p = c.btn.dataset.xeraserProcessed;
+          const p = c.btn.dataset.socialEraserProcessed;
           return !p || (p !== 'true' && p !== 'skipped' && p !== 'pinned' && p !== 'failed');
         });
 
@@ -1525,19 +1525,19 @@
         const article = c.article;
 
         if (this.isPinnedTweet(article)) {
-          c.btn.dataset.xeraserProcessed = 'pinned';
+          c.btn.dataset.socialEraserProcessed = 'pinned';
           this.log(t('pinnedTweetSkipped'));
           await this.sleep(50); continue;
         }
         if (this.isReplyTweet(article)) {
-          c.btn.dataset.xeraserProcessed = 'skipped';
+          c.btn.dataset.socialEraserProcessed = 'skipped';
           await this.sleep(50); continue;
         }
 
         if (this.shouldFilter('originalTweets')) {
           var meta = this.extractMeta(article, 'originalTweets');
           if (!this.matchesFilter(meta, this.filters)) {
-            c.btn.dataset.xeraserProcessed = 'skipped';
+            c.btn.dataset.socialEraserProcessed = 'skipped';
             await this.sleep(50); continue;
           }
         }
@@ -1545,18 +1545,18 @@
         try {
           var success = await this.deleteTweet(article);
           if (success) {
-            c.btn.dataset.xeraserProcessed = 'true';
+            c.btn.dataset.socialEraserProcessed = 'true';
             this.processedCount++;
             lastProgressTime = Date.now();
             this.progress('Tweet #' + this.processedCount);
             this.log(t('tweetDeleted', {count: this.processedCount}));
           } else {
-            c.btn.dataset.xeraserProcessed = 'failed';
+            c.btn.dataset.socialEraserProcessed = 'failed';
             this.error(t('tweetDeleteFailed', {error: 'no more button or confirm'}));
             this.errorCount++;
           }
         } catch (e) {
-          c.btn.dataset.xeraserProcessed = 'failed';
+          c.btn.dataset.socialEraserProcessed = 'failed';
           this.error('deleteTweet threw: ' + e.message);
           this.errorCount++;
         }
@@ -1631,7 +1631,7 @@
 
         const candidates = collectCandidates();
         const pending = candidates.filter(c => {
-          const p = c.btn.dataset.xeraserProcessed;
+          const p = c.btn.dataset.socialEraserProcessed;
           return !p || (p !== 'true' && p !== 'skipped' && p !== 'pinned' && p !== 'failed');
         });
 
@@ -1648,7 +1648,7 @@
         const article = c.article;
 
         if (this.isPinnedTweet(article)) {
-          c.btn.dataset.xeraserProcessed = 'pinned';
+          c.btn.dataset.socialEraserProcessed = 'pinned';
           this.log(t('pinnedTweetSkipped'));
           await this.sleep(50); continue;
         }
@@ -1656,7 +1656,7 @@
         if (this.shouldFilter('replies')) {
           var meta = this.extractMeta(article, 'replies');
           if (!this.matchesFilter(meta, this.filters)) {
-            c.btn.dataset.xeraserProcessed = 'skipped';
+            c.btn.dataset.socialEraserProcessed = 'skipped';
             await this.sleep(50); continue;
           }
         }
@@ -1664,18 +1664,18 @@
         try {
           var success = await this.deleteTweet(article);
           if (success) {
-            c.btn.dataset.xeraserProcessed = 'true';
+            c.btn.dataset.socialEraserProcessed = 'true';
             this.processedCount++;
             lastProgressTime = Date.now();
             this.progress('Tweet #' + this.processedCount);
             this.log(t('tweetDeleted', {count: this.processedCount}));
           } else {
-            c.btn.dataset.xeraserProcessed = 'failed';
+            c.btn.dataset.socialEraserProcessed = 'failed';
             this.error(t('tweetDeleteFailed', {error: 'no more button or confirm'}));
             this.errorCount++;
           }
         } catch (e) {
-          c.btn.dataset.xeraserProcessed = 'failed';
+          c.btn.dataset.socialEraserProcessed = 'failed';
           this.error('deleteTweet threw: ' + e.message);
           this.errorCount++;
         }
@@ -1741,7 +1741,7 @@
 
         const candidates = collectCandidates();
         const pending = candidates.filter(c => {
-          const p = c.btn.dataset.xeraserProcessed;
+          const p = c.btn.dataset.socialEraserProcessed;
           return !p || (p !== 'true' && p !== 'skipped' && p !== 'pinned' && p !== 'failed');
         });
 
@@ -1760,7 +1760,7 @@
         if (this.shouldFilter('retweets')) {
           var meta = this.extractMeta(article, 'retweets');
           if (!this.matchesFilter(meta, this.filters)) {
-            c.btn.dataset.xeraserProcessed = 'skipped';
+            c.btn.dataset.socialEraserProcessed = 'skipped';
             await this.sleep(50); continue;
           }
         }
@@ -1768,18 +1768,18 @@
         try {
           var success = await this.unreTweet(article);
           if (success) {
-            c.btn.dataset.xeraserProcessed = 'true';
+            c.btn.dataset.socialEraserProcessed = 'true';
             this.processedCount++;
             lastProgressTime = Date.now();
             this.progress('Retweet #' + this.processedCount);
             this.log(t('unreTweetSuccess', {count: this.processedCount}));
           } else {
-            c.btn.dataset.xeraserProcessed = 'failed';
+            c.btn.dataset.socialEraserProcessed = 'failed';
             this.error(t('unretweetFailed', {error: 'unretweet failed'}));
             this.errorCount++;
           }
         } catch (e) {
-          c.btn.dataset.xeraserProcessed = 'failed';
+          c.btn.dataset.socialEraserProcessed = 'failed';
           this.error('unreTweet threw: ' + e.message);
           this.errorCount++;
         }
@@ -1818,7 +1818,7 @@
         await this.sleep(150);
       }
       // _findButtonByText timeout 只在 console 留痕（侧边栏用户不需要看 "keywords=[...]" 这种内部细节）
-      console.log('[XEraser] _findButtonByText timeout ' + timeout + 'ms, keywords=' + JSON.stringify(keywords));
+      console.log('[SocialEraser] _findButtonByText timeout ' + timeout + 'ms, keywords=' + JSON.stringify(keywords));
       return null;
     }
 
@@ -2141,12 +2141,12 @@
       diag.username = this._currentUsername || '(unset)';
       // 0 candidates + page state snapshot 是 verbose debug：selector 命中的细节
       //   不打到侧边栏（"0 candidates" 已经会从 processItems 那边的 t('noUnlikeButtons') 推到侧边栏）
-      console.log('[XEraser] ' + label + ' 0 candidates, page state: ' + JSON.stringify(diag));
+      console.log('[SocialEraser] ' + label + ' 0 candidates, page state: ' + JSON.stringify(diag));
     }
 
     log(message) {
       // 走 console + 推送到侧边栏日志面板（用户看的中文 i18n 消息）
-      console.log('[XEraser] ' + message);
+      console.log('[SocialEraser] ' + message);
       if (this.onLog) this.onLog(message, 'info');
     }
 
@@ -2154,7 +2154,7 @@
     //   用途：selector 命中细节、frame 计数、JSON 状态、超时诊断
     //   想看这些请打开 DevTools console（侧边栏"复制诊断日志"只拿 .log-area 面板）
     debug(message) {
-      console.log('[XEraser] ' + message);
+      console.log('[SocialEraser] ' + message);
     }
 
     progress(message) {
@@ -2162,10 +2162,10 @@
     }
 
     error(message) {
-      console.error('[XEraser] ' + message);
+      console.error('[SocialEraser] ' + message);
       if (this.onError) this.onError(message);
     }
   }
 
-  window.XEraserInjector = XEraserInjector;
+  window.SocialEraserInjector = SocialEraserInjector;
 })();

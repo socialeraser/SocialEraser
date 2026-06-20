@@ -3,7 +3,7 @@
 //
 // 职责:
 //   1. 启动时加载远程配置（从 chrome.storage.local 读，background 已预拉好）
-//   2. 初始化 XEraserInjector 实例（核心清理引擎，跑在 lib/injector.js）
+//   2. 初始化 SocialEraserInjector 实例（核心清理引擎，跑在 lib/injector.js）
 //   3. 包装 injector 的回调（onLog / onProgress / onComplete）→ 通过 chrome.runtime.sendMessage 发给 sidepanel
 //   4. 检测登录状态、页面类型（likes/bookmarks/tweets/following）
 //   5. 处理「跨页面清理」的 auto-resume（用户点了 Start，跳页后再回来自动继续）
@@ -17,17 +17,17 @@
 // 注入时机:
 //   - manifest content_scripts: 每次 X 页面加载时自动注入
 //   - chrome.scripting.executeScript: 已开的 tab 由 background 手动注入
-//   防重复注入: 用 window.__XEraserContentInjected flag 守护
+//   防重复注入: 用 window.__SocialEraserContentInjected flag 守护
 
 // 防止 manifest content_scripts + chrome.scripting.executeScript 重复注入同一个 content.js
 // 重复注入会导致 2 个 injector 实例、2 个 onLog 包装、日志面板重复输出
 (function() {
   'use strict';
-  if (window.__XEraserContentInjected) {
+  if (window.__SocialEraserContentInjected) {
     console.log('[SocialEraser] Content script already injected, skipping re-init');
     return;
   }
-  window.__XEraserContentInjected = true;
+  window.__SocialEraserContentInjected = true;
 
   console.log('[SocialEraser] Content script loaded on', window.location.href);
 
@@ -128,11 +128,11 @@
     ]
   };
 
-  // 把远程配置封装成 window.XEraserConfig 给 page 上下文用
+  // 把远程配置封装成 window.SocialEraserConfig 给 page 上下文用
   //   远程配置优先 → 没有就用本地默认（兜底）
   // 设计：getter 形式（每次读都重新判断 remoteConfig），方便运行时 remote 变化后能立刻生效
-  function initXEraserConfig(remoteConfig) {
-    window.XEraserConfig = {
+  function initSocialEraserConfig(remoteConfig) {
+    window.SocialEraserConfig = {
       // 匹配的网站域名模式（用于 chrome.tabs.query 查 X tab）
       getWebsitePatterns() {
         if (remoteConfig && remoteConfig.selectors && remoteConfig.selectors.xWebsite && remoteConfig.selectors.xWebsite.patterns) {
@@ -178,10 +178,10 @@
     };
   }
 
-  // 初始化 XEraserInjector（lib/injector.js 的主引擎类）并包装回调
+  // 初始化 SocialEraserInjector（lib/injector.js 的主引擎类）并包装回调
   // 包装内容：injector.onLog / onProgress / onComplete / onError / onTypeStart / onTypeComplete
   //   全部桥接到 chrome.runtime.sendMessage 发给 sidepanel（用户控制面板）
-  // 失败保护：如果 window.XEraserInjector 不存在（injector.js 没加载完），静默 return
+  // 失败保护：如果 window.SocialEraserInjector 不存在（injector.js 没加载完），静默 return
   // M++ 修复（2026-06-19 tweets-bug-8）：sendToBackground 提到顶层（initInjector 外）
   //   这样 content script 里所有 fire-and-forget 消息（cleanupLog / cleanupAborted / cleanupComplete / cleanupError 等）
   //   都能用同一个 helper，不用每个都内嵌一份
@@ -191,7 +191,7 @@
       try { _bgPort.postMessage(data); return; } catch (e) { _bgPort = null; }
     }
     try {
-      _bgPort = chrome.runtime.connect({ name: 'xeraser-logger' });
+      _bgPort = chrome.runtime.connect({ name: 'socialeraser-logger' });
       _bgPort.onDisconnect.addListener(function() { _bgPort = null; });
       _bgPort.postMessage(data);
     } catch (e) {
@@ -201,8 +201,8 @@
   }
 
   function initInjector(remoteConfig) {
-    if (window.XEraserInjector) {
-      injector = new window.XEraserInjector();
+    if (window.SocialEraserInjector) {
+      injector = new window.SocialEraserInjector();
       injector.setConfig(remoteConfig);
       // 关键修复（debug-tweet-delete-regression）：把当前登录用户名传给 injector
       //   用于 collectCandidates 过滤掉他人 quoted 推文（X 2026 把 quoted 推文渲染成顶层 article）
@@ -244,7 +244,7 @@
     }
   }
 
-  // 启动入口：加载远程配置 → 初始化 XEraserConfig 和 Injector → 500ms 后检查登录状态
+  // 启动入口：加载远程配置 → 初始化 SocialEraserConfig 和 Injector → 500ms 后检查登录状态
   // 同时启动 MutationObserver 监听 article 元素出现，触发 auto-resume 检查
   async function loadConfig() {
     const remoteConfig = await getRemoteConfig();
@@ -254,7 +254,7 @@
       console.log('[SocialEraser] No config in storage, using defaults');
     }
 
-    initXEraserConfig(remoteConfig);
+    initSocialEraserConfig(remoteConfig);
     initInjector(remoteConfig);
 
     console.log('[SocialEraser] Config initialized, checking status...');
@@ -301,7 +301,7 @@
     getRemoteConfig().then(function(newConfig) {
       if (!newConfig) return;
       console.log('[SocialEraser] remoteConfig changed, applying via setConfig');
-      initXEraserConfig(newConfig);
+      initSocialEraserConfig(newConfig);
       if (injector && typeof injector.setConfig === 'function') {
         injector.setConfig(newConfig);
         if (typeof injector.setCurrentUsername === 'function') {
@@ -597,7 +597,7 @@
   loadConfig();
 
   function isTargetWebsite() {
-    const patterns = window.XEraserConfig.getWebsitePatterns();
+    const patterns = window.SocialEraserConfig.getWebsitePatterns();
     const currentHost = window.location.hostname.toLowerCase();
     return patterns.some(function(domain) {
       return currentHost.includes(domain.toLowerCase());
@@ -620,7 +620,7 @@
   }
 
   function checkGlobalLoginIndicators() {
-    const indicators = window.XEraserConfig.getGlobalLoginIndicators();
+    const indicators = window.SocialEraserConfig.getGlobalLoginIndicators();
     for (let i = 0; i < indicators.length; i++) {
       try {
         const element = document.querySelector(indicators[i]);
@@ -636,7 +636,7 @@
   }
 
   function checkLoginStatusWithConfig() {
-    const loginConfig = window.XEraserConfig.getLoginConfig();
+    const loginConfig = window.SocialEraserConfig.getLoginConfig();
     const loggedInElements = loginConfig.loggedInElements || [];
     for (let i = 0; i < loggedInElements.length; i++) {
       const element = loggedInElements[i];
@@ -654,7 +654,7 @@
   }
 
   function checkIsLoginPage() {
-    const loginConfig = window.XEraserConfig.getLoginConfig();
+    const loginConfig = window.SocialEraserConfig.getLoginConfig();
     const checkElementsByLang = loginConfig.checkElements || {};
 
     const pageLang = detectPageLanguage();

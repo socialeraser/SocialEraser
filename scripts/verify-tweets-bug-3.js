@@ -401,17 +401,17 @@ assert(/p !== 'true' && p !== 'skipped' && p !== 'pinned' && p !== 'failed'/.tes
 
 // 关键：try 块 unreTweet 失败时必须标 failed
 const unreTweetBlock = injectorSrc.match(/success = await this\.unreTweet\(article\);[\s\S]*?this\.error\(t\('unretweetFailed'[\s\S]*?\);/);
-assert(unreTweetBlock && /xeraserProcessed\s*=\s*'failed'/.test(unreTweetBlock[0]),
-  'unreTweet 失败时标 btn.dataset.xeraserProcessed=\'failed\'（防无限 retry）');
+assert(unreTweetBlock && /socialEraserProcessed\s*=\s*'failed'/.test(unreTweetBlock[0]),
+  'unreTweet 失败时标 btn.dataset.socialEraserProcessed=\'failed\'（防无限 retry）');
 
 // 关键：try 块 deleteTweet 失败时必须标 failed
 const deleteTweetTryBlock = injectorSrc.match(/success = await this\.deleteTweet\(article\);[\s\S]*?this\.error\(t\('tweetDeleteFailed'[\s\S]*?\);/);
-assert(deleteTweetTryBlock && /xeraserProcessed\s*=\s*'failed'/.test(deleteTweetTryBlock[0]),
-  'deleteTweet 失败时标 btn.dataset.xeraserProcessed=\'failed\'（防无限 retry）');
+assert(deleteTweetTryBlock && /socialEraserProcessed\s*=\s*'failed'/.test(deleteTweetTryBlock[0]),
+  'deleteTweet 失败时标 btn.dataset.socialEraserProcessed=\'failed\'（防无限 retry）');
 
 // 关键：catch 块抛异常时也必须标 failed（用 'failed' 作为 anchor 避免跨过其他 catch）
-const catchBlock = injectorSrc.match(/catch\s*\(e\)\s*\{[\s\S]*?xeraserProcessed\s*=\s*'failed'[\s\S]*?this\.errorCount\+\+;[\s\S]*?\}/);
-assert(catchBlock && /xeraserProcessed\s*=\s*'failed'/.test(catchBlock[0]),
+const catchBlock = injectorSrc.match(/catch\s*\(e\)\s*\{[\s\S]*?socialEraserProcessed\s*=\s*'failed'[\s\S]*?this\.errorCount\+\+;[\s\S]*?\}/);
+assert(catchBlock && /socialEraserProcessed\s*=\s*'failed'/.test(catchBlock[0]),
   'catch 块抛异常时也标 failed（防异常路径无限 retry）');
 
 console.log();

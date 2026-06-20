@@ -1,6 +1,4 @@
-package com.xeraser.app;
-
-import android.os.Bundle;
+package com.socialeraser.app;
 
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.Plugin;
@@ -13,7 +11,7 @@ public class MainActivity extends BridgeActivity {
     super.onCreate(savedInstanceState);
 
     this.init(savedInstanceState, new ArrayList<Class<? extends Plugin>>() {{
-      add(XEraserWebViewPlugin.class);
+      add(SocialEraserWebViewPlugin.class);
     }});
   }
 }

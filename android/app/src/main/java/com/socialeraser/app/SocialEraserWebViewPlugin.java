@@ -1,4 +1,4 @@
-package com.xeraser.app;
+package com.socialeraser.app;
 
 import android.annotation.SuppressLint;
 import android.os.Handler;
@@ -22,7 +22,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 @CapacitorPlugin()
-public class XEraserWebViewPlugin extends Plugin {
+public class SocialEraserWebViewPlugin extends Plugin {
 
     private WebView webView;
     private FrameLayout container;
@@ -30,7 +30,7 @@ public class XEraserWebViewPlugin extends Plugin {
     private boolean scriptInjected = false;
     private boolean isLoading = false;
     private Handler mainHandler;
-    private XEraserBridge bridge;
+    private SocialEraserBridge bridge;
 
     @Override
     public void load() {
@@ -104,8 +104,8 @@ public class XEraserWebViewPlugin extends Plugin {
                     }
                 });
 
-                bridge = new XEraserBridge();
-                webView.addJavascriptInterface(bridge, "XEraserNative");
+                bridge = new SocialEraserBridge();
+                webView.addJavascriptInterface(bridge, "SocialEraserNative");
 
                 webView.loadUrl("https://x.com");
 
@@ -194,7 +194,7 @@ public class XEraserWebViewPlugin extends Plugin {
         mainHandler.post(() -> {
             if (webView != null) {
                 webView.evaluateJavascript(
-                    "if(window.XEraser && window.XEraser.start) window.XEraser.start();",
+                    "if(window.SocialEraser && window.SocialEraser.start) window.SocialEraser.start();",
                     null
                 );
             }
@@ -209,7 +209,7 @@ public class XEraserWebViewPlugin extends Plugin {
         mainHandler.post(() -> {
             if (webView != null) {
                 webView.evaluateJavascript(
-                    "if(window.XEraser) XEraser.stop();",
+                    "if(window.SocialEraser) SocialEraser.stop();",
                     null
                 );
             }
@@ -224,7 +224,7 @@ public class XEraserWebViewPlugin extends Plugin {
         mainHandler.post(() -> {
             if (webView != null) {
                 webView.evaluateJavascript(
-                    "if(window.XEraser) XEraser.pause();",
+                    "if(window.SocialEraser) SocialEraser.pause();",
                     null
                 );
             }
@@ -239,7 +239,7 @@ public class XEraserWebViewPlugin extends Plugin {
         mainHandler.post(() -> {
             if (webView != null) {
                 webView.evaluateJavascript(
-                    "if(window.XEraser) XEraser.resume();",
+                    "if(window.SocialEraser) SocialEraser.resume();",
                     null
                 );
             }
@@ -291,7 +291,7 @@ public class XEraserWebViewPlugin extends Plugin {
         });
     }
 
-    class XEraserBridge {
+    class SocialEraserBridge {
         @JavascriptInterface
         public void postMessage(String data) {
             mainHandler.post(() -> {
@@ -304,7 +304,7 @@ public class XEraserWebViewPlugin extends Plugin {
                     String message = jsonData.optString("message", "");
                     JSONObject payload = jsonData.optJSONObject("data");
 
-                    if ("XEraser-Injector".equals(source)) {
+                    if ("SocialEraser-Injector".equals(source)) {
                         JSObject event = new JSObject();
                         event.put("source", source);
                         event.put("type", type);
@@ -325,7 +325,7 @@ public class XEraserWebViewPlugin extends Plugin {
                     }
                 } catch (JSONException e) {
                     notifyListeners("xeEvent", new JSObject()
-                        .put("source", "XEraser-Native")
+                        .put("source", "SocialEraser-Native")
                         .put("type", "error")
                         .put("message", "Failed to parse message: " + e.getMessage()));
                 }

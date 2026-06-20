@@ -88,11 +88,11 @@
 
   function init() {
     // 等待 i18n 加载完成
-    if (window.XEraseri18n) {
-      i18n = window.XEraseri18n;
+    if (window.SocialEraseri18n) {
+      i18n = window.SocialEraseri18n;
     } else {
       // 不靠经验猜 50ms：用微任务延后到下一个 task 头（script 执行完）
-      //   i18n.js 是 <script src=> 同步加载，正常情况下 window.XEraseri18n 一定已就绪
+      //   i18n.js 是 <script src=> 同步加载，正常情况下 window.SocialEraseri18n 一定已就绪
       //   这里只是防御性 retry，setTimeout(0) 而非经验 50ms
       setTimeout(init, 0);
       return;
