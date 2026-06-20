@@ -2,5 +2,11 @@
   "name": "@social-eraser/marketing-website",
   "version": "1.0.0",
   "description": "Marketing website for socialeraser.app (static HTML/CSS).",
-  "private": true
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler pages deploy . --project-name=socialeraser --commit-dirty=true"
+  },
+  "devDependencies": {
+    "wrangler": "^3.90.0"
+  }
 }

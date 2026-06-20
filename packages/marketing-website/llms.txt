@@ -1,0 +1,30 @@
+# SocialEraser
+
+> Bulk-clean your social media history. 100% local, password-free, open source.
+
+SocialEraser is a browser extension for Chrome and Edge that lets you bulk-delete posts, likes, comments, follows, and other history on X (Twitter), TikTok, YouTube, Instagram, and Facebook. Everything runs locally in your browser — no password, no API key, no server-side data.
+
+## Pages
+
+- [Home](https://socialeraser.app/): Product overview, time estimator, all 5 platforms.
+- [SocialEraser for X](https://socialeraser.app/platforms/x/): Bulk delete tweets, retweets, likes, bookmarks, follows, DMs, search history.
+- [SocialEraser for TikTok](https://socialeraser.app/platforms/tiktok/): Bulk delete videos, reposts, likes, favorites, follows, watch history, comments.
+- [SocialEraser for YouTube](https://socialeraser.app/platforms/youtube/): Bulk clear watch history, search history, liked videos, playlists, subscriptions, comments, community posts.
+- [SocialEraser for Instagram](https://socialeraser.app/platforms/instagram/): Bulk delete or archive posts, Reels, likes, saved items, follows, comments, story highlights, DMs.
+- [SocialEraser for Facebook](https://socialeraser.app/platforms/facebook/): Bulk delete or archive timeline posts, photos, likes, saved items, comments, friends, messages, page posts.
+- [Help Center](https://socialeraser.app/help.html): FAQ, troubleshooting, common workflows.
+- [Privacy Policy](https://socialeraser.app/privacy.html): What we collect, what we don't, and why.
+- [Terms of Service](https://socialeraser.app/terms.html): Usage terms, liability, and disclaimers.
+
+## Key facts
+
+- 100% local processing — your data never leaves the browser.
+- No password, no API key, no account required.
+- Free tier: 50 actions per day, per platform.
+- Open source under the MIT license.
+- Chrome and Edge (Chromium-based) support on desktop.
+- Android and iOS native apps are on the 2027 roadmap.
+
+## Independent tool
+
+SocialEraser is not affiliated with, endorsed by, or sponsored by X Corp., ByteDance Ltd., Google LLC, or Meta Platforms, Inc. All trademarks belong to their respective owners.
