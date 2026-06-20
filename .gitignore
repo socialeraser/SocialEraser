@@ -12,10 +12,10 @@ www/
 # Capacitor native assets (synced from platforms/*/www/)
 /platforms/*/android/app/src/main/assets/public/
 /platforms/*/ios/App/public/
-# Chrome/Firefox/Edge browser extensions are 100% build output
-# (synced from platforms/*/src + scripts + *-source/).
+# Chrome and Edge browser extensions are 100% build output
+# (synced from platforms/*/src + scripts + chrome-source/; chrome-source
+# also produces extensions/edge-x/ via BROWSER_ALIASES in sync-shared.js).
 /extensions/chrome-x/
-/extensions/firefox-x/
 /extensions/edge-x/
 
 # Gradle cache

@@ -4,8 +4,7 @@
 //   platforms/<name>-project/
 //     src/             ← web UI source (single source of truth for that platform)
 //     scripts/         ← core JS for that platform
-//     chrome-source/   ← Chrome-specific source (manifest.json, background.js, ...)
-//     firefox-source/  ← Firefox-specific source (future)
+//     chrome-source/   ← Chrome/Edge-specific source (manifest.json, background.js, ...)
 //     android/         ← Capacitor Android (optional, present after `npx cap add android`)
 //     ios/             ← Capacitor iOS (optional)
 //     capacitor.config.json
@@ -16,10 +15,10 @@
 //   1. Syncs src/  →  <platform>/www/         (Capacitor webDir)
 //                    + mirrors sidepanel.html as index.html (Capacitor entry point)
 //   2. Syncs src/  +  scripts/  +  *-source/  →  extensions/<browser>-<prefix>/
-//                    (chrome-source/ → extensions/chrome-<prefix>/,
-//                     firefox-source/ → extensions/firefox-<prefix>/, etc.)
+//                    (chrome-source/ → extensions/chrome-<prefix>/ and edge-<prefix>/,
+//                     see BROWSER_ALIASES below for the alias map)
 //                    where <prefix> is the part before "-project" in the folder
-//                    name (e.g. platforms/x-project → chrome-x / firefox-x).
+//                    name (e.g. platforms/x-project → chrome-x / edge-x).
 //   3. If capacitor.config.json exists, runs `npx cap copy` in the platform
 //                    dir to copy www/ into android/ and ios/ assets.
 //
@@ -39,6 +38,14 @@ const ROOT = path.join(__dirname, '..');
 const PLATFORMS_DIR = path.join(ROOT, 'platforms');
 const EXTENSIONS_DIR = path.join(ROOT, 'extensions');
 const SKIP_CAP = process.argv.includes('--no-cap');
+
+// Browser source aliases: one source folder can produce multiple extension
+// builds. Edge is Chromium-based and accepts the same MV3 manifest as Chrome
+// (service worker + side_panel), so chrome-source/ serves both browsers.
+// Add more aliases here if you need other forks (e.g. brave → brave + chrome).
+const BROWSER_ALIASES = {
+  chrome: ['chrome', 'edge'],
+};
 
 function rmrf(d) {
   if (fs.existsSync(d)) fs.rmSync(d, { recursive: true, force: true });
@@ -84,7 +91,9 @@ function syncPlatform(platformDir) {
   }
 
   // 2. src/ + scripts/ + *-source/ → extensions/<browser>-<prefix>/
-  // Find all chrome-source/, firefox-source/, edge-source/, etc.
+  // Find all chrome-source/, edge-source/, etc. Each source may produce
+  // multiple extension folders via BROWSER_ALIASES (chrome-source/ → both
+  // extensions/chrome-x/ and extensions/edge-x/).
   const platformEntries = fs.readdirSync(platformDir, { withFileTypes: true });
   const browserSources = platformEntries.filter(e =>
     e.isDirectory() && /-(?:source|template)$/.test(e.name)
@@ -92,18 +101,21 @@ function syncPlatform(platformDir) {
   if (fs.existsSync(scripts) || browserSources.length > 0) {
     for (const srcEntry of browserSources) {
       const browser = srcEntry.name.replace(/-source$/, '').replace(/-template$/, '');
-      const extDir = path.join(EXTENSIONS_DIR, `${browser}-${prefix}`);
-      rmrf(extDir);
-      // copy src/ first
-      if (fs.existsSync(src)) copyDir(src, extDir);
-      // copy scripts/ on top
-      if (fs.existsSync(scripts)) {
-        for (const f of fs.readdirSync(scripts)) {
-          copyFile(path.join(scripts, f), path.join(extDir, f));
+      const targetBrowsers = BROWSER_ALIASES[browser] || [browser];
+      for (const targetBrowser of targetBrowsers) {
+        const extDir = path.join(EXTENSIONS_DIR, `${targetBrowser}-${prefix}`);
+        rmrf(extDir);
+        // copy src/ first
+        if (fs.existsSync(src)) copyDir(src, extDir);
+        // copy scripts/ on top
+        if (fs.existsSync(scripts)) {
+          for (const f of fs.readdirSync(scripts)) {
+            copyFile(path.join(scripts, f), path.join(extDir, f));
+          }
         }
+        // copy <browser>-source/ on top
+        copyDir(path.join(platformDir, srcEntry.name), extDir);
       }
-      // copy <browser>-source/ on top
-      copyDir(path.join(platformDir, srcEntry.name), extDir);
     }
   }
 
