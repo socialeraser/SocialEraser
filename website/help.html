@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Help & FAQ — SocialEraser for X</title>
+  <meta name="description" content="Help, FAQ, and quick start for SocialEraser. How to bulk delete tweets, likes, bookmarks, following.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E❓%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <div class="page">
+    <header class="page-header">
+      <a href="/" class="logo">
+        <span class="logo-icon">🗑️</span>
+        <span class="logo-text">SocialEraser</span>
+      </a>
+      <nav class="page-nav">
+        <a href="/">Home</a>
+        <a href="/privacy.html">Privacy</a>
+        <a href="/terms.html">Terms</a>
+      </nav>
+    </header>
+
+    <main class="content">
+      <h1>Help & FAQ</h1>
+      <p class="meta">Last updated: June 20, 2026</p>
+
+      <h2>Quick Start</h2>
+      <ol>
+        <li>Install SocialEraser from the
+            <a href="https://chrome.google.com/webstore/" target="_blank" rel="noopener noreferrer">Chrome Web Store</a>.</li>
+        <li>Click the SocialEraser icon in Chrome's toolbar to open the Side Panel.</li>
+        <li>Open <a href="https://x.com" target="_blank" rel="noopener noreferrer">x.com</a> and log in to your account.</li>
+        <li>In the Side Panel, select which items to clean (Tweets / Likes / Bookmarks / Following).</li>
+        <li>Click <strong>Start Cleanup</strong>. The progress bar and logs will appear live.</li>
+        <li>Use Pause / Resume / Stop at any time.</li>
+      </ol>
+
+      <h2>FAQ</h2>
+
+      <h3>Is SocialEraser safe? Will my account be banned?</h3>
+      <p>
+        SocialEraser performs the same actions you would perform manually (clicking "Delete",
+        "Unlike", "Remove Bookmark", "Unfollow"). Because the actions are real browser events,
+        they appear identical to manual clicks. However, X / Twitter's automated systems may
+        still detect high-volume activity. We recommend:
+      </p>
+      <ul>
+        <li>Stay within the 50-actions-per-day free limit (or upgrade to Premium when available).</li>
+        <li>Avoid running the extension for many hours continuously.</li>
+        <li>Use the date / keyword filters to clean in smaller, targeted batches.</li>
+      </ul>
+      <p>
+        You assume all responsibility for compliance with X's Terms of Service. See our
+        <a href="/terms.html">Terms of Service</a> for details.
+      </p>
+
+      <h3>Why are some of my tweets / likes not being deleted?</h3>
+      <p>Common reasons:</p>
+      <ul>
+        <li><strong>Pinned tweets</strong> — Pinned tweets cannot be deleted from the UI. Unpin them first.</li>
+        <li><strong>Retweets from accounts that have been suspended</strong> — these cannot be undone via the UI.</li>
+        <li><strong>Tweets from a different account</strong> — make sure you're logged in to the correct account.</li>
+        <li><strong>UI changed</strong> — X.com updates its UI frequently. Click the refresh icon in the Side Panel to fetch the latest selector config.</li>
+      </ul>
+
+      <h3>Can I delete Direct Messages (DMs)?</h3>
+      <p>
+        <strong>No.</strong> X / Twitter's DM deletion requires a real native right-click
+        (context menu), which is protected by the browser's <code>event.isTrusted</code>
+        check. JavaScript-injected events are rejected. The only way to bypass this would
+        require the <code>chrome.debugger</code> permission, which we will <strong>not</strong>
+        request because it triggers a strong user trust warning. To delete DMs, use
+        X's native interface manually.
+      </p>
+
+      <h3>Where is my data stored?</h3>
+      <p>
+        100% on your device, in Chrome's local storage. The extension does not have a
+        server. Uninstalling the extension permanently deletes all stored data.
+        See our <a href="/privacy.html">Privacy Policy</a> for full details.
+      </p>
+
+      <h3>What languages are supported?</h3>
+      <p>
+        Currently: English, 简体中文, 繁體中文, 日本語, 한국어, Español, Deutsch, Français.
+        Switch via the flag icon in the Side Panel.
+      </p>
+
+      <h3>Does SocialEraser work on mobile?</h3>
+      <p>
+        An Android (Capacitor) version is in development. iOS is planned for the future.
+        Sign up for the waitlist at <a href="mailto:hello@socialeraser.app">hello@socialeraser.app</a>.
+      </p>
+
+      <h3>What about TikTok / YouTube / Facebook?</h3>
+      <p>
+        Coming soon. The project is in active development. Follow
+        <a href="https://github.com/xiangping/SocialEraser" target="_blank" rel="noopener noreferrer">our GitHub</a>
+        for updates.
+      </p>
+
+      <h3>How do I uninstall?</h3>
+      <p>
+        Right-click the SocialEraser icon in Chrome's toolbar → "Remove from Chrome".
+        This deletes all locally stored data.
+      </p>
+
+      <h2>Report a Bug</h2>
+      <p>
+        Found a bug or have a feature request? Open an issue on
+        <a href="https://github.com/xiangping/SocialEraser/issues" target="_blank" rel="noopener noreferrer">GitHub</a>
+        or email <a href="mailto:support@socialeraser.app">support@socialeraser.app</a>.
+      </p>
+    </main>
+
+    <footer class="page-footer">
+      <p>© 2026 SocialEraser. All rights reserved.</p>
+      <p>
+        <a href="/">Home</a> ·
+        <a href="/help.html">Help</a> ·
+        <a href="/privacy.html">Privacy</a> ·
+        <a href="/terms.html">Terms</a>
+      </p>
+    </footer>
+  </div>
+</body>
+</html>

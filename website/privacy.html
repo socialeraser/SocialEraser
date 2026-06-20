@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy — SocialEraser for X</title>
+  <meta name="description" content="Privacy Policy for SocialEraser Chrome extension and mobile apps. 100% local processing, no data collection, no analytics.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🛡️%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/assets/styles.css">
+</head>
+<body>
+  <div class="page">
+    <header class="page-header">
+      <a href="/" class="logo">
+        <span class="logo-icon">🗑️</span>
+        <span class="logo-text">SocialEraser</span>
+      </a>
+      <nav class="page-nav">
+        <a href="/">Home</a>
+        <a href="/help.html">Help</a>
+        <a href="/terms.html">Terms</a>
+      </nav>
+    </header>
+
+    <main class="content">
+      <h1>Privacy Policy</h1>
+      <p class="meta">Last updated: June 20, 2026 &nbsp;·&nbsp; Effective immediately</p>
+
+      <div class="callout">
+        <strong>TL;DR:</strong> SocialEraser runs 100% locally in your browser or mobile app.
+        We do not collect, transmit, store, or sell any of your data. There is no server.
+        Uninstalling the extension permanently removes all stored preferences.
+      </div>
+
+      <h2>1. Overview</h2>
+      <p>
+        SocialEraser ("we", "us", "our") provides a browser extension and mobile applications
+        that help you bulk-delete posts, likes, bookmarks, and follows on social media platforms
+        (currently X / Twitter; future support for TikTok, YouTube, Facebook).
+        This Privacy Policy explains what data the extension handles and how.
+      </p>
+
+      <h2>2. Data We Do NOT Collect</h2>
+      <ul>
+        <li>❌ We do <strong>not</strong> collect your username, password, or login credentials.</li>
+        <li>❌ We do <strong>not</strong> collect your posts, likes, bookmarks, or follows.</li>
+        <li>❌ We do <strong>not</strong> collect your IP address, browser fingerprint, or device identifiers.</li>
+        <li>❌ We do <strong>not</strong> use analytics, tracking pixels, or third-party scripts.</li>
+        <li>❌ We do <strong>not</strong> sell or share any data with third parties.</li>
+        <li>❌ We do <strong>not</strong> operate any backend server. There is nothing to breach.</li>
+      </ul>
+
+      <h2>3. Data Stored Locally (on YOUR device)</h2>
+      <p>
+        The extension uses <code>chrome.storage.local</code> to store only the following
+        non-sensitive preferences, all of which remain on your device:
+      </p>
+      <ul>
+        <li><strong>Language preference</strong> — which of the 8 supported languages you selected.</li>
+        <li><strong>Daily usage counter</strong> — how many cleanup actions you have performed today (for the 50/day free-tier limit).</li>
+        <li><strong>Subscription status</strong> (when applicable) — local cache of your license key for premium features.</li>
+        <li><strong>Remote config cache</strong> — a copy of the latest platform selector configuration (e.g. CSS selectors for "Delete" buttons), refreshed every 24 hours.</li>
+      </ul>
+      <p>
+        None of this data leaves your device. You can inspect it via Chrome's
+        <code>chrome://extensions</code> → SocialEraser → "service worker" → Storage.
+        Uninstalling the extension permanently deletes all stored data.
+      </p>
+
+      <h2>4. Permissions Explained</h2>
+      <p>The extension requests the following Chrome permissions, each justified below:</p>
+      <table>
+        <thead><tr><th>Permission</th><th>Why we need it</th></tr></thead>
+        <tbody>
+          <tr><td><code>storage</code></td><td>Store your preferences locally (see section 3).</td></tr>
+          <tr><td><code>activeTab</code></td><td>Read the current X.com page when you click "Start Cleanup".</td></tr>
+          <tr><td><code>sidePanel</code></td><td>Display the cleanup UI in Chrome's Side Panel.</td></tr>
+          <tr><td><code>tabs</code></td><td>Navigate between /likes, /bookmarks, /following, /with_replies tabs to clean each section.</td></tr>
+          <tr><td><code>scripting</code></td><td>Inject the cleanup engine into x.com pages.</td></tr>
+          <tr><td><code>&lt;all_urls&gt;</code></td><td>Restrict injection to x.com and twitter.com only (technical requirement of Chrome Manifest V3).</td></tr>
+        </tbody>
+      </table>
+
+      <h2>5. How the Extension Works</h2>
+      <ol>
+        <li>You click the SocialEraser icon in Chrome, which opens the Side Panel.</li>
+        <li>You select which items to clean (tweets / likes / bookmarks / following).</li>
+        <li>You click <strong>Start Cleanup</strong>.</li>
+        <li>The extension's content script, running inside x.com, simulates user clicks on
+            "Delete" / "Unlike" / "Remove Bookmark" / "Unfollow" buttons — the same buttons
+            you would click manually.</li>
+        <li>All clicks happen in your browser, on your device. No data is sent anywhere.</li>
+      </ol>
+
+      <h2>6. Third-Party Services</h2>
+      <p>
+        The extension does <strong>not</strong> integrate with any third-party analytics,
+        advertising, error tracking, or telemetry service. We do not use Google Analytics,
+        Sentry, Mixpanel, Plausible, or any similar tool.
+      </p>
+
+      <h2>7. Remote Configuration</h2>
+      <p>
+        To handle X.com UI changes without forcing you to update the extension, the extension
+        periodically fetches a small JSON file (selector configuration) from
+        <code>socialeraser.app</code>. This fetch is anonymous (no user identifier is sent)
+        and contains no personal data. You may disable remote config refresh by disabling
+        your network connection; the extension will then use the bundled fallback selectors.
+      </p>
+
+      <h2>8. Children</h2>
+      <p>
+        The extension is not directed at children under 13. We do not knowingly collect any
+        data from children. If you believe a child has used the extension, please contact us
+        so we can address your concern.
+      </p>
+
+      <h2>9. International Users (GDPR / CCPA / LGPD)</h2>
+      <p>
+        Because we collect no data, GDPR / CCPA / LGPD data-subject rights (access, deletion,
+        portability) are trivially satisfied: there is nothing to access, delete, or export.
+        If you have any concerns, contact us at the address below.
+      </p>
+
+      <h2>10. Changes to This Policy</h2>
+      <p>
+        We may update this Privacy Policy. Changes will be posted on this page with a new
+        "Last updated" date. If changes are material, we will note them in the extension's
+        release notes and (for the next update) inside the Side Panel UI.
+      </p>
+
+      <h2>11. Contact</h2>
+      <p>
+        Questions, concerns, or requests? Email
+        <a href="mailto:privacy@socialeraser.app">privacy@socialeraser.app</a>.
+        We respond within 7 business days.
+      </p>
+
+      <h2>12. Open Source</h2>
+      <p>
+        The extension's source code is available at
+        <a href="https://github.com/xiangping/SocialEraser" rel="noopener noreferrer" target="_blank">github.com/xiangping/SocialEraser</a>.
+        You are welcome to audit the code, build it yourself, and verify our privacy claims.
+      </p>
+    </main>
+
+    <footer class="page-footer">
+      <p>© 2026 SocialEraser. All rights reserved.</p>
+      <p>
+        <a href="/">Home</a> ·
+        <a href="/help.html">Help</a> ·
+        <a href="/terms.html">Terms</a> ·
+        <a href="/privacy.html">Privacy</a>
+      </p>
+    </footer>
+  </div>
+</body>
+</html>
