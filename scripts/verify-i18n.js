@@ -37,7 +37,7 @@ const required = [
   'tweetDeleted'
 ];
 
-const langs = ['en', 'zh-CN', 'zh-TW', 'ja', 'ko', 'es', 'de', 'fr'];
+const langs = ['en', 'zh-CN', 'ja', 'ko', 'pt', 'es', 'de', 'fr'];
 
 let allOk = true;
 

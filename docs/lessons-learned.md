@@ -525,14 +525,14 @@ isReplyTweet(container) {
   var socialContext = container.querySelector("[data-testid='socialContext']");
   if (socialContext) {
     var scText = (socialContext.textContent || '').toLowerCase();
-    if (/replying to|回复|回覆|返信|답장|respondiendo a|antworten|répondre|rispondendo a/i.test(scText)) {
+    if (/replying to|回复|返信|답장|respondendo a|respondiendo a|antworten|répondre|rispondendo a/i.test(scText)) {
       return true;
     }
   }
   // 2) 兜底：扫描整个 article textContent
   //    适用于：X 不显示 socialContext，但 reply 链接 text 仍带这些词
   var fullText = (container.textContent || '').toLowerCase();
-  return /replying to|in reply to|回复\s*@|回覆\s*@|返信先|답장\s*@/i.test(fullText);
+  return /replying to|in reply to|回复\s*@|返信先|답장\s*@/i.test(fullText);
 }
 ```
 
@@ -757,8 +757,8 @@ const CANCEL_KEYWORDS_8LANG = [
 ];
 
 const CONFIRM_KEYWORDS_8LANG = [
-  'Delete', '删除', '刪除', '削除', '삭제',
-  'Eliminar', 'Löschen', 'Supprimer', 'Elimina'
+  'Delete', '删除', '削除', '삭제',
+  'Excluir', 'Eliminar', 'Löschen', 'Supprimer', 'Elimina'
 ];
 ```
 
@@ -1034,21 +1034,58 @@ TRAE-debugger skill 协议要求每个 session 写 `debug-<sessionId>.md` 在项
 |------|-------------------|-------------------|
 | en | `882 reposts. Reposted` | `2616 reposts. Repost` |
 | zh-CN | `882 次转帖。已转帖` | `2616 次转帖。转帖` |
-| zh-TW | `882 次轉發。已轉發` | `2620 次轉發。轉發` |
 | ja | `882 件のリポスト件。リポストしました` | `2618 件のリポスト件。リポスト` |
 | ko | `882 재게시. 재게시함` | `2619 재게시. 재게시` |
 | de | `882 Reposts. Repostet` | `2618 Reposts. Repost` |
 | fr | `882 reposts. Reposté` | `2619 reposts. Repost` |
-| es | `882 reposts. Reposteado` | `2619 reposts. Repostear` |
+| es | `882 reposts. Repostado` | `2619 reposts. Repostear` |
+| pt | `134 reposts. Repostado` | `131 reposts. Repost` |
 | it | `882 repost. Ripostato` | `2620 repost. Riposta` |
 
 **经验**：
 - **X 2026 retweet 卡片有特殊渲染规则**："You reposted" 标签强调原作者，自己头像不显示。任何"自己推文"判断在 retweet 卡片上**必须改用 retweet 按钮本身**作为依据，不能用 UserAvatar / User-Name（这些只显示原作者）。
-- **X 2026 retweet 按钮 aria-label 用过去时态标识"已转发"**：每种语言都有自己的过去时态后缀（en `Reposted` / zh-CN `已转帖` / ja `リポストしました` / ko `재게시함` / de `Repostet` / fr `Reposté` / es `Reposteado` / it `Ripostato`）。这些是 `unreTweetButtons` 兜底 selector 的唯一可靠锚点。
+- **X 2026 retweet 按钮 aria-label 用过去时态标识"已转发"**：每种语言都有自己的过去时态后缀（en `Reposted` / zh-CN `已转帖` / ja `リポストしました` / ko `재게시함` / de `Repostet` / fr `Reposté` / es `Repostado` / **pt `Repostado`（X 即便在 pt 界面也用西语形，非葡语 Republicado）** / it `Ripostato`）。这些是 `unreTweetButtons` 兜底 selector 的唯一可靠锚点。2026-06-21 MCP Chrome 实地验证。
 - **`_isOwnArticle` 严格判断专门为 caret 路径设计**——它要求"OP 独占标记"（自己头像），retweet 卡片永远不满足。下个会话复用时**必须**看清楚调用上下文。
 - **调试前先确认环境**——之前 H6 假设（"MCP Chrome ≠ user Chrome"）导致 debug 方向跑偏。用户 2026-06-17 明确："MCP Chrome 和 user Chrome 是同一个"。下次调试前**先问 user 确认**。
 - 完整 session：[docs/debug-history/debug-tweet-delete-regression.md](file:///Volumes/XPSSD/workspaces/SocialEraser/docs/debug-history/debug-tweet-delete-regression.md)
 - 防回归：[scripts/verify-tweets-bug-3.js](file:///Volumes/XPSSD/workspaces/SocialEraser/scripts/verify-tweets-bug-3.js)（65 项 assert）
+
+---
+
+## 二十二、案例 17：⚠️ 铁律——X 2026 web onboarding 全 8 语言登录页弃用 "Sign in / Create your account"，统一为 "Continue" 模式
+
+**症状**：
+最初 `login.checkElements` 8 语言都是 AI 凭母语者直觉 + Google 翻译反推出来的**旧版 X 措辞**：
+- en: "Sign in" / "Create your account"
+- de: "Anmelden" / "Konto erstellen"
+- es: "Iniciar sesión" / "Crea tu cuenta"
+- fr: "Se connecter" / "Créer votre compte"
+- ja: "サインイン" / "アカウントを作成"
+- ko: "로그인" / "계정 만들기"
+- zh-CN: "继续" / "创建您的账户"
+- pt: "Entrar" / "Criar sua conta"（最离谱——"Entrar" 实际从未在 X 出现过）
+
+**修法**：URL 加 `?lang=xx` 直接访问 `https://x.com/i/jf/onboarding/web?lang=xx&mode=login`（无需登录态、无需 IP geo），X 服务端按 URL 参数返回 xx 模板。
+
+**实证数据**（2026-06-21 MCP Chrome 抓 `https://x.com/i/jf/onboarding/web?lang=xx&mode=login` 实际 DOM，xx = 8 语言）：
+
+| lang | 主按钮 | alt sign-in（手机/Apple） | 输入框占位 |
+|------|--------|--------------------------|----------|
+| en | `Continue` | `Continue with phone` / `Continue with Apple` | `Email or username` |
+| zh-CN | `继续` | `使用手机继续` / `使用 Apple 继续` | `电子邮箱或用户名` |
+| ja | `続ける` | `電話番号で続ける` / `Appleで続ける` | `メールアドレスまたはユーザー名` |
+| ko | `계속하기` | `전화번호로 계속` / `Apple로 계속` | `이메일 또는 사용자 이름` |
+| pt | `Continuar` | `Inscreve-te com o telefone` | `E-mail ou nome de utilizador` |
+| es | `Continuar` | `Continuar con el teléfono` / `Continuar con Apple` | `Correo electrónico o nombre de usuario` |
+| de | `Fortfahren` | `Mit Telefon fortfahren` / `Mit Apple fortfahren` | `E-Mail oder Benutzername` |
+| fr | `Continuer` | `S'inscrire avec un numéro de téléphone` / `Continuer avec Apple` | `E-mail ou nom d'utilisateur` |
+
+**经验**：
+- **X 2026 推了 web onboarding 重构**：登录页不再是传统的"Sign in / Sign up"双按钮，而是"Continue + Continue with phone/Apple"统一模式。8 语言都统一为 Continue 风格措辞（en `Continue` / pt/es `Continuar` / de `Fortfahren` / fr `Continuer` / zh-CN `继续` / ja `続ける` / ko `계속하기`）。
+- **验证登录页文本不需要登录态、不需要 geo IP**：URL 加 `?lang=xx` 即可，X 服务端按 URL 参数返回 xx 模板，DOM 立即可抓。
+- **X 即便在 pt 界面也常用西语化或国际化词形**：`Repostado`（已转）、`Continuar`（继续）—— X 不一定用纯母语词汇。**不能用母语者直觉反推**，必须看实际 DOM。
+- **登录页验证要查 `web onboarding` 路径** `x.com/i/jf/onboarding/web?lang=xx&mode=login`，`x.com/login` 已 deprecated/redirect。
+- **防回归**：[scripts/verify-actual-x-selectors.js#14a](file:///Volumes/XPSSD/workspaces/SocialEraser/scripts/verify-actual-x-selectors.js#L565-L625)（96 项 assert：8 langs × 6 checks × 2 files = 96，每语言 3 个必含实测文本 + 2 个旧错文本反向检测 + 1 个 testid 锚点保留）
 
 ---
 

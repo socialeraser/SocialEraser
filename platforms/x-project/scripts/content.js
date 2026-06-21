@@ -91,9 +91,9 @@
       { type: 'text', value: '创建您的账户' },
       { type: 'selector', value: "[data-testid='loginButton']" }
     ],
-    'zh-TW': [
-      { type: 'text', value: '繼續' },
-      { type: 'text', value: '建立您的帳戶' },
+    'pt': [
+      { type: 'text', value: 'Entrar' },
+      { type: 'text', value: 'Criar sua conta' },
       { type: 'selector', value: "[data-testid='loginButton']" }
     ],
     'en': [
@@ -608,9 +608,10 @@
     const htmlLang = document.documentElement.lang;
     if (htmlLang) {
       const lang = htmlLang.toLowerCase();
-      if (lang.startsWith('zh')) return lang.includes('tw') || lang.includes('hant') ? 'zh-TW' : 'zh-CN';
+      if (lang.startsWith('zh')) return 'zh-CN';
       if (lang.startsWith('ja')) return 'ja';
       if (lang.startsWith('ko')) return 'ko';
+      if (lang.startsWith('pt')) return 'pt';
       if (lang.startsWith('es')) return 'es';
       if (lang.startsWith('de')) return 'de';
       if (lang.startsWith('fr')) return 'fr';

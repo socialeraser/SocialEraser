@@ -162,9 +162,9 @@ p { color: var(--text-dim); }
 .container-md { max-width: var(--container-md); margin: 0 auto; padding: 0 var(--space-6); }
 .container-lg { max-width: var(--container-lg); margin: 0 auto; padding: 0 var(--space-6); }
 
-.section { padding: var(--space-24) 0; }
-.section-sm { padding: var(--space-16) 0; }
-.section-lg { padding: var(--space-32) 0; }
+.section { padding-top: var(--space-24); padding-bottom: var(--space-24); }
+.section-sm { padding-top: var(--space-16); padding-bottom: var(--space-16); }
+.section-lg { padding-top: var(--space-32); padding-bottom: var(--space-32); }
 
 .grid { display: grid; gap: var(--space-6); }
 .grid-2 { grid-template-columns: repeat(2, 1fr); }
@@ -283,9 +283,9 @@ p { color: var(--text-dim); }
 .show-mobile { display: none; }
 
 @media (max-width: 768px) {
-  .container, .container-md, .container-lg { padding: 0 var(--space-5); }
-  .section { padding: var(--space-16) 0; }
-  .section-lg { padding: var(--space-20) 0; }
+  .container, .container-md, .container-lg { padding: 0 var(--space-8); }
+  .section { padding-top: var(--space-16); padding-bottom: var(--space-16); }
+  .section-lg { padding-top: var(--space-20); padding-bottom: var(--space-20); }
   .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
   .text-6xl { font-size: var(--text-4xl); }
   .text-7xl { font-size: var(--text-5xl); }
@@ -299,4 +299,9 @@ p { color: var(--text-dim); }
   .text-7xl { font-size: var(--text-4xl); }
   .text-5xl { font-size: var(--text-2xl); }
   .text-4xl { font-size: var(--text-2xl); }
+}
+
+/* Ensure even tiny phones keep generous side breathing room */
+@media (max-width: 380px) {
+  .container, .container-md, .container-lg { padding: 0 var(--space-5); }
 }

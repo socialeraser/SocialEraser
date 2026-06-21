@@ -10,7 +10,7 @@
 //
 //   2) unreTweetButtons / retweetButtonInCard 缺 8 语言 aria-label 兜底
 //      X 2026 retweet 按钮实际 aria-label = "N reposts. Reposted"（"已转发"状态）
-//      en/zh-CN/zh-TW/ja/ko/es/de/fr/it 9 种翻译都不同（实测见 docs/lessons-learned.md 案例 retweet-aria-label-2026-06-17）
+//      en/zh-CN/ja/ko/pt/es/de/fr/it 9 种翻译都不同（实测见 docs/lessons-learned.md 案例 retweet-aria-label-2026-06-17）
 //      旧 selector 只有 1 个英文 'Reposted' + 3 个 data-testid，缺 8 语言兜底
 //      旧 selector 还有 2 个 0 命中的英文 'Undo repost' / 'Undo Repost'（X 2026 已不用）
 //
@@ -56,14 +56,14 @@ console.log('[1] unreTweetButtons / retweetButtonInCard 必含 8 语言 aria-lab
 
 const EXPECTED_ARIA_LABELS = [
   "button[aria-label*='已转帖']",          // zh-CN
-  "button[aria-label*='已轉發']",          // zh-TW
   "button[aria-label*='リポストしました']", // ja
   "button[aria-label*='재게시함']",        // ko
   "button[aria-label*='Reposted']",        // en
   "button[aria-label*='Repostet']",        // de
   "button[aria-label*='Reposté']",         // fr
-  "button[aria-label*='Reposteado']",      // es
+  "button[aria-label*='Repostado']",       // es + pt（同词，X 即便在 pt 界面也用 Repostado 而非葡语 Republicado）
   "button[aria-label*='Ripostato']"        // it
+  // pt 实测词条 = es 同形 "Repostado"，2026-06-21 MCP Chrome 实地验证
 ];
 
 // 1a) default.json（6-type 重构：unreTweetButtons 已从 tweet 节点挪到 retweet 节点；retweetButtonInCard 已删除）
@@ -429,7 +429,7 @@ const deleteKwBlock = deleteKwMatch ? deleteKwMatch[1] : '';
 assert(deleteKwBlock.length > 0, 'i18n.js: deleteKeywords 数组存在');
 
 // 9 语言关键字全在（每个语言的最短形式）
-const requiredDeleteKw = ['Delete', '删除', '刪除', '削除', '삭제', 'Eliminar', 'Löschen', 'Supprimer', 'Elimina'];
+const requiredDeleteKw = ['Delete', '删除', '削除', '삭제', 'Excluir', 'Eliminar', 'Löschen', 'Supprimer', 'Elimina'];
 requiredDeleteKw.forEach(function(kw) {
   assert(deleteKwBlock.indexOf("'" + kw + "'") !== -1,
     'i18n.js deleteKeywords 含 "' + kw + '"');

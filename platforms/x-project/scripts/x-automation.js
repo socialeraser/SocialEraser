@@ -759,7 +759,7 @@
       var text = (socialContext.textContent || '').toLowerCase();
       // 8 语言 pinned 关键字从 this._i18n.pinnedKeywords 读（默认 8 语言，远程配置可覆盖）
       // 动态构建 regex：先 escape 特殊字符，再 | 连接
-      // 例：默认 → /pinned|已置顶|已釘選|ピン留め|고정|fijado|angeheftet|épinglé/i
+      // 例：默认 → /pinned|已置顶|ピン留め|고정|fixado|fijado|angeheftet|épinglé/i
       var pinnedRe = new RegExp(
         this._i18n.pinnedKeywords.map(function(k) {
           return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

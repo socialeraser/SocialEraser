@@ -75,7 +75,7 @@ for (const cfgName of ['default.json', 'remote-example.json']) {
 // 7. content.js DEFAULT_CHECK_ELEMENTS_8LANG 必须 8 语言齐全 + 包含 loginButton 稳定 selector
 //    （原本是 lib/config.js DEFAULT_CONFIG.selectors.login.checkElements，
 //      2026-XX-XX 重构移到这里 —— lib/config.js 已删，兜底统一在 content.js）
-const CHECK_ELEMENTS_8LANG = ['zh-CN', 'zh-TW', 'en', 'ja', 'ko', 'es', 'de', 'fr'];
+const CHECK_ELEMENTS_8LANG = ['zh-CN', 'en', 'ja', 'ko', 'pt', 'es', 'de', 'fr'];
 const checkElementsStart = contentJs.indexOf('DEFAULT_CHECK_ELEMENTS_8LANG = {');
 const checkElementsEnd = checkElementsStart >= 0 ? contentJs.indexOf('};', checkElementsStart) + 2 : -1;
 const checkElementsBlock = checkElementsStart >= 0 ? contentJs.substring(checkElementsStart, checkElementsEnd) : '';

@@ -273,7 +273,7 @@ console.log('[7] injector.js - 关键 selector 与 HTML 真相一致');
       'processOriginalTweets 调 isReplyTweet(article) 过滤 reply 卡片'
     );
     // 8 语言 "Replying to" 关键字（已在 i18n.js 的 DEFAULT_I18N.replyKeywords）
-    const replyKeywords = ['replying to', '回复', '回覆', '返信', '답장', 'respondiendo a', 'antworten', 'répondre', 'rispondendo a'];
+    const replyKeywords = ['replying to', '回复', '返信', '답장', 'respondendo a', 'respondiendo a', 'antworten', 'répondre', 'rispondendo a'];
     replyKeywords.forEach((kw) => {
       assert(
         i18nSrc.toLowerCase().indexOf(kw.toLowerCase()) !== -1,
@@ -520,7 +520,7 @@ console.log('[13] remote-example.json - i18n section 完整 + 8 语言全有');
         });
 
         // 3. 8 语言关键字抽查（deleteKeywords 必含 6 种语言）
-        const langs = ['Delete', '删除', '削除', '삭제', 'Eliminar', 'Löschen', 'Supprimer'];
+        const langs = ['Delete', '删除', '削除', '삭제', 'Excluir', 'Eliminar', 'Löschen', 'Supprimer'];
         langs.forEach((lang) => {
           assert(
             Array.isArray(config.selectors.i18n.deleteKeywords) && config.selectors.i18n.deleteKeywords.indexOf(lang) !== -1,
@@ -538,12 +538,23 @@ console.log('[13] remote-example.json - i18n section 完整 + 8 语言全有');
         });
 
         // 5. common.tweetMoreButtons 包含 8 语言 aria-label fallback（2026-06-18 重构：tweet.moreButtons 移到 common.tweetMoreButtons）
-        const moreAriaLang = ['更多', 'もっと見る', '더 보기', 'Más', 'Mehr', 'Plus'];
+        //   pt=Mais 已通过 2026-06-21 MCP Chrome 实地验证加入
+        const moreAriaLang = ['更多', 'もっと見る', '더 보기', 'Mais', 'Más', 'Mehr', 'Plus'];
         const moreButtons = (config.selectors.common && config.selectors.common.tweetMoreButtons) || [];
         moreAriaLang.forEach((lang) => {
           assert(
             moreButtons.some(b => b.indexOf(lang) !== -1),
             'common.tweetMoreButtons 包含 8 语言 aria-label "' + lang + '"'
+          );
+        });
+
+        // 6. pinnedKeywords 8 语言抽查（2026-06-21 修正：pt=首字母大写 "Fixado"，es 同理）
+        //   实证数据：en=pinned, zh-CN=已置顶, ja=ピン留め, ko=고정, pt=Fixado, es=Fijado, de=Angeheftet, fr=Épinglé
+        const pinnedLangs = ['pinned', '已置顶', 'ピン留め', '고정', 'Fixado', 'Fijado', 'Angeheftet', 'Épinglé'];
+        pinnedLangs.forEach((lang) => {
+          assert(
+            Array.isArray(config.selectors.i18n.pinnedKeywords) && config.selectors.i18n.pinnedKeywords.indexOf(lang) !== -1,
+            'i18n.pinnedKeywords 包含 8 语言 "' + lang + '"'
           );
         });
       }
@@ -555,7 +566,63 @@ console.log('[13] remote-example.json - i18n section 完整 + 8 语言全有');
 console.log();
 
 // ------------------------------------------------------------------
-// 14) default.json：8 语言兜底（en/zh-CN/zh-TW/ja/ko/es/de/fr）
+// 14a) default.json + remote-example.json：login.checkElements 8 语言实测文本（不是猜的）
+//   实证数据（2026-06-21 MCP Chrome 切 ?lang=xx 抓 /i/jf/onboarding/web 实际 DOM）：
+//     X 2026 web onboarding 流程：所有语言都改为"Continue + Continue with phone/Apple"模式
+//     旧的"Sign in / Create your account"风格已完全废弃
+//   每语言必含：主按钮 + alt sign-in + 输入框占位
+//   testid 锚点 [data-testid='loginButton'] 必须保留
+// ------------------------------------------------------------------
+console.log('[14a] login.checkElements 8 语言实测文本（2026-06-21 MCP 验证）');
+{
+  const files = [
+    path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'default.json'),
+    path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'remote-example.json')
+  ];
+  // 8 语言实测：每语言 [主按钮, alt sign-in (手机/Apple), 输入框占位]
+  const LOGIN_8LANG = {
+    'en':     ['Continue', 'Continue with phone', 'Email or username'],
+    'zh-CN':  ['继续', '使用手机继续', '电子邮箱或用户名'],
+    'ja':     ['続ける', '電話番号で続ける', 'メールアドレスまたはユーザー名'],
+    'ko':     ['계속하기', '전화번호로 계속', '이메일 또는 사용자 이름'],
+    'pt':     ['Continuar', 'Inscreve-te com o telefone', 'E-mail ou nome de utilizador'],
+    'es':     ['Continuar', 'Continuar con el teléfono', 'Correo electrónico o nombre de usuario'],
+    'de':     ['Fortfahren', 'Mit Telefon fortfahren', 'E-Mail oder Benutzername'],
+    'fr':     ['Continuer', "S'inscrire avec un numéro de téléphone", "E-mail ou nom d'utilisateur"]
+  };
+  // 旧错文本：发现还在应 FAIL（X 2026 web onboarding 已废弃这些措辞）
+  const LOGIN_FORBIDDEN = {
+    'en':    ['Sign in', 'Create your account'],
+    'de':    ['Anmelden', 'Konto erstellen'],
+    'es':    ['Iniciar sesión', 'Crea tu cuenta'],
+    'fr':    ['Se connecter', 'Créer votre compte'],
+    'ja':    ['サインイン', 'アカウントを作成'],
+    'ko':    ['로그인', '계정 만들기'],
+    'zh-CN': ['创建您的账户'],
+    'pt':    ['Entrar', 'Criar sua conta']
+  };
+  for (const fp of files) {
+    if (!fs.existsSync(fp)) continue;
+    const cfg = JSON.parse(fs.readFileSync(fp, 'utf8'));
+    const checkElements = (cfg.selectors && cfg.selectors.login && cfg.selectors.login.checkElements) || {};
+    for (const lang of Object.keys(LOGIN_8LANG)) {
+      const arr = checkElements[lang] || [];
+      const texts = arr.filter(e => e.type === 'text').map(e => e.value);
+      LOGIN_8LANG[lang].forEach((t) => {
+        assert(texts.indexOf(t) !== -1, path.basename(fp) + ' login.checkElements.' + lang + ' 含实测文本 "' + t + '"');
+      });
+      (LOGIN_FORBIDDEN[lang] || []).forEach((t) => {
+        assert(texts.indexOf(t) === -1, path.basename(fp) + ' login.checkElements.' + lang + ' 不含旧错文本 "' + t + '"');
+      });
+      const hasTestid = arr.some(e => e.type === 'selector' && e.value === "[data-testid='loginButton']");
+      assert(hasTestid, path.basename(fp) + ' login.checkElements.' + lang + ' 保留 [data-testid="loginButton"] 锚点');
+    }
+  }
+}
+console.log();
+
+// ------------------------------------------------------------------
+// 14) default.json：8 语言兜底（en/zh-CN/ja/ko/pt/es/de/fr）
 //   关键：远程 fetch 失败时，default.json 是用户唯一的兜底 —— 没 8 语言兜底就死
 //   防回归：锁死 default.json 至少含 8 语言 selector fallback
 //   来源：MCP 实证（2026-06-18 在 /home /bookmarks /following 4 个 URL 切 8 种语言）
@@ -574,8 +641,10 @@ console.log('[14] default.json - 8 语言兜底同步（远程失败时项目自
     }
     if (defaultCfg && defaultCfg.selectors) {
       // 1. common.tweetMoreButtons 至少含 8 语言（2026-06-18 重构：tweet.moreButtons 移到 common.tweetMoreButtons）
+      //   实证数据：en=More, zh-CN=更多, ja=もっと見る, ko=더 보기, pt=Mais, es=Más opciones, de=Mehr, fr=Plus
+      //   （2026-06-21 MCP Chrome 实地验证：x.com lang=pt，aria-label="Mais"，testid=caret）
       const moreButtons = (defaultCfg.selectors.common && defaultCfg.selectors.common.tweetMoreButtons) || [];
-      const moreLangs = ['更多', 'もっと見る', '더 보기', 'Mehr', 'Plus', 'Más opciones'];
+      const moreLangs = ['更多', 'もっと見る', '더 보기', 'Mais', 'Más opciones', 'Mehr', 'Plus'];
       moreLangs.forEach((s) => {
         assert(
           moreButtons.some(b => b.indexOf(s) !== -1),
@@ -583,11 +652,12 @@ console.log('[14] default.json - 8 语言兜底同步（远程失败时项目自
         );
       });
 
-      // 2. like.unlikeButtons 至少含 8 语言（en + zh-CN + zh-TW + ja + ko + es + de + fr）
-      //   实证数据：en=Liked, zh-CN=喜欢了, zh-TW=已喜歡, ja=いいねしました, ko=마음에 들어 함,
-      //           es=Marcó como Me gusta, de=Gefällt mir, fr=J'aime
+      // 2. like.unlikeButtons 至少含 8 语言（en + zh-CN + ja + ko + pt + es + de + fr）
+      //   实证数据：en=Liked, zh-CN=喜欢了, ja=いいねしました, ko=마음에 들어 함,
+      //           pt=Curtiu, es=Marcó como Me gusta, de=Gefällt mir, fr=J'aime
+      //           （2026-06-21 MCP Chrome 实地验证：x.com lang=pt，aria-label 格式 `{N} Curtidas. Curtiu`）
       const unlikeButtons = (defaultCfg.selectors.like && defaultCfg.selectors.like.unlikeButtons) || [];
-      const unlikeLangs = ['Liked', '喜欢了', '已喜歡', 'いいねしました', '마음에 들어 함', 'Marcó como Me gusta', 'Gefällt mir', "J'aime"];
+      const unlikeLangs = ['Liked', '喜欢了', 'いいねしました', '마음에 들어 함', 'Curtiu', 'Marcó como Me gusta', 'Gefällt mir', "J'aime"];
       unlikeLangs.forEach((s) => {
         assert(
           unlikeButtons.some(b => b.indexOf(s) !== -1),
@@ -596,10 +666,11 @@ console.log('[14] default.json - 8 语言兜底同步（远程失败时项目自
       });
 
       // 3. bookmark.removeButtons 至少含 8 语言
-      //   实证数据：en=Bookmarked, zh-CN=已加入书签, zh-TW=已加入書籤, ja=ブックマークに追加済み,
-      //           ko=북마크에 추가됨, es=Guardado, de=Lesezeichen, fr=signets
+      //   实证数据：en=Bookmarked, zh-CN=已加入书签, ja=ブックマークに追加済み,
+      //           ko=북마크에 추가됨, pt=Item salvo, es=Guardado, de=Lesezeichen, fr=signets
+      //           （2026-06-21 MCP Chrome 实地验证：x.com lang=pt，aria-label="Item salvo"，testid=removeBookmark）
       const removeButtons = (defaultCfg.selectors.bookmark && defaultCfg.selectors.bookmark.removeButtons) || [];
-      const removeLangs = ['Bookmarked', '已加入书签', '已加入書籤', 'ブックマークに追加済み', '북마크에 추가됨', 'Guardado', 'Lesezeichen', 'signets'];
+      const removeLangs = ['Bookmarked', '已加入书签', 'ブックマークに追加済み', '북마크에 추가됨', 'Item salvo', 'Guardado', 'Lesezeichen', 'signets'];
       removeLangs.forEach((s) => {
         assert(
           removeButtons.some(b => b.indexOf(s) !== -1),
@@ -608,10 +679,11 @@ console.log('[14] default.json - 8 语言兜底同步（远程失败时项目自
       });
 
       // 4. following.unfollowButtons 至少含 8 语言
-      //   实证数据：en=Following, zh-CN=正在关注, zh-TW=正在跟隨, ja=フォロー中, ko=팔로잉,
-      //           es=Siguiendo, de=Folge ich, fr=Abonné
+      //   实证数据：en=Following, zh-CN=正在关注, ja=フォロー中, ko=팔로잉,
+      //           pt=Seguindo, es=Siguiendo, de=Folge ich, fr=Abonné
+      //           （2026-06-21 MCP Chrome 实地验证：x.com lang=pt，profile 显示 "1 Seguindo"）
       const unfollowButtons = (defaultCfg.selectors.following && defaultCfg.selectors.following.unfollowButtons) || [];
-      const unfollowLangs = ['Following', '正在关注', '正在跟隨', 'フォロー中', '팔로잉', 'Siguiendo', 'Folge ich', 'Abonné'];
+      const unfollowLangs = ['Following', '正在关注', 'フォロー中', '팔로잉', 'Seguindo', 'Siguiendo', 'Folge ich', 'Abonné'];
       unfollowLangs.forEach((s) => {
         assert(
           unfollowButtons.some(b => b.indexOf(s) !== -1),
@@ -620,10 +692,12 @@ console.log('[14] default.json - 8 语言兜底同步（远程失败时项目自
       });
 
       // 5. retweet.unreTweetButtons 至少含 8 语言（2026-06-18 重构：tweet 拆为 retweet 节点独有）
-      //   实证数据：en=Reposted, zh-CN=已转帖, zh-TW=已轉發, ja=リポストしました, ko=재게시함,
-      //           es=Reposteado, de=Repostet, fr=Reposté
+      //   实证数据：en=Reposted, zh-CN=已转帖, ja=リポストしました, ko=재게시함,
+      //           pt=Repostado, es=Repostado（旧 Reposteado 错），de=Repostet, fr=Reposté
+      //           （2026-06-21 MCP Chrome 实地验证：x.com lang=pt，aria-label 格式 `{N} reposts. Repostado`，
+      //            注意 X 即便在 pt 界面也用 "Repostado" 而非葡语 "Republicado"）
       const unreTweetButtons = (defaultCfg.selectors.retweet && defaultCfg.selectors.retweet.unreTweetButtons) || [];
-      const unreTweetLangs = ['Reposted', '已转帖', '已轉發', 'リポストしました', '재게시함', 'Reposteado', 'Repostet', 'Reposté'];
+      const unreTweetLangs = ['Reposted', '已转帖', 'リポストしました', '재게시함', 'Repostado', 'Repostado', 'Repostet', 'Reposté'];
       unreTweetLangs.forEach((s) => {
         assert(
           unreTweetButtons.some(b => b.indexOf(s) !== -1),

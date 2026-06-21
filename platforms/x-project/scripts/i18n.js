@@ -1,5 +1,5 @@
 // SocialEraser i18n - Multi-language Support
-// 8 languages: en, zh-CN, zh-TW, ja, ko, es, de, fr
+// 8 languages: en, zh-CN, ja, ko, pt, es, de, fr
 
 (function() {
   'use strict';
@@ -277,134 +277,134 @@
       cleanupAbortedPageNotFound: '清理已中止：3 次重试后仍无法到达目标页面，请手动导航后重试。',
     },
 
-    'zh-TW': {
-      openXWebsite: '打開 X 網站',
-      pleaseLogin: '請先登入',
-      checking: '檢查中...',
-      checkingLogin: '正在偵測登入狀態...',
-      xWebsiteDetected: '已偵測到 X 網站',
-      pleaseOpenX: '請打開 X 網站',
-      loggedIn: '已登入',
-      notLoggedIn: '未登入',
-      notLoggedInHint: '請先登入',
-      selectOptions: '選擇要刪除的內容',
-      originalTweets: '原創推文',
-      originalTweetsBackupTip: '推文一旦刪除無法恢復，建議先去 {link} 申請歸檔下載再清理。',
-      archiveLinkText: 'X 申請歸檔下載',
-      replies: '回覆',
-      retweets: '轉發',
-      likes: '讚',
-      bookmarks: '書籤',
-      following: '追蹤',
-      filterOptions: '篩選條件',
-      fromDate: '開始日期',
-      toDate: '結束日期',
-      keywordPlaceholder: '按關鍵字篩選...',
-      startCleanup: '開始清理',
-      pause: '暫停',
-      resume: '繼續',
-      stop: '停止',
-      processing: '處理中...',
-      processed: '已處理',
-      waiting: '等待開始...',
-      completed: '已完成',
-      paused: '已暫停',
-      stopped: '已停止',
-      activity: '活動記錄',
-      privacy: '隱私',
-      terms: '條款',
-      help: '說明',
-      trustTitle: '100% 本地處理',
-      trustText: '您的資料在本地處理，我們絕不儲存您的憑證或個人資訊。',
+    'pt': {
+      openXWebsite: 'Abrir o site do X',
+      pleaseLogin: 'Faça login primeiro',
+      checking: 'Verificando...',
+      checkingLogin: 'Verificando status de login...',
+      xWebsiteDetected: 'Site do X detectado',
+      pleaseOpenX: 'Abra o site do X',
+      loggedIn: 'Conectado',
+      notLoggedIn: 'Não conectado',
+      notLoggedInHint: 'Faça login primeiro',
+      selectOptions: 'Selecione o que deseja excluir',
+      originalTweets: 'Tweets originais',
+      originalTweetsBackupTip: 'Os tweets são excluídos permanentemente e não podem ser recuperados. Recomendamos baixar seu {link} antes de limpar.',
+      archiveLinkText: 'arquivo do X',
+      replies: 'Respostas',
+      retweets: 'Reposts',
+      likes: 'Curtidas',
+      bookmarks: 'Itens salvos',
+      following: 'Seguindo',
+      filterOptions: 'Filtros',
+      fromDate: 'Data inicial',
+      toDate: 'Data final',
+      keywordPlaceholder: 'Filtrar por palavra-chave...',
+      startCleanup: 'Iniciar limpeza',
+      pause: 'Pausar',
+      resume: 'Continuar',
+      stop: 'Parar',
+      processing: 'Processando...',
+      processed: 'Processado',
+      waiting: 'Aguardando início...',
+      completed: 'Concluído',
+      paused: 'Pausado',
+      stopped: 'Parado',
+      activity: 'Atividade',
+      privacy: 'Privacidade',
+      terms: 'Termos',
+      help: 'Ajuda',
+      trustTitle: '100% processamento local',
+      trustText: 'Seus dados são processados localmente. Nunca armazenamos suas credenciais ou informações pessoais.',
 
-      noItemsSelected: '請至少選擇一項',
-      confirmStop: '確定停止清理？進度將遺失。',
+      noItemsSelected: 'Selecione pelo menos uma opção',
+      confirmStop: 'Parar a limpeza? O progresso será perdido.',
 
-      refreshingConfig: '正在從遠端刷新設定...',
-      configRefreshed: '設定已刷新。',
-      configRefreshFailed: '刷新設定失敗，狀態已重新偵測',
-      startingCleanup: '開始清理...',
-      cleanupCompleted: '清理完成，共處理: {count}',
-      stoppedByUser: '使用者已停止。已處理: {count}',
-      pausedLog: '已暫停',
-      resumedLog: '已繼續',
-      likesRequiresNav: '讚需要在 /likes 頁面，正在跳轉...',
-      bookmarksRequiresNav: '書籤需要在 /bookmarks 頁面，正在跳轉...',
-      followingRequiresNav: '追蹤列表需要在 /following 頁面，正在跳轉...',
-      tweetsRequiresNav: '推文需要在個人主頁，正在跳轉...',
-      originalTweetsRequiresNav: '原創推文需要在個人主頁，正在跳轉...',
-      repliesRequiresNav: '回覆需要在 /with_replies 頁面，正在跳轉...',
-      retweetsRequiresNav: '轉發需要在 /with_replies 頁面，正在跳轉...',
-      navigatingTo: '正在跳轉至: {url}',
-      pageLoadedResuming: '頁面已載入，正在恢復清理...',
-      cleanupAutoResumed: '清理已自動恢復',
-      pageTypeMismatch: '頁面類型不符，中止',
-      startingLikesCleanup: '開始清理讚',
-      noUnlikeButtons: '未找到可處理的內容',
-      noMoreLikes: '沒有更多讚了',
-      endOfLikes: '讚已全部處理',
-      clickedUnlike: '已點擊 unlike 按鈕 #{count}',
-      unlikeFailed: '取消讚失敗: {error}',
-      clickReturnedFalse: 'unlike 按鈕點擊返回 false',
+      refreshingConfig: 'Atualizando configuração remota...',
+      configRefreshed: 'Configuração atualizada.',
+      configRefreshFailed: 'Falha ao atualizar configuração, status verificado novamente',
+      startingCleanup: 'Iniciando limpeza...',
+      cleanupCompleted: 'Limpeza concluída. Total processado: {count}',
+      stoppedByUser: 'Parado pelo usuário. Processado: {count}',
+      pausedLog: 'Pausado',
+      resumedLog: 'Continuado',
+      likesRequiresNav: 'Curtidas requerem a página /likes, navegando...',
+      bookmarksRequiresNav: 'Itens salvos requerem a página /bookmarks, navegando...',
+      followingRequiresNav: 'Seguindo requer a página /following, navegando...',
+      tweetsRequiresNav: 'Tweets requerem sua página de perfil, navegando...',
+      originalTweetsRequiresNav: 'Tweets originais requerem sua página de perfil, navegando...',
+      repliesRequiresNav: 'Respostas requerem a página /with_replies, navegando...',
+      retweetsRequiresNav: 'Reposts requerem a página /with_replies, navegando...',
+      navigatingTo: 'Navegando para: {url}',
+      pageLoadedResuming: 'Página carregada, retomando limpeza...',
+      cleanupAutoResumed: 'Limpeza retomada automaticamente',
+      pageTypeMismatch: 'Tipo de página incorreto, abortando',
+      startingLikesCleanup: 'Iniciando limpeza de curtidas',
+      noUnlikeButtons: 'Nenhum conteúdo processável encontrado',
+      noMoreLikes: 'Não há mais curtidas',
+      endOfLikes: 'Fim das curtidas',
+      clickedUnlike: 'Clicou em unlike no botão #{count}',
+      unlikeFailed: 'Falha ao desfazer curtida: {error}',
+      clickReturnedFalse: 'Clique no botão unlike retornou false',
 
-      pageDiagnostics: '=== 頁面診斷 ===',
-      endDiagnostics: '=== 診斷結束 ===',
-      totalTestIdElements: 'data-testid 元素總數: {count}',
-      topTestIds: '常用 data-testid: {list}',
-      totalLabeledButtons: '可處理的帶 aria-label 按鈕總數: {count}',
-      topAriaLabels: '常用 aria-label: {list}',
+      pageDiagnostics: '=== Diagnóstico da página ===',
+      endDiagnostics: '=== Fim do diagnóstico ===',
+      totalTestIdElements: 'Total de elementos data-testid: {count}',
+      topTestIds: 'Principais data-testids: {list}',
+      totalLabeledButtons: 'Total de botões rotulados: {count}',
+      topAriaLabels: 'Principais aria-labels: {list}',
 
-      // 每日額度
-      dailyLimitReached: '已達到每日免費額度限制 ({used}/{limit})',
-      dailyLimitReachedHint: '您今日已使用全部 {limit} 次免費操作。\n升級到高級版享受無限清理！',
-      upgradeToPremium: '升級到高級版',
-      maybeLater: '稍後再說',
-      usedToday: '今日已使用: {used} / {limit}',
-      cleanupSkipped: '已達每日額度限制，跳過清理',
+      // Limite diário
+      dailyLimitReached: 'Limite diário gratuito atingido ({used}/{limit})',
+      dailyLimitReachedHint: 'Você usou todas as {limit} ações gratuitas hoje.\nFaça upgrade para Premium e tenha limpeza ilimitada!',
+      upgradeToPremium: 'Fazer upgrade para Premium',
+      maybeLater: 'Talvez mais tarde',
+      usedToday: 'Usado hoje: {used} / {limit}',
+      cleanupSkipped: 'Limpeza pulada por atingir o limite diário',
 
-      // 過濾
-      invalidDateRange: '開始日期不能晚於結束日期',
-      noItemsMatched: '沒有符合篩選條件的內容',
-      dateFilterSkipped: '{type} 日期過濾已跳過：部分內容未找到時間戳',
-      cleanupStuck: '30 秒無進展，已停止（X 改版或選擇器可能失效）',
-      dailyBudgetExhausted: '今日額度已用完，跳過 {type}',
-      noRemoveBookmarkButtons: '未找到可處理的內容',
-      foundButtonsCount: '找到 {count} 個待處理項',
-      processedNavigatingTo: '正在切換到 {next} 頁面...',
-      startingBookmarksCleanup: '開始清理書籤',
-      noMoreBookmarks: '沒有更多書籤',
-      endOfBookmarks: '書籤清理完成',
-      clickedRemoveBookmark: '已移除書籤 #{count}',
-      clickReturnedFalseRemoveBookmark: '點擊移除書籤失敗',
-      removeBookmarkFailed: '移除書籤失敗：{error}',
-      startingFollowingCleanup: '開始清理追蹤列表',
-      noUnfollowButtons: '未找到取消追蹤按鈕',
-      clickedUnfollow: '已取消追蹤 #{count}',
-      clickReturnedFalseConfirm: '點擊確認按鈕失敗',
-      unfollowedNoConfirm: '已取消追蹤 #{count}（未彈出確認框）',
-      unfollowFailed: '取消追蹤失敗：{error}',
-      noMoreFollowing: '沒有更多追蹤了',
-      // Tweets 清理日志 + 提示
-      startingTweetsCleanup: '開始清理推文',
-      noMoreTweets: '無更多推文',
-      endOfTweets: '推文清理完成',
-      tweetDeleteFailed: '刪除推文失敗：{error}',
-      unretweetFailed: '撤銷轉發失敗：{error}',
-      pinnedTweetSkipped: '已跳過置頂推文（請先取消置頂）',
-      unreTweetSuccess: '已撤銷轉發 #{count}',
-      tweetDeleted: '已刪除推文 #{count}',
-      undoRepost: '撤銷轉發',
-      retweetNotDeleted: '轉發只能撤銷，無法刪除',
-      tweetSkipped: '已跳過推文',
-      pinnedTweetHint: '置頂推文需先取消置頂',
-      endOfFollowing: '追蹤列表清理完成',
-      copyDiagnosticLog: '複製診斷日誌',
-      copiedToClipboard: '診斷日誌已複製到剪貼簿',
-      copyFailed: '複製失敗：{error}',
-      sessionWriteFailed: '警告：儲存清理狀態失敗，跨頁恢復可能無法運作',
+      // Filtros
+      invalidDateRange: 'A data inicial não pode ser posterior à data final',
+      noItemsMatched: 'Nenhum item corresponde ao filtro',
+      dateFilterSkipped: 'Filtro de data pulado para {type}: timestamp não encontrado em alguns itens',
+      cleanupStuck: 'Sem progresso por 30s, parando (a interface do X pode ter mudado)',
+      dailyBudgetExhausted: 'Cota diária esgotada, pulando {type}',
+      noRemoveBookmarkButtons: 'Nenhum conteúdo processável encontrado',
+      foundButtonsCount: 'Encontrados {count} itens para processar',
+      processedNavigatingTo: 'Trocando para a página {next}...',
+      startingBookmarksCleanup: 'Iniciando limpeza de itens salvos',
+      noMoreBookmarks: 'Não há mais itens salvos',
+      endOfBookmarks: 'Fim dos itens salvos',
+      clickedRemoveBookmark: 'Item salvo #{count} removido',
+      clickReturnedFalseRemoveBookmark: 'Clique falhou ao remover item salvo',
+      removeBookmarkFailed: 'Falha ao remover item salvo: {error}',
+      startingFollowingCleanup: 'Iniciando limpeza de seguindo',
+      noUnfollowButtons: 'Nenhum botão de deixar de seguir encontrado',
+      clickedUnfollow: 'Deixou de seguir #{count}',
+      clickReturnedFalseConfirm: 'Clique falhou no botão de confirmação',
+      unfollowedNoConfirm: 'Deixou de seguir #{count} (sem diálogo de confirmação)',
+      unfollowFailed: 'Falha ao deixar de seguir: {error}',
+      noMoreFollowing: 'Fim da lista de seguindo',
+      // Logs e dicas de limpeza de Tweets
+      startingTweetsCleanup: 'Iniciando limpeza de tweets',
+      noMoreTweets: 'Não há mais tweets',
+      endOfTweets: 'Fim da lista de tweets',
+      tweetDeleteFailed: 'Falha ao excluir tweet: {error}',
+      unretweetFailed: 'Falha ao desfazer repost: {error}',
+      pinnedTweetSkipped: 'Tweet fixado pulado (desafixe primeiro)',
+      unreTweetSuccess: 'Repost desfeito #{count}',
+      tweetDeleted: 'Tweet #{count} excluído',
+      undoRepost: 'Desfazer repost',
+      retweetNotDeleted: 'Reposts só podem ser desfeitos, não excluídos',
+      tweetSkipped: 'Tweet pulado',
+      pinnedTweetHint: 'Tweets fixados devem ser desafixados primeiro',
+      endOfFollowing: 'Fim da lista de seguindo',
+      copyDiagnosticLog: 'Copiar log de diagnóstico',
+      copiedToClipboard: 'Log de diagnóstico copiado para a área de transferência',
+      copyFailed: 'Falha ao copiar: {error}',
+      sessionWriteFailed: 'Aviso: falha ao salvar estado da limpeza, a retomada entre páginas pode não funcionar',
 
       // Auto-resume retry limit reached (page mismatch)
-      cleanupAbortedPageNotFound: '清理已中止：3 次重試後仍無法到達目標頁面，請手動導航後重試。',
+      cleanupAbortedPageNotFound: 'Limpeza abortada: não foi possível chegar à página alvo após 3 tentativas. Navegue manualmente e tente novamente.',
     },
 
     ja: {
@@ -1077,9 +1077,9 @@
     deleteKeywords: [
       'Delete',                  // en
       '删除',                    // zh-CN
-      '刪除',                    // zh-TW
       '削除',                    // ja
       '삭제',                    // ko
+      'Excluir',                 // pt
       'Eliminar',                // es
       'Löschen',                 // de
       'Supprimer',               // fr
@@ -1089,9 +1089,9 @@
     unretweetKeywords: [
       'Undo repost', 'Undo Repost', // en（两种大小写 X 都用）
       '撤销转推',                    // zh-CN
-      '取消轉推',                    // zh-TW
       'リポストを取り消す',          // ja
       '리트윗 취소',                  // ko
+      'Desfazer repost',             // pt
       'Cancelar repost',             // es
       'Repost rückgängig machen',    // de
       'Annuler le repost',           // fr
@@ -1102,9 +1102,9 @@
     unfollowKeywords: [
       'Unfollow',                   // en
       '取消关注',                    // zh-CN
-      '取消追蹤',                    // zh-TW
       'フォロー解除',                // ja
       '언팔로우',                    // ko
+      'Deixar de seguir',            // pt
       'Dejar de seguir',             // es
       'Entfolgen',                   // de
       'Ne plus suivre',              // fr
@@ -1114,9 +1114,9 @@
     pinnedKeywords: [
       'pinned',                    // en
       '已置顶',                    // zh-CN
-      '已釘選',                    // zh-TW
       'ピン留め',                  // ja
       '고정',                      // ko
+      'fixado',                    // pt
       'fijado',                    // es
       'angeheftet',                // de
       'épinglé'                    // fr
@@ -1125,9 +1125,9 @@
     replyKeywords: [
       'replying to', 'in reply to', // en
       '回复',                       // zh-CN
-      '回覆',                       // zh-TW
       '返信',                       // ja
       '답장',                       // ko
+      'respondendo a',              // pt
       'respondiendo a',             // es
       'antworten',                  // de
       'répondre',                   // fr
@@ -1136,9 +1136,10 @@
     // 弹窗 Cancel 按钮（role=button）
     cancelKeywords: [
       'Cancel',                    // en
-      '取消',                      // zh-CN / zh-TW
+      '取消',                      // zh-CN
       'キャンセル',                // ja
       '취소',                      // ko
+      'Cancelar',                  // pt
       'Cancelar',                  // es
       'Abbrechen',                 // de
       'Annuler',                   // fr
@@ -1149,9 +1150,9 @@
     confirmKeywords: [
       'Delete',                    // en
       '删除',                      // zh-CN
-      '刪除',                      // zh-TW
       '削除',                      // ja
       '삭제',                      // ko
+      'Excluir',                   // pt
       'Eliminar',                  // es
       'Löschen',                   // de
       'Supprimer',                 // fr
@@ -1163,10 +1164,11 @@
   function detectLanguage() {
     var lang = (navigator.language || 'en').toLowerCase();
     if (lang.startsWith('zh')) {
-      return lang.includes('tw') || lang.includes('hant') ? 'zh-TW' : 'zh-CN';
+      return 'zh-CN';
     }
     if (lang.startsWith('ja')) return 'ja';
     if (lang.startsWith('ko')) return 'ko';
+    if (lang.startsWith('pt')) return 'pt';
     if (lang.startsWith('es')) return 'es';
     if (lang.startsWith('de')) return 'de';
     if (lang.startsWith('fr')) return 'fr';
@@ -1178,16 +1180,16 @@
   var LANG_META = {
     'en':     { flag: '🇺🇸', name: 'English' },
     'zh-CN':  { flag: '🇨🇳', name: '简体中文' },
-    'zh-TW':  { flag: '🇹🇼', name: '繁體中文' },
     'ja':     { flag: '🇯🇵', name: '日本語' },
     'ko':     { flag: '🇰🇷', name: '한국어' },
+    'pt':     { flag: '🇧🇷', name: 'Português' },
     'es':     { flag: '🇪🇸', name: 'Español' },
     'de':     { flag: '🇩🇪', name: 'Deutsch' },
     'fr':     { flag: '🇫🇷', name: 'Français' }
   };
 
   // 支持的语言代码列表
-  var SUPPORTED_LANGS = ['en', 'zh-CN', 'zh-TW', 'ja', 'ko', 'es', 'de', 'fr'];
+  var SUPPORTED_LANGS = ['en', 'zh-CN', 'ja', 'ko', 'pt', 'es', 'de', 'fr'];
 
   var currentLang = detectLanguage();
   console.log('[SocialEraser] Detected language:', currentLang);

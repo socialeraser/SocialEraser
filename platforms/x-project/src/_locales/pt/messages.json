@@ -4,7 +4,7 @@
     "description": "Extension name"
   },
   "ext_description": {
-    "message": "X/Twitter 批次清理工具",
+    "message": "Ferramenta de limpeza em lote para X/Twitter",
     "description": "Extension description"
   }
 }

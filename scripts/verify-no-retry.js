@@ -34,7 +34,7 @@ check('content.js 不再硬编码 4 秒重试间隔',
   !/setTimeout\s*\(\s*[^)]*,\s*4000\s*\)/.test(contentJs));
 
 // 5. i18n.js 8 语言都不再有 retryingIn 键
-const langs = ['en', 'zh-CN', 'zh-TW', 'ja', 'ko', 'es', 'de', 'fr'];
+const langs = ['en', 'zh-CN', 'ja', 'ko', 'pt', 'es', 'de', 'fr'];
 for (const lang of langs) {
   // 找到该语言块（括号配对）
   const startA = "'" + lang + "': {";
