@@ -12,7 +12,7 @@
     "build": "node scripts/sync-shared.js",
     "start": "npm run build && cd platforms/x-project && npx cap run android",
     "android:open": "cd platforms/x-project && npx cap open android",
-    "test": "node scripts/run-verify.js",
+    "test": "npm run sync && node scripts/run-verify.js",
     "verify": "node scripts/run-verify.js",
     "verify:single": "node scripts/run-verify.js --single",
     "deploy:website": "./scripts/deploy-website.sh"
