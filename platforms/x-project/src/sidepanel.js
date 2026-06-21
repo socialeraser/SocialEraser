@@ -1,4 +1,4 @@
-// SocialEraser Side Panel Script - i18n enabled
+// X Eraser Side Panel Script - i18n enabled
 (function() {
   'use strict';
 
@@ -9,6 +9,12 @@
     isRunning: false,
     isPaused: false,
     processedItems: 0,
+    // 2026-06-21 修复（revert 7d4928e 引入的 high-water-mark bug）：
+    //   typeStartCumulative 必须在 state 字面量里初始化为 0，不能依赖
+    //   cleanupTypeStart 兜底——sidepanel 在清理中途 reload 时，新 state
+    //   对象该字段是 undefined，typeDelta 计算里 `newCount - undefined`
+    //   得 NaN，setOptionCount 收到 NaN 会显示 "NaN"。
+    typeStartCumulative: 0,
     statusHideTimer: null,
     totalItems: 0,
     // 登录态持续 8s 卡在"检测中"时弹出"请刷新 X 页面"提示
@@ -45,7 +51,7 @@
       return used;
     }).catch(function(err) {
       // 单步失败不能毒化整条链，否则后续 increment 会永远排队
-      console.warn('[SocialEraser] getDailyUsage chain step failed:', err && err.message);
+      console.warn('[X Eraser] getDailyUsage chain step failed:', err && err.message);
       if (callback) callback(0);
       return 0;
     });
@@ -71,7 +77,7 @@
         });
       });
     }).catch(function(err) {
-      console.warn('[SocialEraser] incrementDailyUsage chain step failed:', err && err.message);
+      console.warn('[X Eraser] incrementDailyUsage chain step failed:', err && err.message);
       if (callback) callback(null);
     });
     return _dailyUsageChain;
@@ -88,11 +94,11 @@
 
   function init() {
     // 等待 i18n 加载完成
-    if (window.SocialEraseri18n) {
-      i18n = window.SocialEraseri18n;
+    if (window.XEraseri18n) {
+      i18n = window.XEraseri18n;
     } else {
       // 不靠经验猜 50ms：用微任务延后到下一个 task 头（script 执行完）
-      //   i18n.js 是 <script src=> 同步加载，正常情况下 window.SocialEraseri18n 一定已就绪
+      //   i18n.js 是 <script src=> 同步加载，正常情况下 window.XEraseri18n 一定已就绪
       //   这里只是防御性 retry，setTimeout(0) 而非经验 50ms
       setTimeout(init, 0);
       return;
@@ -103,9 +109,9 @@
     chrome.storage.local.get(['preferredLang'], function(result) {
       if (result.preferredLang && i18n.setLanguage) {
         i18n.setLanguage(result.preferredLang);
-        console.log('[SocialEraser] Loaded preferred language:', result.preferredLang);
+        console.log('[X Eraser] Loaded preferred language:', result.preferredLang);
       } else {
-        console.log('[SocialEraser] Using detected language:', i18n.getLanguage());
+        console.log('[X Eraser] Using detected language:', i18n.getLanguage());
       }
       // 语言确定后，才继续初始化 UI
       afterLangLoaded();
@@ -288,47 +294,37 @@
     chrome.runtime.onMessage.addListener(function(msg) {
       if (msg.type === 'cleanupProgress') {
         var newCount = msg.data.count;
-        var prevMax = state.processedMax;
-        // 修复（共处理跨 type 累加）：x-automation 推送的 count 是累计值，
-        //   但需要在 sidepanel 侧自己保证「state.processedItems 是所有 type 的总数」。
-        //   这里用 high-water-mark + delta 累加：
-        //     - newCount > prevMax: 正常增长，加 delta
-        //     - newCount < prevMax: 换 type 后计数重置，加新的 newCount 上去
-        //   这样无论 x-automation 改用 per-type 还是 cumulative 推，都能保证总数对。
-        if (newCount > prevMax) {
-          state.processedItems += (newCount - prevMax);
-          state.processedMax = newCount;
-        } else if (newCount < prevMax) {
-          // type 切换 / 计数被重置：把当前 type 已处理的 newCount 累加进总数
-          state.processedItems += newCount;
-          state.processedMax = newCount;
-        }
-        // 实时累加每日额度
-        //   与 state.processedItems 累加保持一致：换 type 后计数重置时也按 newCount 加
-        if (newCount > prevMax) {
-          var delta = newCount - prevMax;
+        // 2026-06-21 真修复：processedItems 必须是跨 type + 跨 X 页面累计
+        //   x-automation 的 this.processedCount 在 content script 每次 page navigation
+        //   （/likes → /replies → /retweets → /bookmarks → /following）重新注入时归零
+        //   （新 XEraserInjector 实例，line 41 this.processedCount = 0），所以
+        //   msg.data.count 只是当前 type 当前页的局部计数，不是真正的累计。
+        //   证据：日志里 "Retweet undone #1..#7"（累计的话应是 #3..#9）、
+        //   "Removed bookmark #1"（应是 #10）→ 证实每页 processedCount 归零。
+        //   正确算法：processedItems = typeStartCumulative + newCount
+        //     - typeStartCumulative 在 cleanupTypeStart 时快照成"到目前为止累计"
+        //     - newCount 是当前 type 当前页的局部计数（0 → 本 type 处理数）
+        //   两者相加 = 跨 type + 跨 X 页面 的真正累计总数。
+        var baseTotal = state.typeStartCumulative || 0;
+        var prevTotal = state.processedItems || 0;
+        state.processedItems = baseTotal + newCount;
+        // 实时累加每日额度：delta = 新总数 - 旧总数（跨页累计差）
+        if (state.processedItems > prevTotal) {
+          var delta = state.processedItems - prevTotal;
           incrementDailyUsage(delta, function(totalUsed) {
-            // 标记已达上限，等清理完成时弹窗
-            if (totalUsed >= FREE_LIMIT_PER_DAY) {
-              state.limitReached = true;
-            }
-          });
-        } else if (newCount < prevMax) {
-          // type 切换 / 计数被重置：把当前 type 已处理的 newCount 加进每日额度
-          incrementDailyUsage(newCount, function(totalUsed) {
             if (totalUsed >= FREE_LIMIT_PER_DAY) {
               state.limitReached = true;
             }
           });
         }
         updateProgress();
-        // 修复（option-count 显示当前 type 的条数）：
-        //   之前直接用 newCount（累计值），导致 type 2 跑的时候 type 2 的数字是
-        //     type1 + type2 的累计，而不是 type2 自己的条数。
-        //   现在用 newCount - state.typeStartCumulative 算当前 type 的 delta。
+        // option-count 显示当前 type 的条数：
+        //   x-automation 在 onTypeStart 时把 processedCount 清零，newCount 就是
+        //   本 type 的条数。typeStartCumulative 只是用来算跨 type 累计（上面用），
+        //   option-count 不再减 typeStartCumulative（之前那写法在每页归零的场景下
+        //   会算成 0 - 上次累计 = 负数，被 Math.max(0,...) 吃掉，永远显示 0）。
         if (state.currentType) {
-          var typeDelta = Math.max(0, newCount - state.typeStartCumulative);
-          setOptionCount(state.currentType, typeDelta);
+          setOptionCount(state.currentType, newCount);
         }
       } else if (msg.type === 'cleanupLog') {
         addLog(msg.data.message, msg.data.level);
@@ -356,7 +352,7 @@
         // 修复（option-count 显示当前 type 的条数）：
         //   记录换 type 时的累计基线，cleanupProgress 收到时用 newCount - 基线
         //   算出当前 type 的 delta（避免 type 2 的 option-count 显示成 type1+type2 的总数）
-        state.typeStartCumulative = state.processedMax;
+        state.typeStartCumulative = state.processedItems;
         setOptionState(msg.data.type, 'processing');
       } else if (msg.type === 'cleanupTypeComplete') {
         state.currentType = null;
@@ -791,7 +787,7 @@
         return (time ? time.textContent : '') + ' ' + text;
       }).join('\n');
 
-      var diagText = '=== SocialEraser Diagnostic Log ===\n' +
+      var diagText = '=== X Eraser Diagnostic Log ===\n' +
         'Timestamp: ' + new Date().toISOString() + '\n' +
         'X website: ' + (state.isX ? 'yes' : 'no') + '\n' +
         'Logged in: ' + (state.isLoggedIn ? 'yes' : 'no') + '\n' +
@@ -902,9 +898,7 @@
         state.isRunning = true;
         state.isPaused = false;
         state.processedItems = 0;
-        // 修复（共处理跨 type 累加）：清空 high-water-mark 和当前 type 基线
-        //   否则上次的值会污染这一轮的累加
-        state.processedMax = 0;
+        // 修复（共处理跨 type 累加）：清空当前 type 基线，否则上次值污染本轮 typeDelta
         state.typeStartCumulative = 0;
         state.dailyRemaining = remaining;
         state.totalItems = isPremium ? '∞' : remaining;
@@ -932,7 +926,7 @@
         addLog(t('usedToday', {used: used, limit: isPremium ? '∞' : FREE_LIMIT_PER_DAY}), 'info');
         addLog(t('startingCleanup'), 'info');
 
-        console.log('[SocialEraser sidepanel] state.cleanupOptions:', state.cleanupOptions);
+        console.log('[X Eraser sidepanel] state.cleanupOptions:', state.cleanupOptions);
 
         // 写 session 后必须 readback 确认（MV3 service worker cold start / 写失败时 session 可能丢）
         function writeSessionAndStart() {
@@ -940,9 +934,9 @@
             // 写后立即 readback 确认
             return chrome.storage.session.get('pendingCleanup');
           }).then(function(readback) {
-            console.log('[SocialEraser sidepanel] session readback:', readback);
+            console.log('[X Eraser sidepanel] session readback:', readback);
             if (!readback || !readback.pendingCleanup) {
-              console.warn('[SocialEraser sidepanel] session write/readback failed, retrying...');
+              console.warn('[X Eraser sidepanel] session write/readback failed, retrying...');
               // 重试一次
               return chrome.storage.session.set({ pendingCleanup: state.cleanupOptions }).then(function() {
                 return chrome.storage.session.get('pendingCleanup');
@@ -951,7 +945,7 @@
             return readback;
           }).then(function(finalReadback) {
             if (!finalReadback || !finalReadback.pendingCleanup) {
-              console.error('[SocialEraser sidepanel] session write FAILED after retry, pending cleanup will not work');
+              console.error('[X Eraser sidepanel] session write FAILED after retry, pending cleanup will not work');
               addLog(t('sessionWriteFailed'), 'error');
               // 即便失败也发 startCleanup（让单页流程仍能 work）
             }
@@ -959,7 +953,7 @@
               chrome.runtime.sendMessage({type: 'startCleanup', options: state.cleanupOptions});
             });
           }).catch(function(err) {
-            console.error('[SocialEraser sidepanel] session write error:', err);
+            console.error('[X Eraser sidepanel] session write error:', err);
             activateXTab(function() {
               chrome.runtime.sendMessage({type: 'startCleanup', options: state.cleanupOptions});
             });

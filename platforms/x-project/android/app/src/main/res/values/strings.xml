@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">SocialEraser</string>
-    <string name="title_activity_main">SocialEraser</string>
+    <string name="app_name">X Eraser</string>
+    <string name="title_activity_main">X Eraser</string>
     <string name="package_name">com.socialeraser.app</string>
     <string name="custom_url_scheme">com.socialeraser.app</string>
 </resources>

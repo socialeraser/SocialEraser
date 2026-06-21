@@ -37,7 +37,7 @@ sandbox.document = { querySelector: function() { return null; }, querySelectorAl
 
 const ctx = vm.createContext(sandbox);
 vm.runInContext(src, ctx);
-const { SocialEraserInjector } = sandbox.window;
+const { XEraserInjector } = sandbox.window;
 
 let pass = 0, fail = 0;
 function assert(name, cond, extra) {
@@ -47,28 +47,28 @@ function assert(name, cond, extra) {
 
 console.log('[1] config=null → this.config = {}');
 {
-  const i = new SocialEraserInjector();
+  const i = new XEraserInjector();
   i.setConfig(null);
   assert('this.config 是空对象', i.config && Object.keys(i.config).length === 0);
 }
 
 console.log('\n[2] config={} → this.config = {}');
 {
-  const i = new SocialEraserInjector();
+  const i = new XEraserInjector();
   i.setConfig({});
   assert('this.config 是空对象', i.config && Object.keys(i.config).length === 0);
 }
 
 console.log('\n[3] config={selectors:{}} → this.config = {}');
 {
-  const i = new SocialEraserInjector();
+  const i = new XEraserInjector();
   i.setConfig({ selectors: {} });
   assert('this.config 是空对象', i.config && Object.keys(i.config).length === 0);
 }
 
 console.log('\n[4] 远程提供 like.unlikeButtons → 远程数组生效');
 {
-  const i = new SocialEraserInjector();
+  const i = new XEraserInjector();
   const remote = ["[data-testid='custom-unlike']"];
   i.setConfig({ selectors: { like: { unlikeButtons: remote } } });
   assert('like.unlikeButtons 等于远程', JSON.stringify(i.config.like.unlikeButtons) === JSON.stringify(remote));
@@ -76,7 +76,7 @@ console.log('\n[4] 远程提供 like.unlikeButtons → 远程数组生效');
 
 console.log('\n[5] 远程提供多个 type → 全部生效');
 {
-  const i = new SocialEraserInjector();
+  const i = new XEraserInjector();
   const cfg = {
     selectors: {
       tweet: { moreButtons: ['[data-testid="more"]'] },
@@ -96,7 +96,7 @@ console.log('\n[5] 远程提供多个 type → 全部生效');
 
 console.log('\n[6] 远程提供未知 type → 远程块被采纳');
 {
-  const i = new SocialEraserInjector();
+  const i = new XEraserInjector();
   i.setConfig({ selectors: { unknownType: { container: 'X' } } });
   assert('unknownType.container 存在', i.config.unknownType && i.config.unknownType.container === 'X');
 }
@@ -105,7 +105,7 @@ console.log('\n[7] 写入 this.config 不污染 source config（浅拷贝）');
 {
   const sourceRemote = ["[data-testid='source-unlike']"];
   const cfg = { selectors: { like: { unlikeButtons: sourceRemote } } };
-  const i = new SocialEraserInjector();
+  const i = new XEraserInjector();
   i.setConfig(cfg);
   i.config.like.unlikeButtons.push('MUTATED');
   assert('source config 的 unlikeButtons 不被污染',
@@ -118,7 +118,7 @@ console.log('\n[7] 写入 this.config 不污染 source config（浅拷贝）');
 console.log('\n[8] 嵌套对象也浅拷贝（userInfo 等）');
 {
   const cfg = { selectors: { common: { userInfo: { userCell: ['a'], userName: ['b'], userDescription: ['c'] } } } };
-  const i = new SocialEraserInjector();
+  const i = new XEraserInjector();
   i.setConfig(cfg);
   i.config.common.userInfo.userCell.push('MUTATED');
   assert('source config 的 userInfo.userCell 不被污染',

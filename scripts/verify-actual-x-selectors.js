@@ -23,7 +23,7 @@ const I18N_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'scripts'
 let passed = 0;
 let failed = 0;
 
-// 8 语言 selector 关键字已挪到 i18n.js 的 DEFAULT_I18N，injector.js 通过 window.SocialEraseri18n.DEFAULT_I18N 引用
+// 8 语言 selector 关键字已挪到 i18n.js 的 DEFAULT_I18N，injector.js 通过 window.XEraseri18n.DEFAULT_I18N 引用
 // 所以关键字关键字检查必须看 i18n.js，不能再看 injector.js
 const i18nSrc = fs.existsSync(I18N_PATH) ? fs.readFileSync(I18N_PATH, 'utf8') : '';
 
@@ -403,7 +403,7 @@ console.log('[11] 8 语言 Cancel / Confirm 关键字 + findButtonByText helper'
 console.log();
 
 // ------------------------------------------------------------------
-// 12) i18n 全部配置化：DEFAULT_I18N 已挪到 i18n.js，injector.js 通过 window.SocialEraseri18n.DEFAULT_I18N 引用
+// 12) i18n 全部配置化：DEFAULT_I18N 已挪到 i18n.js，injector.js 通过 window.XEraseri18n.DEFAULT_I18N 引用
 //   关键：X 改版改了翻译时，**只改 i18n.js 的 DEFAULT_I18N 或远程配置即可**，不用动 injector.js
 //   防回归：锁死 DEFAULT_I18N 位置 / setConfig 合并 / 5 处运行时读取
 // ------------------------------------------------------------------
@@ -426,10 +426,10 @@ console.log('[12] i18n 全部配置化（DEFAULT_I18N 在 i18n.js + injector.js 
       );
     });
 
-    // 2. i18n.js 暴露 window.SocialEraseri18n.DEFAULT_I18N
+    // 2. i18n.js 暴露 window.XEraseri18n.DEFAULT_I18N
     assert(
-      /window\.SocialEraseri18n\s*=\s*\{[\s\S]{0,500}DEFAULT_I18N\s*:/.test(i18nSrc),
-      'i18n.js: window.SocialEraseri18n.DEFAULT_I18N 暴露存在'
+      /window\.XEraseri18n\s*=\s*\{[\s\S]{0,500}DEFAULT_I18N\s*:/.test(i18nSrc),
+      'i18n.js: window.XEraseri18n.DEFAULT_I18N 暴露存在'
     );
 
     // 3. injector.js 不应再有 DEFAULT_I18N 常量定义（必须挪走了）
@@ -441,10 +441,10 @@ console.log('[12] i18n 全部配置化（DEFAULT_I18N 在 i18n.js + injector.js 
       'injector.js: 不应有本地 const DEFAULT_I18N = {...}（必须挪到 i18n.js）'
     );
 
-    // 4. injector.js setConfig 内部从 window.SocialEraseri18n.DEFAULT_I18N 读
+    // 4. injector.js setConfig 内部从 window.XEraseri18n.DEFAULT_I18N 读
     assert(
-      /setConfig\s*\(\s*config\s*\)\s*\{[\s\S]{0,3000}window\.SocialEraseri18n[\s\S]{0,200}DEFAULT_I18N/.test(injectSrc),
-      'injector.js setConfig 用 window.SocialEraseri18n.DEFAULT_I18N 作 i18n 兜底'
+      /setConfig\s*\(\s*config\s*\)\s*\{[\s\S]{0,3000}window\.XEraseri18n[\s\S]{0,200}DEFAULT_I18N/.test(injectSrc),
+      'injector.js setConfig 用 window.XEraseri18n.DEFAULT_I18N 作 i18n 兜底'
     );
     assert(
       /setConfig\s*\(\s*config\s*\)\s*\{[\s\S]{0,3000}this\._i18n\s*=/.test(injectSrc),

@@ -1,9 +1,9 @@
-// SocialEraser Content Script
+// X Eraser Content Script
 // 注入到 X 网站，跑在 X 页面 DOM 上下文里
 //
 // 职责:
 //   1. 启动时加载远程配置（从 chrome.storage.local 读，background 已预拉好）
-//   2. 初始化 SocialEraserInjector 实例（核心清理引擎，跑在 lib/injector.js）
+//   2. 初始化 XEraserInjector 实例（核心清理引擎，跑在 lib/injector.js）
 //   3. 包装 injector 的回调（onLog / onProgress / onComplete）→ 通过 chrome.runtime.sendMessage 发给 sidepanel
 //   4. 检测登录状态、页面类型（likes/bookmarks/tweets/following）
 //   5. 处理「跨页面清理」的 auto-resume（用户点了 Start，跳页后再回来自动继续）
@@ -17,19 +17,19 @@
 // 注入时机:
 //   - manifest content_scripts: 每次 X 页面加载时自动注入
 //   - chrome.scripting.executeScript: 已开的 tab 由 background 手动注入
-//   防重复注入: 用 window.__SocialEraserContentInjected flag 守护
+//   防重复注入: 用 window.__XEraserContentInjected flag 守护
 
 // 防止 manifest content_scripts + chrome.scripting.executeScript 重复注入同一个 content.js
 // 重复注入会导致 2 个 injector 实例、2 个 onLog 包装、日志面板重复输出
 (function() {
   'use strict';
-  if (window.__SocialEraserContentInjected) {
-    console.log('[SocialEraser] Content script already injected, skipping re-init');
+  if (window.__XEraserContentInjected) {
+    console.log('[X Eraser] Content script already injected, skipping re-init');
     return;
   }
-  window.__SocialEraserContentInjected = true;
+  window.__XEraserContentInjected = true;
 
-  console.log('[SocialEraser] Content script loaded on', window.location.href);
+  console.log('[X Eraser] Content script loaded on', window.location.href);
 
   let injector = null;
 
@@ -76,7 +76,7 @@
       const stored = await chrome.storage.local.get('remoteConfig');
       if (stored && stored.remoteConfig) return stored.remoteConfig;
     } catch (e) {
-      console.warn('[SocialEraser] Failed to read remote config from storage:', e.message);
+      console.warn('[X Eraser] Failed to read remote config from storage:', e.message);
     }
     return null;
   }
@@ -128,11 +128,11 @@
     ]
   };
 
-  // 把远程配置封装成 window.SocialEraserConfig 给 page 上下文用
+  // 把远程配置封装成 window.XEraserConfig 给 page 上下文用
   //   远程配置优先 → 没有就用本地默认（兜底）
   // 设计：getter 形式（每次读都重新判断 remoteConfig），方便运行时 remote 变化后能立刻生效
-  function initSocialEraserConfig(remoteConfig) {
-    window.SocialEraserConfig = {
+  function initXEraserConfig(remoteConfig) {
+    window.XEraserConfig = {
       // 匹配的网站域名模式（用于 chrome.tabs.query 查 X tab）
       getWebsitePatterns() {
         if (remoteConfig && remoteConfig.selectors && remoteConfig.selectors.xWebsite && remoteConfig.selectors.xWebsite.patterns) {
@@ -178,10 +178,10 @@
     };
   }
 
-  // 初始化 SocialEraserInjector（lib/injector.js 的主引擎类）并包装回调
+  // 初始化 XEraserInjector（lib/injector.js 的主引擎类）并包装回调
   // 包装内容：injector.onLog / onProgress / onComplete / onError / onTypeStart / onTypeComplete
   //   全部桥接到 chrome.runtime.sendMessage 发给 sidepanel（用户控制面板）
-  // 失败保护：如果 window.SocialEraserInjector 不存在（injector.js 没加载完），静默 return
+  // 失败保护：如果 window.XEraserInjector 不存在（injector.js 没加载完），静默 return
   // M++ 修复（2026-06-19 tweets-bug-8）：sendToBackground 提到顶层（initInjector 外）
   //   这样 content script 里所有 fire-and-forget 消息（cleanupLog / cleanupAborted / cleanupComplete / cleanupError 等）
   //   都能用同一个 helper，不用每个都内嵌一份
@@ -201,8 +201,8 @@
   }
 
   function initInjector(remoteConfig) {
-    if (window.SocialEraserInjector) {
-      injector = new window.SocialEraserInjector();
+    if (window.XEraserInjector) {
+      injector = new window.XEraserInjector();
       injector.setConfig(remoteConfig);
       // 关键修复（debug-tweet-delete-regression）：把当前登录用户名传给 injector
       //   用于 collectCandidates 过滤掉他人 quoted 推文（X 2026 把 quoted 推文渲染成顶层 article）
@@ -240,24 +240,24 @@
         sendToBackground({ type: 'cleanupTypeComplete', data: { type: type, processed: processed } });
       };
 
-      console.log('[SocialEraser] Injector initialized');
+      console.log('[X Eraser] Injector initialized');
     }
   }
 
-  // 启动入口：加载远程配置 → 初始化 SocialEraserConfig 和 Injector → 500ms 后检查登录状态
+  // 启动入口：加载远程配置 → 初始化 XEraserConfig 和 Injector → 500ms 后检查登录状态
   // 同时启动 MutationObserver 监听 article 元素出现，触发 auto-resume 检查
   async function loadConfig() {
     const remoteConfig = await getRemoteConfig();
     if (remoteConfig) {
-      console.log('[SocialEraser] Config loaded from storage');
+      console.log('[X Eraser] Config loaded from storage');
     } else {
-      console.log('[SocialEraser] No config in storage, using defaults');
+      console.log('[X Eraser] No config in storage, using defaults');
     }
 
-    initSocialEraserConfig(remoteConfig);
+    initXEraserConfig(remoteConfig);
     initInjector(remoteConfig);
 
-    console.log('[SocialEraser] Config initialized, checking status...');
+    console.log('[X Eraser] Config initialized, checking status...');
     // 不用 setTimeout 猜延迟（500ms 是靠经验），等 window 'load' 事件 = page + 资源完全加载
     if (document.readyState === 'complete') {
       checkXStatus();
@@ -300,8 +300,8 @@
     if (area !== 'local' || !changes.remoteConfig) return;
     getRemoteConfig().then(function(newConfig) {
       if (!newConfig) return;
-      console.log('[SocialEraser] remoteConfig changed, applying via setConfig');
-      initSocialEraserConfig(newConfig);
+      console.log('[X Eraser] remoteConfig changed, applying via setConfig');
+      initXEraserConfig(newConfig);
       if (injector && typeof injector.setConfig === 'function') {
         injector.setConfig(newConfig);
         if (typeof injector.setCurrentUsername === 'function') {
@@ -309,7 +309,7 @@
         }
       }
     }).catch(function(e) {
-      console.warn('[SocialEraser] re-init on storage change failed:', e.message);
+      console.warn('[X Eraser] re-init on storage change failed:', e.message);
     });
   });
 
@@ -397,7 +397,7 @@
       });
     } catch (e) {
       // 兜底：background 不可用时退回 location.replace
-      console.warn('[SocialEraser] forceNavigation failed, fallback to location.replace:', e);
+      console.warn('[X Eraser] forceNavigation failed, fallback to location.replace:', e);
       window.location.replace(finalUrl);
     }
   }
@@ -413,7 +413,7 @@
       const pending = readResp.pending;
       const pageType = detectPageType();
       const types = pending.types || [];
-      console.log('[SocialEraser] Resuming pending cleanup - types:', types, 'pageType:', pageType);
+      console.log('[X Eraser] Resuming pending cleanup - types:', types, 'pageType:', pageType);
 
       // 通知 side panel
       chrome.runtime.sendMessage({
@@ -445,7 +445,7 @@
           // 解决：retry 超过 3 次主动清 session + 提示用户
           const retryCount = (pending.retryCount || 0) + 1;
           if (retryCount > 3) {
-            console.warn('[SocialEraser] Retry limit reached (' + retryCount + '), aborting cleanup. Current page:', pageType);
+            console.warn('[X Eraser] Retry limit reached (' + retryCount + '), aborting cleanup. Current page:', pageType);
             await chrome.runtime.sendMessage({ target: 'clearPendingCleanup' });
             // 通知 sidepanel：cleanup 已中止 + 错误原因（chrome.runtime.sendMessage 是广播，sidepanel 直接收到）
             sendToBackground({
@@ -463,7 +463,7 @@
             target: 'updatePendingCleanup',
             pending: Object.assign({}, pending, { retryCount: retryCount })
           });
-          console.log('[SocialEraser] No matched type on this page, navigating to:', firstType, '(retry ' + retryCount + '/3)');
+          console.log('[X Eraser] No matched type on this page, navigating to:', firstType, '(retry ' + retryCount + '/3)');
           forcePageLoad(nextUrl);
         } else {
           // 未知 type，清空 session 避免死循环
@@ -504,7 +504,7 @@
           const nextPath = nextUrl.split('?')[0];
           if (nextPath === window.location.pathname) {
             // 同 URL：直接处理（replies/retweets 共享 /with_replies 场景）
-            console.log('[SocialEraser] Same URL for ' + nextType + ', skip forcePageLoad and process directly');
+            console.log('[X Eraser] Same URL for ' + nextType + ', skip forcePageLoad and process directly');
             sendToBackground({
               type: 'cleanupLog',
               data: { message: t('processedNavigatingTo', {next: t(nextType)}), level: 'info' }
@@ -523,7 +523,7 @@
           // 不同 URL：更新 session + forcePageLoad 跳出当前 resume，等下次 page load 自动 resume
           const newPending = Object.assign({}, pending, { types: pendingToProcess });
           await chrome.runtime.sendMessage({ target: 'updatePendingCleanup', pending: newPending });
-          console.log('[SocialEraser] Processed ' + matchedType + ', navigating to:', nextType);
+          console.log('[X Eraser] Processed ' + matchedType + ', navigating to:', nextType);
           sendToBackground({
             type: 'cleanupLog',
             data: { message: t('processedNavigatingTo', {next: t(nextType)}), level: 'info' }
@@ -535,7 +535,7 @@
         await chrome.runtime.sendMessage({ target: 'clearPendingCleanup' });
       }
     } catch (error) {
-      console.warn('[SocialEraser] Failed to check pending cleanup:', error.message);
+      console.warn('[X Eraser] Failed to check pending cleanup:', error.message);
     }
   }
 
@@ -563,7 +563,7 @@
           try {
             origOnComplete(result);
           } catch (e) {
-            console.error('[SocialEraser] origOnComplete threw:', e);
+            console.error('[X Eraser] origOnComplete threw:', e);
           }
         }
         if (!resolved) {
@@ -571,7 +571,7 @@
           // 恢复原始 onComplete，避免下一轮 runCleanupOnce 拿到被覆盖的版本
           // 否则最后一轮完成后 cleanupComplete 事件链断裂，sidepanel 永远卡 Processing...
           injector.onComplete = origOnComplete;
-          console.log('[SocialEraser] Auto-resume attempt ' + attempt + ': processed=' + result.processed + (isLast ? ' (final)' : ' (continuing)'));
+          console.log('[X Eraser] Auto-resume attempt ' + attempt + ': processed=' + result.processed + (isLast ? ' (final)' : ' (continuing)'));
           resolve(result);
         }
       };
@@ -582,7 +582,7 @@
       injector.startCleanup(options).catch(function(e) {
         if (resolved) return;
         resolved = true;
-        console.warn('[SocialEraser] startCleanup threw in attempt ' + attempt + ': ' + e.message);
+        console.warn('[X Eraser] startCleanup threw in attempt ' + attempt + ': ' + e.message);
         resolve({ processed: 0, errors: 0 });
       });
     });
@@ -597,7 +597,7 @@
   loadConfig();
 
   function isTargetWebsite() {
-    const patterns = window.SocialEraserConfig.getWebsitePatterns();
+    const patterns = window.XEraserConfig.getWebsitePatterns();
     const currentHost = window.location.hostname.toLowerCase();
     return patterns.some(function(domain) {
       return currentHost.includes(domain.toLowerCase());
@@ -621,12 +621,12 @@
   }
 
   function checkGlobalLoginIndicators() {
-    const indicators = window.SocialEraserConfig.getGlobalLoginIndicators();
+    const indicators = window.XEraserConfig.getGlobalLoginIndicators();
     for (let i = 0; i < indicators.length; i++) {
       try {
         const element = document.querySelector(indicators[i]);
         if (element) {
-          console.log('[SocialEraser] Global login indicator found:', indicators[i]);
+          console.log('[X Eraser] Global login indicator found:', indicators[i]);
           return true;
         }
       } catch (e) {
@@ -637,7 +637,7 @@
   }
 
   function checkLoginStatusWithConfig() {
-    const loginConfig = window.SocialEraserConfig.getLoginConfig();
+    const loginConfig = window.XEraserConfig.getLoginConfig();
     const loggedInElements = loginConfig.loggedInElements || [];
     for (let i = 0; i < loggedInElements.length; i++) {
       const element = loggedInElements[i];
@@ -655,7 +655,7 @@
   }
 
   function checkIsLoginPage() {
-    const loginConfig = window.SocialEraserConfig.getLoginConfig();
+    const loginConfig = window.XEraserConfig.getLoginConfig();
     const checkElementsByLang = loginConfig.checkElements || {};
 
     const pageLang = detectPageLanguage();
@@ -717,7 +717,7 @@
       var href = profileLink.getAttribute('href');
       var match = href && href.match(/^\/([^\/\?]+)/);
       if (match && match[1]) {
-        console.log('[SocialEraser] Got username from AppTabBar_Profile_Link:', match[1]);
+        console.log('[X Eraser] Got username from AppTabBar_Profile_Link:', match[1]);
         return match[1];
       }
     }
@@ -737,7 +737,7 @@
         // 检查是否是 profile 链接（通常是头像或 profile 按钮）
         var ariaLabel = avatarLinks[i].getAttribute('aria-label') || '';
         if (ariaLabel.toLowerCase().indexOf('profile') >= 0) {
-          console.log('[SocialEraser] Got username from avatar link:', m[1]);
+          console.log('[X Eraser] Got username from avatar link:', m[1]);
           return m[1];
         }
       }
@@ -752,7 +752,7 @@
       /^\/([^\/]+)(?:\/(with_replies|likes|following|highlights|articles|media))?\/?$/
     );
     if (urlMatch && urlMatch[1] && RESERVED_PATHS.indexOf(urlMatch[1]) === -1) {
-      console.log('[SocialEraser] Got username from URL path:', urlMatch[1]);
+      console.log('[X Eraser] Got username from URL path:', urlMatch[1]);
       return urlMatch[1];
     }
 
@@ -770,7 +770,7 @@
     if (username) {
       return 'https://x.com/' + username + '/likes';
     }
-    console.warn('[SocialEraser] Could not get username for likes page');
+    console.warn('[X Eraser] Could not get username for likes page');
     return null;  // 拿不到 username 就放弃
   }
 
@@ -785,7 +785,7 @@
     if (username) {
       return 'https://x.com/' + username + '/following';
     }
-    console.warn('[SocialEraser] Could not get username, using /i/following fallback');
+    console.warn('[X Eraser] Could not get username, using /i/following fallback');
     return 'https://x.com/i/following';
   }
 
@@ -796,19 +796,19 @@
   function getOriginalTweetsPageURL() {
     var username = getCurrentUsername();
     if (username) return 'https://x.com/' + username;
-    console.warn('[SocialEraser] Could not get username for originalTweets, using /home fallback');
+    console.warn('[X Eraser] Could not get username for originalTweets, using /home fallback');
     return 'https://x.com/home';
   }
   function getRepliesPageURL() {
     var username = getCurrentUsername();
     if (username) return 'https://x.com/' + username + '/with_replies';
-    console.warn('[SocialEraser] Could not get username for replies, using /home fallback');
+    console.warn('[X Eraser] Could not get username for replies, using /home fallback');
     return 'https://x.com/home';
   }
   function getRetweetsPageURL() {
     var username = getCurrentUsername();
     if (username) return 'https://x.com/' + username + '/with_replies';
-    console.warn('[SocialEraser] Could not get username for retweets, using /home fallback');
+    console.warn('[X Eraser] Could not get username for retweets, using /home fallback');
     return 'https://x.com/home';
   }
 
@@ -823,7 +823,7 @@
     if (cachedIsLoggedIn === true) {
       if (checkIsLoginPage()) {
         cachedIsLoggedIn = false;
-        console.log('[SocialEraser] Login page detected, flipping cached state to false');
+        console.log('[X Eraser] Login page detected, flipping cached state to false');
         return false;
       }
       return true;
@@ -840,7 +840,7 @@
     // 首次 / 重置后：跑一次正向 selector 检测
     if (checkLoginStatus()) {
       cachedIsLoggedIn = true;
-      console.log('[SocialEraser] Login confirmed (sticky cached)');
+      console.log('[X Eraser] Login confirmed (sticky cached)');
       return true;
     }
 
@@ -883,11 +883,11 @@
     // 检查页面类型与所选类型是否匹配
     const pageType = detectPageType();
     const types = (message.options && message.options.types) || [];
-    console.log('[SocialEraser] Start cleanup - types:', types, 'pageType:', pageType);
+    console.log('[X Eraser] Start cleanup - types:', types, 'pageType:', pageType);
 
     if (types.indexOf('likes') >= 0 && pageType !== 'likes') {
       const likesUrl = getLikesPageURL();
-      console.log('[SocialEraser] Likes requires /likes page, current:', pageType);
+      console.log('[X Eraser] Likes requires /likes page, current:', pageType);
       sendToBackground({
         type: 'cleanupLog',
         data: { message: t('likesRequiresNav'), level: 'info' }
@@ -902,7 +902,7 @@
 
     if (types.indexOf('bookmarks') >= 0 && pageType !== 'bookmarks') {
       const bookmarksUrl = getBookmarksPageURL();
-      console.log('[SocialEraser] Bookmarks requires /bookmarks page, current:', pageType);
+      console.log('[X Eraser] Bookmarks requires /bookmarks page, current:', pageType);
       sendToBackground({
         type: 'cleanupLog',
         data: { message: t('bookmarksRequiresNav'), level: 'info' }
@@ -914,7 +914,7 @@
 
     if (types.indexOf('following') >= 0 && pageType !== 'following') {
       const followingUrl = getFollowingPageURL();
-      console.log('[SocialEraser] Following requires /following page, current:', pageType);
+      console.log('[X Eraser] Following requires /following page, current:', pageType);
       chrome.runtime.sendMessage({
         type: 'cleanupLog',
         data: { message: t('followingRequiresNav'), level: 'info' }
@@ -926,7 +926,7 @@
 
     if (types.indexOf('originalTweets') >= 0 && pageType !== 'originalTweets') {
       const url = getOriginalTweetsPageURL();
-      console.log('[SocialEraser] originalTweets requires profile page, current:', pageType);
+      console.log('[X Eraser] originalTweets requires profile page, current:', pageType);
       chrome.runtime.sendMessage({
         type: 'cleanupLog',
         data: { message: t('originalTweetsRequiresNav'), level: 'info' }
@@ -938,7 +938,7 @@
 
     if (types.indexOf('replies') >= 0 && pageType !== 'tweetTimeline') {
       const url = getRepliesPageURL();
-      console.log('[SocialEraser] replies requires /with_replies page, current:', pageType);
+      console.log('[X Eraser] replies requires /with_replies page, current:', pageType);
       chrome.runtime.sendMessage({
         type: 'cleanupLog',
         data: { message: t('repliesRequiresNav'), level: 'info' }
@@ -950,7 +950,7 @@
 
     if (types.indexOf('retweets') >= 0 && pageType !== 'tweetTimeline') {
       const url = getRetweetsPageURL();
-      console.log('[SocialEraser] retweets requires /with_replies page, current:', pageType);
+      console.log('[X Eraser] retweets requires /with_replies page, current:', pageType);
       chrome.runtime.sendMessage({
         type: 'cleanupLog',
         data: { message: t('retweetsRequiresNav'), level: 'info' }

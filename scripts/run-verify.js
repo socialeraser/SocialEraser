@@ -34,9 +34,11 @@ const ALL_SCRIPTS = [
   'verify-i18n.js',
   'verify-login-detection.js',
   'verify-no-retry.js',
+  'verify-processed-count-cumulative.js',
   'verify-scroll-to-bottom.js',
   'verify-setconfig.js',
   'verify-sidepanel-bindings.js',
+  'verify-syntax.js',
   'verify-tweets-bug-3.js',
 ];
 

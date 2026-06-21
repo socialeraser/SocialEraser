@@ -1,10 +1,10 @@
-// SocialEraser i18n - Multi-language Support
+// X Eraser i18n - Multi-language Support
 // 8 languages: en, zh-CN, ja, ko, pt, es, de, fr
 
 (function() {
   'use strict';
 
-  console.log('[SocialEraser] i18n.js loading...');
+  console.log('[X Eraser] i18n.js loading...');
 
   // 中文文案需要更细粒度的处理
   // 使用 {var} 作为占位符
@@ -1076,7 +1076,7 @@
   // DEFAULT_I18N：8 语言 selector 关键字默认集合
   //   - 这些不是 UI 文案，是「X 改版时要改的 selector 关键字」（Delete / 撤销转推 / Cancel 等）
   //   - 项目惯例：i18n.js = 所有 8 语言数据的家
-  //   - 运行时合并：injector.js 的 setConfig 用 window.SocialEraseri18n.DEFAULT_I18N 作默认值
+  //   - 运行时合并：injector.js 的 setConfig 用 window.XEraseri18n.DEFAULT_I18N 作默认值
   //     再叠加 remote-example.json 的 selectors.i18n 覆盖
   //   - X 改版改了翻译时，改这里或远程配置即可（不用动 injector.js）
   // ============================================================================
@@ -1200,7 +1200,7 @@
   var SUPPORTED_LANGS = ['en', 'zh-CN', 'ja', 'ko', 'pt', 'es', 'de', 'fr'];
 
   var currentLang = detectLanguage();
-  console.log('[SocialEraser] Detected language:', currentLang);
+  console.log('[X Eraser] Detected language:', currentLang);
 
   // 翻译函数 - 支持 {var} 占位符
   function t(key, vars) {
@@ -1213,7 +1213,7 @@
   }
 
   // 暴露到全局
-  window.SocialEraseri18n = {
+  window.XEraseri18n = {
     t: t,
     DEFAULT_I18N: DEFAULT_I18N,
     setLanguage: function(lang) {
@@ -1230,7 +1230,7 @@
   // 兼容老代码：content.js 直接调 t()，挂到 window.t
   window.t = t;
 
-  console.log('[SocialEraser] i18n.js ready, language:', currentLang);
+  console.log('[X Eraser] i18n.js ready, language:', currentLang);
 
   // 关键修复：用户保存的 preferredLang 必须覆盖 navigator.language 自动检测
   // 否则用户选了 English，但 content.js / injector.js 跑在 X 页面上下文，
@@ -1248,7 +1248,7 @@
       if (result && result.preferredLang && TRANSLATIONS[result.preferredLang]) {
         if (result.preferredLang !== currentLang) {
           currentLang = result.preferredLang;
-          console.log('[SocialEraser] Applied preferred language:', currentLang);
+          console.log('[X Eraser] Applied preferred language:', currentLang);
         }
       }
     });
@@ -1258,7 +1258,7 @@
           var newLang = changes.preferredLang.newValue;
           if (newLang && TRANSLATIONS[newLang]) {
             currentLang = newLang;
-            console.log('[SocialEraser] Language changed to:', currentLang);
+            console.log('[X Eraser] Language changed to:', currentLang);
           }
         }
       });

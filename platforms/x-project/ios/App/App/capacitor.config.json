@@ -1,6 +1,6 @@
 {
   "appId": "com.socialeraser.app",
-  "appName": "SocialEraser",
+  "appName": "X Eraser",
   "webDir": "www",
   "android": {
     "allowMixedContent": true,

@@ -1194,3 +1194,101 @@ deleteKeywords: [
 - **铁律优先级**：当症状是"某语言坏其他语言好"，**先查 i18n / config 8 语言数组**，再考虑代码逻辑
 - **完整 session**：[docs/debug-history/debug-portuguese-delete-regression.md](file:///Volumes/XPSSD/workspaces/SocialEraser/docs/debug-history/debug-portuguese-delete-regression.md)（待建）
 - **防回归**：[scripts/verify-actual-x-selectors.js#i18n-8lang](file:///Volumes/XPSSD/workspaces/SocialEraser/scripts/verify-actual-x-selectors.js) 增 5 项 assert：8 langs × `i18n.js` / `default.json` / `remote-example.json` 三处都有"Excluir" + "Desfazer repost" + "respondendo a" + "Fixado" + "Repostado" = 40 项硬护栏
+
+---
+
+## 二十四、案例 19：⚠️ 铁律——重命名时 sed `Brand → NewBrand` 绝不能无脑做，先 grep 找 `Brand+IdentifierSuffix` 显式 rename
+
+**症状**：
+上一步把 x-project 的 `SocialEraser` 全部重命名为 `X Eraser` 后，**3 个 `content.js` 静默 break**：
+- `window.__SocialEraserContentInjected` → 被 sed 替换成 `window.__X EraserContentInjected`
+- 第 26 行 `if (window.__X EraserContentInjected)` —— **JS 标识符含空格** → 加载即 `SyntaxError`
+- 第 30 行 `window.__X EraserContentInjected = true;` —— 同上
+- 第 20 行注释里 `用 window.__X EraserContentInjected flag 守护` —— 注释无害但语义坏
+- 涉及 3 个文件：source `platforms/x-project/scripts/content.js` + build output `extensions/chrome-x/content.js` + `extensions/edge-x/content.js`
+
+`node scripts/run-verify.js` **12/12 全过**——所有 verify 脚本（verify-tweets-bug-3.js / verify-setconfig.js / verify-actual-x-selectors.js / verify-no-retry.js / ...）都只验方法签名 / 注释字符串 / 模拟沙箱，**没有一项**真的去 `node --check` 整个 content.js 解析 IIFE 顶层。user 在 IDE 里打开 `content.js:26` 一眼就看出来"变量名可以包含空格吗？"
+
+**根因**：
+- `sed 's/SocialEraser/X Eraser/g'` 是字符串级别替换，**不识别 JS 标识符语法边界**。`__SocialEraserContentInjected` 被原样替换成 `__X EraserContentInjected`，后者是 invalid identifier（JS 标识符 = `[A-Za-z_$][A-Za-z0-9_$]*`，不能含空格）。
+- 当时脑里只想着"品牌字符串替换" + "JS class 标识符（`SocialEraserInjector` → `XEraserInjector` 无空格）"，**漏算**了"dunder-style flag"（`__SocialEraserContentInjected`）这种 `Brand+IdentifierSuffix` 模式。
+- 整套 verify 体系无 `node --check` 阶段，全靠 `grep` + `regex.test` + `eval` 沙箱 IIFE 部分逻辑 —— 这三类都没法 catch 一个 IIFE 顶部 `if (window.__X EraserContentInjected)` 的语法错误。
+
+**修法**（**应该**这么做 / 以后重命名步骤）：
+
+```bash
+# 步骤 1：先找出所有 "Brand + 标识符后缀" 的位置（PascalCase Brand 后接大写字母 = 标识符）
+grep -nE "[A-Z]?[Bb]rand[A-Z][A-Za-z_0-9]" <files>
+
+# 步骤 2：把这些显式列出来，逐个决定 rename 方案：
+#   - PascalCase Brand+Suffix  → NewBrandSuffix（无空格）
+#   - __BrandContentInjected  → __NewBrandContentInjected（dunder 同样无空格）
+#   - window.BrandConfig      → window.NewBrandConfig
+
+# 步骤 3：手动 edit 这些位置（不是 sed）
+
+# 步骤 4：再 sed 处理"纯字符串"位置
+sed -i '' 's/Brand/NewBrand/g' <files>  # Brand 后面是空格 / 标点 / 行尾 / 文件结尾的位置
+
+# 步骤 5：必须跑 node -c / eslint 验证语法
+for f in <all-js-files>; do
+  node -c "$f" || echo "SYNTAX ERROR in $f"
+done
+
+# 步骤 6：再跑现有 verify 脚本
+node scripts/run-verify.js
+```
+
+**诊断流程**（"重命名后看着像 ok 但有玄学"）：
+
+| 步骤 | 检查项 | 命令 |
+|------|--------|------|
+| 1 | 找 `Brand+IdentifierSuffix` 位置（PascalCase Brand 后跟大写字母 / 数字 / 下划线） | `grep -nE "[A-Z]?[Bb]rand[A-Z][A-Za-z_0-9]" <files>` |
+| 2 | `node --check` 每个改过的 JS 文件 | `for f in $(find . -name '*.js' -path '*/x-project/*'); do node -c "$f"; done` |
+| 3 | grep 找 NewBrand 紧跟字母/数字/下划线（标识符后缀漏改） | `grep -nE "NewBrand[A-Za-z_0-9]" <files>` |
+| 4 | grep 找 NewBrand 前面是 `.` 或 `window.`（属性访问漏改） | `grep -nE "(window|\.)\s*NewBrand" <files>` |
+| 5 | 在真实页面 / 扩展菜单打开，console 看有没有 `SyntaxError` / `ReferenceError` | DevTools |
+
+**绝对禁止**：
+- 无脑 `sed 's/Brand/NewBrand/g'`，尤其当 NewBrand 含空格 / 中文 / 任何非 `[A-Za-z0-9_$]` 字符
+- 改完只跑 `node scripts/run-verify.js` 就宣称"12/12 通过 = 修复完成"——verify 体系本身就要扩
+- 在 brand 字符串和 JS 标识符混用同一个 sed 替换里——必须**分开做**，先用 grep 找标识符位置显式 rename，剩下纯字符串位置才 sed
+- 漏算 dunder flag / 单下划线私有字段 / `window.BrandX` 全局 / `BrandX.prototype.y` 这种 Brand+IdentifierSuffix 模式
+
+**verify 体系扩项**（防"verify 12/12 过但线上 SyntaxError"）：
+
+```js
+// scripts/verify-syntax.js (新加)
+//   - 遍历 platforms/*/src platforms/*/scripts platforms/*/chrome-source platforms/*/edge-source
+//   - 全部 .js 跑 node --check
+//   - 失败立即 exit 1，输出文件 + 行号
+const { execSync } = require('child_process');
+const fs = require('fs');
+const path = require('path');
+function walk(dir) {
+  const out = [];
+  for (const f of fs.readdirSync(dir, { withFileTypes: true })) {
+    const p = path.join(dir, f.name);
+    if (f.isDirectory()) out.push(...walk(p));
+    else if (f.name.endsWith('.js')) out.push(p);
+  }
+  return out;
+}
+let failed = 0;
+for (const f of walk('platforms')) {
+  if (f.includes('/www/') || f.includes('/ios/')) continue;  // build output
+  try { execSync(`node -c "${f}"`, { stdio: 'pipe' }); }
+  catch (e) { console.log('FAIL', f); failed++; }
+}
+process.exit(failed ? 1 : 0);
+```
+
+**经验**：
+- **sed 是无脑工具，语法边界它不懂**——遇到"重命名"这种大动作，永远先 grep 列清单，再决定怎么 rename，最后才 sed
+- **JS 标识符规则不能忘**：`[A-Za-z_$][A-Za-z0-9_$]*`，含空格 / 中文 / emoji 全部 invalid，扩展加载即 throw
+- **dunder 模式（`__BrandXxx`）和 PascalCase 模式（`BrandXxx`）一视同仁**——都是 Brand + IdentifierSuffix，sed 都会破坏
+- **verify 12/12 过 ≠ 真实加载不出错**——verify 体系本身要补 `node --check` / eslint 阶段
+- **用户 IDE 里点开的"玄学错误"就是真错误**——verifier 没 catch 不代表没坏，user 一眼看出来的要立刻承认 + 修，别辩护
+- **品牌重命名三步走**：(1) grep 找 `Brand+IdentifierSuffix` 位置 (2) 显式 rename (3) 再 sed 处理纯字符串
+- **完整 session**：本对话上文 + commit history
+- **防回归**：`scripts/verify-syntax.js`（待建）— 全 platform 源 JS 文件 `node --check` 0 失败才能 `npm run build`
