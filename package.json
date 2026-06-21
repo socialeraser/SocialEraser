@@ -11,6 +11,7 @@
     "sync": "node scripts/sync-shared.js --no-cap",
     "build": "node scripts/sync-shared.js",
     "start": "npm run build && cd platforms/x-project && npx cap run android",
+    "dev:website": "npm --workspace @social-eraser/marketing-website run dev",
     "android:open": "cd platforms/x-project && npx cap open android",
     "test": "npm run sync && node scripts/run-verify.js",
     "verify": "node scripts/run-verify.js",
