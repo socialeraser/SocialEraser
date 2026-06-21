@@ -1,7 +1,7 @@
 # platforms/x-project
 
 The **X (Twitter) bulk-delete** platform. Ships to:
-- Chrome extension (via `extensions/chrome-x/`)
+- Chrome extension (via `chrome-source/` + `scripts/` + `src/sidepanel.html`)
 - Android (via Capacitor → `android/`)
 - iOS (placeholder, not started)
 
@@ -11,6 +11,8 @@ The **X (Twitter) bulk-delete** platform. Ships to:
 |------|---------|
 | `src/` | Web UI source: `sidepanel.html`, `sidepanel.js`, `_locales/`, `config/`, `icons/` |
 | `scripts/` | Core automation: `x-automation.js` (the actual delete logic), `content.js` (Chrome entry), `i18n.js` |
+| `chrome-source/` | Chrome extension shell: `manifest.json` (MV3) + `background.js` (service worker) |
+| `edge-source/` | Edge extension shell: `manifest.json` + `background.js` (fork of chrome-source) |
 | `android/` | Capacitor Android Studio project |
 | `ios/` | Capacitor iOS Xcode project (placeholder) |
 | `capacitor.config.json` | Capacitor app config |

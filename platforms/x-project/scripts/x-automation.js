@@ -428,22 +428,25 @@
       // 关键修复（M++ 修复 tweets-bug-3 2026-06-17 增量）：
       //   旧版直接 safeClick(moreButton, 0) → click caret → 但 N++ 修复 isReplyTweet 已 click caret 弹菜单
       //   → 再次 click caret → toggle 关掉 → 0 menuitem → waitForMenuItemByText 3s timeout → 失败
-      //   修法：先 wait 350ms 看 menuitem 是不是已在（reply 推文 N++ 修复弹菜单）—— 命中直接 click deleteItem
+      //   修法：先 wait 1000ms 看 menuitem 是不是已在（reply 推文 N++ 修复弹菜单）—— 命中直接 click deleteItem
       //         miss（原创推文 N++ 修复没弹菜单）→ 才 click caret 弹菜单 + wait 3000ms
       //   MCP 实证（2026-06-17 第三次 cleanup 测试 menuitemCount=0 startCount=0 + 第 1 次 wait 50ms snapshot=[Delete, Pin, ...]）：
       //     - startCount=0, 50ms 内出现 8 menuitem → 50ms timeout 退出**未**进 while loop body
       //       → 50ms 太短！N++ 修复 click caret 弹菜单需要 150-200ms 渲染时间
       //     - 改 50ms → 350ms → wait 350ms 命中"Delete" → click deleteItem
+      //   MCP 实证（2026-06-21 tweets-bug 回归）：
+      //     - 350ms 在 X 2026-06 改版后**仍 miss**（menuitemCount=0）
+      //     - 改 350ms → 1000ms 验证主路径是否稳定命中（用户无感：X 菜单渲染已 200ms 收尾，剩余 800ms 是网络/JS 解析 buffer）
       //   注意：原创推文 N++ 修复**也**调 isReplyTweet（line 1497 diag log）→ 弹菜单
-      //         wait 350ms **也**命中 → click deleteItem —— OK
+      //         wait 1000ms **也**命中 → click deleteItem —— OK
       //         不会触发 fallback click caret（除非 N++ 修复失败未弹菜单）
       let deleteItem = await this.waitForMenuItemByText(
         this._i18n.deleteKeywords,
-        350
+        1000
       );
       if (!deleteItem) {
         // N++ 修复未弹菜单（原创推文特殊情况）→ fallback click caret 弹菜单
-        this.debug('[deleteTweet 350ms-miss] article="' + _delArticleSig + '", '
+        this.debug('[deleteTweet 1000ms-miss] article="' + _delArticleSig + '", '
           + 'menuitemCount=' + this.findElements('[role="menuitem"]', document).length);
         await this.safeClick(moreButton, 0);
         deleteItem = await this.waitForMenuItemByText(
