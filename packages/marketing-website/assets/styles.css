@@ -6,6 +6,8 @@
 
 /* ---------- Design Tokens (CSS custom properties) ---------- */
 :root {
+  color-scheme: dark;
+
   /* Surface */
   --bg:               #0a0a0b;
   --bg-elev-1:        #111114;
@@ -94,11 +96,21 @@
   --container-lg:  1280px;
   --header-height: 72px;
 
+  /* Breakpoints (documented; not enforced in CSS) */
+  --bp-sm:  480px;
+  --bp-md:  768px;
+  --bp-lg:  900px;
+
   /* Motion */
   --ease:        cubic-bezier(0.4, 0, 0.2, 1);
   --ease-out:    cubic-bezier(0, 0, 0.2, 1);
   --duration:    200ms;
   --duration-slow: 400ms;
+
+  /* Hover lift tokens */
+  --hover-lift-sm: translateY(-1px);
+  --hover-lift-md: translateY(-2px);
+  --hover-lift-lg: translateY(-4px);
 
   /* Brand gradient (reusable) */
   --gradient-brand:    linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
@@ -226,6 +238,45 @@ p { color: var(--text-dim); }
 }
 
 [hidden] { display: none !important; }
+
+/* ---------- Skip to content (a11y) ---------- */
+.skip-to-content {
+  position: absolute;
+  top: -100px;
+  left: var(--space-4);
+  z-index: 100;
+  padding: var(--space-3) var(--space-5);
+  background: var(--accent);
+  color: #0a0a0a;
+  font-weight: 600;
+  font-size: var(--text-sm);
+  border-radius: var(--radius);
+  text-decoration: none;
+  transition: top var(--duration) var(--ease);
+}
+.skip-to-content:focus-visible { top: var(--space-4); }
+
+/* ---------- Text defaults (Western aesthetics) ---------- */
+.text-default { color: var(--text); }
+.link-accent { color: var(--accent); }
+.link-accent:hover { text-decoration: underline; }
+
+/* ---------- Global focus ring (a11y) ---------- */
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ---------- Reduced motion (a11y) ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
 
 /* ---------- Responsive helpers ---------- */
 .hide-mobile { display: initial; }
