@@ -288,24 +288,47 @@
     chrome.runtime.onMessage.addListener(function(msg) {
       if (msg.type === 'cleanupProgress') {
         var newCount = msg.data.count;
-        var prevCount = state.processedItems;
-        state.processedItems = newCount;
+        var prevMax = state.processedMax;
+        // 修复（共处理跨 type 累加）：x-automation 推送的 count 是累计值，
+        //   但需要在 sidepanel 侧自己保证「state.processedItems 是所有 type 的总数」。
+        //   这里用 high-water-mark + delta 累加：
+        //     - newCount > prevMax: 正常增长，加 delta
+        //     - newCount < prevMax: 换 type 后计数重置，加新的 newCount 上去
+        //   这样无论 x-automation 改用 per-type 还是 cumulative 推，都能保证总数对。
+        if (newCount > prevMax) {
+          state.processedItems += (newCount - prevMax);
+          state.processedMax = newCount;
+        } else if (newCount < prevMax) {
+          // type 切换 / 计数被重置：把当前 type 已处理的 newCount 累加进总数
+          state.processedItems += newCount;
+          state.processedMax = newCount;
+        }
         // 实时累加每日额度
-        if (newCount > prevCount) {
-          var delta = newCount - prevCount;
+        //   与 state.processedItems 累加保持一致：换 type 后计数重置时也按 newCount 加
+        if (newCount > prevMax) {
+          var delta = newCount - prevMax;
           incrementDailyUsage(delta, function(totalUsed) {
             // 标记已达上限，等清理完成时弹窗
             if (totalUsed >= FREE_LIMIT_PER_DAY) {
               state.limitReached = true;
             }
           });
+        } else if (newCount < prevMax) {
+          // type 切换 / 计数被重置：把当前 type 已处理的 newCount 加进每日额度
+          incrementDailyUsage(newCount, function(totalUsed) {
+            if (totalUsed >= FREE_LIMIT_PER_DAY) {
+              state.limitReached = true;
+            }
+          });
         }
         updateProgress();
-        // M++ 修复（2026-06-19 tweets-bug-8）：实时更新当前 type 的 option-count 数字
-        //   之前只在 cleanupTypeComplete 时更新（type 跑完才看到数字，体验差）
-        //   现在每收到一次 progress 都立即更新当前 type 的数字
+        // 修复（option-count 显示当前 type 的条数）：
+        //   之前直接用 newCount（累计值），导致 type 2 跑的时候 type 2 的数字是
+        //     type1 + type2 的累计，而不是 type2 自己的条数。
+        //   现在用 newCount - state.typeStartCumulative 算当前 type 的 delta。
         if (state.currentType) {
-          setOptionCount(state.currentType, newCount);
+          var typeDelta = Math.max(0, newCount - state.typeStartCumulative);
+          setOptionCount(state.currentType, typeDelta);
         }
       } else if (msg.type === 'cleanupLog') {
         addLog(msg.data.message, msg.data.level);
@@ -330,6 +353,10 @@
         //   UI 数字只在 cleanupTypeComplete 时才更新（实时性差）
         //   现在存 state.currentType，cleanupProgress 收时实时更新该 type 的数字
         state.currentType = msg.data.type;
+        // 修复（option-count 显示当前 type 的条数）：
+        //   记录换 type 时的累计基线，cleanupProgress 收到时用 newCount - 基线
+        //   算出当前 type 的 delta（避免 type 2 的 option-count 显示成 type1+type2 的总数）
+        state.typeStartCumulative = state.processedMax;
         setOptionState(msg.data.type, 'processing');
       } else if (msg.type === 'cleanupTypeComplete') {
         state.currentType = null;
@@ -875,6 +902,10 @@
         state.isRunning = true;
         state.isPaused = false;
         state.processedItems = 0;
+        // 修复（共处理跨 type 累加）：清空 high-water-mark 和当前 type 基线
+        //   否则上次的值会污染这一轮的累加
+        state.processedMax = 0;
+        state.typeStartCumulative = 0;
         state.dailyRemaining = remaining;
         state.totalItems = isPremium ? '∞' : remaining;
         state.cleanupOptions = { types: options, maxPerType: maxPerType, filters: filters };

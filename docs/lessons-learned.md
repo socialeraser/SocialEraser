@@ -1125,3 +1125,72 @@ AI 调试 X 实际页面（menuitem text / DOM 结构 / 弹窗 / 菜单 / 按钮
 - user 是"X 实际"的最佳权威 —— 多问 user "X 实际长什么样" / "你能截屏吗"
 - 完整 session：[docs/debug-history/debug-tweet-delete-regression.md](file:///Volumes/XPSSD/workspaces/SocialEraser/docs/debug-history/debug-tweet-delete-regression.md)
 - 防回归：[scripts/verify-tweets-bug-3.js](file:///Volumes/XPSSD/workspaces/SocialEraser/scripts/verify-tweets-bug-3.js)（87 项 assert）
+
+---
+
+## 二十三、案例 18：⚠️ 铁律——"某语言坏其他语言好"先查 i18n / config 8 语言数组，**绝不**先改代码逻辑
+
+**症状**：
+user 反馈：英文、中文、日文下都能正常删除回复推文，**就在葡萄牙语下不行**——点 More 弹菜单，没点 Excluir，3s timeout。AI 跑去 `x-automation.js` 加了一堆 `isInViewport` 视口过滤、`isInViewport` 跳过隐藏 menuitem 之类的"代码层修复"。user 一句话戳穿："英文、中文、日文下都是能正常删除回复推文的，就在葡萄牙语下不行。你要从这个方面去想什么原因，而不是又开始瞎搞"。
+
+**根因**：
+`git log -p` 一翻就发现：`i18n.js` / `default.json` / `remote-example.json` 三处 `deleteKeywords` 数组在 commit 8b658b8 之前**根本没有 PT 条目**，PT 位置被繁体中文"刪除"错位占了：
+
+```js
+// 错的（commit 2ac79df → 8b658b8 之间）：
+deleteKeywords: [
+  'Delete', '删除', '刪除',  // ← zh-TW 错占 PT 位置
+  '削除', '삭제',
+  // ← PT 缺失！
+  'Eliminar', 'Löschen', 'Supprimer', 'Elimina'
+]
+// 对的（8b658b8 之后）：
+deleteKeywords: [
+  'Delete', '删除', '削除', '삭제',
+  'Excluir',           // ← 加回 PT
+  'Eliminar', 'Löschen', 'Supprimer', 'Elimina'
+]
+```
+
+`waitForMenuItemByText(['Delete', '删除', '刪除', '削除', '삭제', 'Eliminar', ...])` 在 PT 页面循环 8 个 keyword 全 miss → 3s timeout → `deleteTweet` 返回 false → 同 candidate 无限 retry。
+
+`isInViewport` 视口过滤**是错位的修复**——它只能解决"菜单关闭后残留 menuitem 隐藏"这个 race condition 场景，**不是** PT 不能删除的根因。即便视口过滤完美生效，没有"Excluir"这个 keyword 一切都是白搭。
+
+**修法**（**真正**应该做的）：
+1. **第一步**：`git log -p platforms/x-project/src/config/remote-example.json` 看 8 语言数组历史
+2. **第二步**：对比 `i18n.js` / `default.json` / `remote-example.json` 三处 `deleteKeywords` / `confirmKeywords` / `pinnedKeywords` / `replyKeywords` / `unretweetKeywords` —— 8 语言条数 = 8？PT 条目是不是齐？
+3. **第三步**：让 user 在 chrome://extensions → Service Worker console 跑：
+   ```js
+   const r = await chrome.storage.local.get(['remoteConfig', 'configUpdatedAt']);
+   console.log(JSON.stringify(r.remoteConfig.selectors.i18n, null, 2));
+   console.log('updatedAt:', new Date(r.configUpdatedAt).toISOString());
+   ```
+   看 chrome.storage 里的 config 是不是新版的 + `configUpdatedAt` 时间戳是否对得上 GCS 文件的最后修改时间。
+4. **第四步**：把新 config 推到 GCS（覆盖），触发扩展 service worker 重启拉新 config → 写入 chrome.storage → content.js 读出新 config → 修复生效。
+5. **回滚**错位的 `isInViewport` 修改——既然不是根因就别留。
+
+**正确诊断流程**（"某语言坏其他语言好"）：
+
+| 步骤 | 检查项 | 命令 / 工具 |
+|------|--------|------------|
+| 1 | 三处 config 的 8 语言数组条数 | `git log -p -- platforms/x-project/src/config/remote-example.json \| grep -A 12 "deleteKeywords"` |
+| 2 | i18n.js 的 8 语言数组 | `grep -A 12 "deleteKeywords:" platforms/x-project/scripts/i18n.js` |
+| 3 | GCS 上 config 是不是新版 | 浏览器打开 GCS URL 看 Last-Modified 头 / diff 本地 vs 远端 |
+| 4 | chrome.storage 加载的 config | `chrome.storage.local.get('remoteConfig')` 在 Service Worker console |
+| 5 | X 实际页面渲染的 menuitem text | MCP `evaluate_script` 抓 `[role="menuitem"]` |
+
+**绝对禁止**：
+- 看到"某语言坏"就猜"代码逻辑有 bug"开始改 x-automation.js
+- 改代码前不先 diff 三处 config 的 8 语言数组
+- 改代码前不问 user "GCS 上 config 是不是新版的" / "chrome.storage 里的 config 是不是新版的"
+- 把错位的"症状级修复"（视口过滤之类）留下来当真正的修复——会污染代码 + 误导后续 AI
+- 假设"重装扩展"就是修复路径——重装只是**触发**了 service worker 重启去拉新 config，**真正**生效的是新 config 被加载了
+
+**经验**：
+- **症状级信号**（"某语言坏其他语言好"）= 几乎 100% 是 config 8 语言数组缺条目，**不是**代码逻辑 bug
+- **代码层修复是错位修复**——加一堆 `isInViewport` 看似合理，但没补全 keyword 一切都是白搭
+- **config 才是真正的代码**——AI 改 default.json / remote-example.json / i18n.js 也是改代码，必须按改代码的流程（先验证再声称完成）
+- **重装扩展 ≠ 修复**——重装只是触发 service worker 重启去拉新 config；如果是 config 旧才坏，没推 GCS 重装 N 次都没用
+- **铁律优先级**：当症状是"某语言坏其他语言好"，**先查 i18n / config 8 语言数组**，再考虑代码逻辑
+- **完整 session**：[docs/debug-history/debug-portuguese-delete-regression.md](file:///Volumes/XPSSD/workspaces/SocialEraser/docs/debug-history/debug-portuguese-delete-regression.md)（待建）
+- **防回归**：[scripts/verify-actual-x-selectors.js#i18n-8lang](file:///Volumes/XPSSD/workspaces/SocialEraser/scripts/verify-actual-x-selectors.js) 增 5 项 assert：8 langs × `i18n.js` / `default.json` / `remote-example.json` 三处都有"Excluir" + "Desfazer repost" + "respondendo a" + "Fixado" + "Repostado" = 40 项硬护栏
