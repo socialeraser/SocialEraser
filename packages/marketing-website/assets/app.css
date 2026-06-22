@@ -109,12 +109,152 @@
   color: var(--text);
 }
 .site-nav__platforms-menu a:hover { background: var(--bg-elev-3); }
-.site-nav__platforms-menu svg { width: 16px; height: 16px; }
+.site-nav__platforms-menu svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* Nav popup platform icons: each link's icon in its platform's brand color.
+   X and TikTok have black brand marks → use light text color so they stay
+   visible on the dark popup surface. */
+.site-nav__platforms-menu a[href$="/platforms/x/"] svg        { color: #fafafa; }
+.site-nav__platforms-menu a[href$="/platforms/tiktok/"] svg   { color: #fafafa; }
+.site-nav__platforms-menu a[href$="/platforms/youtube/"] svg  { color: #FF0000; }
+.site-nav__platforms-menu a[href$="/platforms/instagram/"] svg { color: #E4405F; }
+.site-nav__platforms-menu a[href$="/platforms/facebook/"] svg { color: #1877F2; }
+
+/* ====================== Mobile Nav Toggle ====================== */
+.site-nav--mobile { display: none; position: relative; }
+.site-nav--mobile > summary {
+  list-style: none;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  user-select: none;
+  transition: background var(--duration) var(--ease), border-color var(--duration) var(--ease);
+}
+.site-nav--mobile > summary::-webkit-details-marker { display: none; }
+.site-nav--mobile > summary:hover { background: var(--bg-elev-1); border-color: var(--border-strong); }
+.site-nav--mobile > summary svg { width: 20px; height: 20px; }
+.site-nav--mobile > summary .site-nav--mobile-icon-close { display: none; }
+.site-nav--mobile[open] > summary .site-nav--mobile-icon-menu { display: none; }
+.site-nav--mobile[open] > summary .site-nav--mobile-icon-close { display: block; }
+
+.site-nav--mobile-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  min-width: 240px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: var(--space-2);
+  box-shadow: var(--shadow-lg);
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  /* Cap height so the menu can't run off-screen on small phones. Falls back
+     to 100vh, then refines with dvh so the iOS address bar is respected. */
+  max-height: calc(100vh - 80px);
+  max-height: calc(100dvh - 80px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
+}
+.site-nav--mobile-menu a {
+  display: flex;
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text);
+}
+.site-nav--mobile-menu a:hover { background: var(--bg-elev-3); text-decoration: none; }
+.site-nav--mobile-menu a.btn {
+  justify-content: center;
+  margin-top: var(--space-2);
+  color: #fff;
+}
+
+/* Leading icon for every mobile menu row. Platform links get their brand
+   colour; the generic Help/Home/Install rows use the dim text colour. */
+.site-nav--mobile-menu a > svg:first-of-type {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin-right: var(--space-3);
+  color: var(--text-dim);
+}
+.site-nav--mobile-menu a[href$="/platforms/x/"]        > svg:first-of-type { color: #fafafa; }
+.site-nav--mobile-menu a[href$="/platforms/tiktok/"]   > svg:first-of-type { color: #fafafa; }
+.site-nav--mobile-menu a[href$="/platforms/youtube/"]  > svg:first-of-type { color: #FF0000; }
+.site-nav--mobile-menu a[href$="/platforms/instagram/"] > svg:first-of-type { color: #E4405F; }
+.site-nav--mobile-menu a[href$="/platforms/facebook/"]  > svg:first-of-type { color: #1877F2; }
+
+/* Collapsible language picker inside the mobile menu. The picker is a
+   <details> with a "Language: <current>" trigger that expands to show
+   the 8 language links filled by lang-switcher.js. */
+.site-nav--mobile-lang > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text);
+  user-select: none;
+  transition: background var(--duration) var(--ease);
+}
+.site-nav--mobile-lang > summary:hover { background: var(--bg-elev-3); }
+.site-nav--mobile-lang > summary::-webkit-details-marker { display: none; }
+.site-nav--mobile-lang > summary svg { width: 16px; height: 16px; flex-shrink: 0; }
+.site-nav--mobile-lang__current { flex: 1; }
+.site-nav--mobile-lang__chev {
+  margin-left: auto;
+  opacity: 0.6;
+  transition: transform var(--duration) var(--ease);
+}
+.site-nav--mobile-lang[open] > summary .site-nav--mobile-lang__chev { transform: rotate(180deg); }
+
+[data-lang-list] {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  padding: 0 var(--space-2) var(--space-2);
+}
+.lang-mobile__item {
+  display: flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-4) var(--space-2) var(--space-8);
+  border-radius: var(--radius);
+  font-size: var(--text-sm);
+  color: var(--text-dim);
+  text-decoration: none;
+  transition: background var(--duration) var(--ease), color var(--duration) var(--ease);
+}
+.lang-mobile__item:hover {
+  background: var(--bg-elev-3);
+  color: var(--text);
+  text-decoration: none;
+}
+.lang-mobile__item--active {
+  color: var(--accent);
+  font-weight: 600;
+}
 
 @media (max-width: 768px) {
   .site-header__inner { gap: var(--space-2); padding: 0 var(--space-4); }
-  .site-nav { gap: var(--space-3); }
-  .site-nav a.hide-mobile { display: none; }
+  .site-nav { display: none; }
+  .site-nav--mobile { display: block; }
 }
 
 /* ====================== Language Switcher ====================== */
@@ -607,6 +747,17 @@
 
 .platform-card--coming { opacity: 0.7; }
 .platform-card--coming:hover { opacity: 1; }
+
+/* Platform card logo: actual brand color as background, white icon on top.
+   SVGs themselves stay `fill="currentColor"` (reusable). */
+.platform-card__logo { color: #ffffff; }
+.platform-card__logo[data-platform="x"]        { background: #000000; }
+.platform-card__logo[data-platform="tiktok"]   { background: #000000; }
+.platform-card__logo[data-platform="youtube"]  { background: #FF0000; }
+.platform-card__logo[data-platform="instagram"] {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+.platform-card__logo[data-platform="facebook"] { background: #1877F2; }
 
 /* ====================== Badges ====================== */
 .badge {

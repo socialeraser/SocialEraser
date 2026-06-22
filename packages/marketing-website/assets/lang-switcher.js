@@ -125,6 +125,31 @@
     if (inner) inner.insertAdjacentHTML('beforeend', html);
   }
 
+  // Mobile menu language picker: fill any [data-lang-list] placeholder.
+  // The placeholder lives inside a <details class="site-nav--mobile-lang">,
+  // so the trigger stays as "Language: <current>" and the list of 8
+  // options expands on click. The current language is highlighted.
+  const mobileHtml = LANGS.map(l => `
+    <a href="${l.path}" hreflang="${l.code}" data-lang="${l.code}" data-path="${l.path}" class="lang-mobile__item${l.code === active.code ? ' lang-mobile__item--active' : ''}" aria-current="${l.code === active.code ? 'true' : 'false'}">${l.label}</a>
+  `).join('');
+  document.querySelectorAll('[data-lang-list]').forEach(host => {
+    host.innerHTML = mobileHtml;
+    // Keep the summary's current-language label in sync with <html lang>.
+    const details = host.closest('.site-nav--mobile-lang');
+    if (details) {
+      const cur = details.querySelector('[data-lang-current]');
+      if (cur) cur.textContent = active.label;
+    }
+    host.querySelectorAll('.lang-mobile__item').forEach(a => {
+      a.addEventListener('click', () => {
+        try {
+          localStorage.setItem('se_lang', a.dataset.lang);
+          localStorage.setItem('se_lang_pref', a.dataset.lang);
+        } catch (_) {}
+      });
+    });
+  });
+
   // Persist language preference and let the default <a href> navigation happen
   document.querySelectorAll('.lang-switcher__item').forEach(a => {
     a.addEventListener('click', () => {
