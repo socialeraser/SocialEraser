@@ -109,6 +109,10 @@
       </p>
 
       <h2>4. Permissions Explained</h2>
+      <p>
+        The permissions below apply to the <strong>Chrome browser extension only</strong>.
+        The SocialEraser website (this page) and the planned Android / iOS apps do not request any browser-level permissions.
+      </p>
       <p>The extension requests the following Chrome permissions, each justified below:</p>
       <table>
         <thead><tr><th>Permission</th><th>Why we need it</th></tr></thead>
@@ -118,7 +122,7 @@
           <tr><td><code>sidePanel</code></td><td>Display the cleanup UI in Chrome's Side Panel.</td></tr>
           <tr><td><code>tabs</code></td><td>Navigate between /likes, /bookmarks, /following, /with_replies tabs to clean each section.</td></tr>
           <tr><td><code>scripting</code></td><td>Inject the cleanup engine into x.com pages.</td></tr>
-          <tr><td><code>&lt;all_urls&gt;</code></td><td>Restrict injection to x.com and twitter.com only (technical requirement of Chrome Manifest V3).</td></tr>
+          <tr><td><code>&lt;all_urls&gt;</code></td><td>Grants the background service worker the host access it needs to call <code>chrome.scripting.executeScript()</code> against the user's active tab. The content script itself is restricted to x.com / twitter.com by the manifest's <code>content_scripts.matches</code> field — the extension never runs on any other domain.</td></tr>
         </tbody>
       </table>
 
@@ -180,7 +184,7 @@
       <h2>12. Open Source</h2>
       <p>
         The extension's source code is available at
-        <a href="https://github.com/xiangping/SocialEraser" rel="noopener noreferrer" target="_blank">github.com/xiangping/SocialEraser</a>.
+        <a href="https://github.com/socialeraser/SocialEraser" rel="noopener noreferrer" target="_blank">github.com/socialeraser/SocialEraser</a>.
         You are welcome to audit the code, build it yourself, and verify our privacy claims.
       </p>
     </main>
@@ -214,8 +218,8 @@
           <ul>
             <li><a href="/help.html">Help Center</a></li>
             <li><a href="/#download">Install</a></li>
-            <li><a href="https://github.com/xiangping/SocialEraser/blob/main/CHANGELOG.md">Changelog</a></li>
-            <li><a href="https://github.com/xiangping/SocialEraser">Source Code</a></li>
+            <li><a href="https://github.com/socialeraser/SocialEraser/blob/main/CHANGELOG.md">Changelog</a></li>
+            <li><a href="https://github.com/socialeraser/SocialEraser">Source Code</a></li>
           </ul>
         </div>
         <div class="site-footer__col">

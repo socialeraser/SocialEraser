@@ -506,7 +506,7 @@ claude mcp add chrome-devtools npx chrome-devtools-mcp@latest
 ## 十三、案例 9：菜单项数 = reply 标识（chrome-devtools-mcp 实战发现）
 
 ### 症状
-- 用户在 xiangping5211 profile /with_replies 页面有 3 条推文：1 原创 + 1 转发 + 1 回复
+- 用户在 test_user profile /with_replies 页面有 3 条推文：1 原创 + 1 转发 + 1 回复
 - 旧版 `isReplyTweet(container)` **只**查 `socialContext` 元素的 textContent
 - 实战发现：「I like SpaceX」（**回复**）的 article **没有** `socialContext` 元素（X 在用户自己 profile 视图隐藏）
 - 后果：旧版 `isReplyTweet` 返回 false → 跟 includeReplies=false 不匹配 → 误删 reply
@@ -1092,7 +1092,7 @@ TRAE-debugger skill 协议要求每个 session 写 `debug-<sessionId>.md` 在项
 ## 二十一、案例 16：⚠️ 铁律——分析 X 实际 DOM 必须用 MCP 实证，绝不靠猜
 
 **症状**：
-user 反馈 tweets 删除卡死。AI **没** click xiangping 自己的推文 caret 抓 11 菜单项实际 text，就**猜** "X 2026 改版后菜单文字可能带后缀变体（'Delete post' / 'Delete this post' 等）"，直接改 `waitForMenuItemByText` 严格相等匹配 → substring 匹配 + 失败标 'failed'。user 一句话戳穿："你有运行 MCP 去抓去 DOM 分析吗？是不是在靠猜？"
+user 反馈 tweets 删除卡死。AI **没** click 开发者 自己的推文 caret 抓 11 菜单项实际 text，就**猜** "X 2026 改版后菜单文字可能带后缀变体（'Delete post' / 'Delete this post' 等）"，直接改 `waitForMenuItemByText` 严格相等匹配 → substring 匹配 + 失败标 'failed'。user 一句话戳穿："你有运行 MCP 去抓去 DOM 分析吗？是不是在靠猜？"
 
 **根因**：
 AI 调试 X 实际页面（menuitem text / DOM 结构 / 弹窗 / 菜单 / 按钮 testid / aria-label / role / className）时**靠经验推断**，**没用** chrome-devtools-mcp 工具实证 X 实际 DOM。错误率极高：

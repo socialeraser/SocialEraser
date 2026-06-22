@@ -399,7 +399,7 @@
       // M 修复 tweets-bug-3 2026-06-17（M+ 修复 2026-06-18）：
       //   - X 旧版 click Delete menuitem 后**会**出 [role="dialog"] confirm 弹窗（data-testid="tweet-delete-confirm"）→ 再点
       //   - X 2026 click Delete menuitem 后**会**出 [data-testid="confirmationSheetConfirm"] 浮动确认条 → 再点
-      //     - 实证（2026-06-18 MCP xiangping 自己推文 click Delete 抓 confirm）：dialog element = null（dialogCount=0）
+      //     - 实证（2026-06-18 MCP 开发者 自己推文 click Delete 抓 confirm）：dialog element = null（dialogCount=0）
       //       但出现 [data-testid="confirmationSheetConfirm"] 按钮（text="Delete"）
       //       不点 → 推文**不消失**（container.isConnected === true）→ 3s timeout
       //       点 → 推文**消失**（container.isConnected === false）→ return true
@@ -477,7 +477,7 @@
       //     - 触发条件：container.isConnected === true（X 旧版需要 confirm 弹窗时）
       //     - 进 while loop body → 第一行就 ReferenceError → catch 块捕获 → return false
       //
-      // MCP 实证（2026-06-18 xiangping 自己推文 click Delete 抓 confirm）：
+      // MCP 实证（2026-06-18 开发者 自己推文 click Delete 抓 confirm）：
       //   - dialog element = null（X 2026 没用 [role="dialog"]，是 floating confirmation sheet）
       //   - 出现 [data-testid="confirmationSheetConfirm"] 按钮（text="Delete"）
       //   - 不点 confirmationSheetConfirm → 推文**不消失**（container.isConnected 一直 true）
@@ -804,7 +804,7 @@
       if (pathname.endsWith('/with_replies')) {
         return true;
       }
-      // 主路径 2：根 profile 页（如 /xiangping5211）= 全 original
+      // 主路径 2：根 profile 页（如 /test_user）= 全 original
       if (/^\/[A-Za-z0-9_]+$/.test(pathname)) {
         return false;
       }
@@ -989,7 +989,7 @@
       // M++ 修复（2026-06-18 tweets-bug-7）：X 2026 改版后 /{username}/likes 是 profile 6 tabs 页
       //   实际 likes 列表在 "Likes" tab 里（不在 Posts tab 默认）→ 必须点 Likes tab 激活
       //   流程：找 ScrollSnap-SwipeableList 里的 "Likes" 文字 tab → click → 等 article 渲染
-      // MCP 实证：/xiangping5211/likes 6 tabs (Posts/Replies/Highlights/Articles/Media/Likes)
+      // MCP 实证：/test_user/likes 6 tabs (Posts/Replies/Highlights/Articles/Media/Likes)
       //   tabs 容器 testid='ScrollSnap-SwipeableList'，tab 是 role="tab" 的 <a>，文字 Posts/Replies/.../Likes
       var likesTabClicked = await this._activateProfileTab('Likes');
       // 命中/未命中都是内部状态，不打到侧边栏日志

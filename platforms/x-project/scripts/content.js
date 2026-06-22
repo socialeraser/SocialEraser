@@ -762,8 +762,8 @@
   // 获取用户 likes 页面 URL（用于 forcePageLoad 跳页）
   // M++ 修复（2026-06-18 tweets-bug-7）：X 2026 改版后 user 的 likes **只**在 profile 的 Likes tab 里
   //   MCP session 是空 user 测不出真东西 → 之前误以为 /i/likes 是真 likes 列表
-  //   user 实测 /i/likes 0 数据（emptyState），/xiangping5211/likes 是 profile 6 tabs 页（Posts/Replies/Highlights/Articles/Media/Likes）
-  //   → likes 列表**必须**在 /xiangping5211/likes 页 + 点 Likes tab 激活
+  //   user 实测 /i/likes 0 数据（emptyState），/test_user/likes 是 profile 6 tabs 页（Posts/Replies/Highlights/Articles/Media/Likes）
+  //   → likes 列表**必须**在 /test_user/likes 页 + 点 Likes tab 激活
   // 流程：navigate 到 profile likes 页 → processLikes 入口找 Likes tab 点击 → 等 article 渲染
   function getLikesPageURL() {
     var username = getCurrentUsername();

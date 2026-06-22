@@ -35,7 +35,7 @@
 ### 证据 1：原始 console 日志（8 次失败）
 ```
 [XEraser] Processing tweets...
-[XEraser] Starting tweets cleanup on https://x.com/xiangping5211/with_replies?_=1781611182301...
+[XEraser] Starting tweets cleanup on https://x.com/test_user/with_replies?_=1781611182301...
 [error] [XEraser] Tweet delete failed: no more button or confirm   [8 times]
 [XEraser] No progress for 30s, stopping (X UI may have changed)
 [XEraser] Auto-resume attempt 1: processed=0 (final)
@@ -95,7 +95,7 @@
 - deleteTweet 拿 fake container（btn.parentElement）找 more button → 0 命中 → 失败
 - 8 次失败 → 30s STUCK_TIMEOUT 退出 → 0 命中
 
-**次要观察**：用户在 /with_replies 页面只有 2 条 retweet，没有原创推文或 reply。`moreButtons` 修复后 0 个原创候选（这是预期行为，因为没有原创）。如果用户想删原创，需要去 `/xiangping5211`（非 /with_replies）。
+**次要观察**：用户在 /with_replies 页面只有 2 条 retweet，没有原创推文或 reply。`moreButtons` 修复后 0 个原创候选（这是预期行为，因为没有原创）。如果用户想删原创，需要去 `/test_user`（非 /with_replies）。
 
 ---
 
