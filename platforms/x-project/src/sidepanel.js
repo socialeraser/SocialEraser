@@ -24,7 +24,7 @@
   };
 
   // 每日额度配置
-  var FREE_LIMIT_PER_DAY = 50;
+  var FREE_LIMIT_PER_DAY = 5000;
 
   // 单飞串行链：所有 dailyUsage 读写都排队走这条 Promise 链
   // 修复并发的 read-modify-write 竞态——cleanupProgress 回调高频触发时旧实现会丢计数

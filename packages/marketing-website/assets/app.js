@@ -121,3 +121,43 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   });
 })();
+
+// Time estimator: progressive enhancement. HTML pre-fills values; JS only updates on input change.
+(function () {
+  const fmt = (s) => {
+    if (s <= 0) return '—';
+    if (s < 60) return Math.round(s) + 's';
+    if (s < 600) return (s / 60).toFixed(1).replace(/\.0$/, '') + 'm';
+    if (s < 3600) return Math.round(s / 60) + 'm';
+    const h = Math.floor(s / 3600);
+    const m = Math.round((s - h * 3600) / 60);
+    if (m === 0) return h + 'h';
+    if (m === 60) return (h + 1) + 'h';
+    return h + 'h ' + m + 'm';
+  };
+  const anim = (el) => {
+    el.classList.remove('is-changing');
+    void el.offsetWidth; // force reflow to restart animation
+    el.classList.add('is-changing');
+  };
+  document.querySelectorAll('[data-estimator]').forEach((root) => {
+    const input = root.querySelector('[data-estimator-input]');
+    const manual = root.querySelector('[data-estimator-manual]');
+    const auto = root.querySelector('[data-estimator-auto]');
+    const saved = root.querySelector('[data-estimator-saved]');
+    if (!input || !manual || !auto || !saved) return;
+    const compute = () => {
+      const n = Math.max(0, Math.min(100000, parseInt(input.value, 10) || 0));
+      const sAuto = n * 0.9;  // X benchmark (real test: 0.9s/item)
+      const sMan = n * 10;    // manual: ~10s per click+confirm
+      manual.textContent = fmt(sMan);
+      auto.textContent = fmt(sAuto);
+      saved.textContent = fmt(sMan - sAuto);
+      [manual, auto, saved].forEach(anim);
+    };
+    input.addEventListener('input', compute);
+    root.querySelectorAll('[data-estimator-quick]').forEach((b) => {
+      b.addEventListener('click', () => { input.value = b.dataset.value; compute(); });
+    });
+  });
+})();

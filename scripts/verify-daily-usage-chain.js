@@ -109,10 +109,10 @@ check('dailyUsage 相关的 chrome.storage.local 调用都在 _dailyUsageChain.t
   dailyUsageKeyCalls === inChainDailyUsageCalls && dailyUsageKeyCalls > 0,
   'dailyUsage key 调用 ' + dailyUsageKeyCalls + ' 次, 链内 ' + inChainDailyUsageCalls + ' 次（必须相等且 > 0）');
 
-// 8. 锁住每日 50 条上限常量（防被人悄悄改）
-check('FREE_LIMIT_PER_DAY = 50 常量未变',
-  /FREE_LIMIT_PER_DAY\s*=\s*50\b/.test(js),
-  '免费额度上限必须保持 50（业务合同）');
+// 8. 锁住每日 5000 条上限常量（防被人悄悄改）
+check('FREE_LIMIT_PER_DAY = 5000 常量未变',
+  /FREE_LIMIT_PER_DAY\s*=\s*5000\b/.test(js),
+  '免费额度上限必须保持 5000（业务合同）');
 
 // 9. _dailyUsageChain 声明附近（向前 200 字符）应有说明性注释
 //    关键：注释在声明之前，所以要 look back，不能 look forward

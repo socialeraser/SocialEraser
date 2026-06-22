@@ -1020,7 +1020,7 @@
       // 无进展兜底：连续 STUCK_TIMEOUT_MS 没新增任何 processedCount 就退出
       // 注意：这不是"批量时长上限"。订阅用户跑几千条几小时都 OK，
       // 这个超时只用来抓 X 改版 / 选择器失效 / 网络卡死导致的死循环。
-      // 真正的批量上限在 sidepanel.js 的 dailyUsage（免费 50/天，订阅无限）。
+      // 真正的批量上限在 sidepanel.js 的 dailyUsage（免费 5000/天，订阅无限）。
       var lastProgressTime = Date.now();
       var STUCK_TIMEOUT_MS = 30000;
 
@@ -1161,7 +1161,7 @@
       // 无进展兜底：连续 STUCK_TIMEOUT_MS 没新增任何 processedCount 就退出
       // 注意：这不是"批量时长上限"。订阅用户跑几千条几小时都 OK，
       // 这个超时只用来抓 X 改版 / 选择器失效 / 网络卡死导致的死循环。
-      // 真正的批量上限在 sidepanel.js 的 dailyUsage（免费 50/天，订阅无限）。
+      // 真正的批量上限在 sidepanel.js 的 dailyUsage（免费 5000/天，订阅无限）。
       var lastProgressTime = Date.now();
       var STUCK_TIMEOUT_MS = 30000;
 
@@ -1303,7 +1303,7 @@
       // 无进展兜底：连续 STUCK_TIMEOUT_MS 没新增任何 processedCount 就退出
       // 注意：这不是"批量时长上限"。订阅用户跑几千条几小时都 OK，
       // 这个超时只用来抓 X 改版 / 选择器失效 / 网络卡死导致的死循环。
-      // 真正的批量上限在 sidepanel.js 的 dailyUsage（免费 50/天，订阅无限）。
+      // 真正的批量上限在 sidepanel.js 的 dailyUsage（免费 5000/天，订阅无限）。
       var lastProgressTime = Date.now();
       var STUCK_TIMEOUT_MS = 30000;
 

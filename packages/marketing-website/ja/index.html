@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0a0a0b">
   <title>SocialEraser — ソーシャルメディアを一括清理 | 100% ローカル処理、パスワード不要</title>
-  <meta name="description" content="X、TikTok、YouTube、Instagram、Facebook の投稿、いいね、ブックマーク、リポストを一括削除。100% ローカル処理で、データはブラウザから出ません。1 日 50 回まで無料。">
+  <meta name="description" content="X、TikTok、YouTube、Instagram、Facebook の投稿、いいね、ブックマーク、リポストを一括削除。100% ローカル処理で、データはブラウザから出ません。公開中無料、利用回数無制限。">
   <meta name="keywords" content="投稿一括削除, ツイッター清理, TikTok リポスト削除, Instagram 清理, YouTube 履歴清理, ソーシャルメディア清理">
   <link rel="canonical" href="https://socialeraser.app/ja/">
   <link rel="alternate" hreflang="en" href="https://socialeraser.app/">
@@ -16,7 +16,7 @@
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://socialeraser.app/ja/">
   <meta property="og:title" content="SocialEraser — ソーシャルメディアを一括清理">
-  <meta property="og:description" content="投稿、いいね、ブックマーク、リポストを一括削除。100% ローカル処理で、データはブラウザから出ません。1 日 50 回まで無料。">
+  <meta property="og:description" content="投稿、いいね、ブックマーク、リポストを一括削除。100% ローカル処理で、データはブラウザから出ません。公開中無料、利用回数無制限。">
   <meta property="og:image" content="https://socialeraser.app/assets/icons/socialeraser-mark.svg">
   <meta property="og:locale" content="ja_JP">
   <meta name="twitter:card" content="summary_large_image">
@@ -24,9 +24,6 @@
   <meta name="twitter:description" content="投稿、いいね、ブックマーク、リポストを一括削除。100% ローカル処理で、データはブラウザから出ません。">
   <meta name="twitter:image" content="https://socialeraser.app/assets/icons/socialeraser-mark.svg">
   <link rel="icon" type="image/svg+xml" href="/assets/icons/socialeraser-mark.svg">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/styles.css">
   <link rel="stylesheet" href="/assets/app.css">
   <script type="application/ld+json">
@@ -38,11 +35,15 @@
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
     {"@type":"Question","name":"What exactly does SocialEraser do?","acceptedAnswer":{"@type":"Answer","text":"It bulk-deletes content on the social media platform of your choice — tweets, likes, bookmarks, follows, reposts, and more. You pick what to clean, set filters, and it processes items one by one in your browser."}},
-    {"@type":"Question","name":"Is SocialEraser really free?","acceptedAnswer":{"@type":"Answer","text":"Yes. 50 actions per day, forever, no account required. A Pro tier is in development but the free tier will never go away."}},
+    {"@type":"Question","name":"Is SocialEraser really free?","acceptedAnswer":{"@type":"Answer","text":"Yes — free during launch, no account required. A tip jar is welcome but never required."}},
     {"@type":"Question","name":"Do I need to create an account?","acceptedAnswer":{"@type":"Answer","text":"No. Zero accounts, zero signups, zero emails. Install, use, done."}},
+    {"@type":"Question","name":"Do I need to keep my browser open during cleanup?","acceptedAnswer":{"@type":"Answer","text":"The browser tab where the cleanup runs must stay open, but you can minimize it. Closing the tab pauses the run; reopening resumes from the last completed item."}},
+    {"@type":"Question","name":"Can I verify the extension doesn't talk to a server?","acceptedAnswer":{"@type":"Answer","text":"Yes. Open Chrome DevTools → Network tab while the extension is running. You will see zero outbound requests to any third-party domain. The only traffic is between your browser and the platform you are cleaning."}},
     {"@type":"Question","name":"Will my account get banned?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser simulates normal clicks at human speed and respects rate limits. We are not affiliated with X Corp. or any platform; using bulk tools is at your own discretion."}},
     {"@type":"Question","name":"Why no TikTok / YouTube / Instagram / Facebook yet?","acceptedAnswer":{"@type":"Answer","text":"Each platform has unique UI patterns, rate limits, and anti-bot measures. We ship one platform at a time and tune it until it is reliable. X shipped first; the others are queued."}},
-    {"@type":"Question","name":"Does my data ever leave my browser?","acceptedAnswer":{"@type":"Answer","text":"No. SocialEraser runs 100% locally in your browser. There is no server, no analytics, no tracking. Uninstall removes all stored data."}}
+    {"@type":"Question","name":"Does my data ever leave my browser?","acceptedAnswer":{"@type":"Answer","text":"No. SocialEraser runs 100% locally in your browser. There is no server, no analytics, no tracking. Uninstall removes all stored data."}},
+    {"@type":"Question","name":"Can I pause and resume a run?","acceptedAnswer":{"@type":"Answer","text":"Yes. Pause / resume works any time, even after closing the browser. State is stored in chrome.storage.local, so it survives a restart. Come back the next day and continue exactly where you left off."}},
+    {"@type":"Question","name":"What happens if my internet drops mid-cleanup?","acceptedAnswer":{"@type":"Answer","text":"The extension detects the disconnect, pauses the run, and shows a reconnecting indicator. Once the network is back, it resumes from the last completed item."}}
   ]}
   </script>
 </head>
@@ -87,7 +88,7 @@
     <!-- HERO -->
     <section class="container-lg">
       <div class="hero">
-        <span class="muted-eyebrow">一括清理 · 5 つのプラットフォーム · 永久無料</span>
+        <span class="muted-eyebrow">一括清理 · 5 つのプラットフォーム · 公開中無料</span>
         <h1 class="hero__h1">
           <span class="gradient-text">ソーシャルメディア</span>を一括清理<br>
           <span class="text-default">100% ローカル処理 · パスワード不要</span>
@@ -95,11 +96,29 @@
         <p class="hero__lede">
           数時間ではなく数分で、何千もの投稿、いいね、リポスト、ブックマークを削除。すべての処理はブラウザ内で行われ、データはサーバーへ送信されません。<strong>あなたのアカウントを見ることはできません。</strong>
         </p>
-        <div class="btn-row hero__cta btn-row--center">
-          <a href="#download" class="btn btn--primary btn--xl">Chrome に追加 — 無料</a>
-          <a href="#platforms" class="btn btn--secondary btn--xl">すべてのプラットフォーム</a>
+        <div class="hero-platforms">
+          <a href="https://chrome.google.com/webstore/" class="hero-platform hero-platform--available">
+            <span class="hero-platform__name">X</span>
+            <span class="hero-platform__action">無料でインストール</span>
+          </a>
+          <a href="/platforms/tiktok/" class="hero-platform hero-platform--soon">
+            <span class="hero-platform__name">TikTok</span>
+            <span class="hero-platform__action">2026 Q4</span>
+          </a>
+          <a href="/platforms/youtube/" class="hero-platform hero-platform--soon">
+            <span class="hero-platform__name">YouTube</span>
+            <span class="hero-platform__action">2027 Q1</span>
+          </a>
+          <a href="/platforms/instagram/" class="hero-platform hero-platform--soon">
+            <span class="hero-platform__name">Instagram</span>
+            <span class="hero-platform__action">2027 Q1</span>
+          </a>
+          <a href="/platforms/facebook/" class="hero-platform hero-platform--soon">
+            <span class="hero-platform__name">Facebook</span>
+            <span class="hero-platform__action">2027 Q2</span>
+          </a>
         </div>
-        <p class="hero__micro">★ 1 日 50 回まで無料 · アカウント不要 · 8 言語対応</p>
+        <p class="hero__micro">★ 公開中無料 · アカウント不要 · 8 言語対応</p>
       </div>
     </section>
 
@@ -136,6 +155,7 @@
           <p class="platform-card__desc">リポスト取り消し、いいね取り消し、フォロー解除、視聴履歴クリアを一括処理。2026 年 Q4 リリース予定。</p>
           <div class="platform-card__endpoints">
             <span class="endpoint-chip endpoint-chip--soon">Chrome</span>
+            <span class="endpoint-chip endpoint-chip--soon">Edge</span>
             <span class="endpoint-chip endpoint-chip--soon">Android</span>
             <span class="endpoint-chip endpoint-chip--soon">iOS</span>
           </div>
@@ -147,6 +167,7 @@
           <p class="platform-card__desc">自分の動画の一括削除、視聴履歴のクリア、高評価動画の削除。2027 年 Q1 リリース予定。</p>
           <div class="platform-card__endpoints">
             <span class="endpoint-chip endpoint-chip--soon">Chrome</span>
+            <span class="endpoint-chip endpoint-chip--soon">Edge</span>
             <span class="endpoint-chip endpoint-chip--soon">Android</span>
             <span class="endpoint-chip endpoint-chip--soon">iOS</span>
           </div>
@@ -158,6 +179,7 @@
           <p class="platform-card__desc">投稿への「いいね」取り消し、フォロー解除、ストーリー削除、検索履歴クリアを一括処理。2027 年 Q1 リリース予定。</p>
           <div class="platform-card__endpoints">
             <span class="endpoint-chip endpoint-chip--soon">Chrome</span>
+            <span class="endpoint-chip endpoint-chip--soon">Edge</span>
             <span class="endpoint-chip endpoint-chip--soon">Android</span>
             <span class="endpoint-chip endpoint-chip--soon">iOS</span>
           </div>
@@ -169,6 +191,7 @@
           <p class="platform-card__desc">投稿の「いいね」取り消し、リアクション削除、ページフォロー解除、古い写真の削除を一括処理。2027 年 Q2 リリース予定。</p>
           <div class="platform-card__endpoints">
             <span class="endpoint-chip endpoint-chip--soon">Chrome</span>
+            <span class="endpoint-chip endpoint-chip--soon">Edge</span>
             <span class="endpoint-chip endpoint-chip--soon">Android</span>
             <span class="endpoint-chip endpoint-chip--soon">iOS</span>
           </div>
@@ -188,7 +211,7 @@
         <div class="trust-strip__item">
           <div class="trust-strip__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
           <div class="trust-strip__label">標準で一括処理</div>
-          <div class="trust-strip__hint">1000 件を約 25 分で</div>
+          <div class="trust-strip__hint">1000 件を約 15 分で</div>
         </div>
         <div class="trust-strip__item">
           <div class="trust-strip__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg></div>
@@ -247,7 +270,7 @@
             </div>
             <div class="estimator__row-text">
               <span class="estimator__row-label">節約できる時間</span>
-              <span class="estimator__row-value" data-estimator-saved>—</span>
+              <span class="estimator__row-value" data-estimator-saved>1h 16m</span>
             </div>
           </div>
         </div>
@@ -330,10 +353,10 @@
           <thead><tr><th>機能</th><th class="text-center">SocialEraser</th><th class="text-center">手動清理</th><th class="text-center">API ベースツール</th><th class="text-center">パスワード必要アプリ</th></tr></thead>
           <tbody>
             <tr class="us"><td>パスワードを要求</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> いいえ</td><td>—</td><td>—</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> はい</td></tr>
-            <tr class="us"><td>一括速度 (1000 件)</td><td>~25 分</td><td>~3 時間</td><td>~15 分</td><td>~25 分</td></tr>
+            <tr class="us"><td>一括速度 (1000 件)</td><td>~15 分</td><td>~3 時間</td><td>~15 分</td><td>~25 分</td></tr>
             <tr class="us"><td>全エンドポイント対応</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Chrome + Edge + Android + iOS</td><td>—</td><td>さまざま</td><td>通常 1 つのみ</td></tr>
             <tr class="us"><td>100% ローカル処理</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> はい</td><td>—</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> いいえ</td><td>場合による</td></tr>
-            <tr class="us"><td>無料枠</td><td>1 日 50 回永久無料</td><td>—</td><td>制限あり</td><td>トライアルのみ</td></tr>
+            <tr class="us"><td>無料枠</td><td>公開中無料</td><td>—</td><td>制限あり</td><td>トライアルのみ</td></tr>
             <tr class="us"><td>オープンソース</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> MIT</td><td>—</td><td>まれ</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> いいえ</td></tr>
           </tbody>
         </table>
@@ -392,9 +415,10 @@
         <div class="faq__category">
           <h3 class="faq__category-title">基本</h3>
           <details class="faq__item"><summary>SocialEraser は具体的に何をしますか？</summary><div class="faq__answer"><p>選択したソーシャル メディア プラットフォーム上のコンテンツ（投稿、いいね、ブックマーク、フォロー、リポストなど）を一括削除します。何を削除するか、フィルターを設定すれば、ブラウザ内で項目を 1 つずつ処理し、一時停止 / 再開のステート マシンを備えています。</p></div></details>
-          <details class="faq__item"><summary>本当に無料ですか？</summary><div class="faq__answer"><p>はい。1 日 50 アクションまで永久無料、アカウント不要。パワーユーザー向け Pro ティア（無制限 + 複数アカウント）も開発中ですが、無料枠は今後もなくなりません。</p></div></details>
+          <details class="faq__item"><summary>本当に無料ですか？</summary><div class="faq__answer"><p>はい。公開中無料、アカウント不要。投げ銭は歓迎しますが、必須ではありません。ペイウォールや回数制限、アップグレードの催促は一切ありません。</p></div></details>
           <details class="faq__item"><summary>アカウントを作成する必要がありますか？</summary><div class="faq__answer"><p>いいえ。アカウント、サインアップ、メールは一切不要。インストールして使うだけ。</p></div></details>
           <details class="faq__item"><summary>対応ブラウザは？</summary><div class="faq__answer"><p>現時点では Chrome と Edge。Firefox と Safari は 2026 年のロードマップにあります。</p></div></details>
+          <details class="faq__item"><summary>クリーンアップ中はブラウザを開いたままにしておく必要がありますか？</summary><div class="faq__answer"><p>クリーンアップが実行されているブラウザ タブは開いたままにしておく必要がありますが、最小化することはできます。Chrome を閉じると、実行は一時停止し、再開時に停止した場所からそのまま続行されます。サイド パネルはタブから切り離して表示を維持できます。</p></div></details>
         </div>
         <div class="faq__category">
           <h3 class="faq__category-title">プライバシーとセキュリティ</h3>
@@ -402,26 +426,31 @@
           <details class="faq__item"><summary>私のデータは収集されますか？</summary><div class="faq__answer"><p>いいえ。データを受け取るサーバーはありません。拡張機能は完全にクライアント サイドで動作します。<code>chrome.storage</code> に保存されるのは設定（言語、日次カウンター）のみ — ワンクリックで削除できます。</p></div></details>
           <details class="faq__item"><summary>インストールしても安全ですか？</summary><div class="faq__answer"><p>拡張機能は Chrome ウェブ ストアに掲載される前に Google による審査を受けています。ソース コードは GitHub でオープン ソース（MIT ライセンス）として公開されているため、誰でも監査できます。すべてのリモート スクリプトをブロックする厳格なコンテンツ セキュリティ ポリシーを使用しています。</p></div></details>
           <details class="faq__item"><summary>使用中にアカウントが BAN される可能性は？</summary><div class="faq__answer"><p>SocialEraser は人間に近い速度で通常のクリックをシミュレートします。プラットフォームにはレート制限があり、私たちはそれを尊重します。とはいえ、どのプラットフォームとも提携していないため、一括ツールの使用はご自身の判断で行ってください。他のサードパーティ ツールにも同じことが言えます。</p></div></details>
+          <details class="faq__item"><summary>拡張機能がサーバーと通信していないことを確認できますか？</summary><div class="faq__answer"><p>はい。拡張機能の実行中に Chrome DevTools → Network タブを開けば、サードパーティ ドメインへの送信リクエストがゼロであることがわかります。ネットワーク アクティビティはあなたのブラウザとクリーンアップ対象のソーシャル プラットフォーム間のみ — あなたが手動で行うのと同じリクエストです。完全なソースは <a href="https://github.com/xiangping/SocialEraser" class="link-accent">GitHub</a> で誰でも監査できます。</p></div></details>
         </div>
         <div class="faq__category">
           <h3 class="faq__category-title">仕組み</h3>
           <details class="faq__item"><summary>一括削除は実際にどう動作しますか？</summary><div class="faq__answer"><p>拡張機能はプラットフォームのネイティブ UI（例：x.com）を開き、各項目のアクション メニューを見つけて、削除をクリックして確認します。あなたが手動で行うのと同じ — ただしより高速で疲れません。</p></div></details>
           <details class="faq__item"><summary>どんなフィルターが使えますか？</summary><div class="faq__answer"><p>日付範囲（X より前 / 後の投稿を削除）、キーワード（「Y」を含む投稿のみ削除）、メディア タイプ（画像のみ、テキストのみ、動画のみ）、アカウント（このハンドルからの投稿のみ）。フィルターの組み合わせは OR ではなく AND として機能します。</p></div></details>
           <details class="faq__item"><summary>処理を一時停止・再開できますか？</summary><div class="faq__answer"><p>はい。ブラウザを閉じた後でも、いつでも一時停止 / 再開できます。状態は <code>chrome.storage.local</code> に保存されるため、再起動後も保持されます。翌日に戻って、停止した場所からそのまま続行できます。</p></div></details>
-          <details class="faq__item"><summary>どのくらい速いですか？</summary><div class="faq__answer"><p>平均して 1 件あたり約 1.6 秒。1000 件の処理は約 25 分です。正確な見積もりには上部の <a href="#estimator" style="color: var(--accent)">時間計算ツール</a> をご利用ください。</p></div></details>
+          <details class="faq__item"><summary>どのくらい速いですか？</summary><div class="faq__answer"><p>1 件あたり平均 1 秒未満。1000 件の処理は約 15 分です。正確な見積もりには上部の <a href="#estimator" style="color: var(--accent)">時間計算ツール</a> をご利用ください。</p></div></details>
           <details class="faq__item"><summary>削除前にエクスポートできますか？</summary><div class="faq__answer"><p>はい。X ティアの拡張機能には、削除前にすべての項目の <code>archive.json</code> を保存する「Export archive」オプションがあります。他のプラットフォームにも順次追加中です。</p></div></details>
+          <details class="faq__item"><summary>クリーンアップ中にインターネットが切れた場合はどうなりますか？</summary><div class="faq__answer"><p>拡張機能は切断を検知して実行を一時停止し、「再接続中…」インジケーターを表示します。ネットワークが復旧したら、最後に完了した項目から処理を再開します。データは一切送信・保存されず、再開状態はお使いのブラウザのローカル ストレージのみに保持されます。</p></div></details>
+          <details class="faq__item"><summary>クリーンアップを取り消すことはできますか？</summary><div class="faq__answer"><p>いいえ。プラットフォーム上で投稿が削除されると、それで終わりです。クリーンアップを実行する前に「Export archive」オプション（利用可能な場合）を使用して JSON バックアップを保存し、削除した項目の記録を残しておくことをおすすめします。</p></div></details>
         </div>
         <div class="faq__category">
           <h3 class="faq__category-title">代替ツールとの比較</h3>
           <details class="faq__item"><summary>SocialEraser vs TweetDelete？</summary><div class="faq__answer"><p>TweetDelete は X API を使用し、OAuth 認証が必要です。サーバー サイドで動作するため、データはあなたの端末から出ます。SocialEraser はブラウザ内で動作し、認証情報を要求せず、X だけでなく 5 つのプラットフォームに対応します。</p></div></details>
           <details class="faq__item"><summary>SocialEraser vs Semiphemeral？</summary><div class="faq__answer"><p>Semiphemeral は経過時間ベースの自動削除で、X か月以上古い投稿をスケジュールで削除します。SocialEraser はオンデマンドの一括削除で、何を、いつ、どの程度清理するかをユーザーが選択します。別の目的のための別のツールです。</p></div></details>
           <details class="faq__item"><summary>SocialEraser vs Redact？</summary><div class="faq__answer"><p>Redact は API 経由で投稿を一括削除する有料の開発者向けツールです。API キーと開発者アカウントが必要です。SocialEraser は無料で、API アクセス不要で、X 以外のプラットフォームにも対応します。</p></div></details>
+          <details class="faq__item"><summary>SocialEraser vs 手作業？</summary><div class="faq__answer"><p>1000 件を手動で削除すると、約 3 時間の連続クリックが必要です。SocialEraser は同じ作業を約 15 分で完了し、疲れることも、確認ダイアログを見落とすことも、深夜 2 時に誤ったボタンをクリックすることもありません。同じ動作を、自動で実行するだけです。</p></div></details>
         </div>
         <div class="faq__category">
           <h3 class="faq__category-title">プラットフォーム別</h3>
           <details class="faq__item"><summary>TikTok / YouTube / Instagram / Facebook はなぜ未対応？</summary><div class="faq__answer"><p>各プラットフォームには固有の UI パターン、レート制限、ボット対策があります。私たちは 1 つずつプラットフォームを出荷し、信頼性が確保されるまで調整します。X が最初に出荷されたのは、最も明確な需要があったためです。他はキューに入っています — <a href="/platforms/tiktok/" class="link-accent">ウェイトリスト</a> に参加して通知を受け取ってください。</p></div></details>
-          <details class="faq__item"><summary>モバイル（iOS / Android）アプリも無料ですか？</summary><div class="faq__answer"><p>Android と iOS のアプリも同じ 1 日 50 回の制限で無料になります。Pro ティアはプラットフォームごとに異なる制限を持つ場合があります。</p></div></details>
-          <details class="faq__item"><summary>複数のアカウントで SocialEraser を使えますか？</summary><div class="faq__answer"><p>Chrome では、アカウントごとに別のブラウザ プロファイルを使用できます。1 つのプロファイル内での複数アカウント対応は Pro 機能のロードマップにあります。</p></div></details>
+          <details class="faq__item"><summary>モバイル（iOS / Android）アプリも無料ですか？</summary><div class="faq__answer"><p>はい。Android と iOS のアプリも公開中無料です。回数制限やアカウント登録は不要です。</p></div></details>
+          <details class="faq__item"><summary>複数のアカウントで SocialEraser を使えますか？</summary><div class="faq__answer"><p>Chrome では、アカウントごとに別のブラウザ プロファイルを使用できます。1 つのプロファイル内での複数アカウント対応はロードマップにあります。</p></div></details>
+          <details class="faq__item"><summary>最初にプラットフォームにログインしておく必要がありますか？</summary><div class="faq__answer"><p>はい。SocialEraser はすでにログイン済みのブラウザ セッション内で動作します。ログイン操作、クッキー保存、認証トークンへの干渉は一切行いません。セッションの有効期限が切れた場合は、ログインし直して実行を再開してください。</p></div></details>
         </div>
       </div>
     </section>
@@ -429,14 +458,14 @@
     <!-- DOWNLOAD CTA -->
     <section id="download" class="container-md section">
       <div class="cta-box">
-        <span class="muted-eyebrow">永久無料 · 登録不要</span>
+        <span class="muted-eyebrow">公開中無料 · 登録不要</span>
         <h2 class="hero__h1">清理を始めますか？</h2>
         <p class="hero__lede">SocialEraser for X を 2 クリックでインストール。60 秒以内に削除を開始できます。</p>
         <div class="btn-row btn-row--center">
           <a href="https://chrome.google.com/webstore/" class="btn btn--primary btn--xl">Chrome に追加 — 無料</a>
           <a href="https://microsoftedge.microsoft.com/addons/" class="btn btn--secondary btn--xl">Edge に追加</a>
         </div>
-        <p class="hero__micro">★ ★ ★ ★ ★ &nbsp; 1 日 50 回まで無料 · オフライン対応 · オープンソース</p>
+        <p class="hero__micro">★ ★ ★ ★ ★ &nbsp; 公開中無料 · オフライン対応 · オープンソース</p>
       </div>
     </section>
 
@@ -480,8 +509,8 @@
         <div class="site-footer__col">
           <h4>Company</h4>
           <ul>
-            <li><a href="#platforms">About</a></li>
-            <li><a href="mailto:hi@socialeraser.app">Contact</a></li>
+            <li><a href="/about.html">About</a></li>
+            <li><a href="mailto:support@socialeraser.app">Contact</a></li>
             <li><a href="/privacy.html">Privacy</a></li>
             <li><a href="/terms.html">Terms</a></li>
             <li><a href="https://github.com/xiangping/SocialEraser#readme">Press Kit</a></li>

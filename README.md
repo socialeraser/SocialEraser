@@ -41,7 +41,7 @@
 |------|------|------|
 | 批量删除 Messages（私信）| ❌ | X 使用 `event.isTrusted` 验证用户输入，content script 派发的 JS 事件（`dispatchEvent` / `mousedown`+`contextmenu` 等序列）全部被 X 拒绝。详见下方"为何 Messages 不支持" |
 | 实际删除操作 | 🔄 | Likes / Bookmarks / Following 端到端真机回归中；Tweets 三子类型（原创 / 回复 / 撤销转推）引擎完整，详见上方已完成的批量删除推文条目 |
-| 免费额度 50/天 | 🔄 | 计数器已 per-type 化，弹窗未实现 |
+| 免费额度 5000/天 | 🔄 | 计数器已 per-type 化，弹窗未实现 |
 | 订阅系统 Creem | 🔄 | 架构待设计 |
 | Android App | 🔄 | Capacitor 工程已就绪，UI 待移植 |
 
@@ -270,7 +270,7 @@ addLog(t('startingCleanup'), 'info');
 - [x] 批量删除 Likes / Bookmarks（引擎就绪，端到端真机测试中）
 - [x] 批量删除 Messages（已降级——X 校验 isTrusted，content script 无法模拟 native right click）
 - [x] 批量删除 Tweets（3 子类型 `processOriginalTweets` / `processReplies` / `processRetweets` + `getOriginalTweetsPageURL` / `getRepliesPageURL` / `getRetweetsPageURL` + 跨页续跑 + 8 语言 selector 全就位，端到端真机回归中）
-- [ ] 免费额度 50/天弹窗
+- [ ] 免费额度 5000/天弹窗
 
 ### Phase 2: Chrome Extension 完善
 - [ ] 日期过滤逻辑

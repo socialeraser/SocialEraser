@@ -4,22 +4,22 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0a0a0b">
-  <title>Help & FAQ — SocialEraser</title>
-  <meta name="description" content="Help, FAQ, and quick start for SocialEraser. How to bulk delete tweets, likes, bookmarks, following.">
+  <title>About — SocialEraser</title>
+  <meta name="description" content="The story behind SocialEraser. Why we built a 100% local, password-free bulk cleaner for your social media — and what we believe in.">
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="https://socialeraser.app/help.html">
-  <link rel="alternate" hreflang="en" href="https://socialeraser.app/help.html">
-  <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/help.html">
+  <link rel="canonical" href="https://socialeraser.app/about.html">
+  <link rel="alternate" hreflang="en" href="https://socialeraser.app/about.html">
+  <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/about.html">
   <link rel="sitemap" type="application/xml" href="/sitemap.xml">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://socialeraser.app/help.html">
-  <meta property="og:title" content="Help & FAQ — SocialEraser">
-  <meta property="og:description" content="Help, FAQ, and quick start for SocialEraser. How to bulk delete tweets, likes, bookmarks, following.">
+  <meta property="og:url" content="https://socialeraser.app/about.html">
+  <meta property="og:title" content="About — SocialEraser">
+  <meta property="og:description" content="The story behind SocialEraser. Why we built a 100% local, password-free bulk cleaner for your social media.">
   <meta property="og:image" content="https://socialeraser.app/assets/icons/socialeraser-mark.svg">
   <meta property="og:locale" content="en_US">
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Help & FAQ — SocialEraser">
-  <meta name="twitter:description" content="Help, FAQ, and quick start for SocialEraser. How to bulk delete tweets, likes, bookmarks, following.">
+  <meta name="twitter:title" content="About — SocialEraser">
+  <meta name="twitter:description" content="The story behind SocialEraser. Why we built a 100% local, password-free bulk cleaner for your social media.">
   <link rel="icon" type="image/svg+xml" href="/assets/icons/socialeraser-mark.svg">
   <link rel="stylesheet" href="/assets/styles.css">
   <link rel="stylesheet" href="/assets/app.css">
@@ -64,95 +64,67 @@
   </header>
 
     <main id="main" class="legal-content container-md section-lg">
-      <h1>Help & FAQ</h1>
-      <p class="meta">Last updated: June 20, 2026</p>
+      <h1>About SocialEraser</h1>
+      <p class="meta">Built by one person who got tired of clicking "Delete" a thousand times.</p>
 
-      <h2>Quick Start</h2>
-      <ol>
-        <li>Install SocialEraser from the
-            <a href="https://chrome.google.com/webstore/" target="_blank" rel="noopener noreferrer">Chrome Web Store</a>.</li>
-        <li>Click the SocialEraser icon in Chrome's toolbar to open the Side Panel.</li>
-        <li>Open <a href="https://x.com" target="_blank" rel="noopener noreferrer">x.com</a> and log in to your account.</li>
-        <li>In the Side Panel, select which items to clean (Tweets / Likes / Bookmarks / Following).</li>
-        <li>Click <strong>Start Cleanup</strong>. The progress bar and logs will appear live.</li>
-        <li>Use Pause / Resume / Stop at any time.</li>
-      </ol>
-
-      <h2>FAQ</h2>
-
-      <h3>Is SocialEraser safe? Will my account be banned?</h3>
+      <h2>The story</h2>
       <p>
-        SocialEraser performs the same actions you would perform manually (clicking "Delete",
-        "Unlike", "Remove Bookmark", "Unfollow"). Because the actions are real browser events,
-        they appear identical to manual clicks. However, X / Twitter's automated systems may
-        still detect high-volume activity. We recommend:
+        A few years ago, I wanted to clean up my old tweets. Nothing dramatic — just
+        a long backlog of inside jokes, half-thoughts, and screenshots that stopped
+        being funny around 2017. I figured it would take a few minutes. Maybe an hour.
       </p>
-      <ul>
-        <li>Run at a steady pace — SocialEraser auto-pauses on rate-limit detection.</li>
-        <li>Avoid running the extension for many hours continuously.</li>
-        <li>Use the date / keyword filters to clean in smaller, targeted batches.</li>
-      </ul>
       <p>
-        You assume all responsibility for compliance with X's Terms of Service. See our
-        <a href="/terms.html">Terms of Service</a> for details.
+        It took three days.
+      </p>
+      <p>
+        X let me delete tweets one at a time. Each one meant: scroll, click the menu,
+        click "Delete", click "Confirm", wait for the page to refresh, scroll again,
+        repeat. I had over <strong>4,000 tweets</strong>. At roughly ten seconds per
+        item, that was eleven hours of clicking. I gave up after the first afternoon.
+      </p>
+      <p>
+        I tried the existing tools. Most of them wanted my password, my API keys, or
+        my credit card. The few that didn't still ran everything through their
+        servers — meaning every like, every follow, every DM had to travel through
+        someone else's database to be deleted. I wasn't comfortable with that. I
+        shouldn't have to trust a stranger's database to clean up <em>my own</em>
+        account.
+      </p>
+      <p>
+        So I built SocialEraser.
       </p>
 
-      <h3>Why are some of my tweets / likes not being deleted?</h3>
-      <p>Common reasons:</p>
+      <h2>What we believe</h2>
       <ul>
-        <li><strong>Pinned tweets</strong> — Pinned tweets cannot be deleted from the UI. Unpin them first.</li>
-        <li><strong>Retweets from accounts that have been suspended</strong> — these cannot be undone via the UI.</li>
-        <li><strong>Tweets from a different account</strong> — make sure you're logged in to the correct account.</li>
-        <li><strong>UI changed</strong> — X.com updates its UI frequently. Click the refresh icon in the Side Panel to fetch the latest selector config.</li>
+        <li><strong>Your data is yours.</strong> If a tool needs your password to clean your account, something has gone wrong with the design.</li>
+        <li><strong>No server is safer than any server.</strong> A "no server" architecture is the only way to make a privacy promise we can keep forever.</li>
+        <li><strong>Free should mean free.</strong> No trial, no quota, no daily caps. A tip jar is welcome, never required.</li>
+        <li><strong>Open source is accountability.</strong> Anyone can audit the code, file an issue, or fork the project. There are no secrets in a privacy tool.</li>
+        <li><strong>Slow is fine.</strong> Bulk deletion is not a race. We pace ourselves to match what a careful human would do — that's also what keeps accounts safe.</li>
       </ul>
 
-      <h3>Can I delete Direct Messages (DMs)?</h3>
+      <h2>What we're not</h2>
       <p>
-        <strong>No.</strong> X / Twitter's DM deletion requires a real native right-click
-        (context menu), which is protected by the browser's <code>event.isTrusted</code>
-        check. JavaScript-injected events are rejected. The only way to bypass this would
-        require the <code>chrome.debugger</code> permission, which we will <strong>not</strong>
-        request because it triggers a strong user trust warning. To delete DMs, use
-        X's native interface manually.
+        We're not affiliated with X, TikTok, YouTube, Instagram, or Facebook — and
+        we never will be. We don't sell your data (we don't have any). We don't
+        run ads. We don't take investment from platforms whose APIs we use. If
+        any of those things change, we'll announce it loudly, in advance, before
+        it happens.
+      </p>
+      <p>
+        We are a tiny team — currently one developer, sometimes two — building
+        something we wish had existed years ago. The extension is free, the code
+        is on <a href="https://github.com/xiangping/SocialEraser" target="_blank" rel="noopener noreferrer">GitHub</a>,
+        and the only thing we ask in return is that if it helps you, you tell a
+        friend.
       </p>
 
-      <h3>Where is my data stored?</h3>
+      <h2>Get in touch</h2>
       <p>
-        100% on your device, in Chrome's local storage. The extension does not have a
-        server. Uninstalling the extension permanently deletes all stored data.
-        See our <a href="/privacy.html">Privacy Policy</a> for full details.
-      </p>
-
-      <h3>What languages are supported?</h3>
-      <p>
-        Currently: English, 简体中文, 日本語, 한국어, Português, Español, Deutsch, Français.
-        Switch via the flag icon in the Side Panel.
-      </p>
-
-      <h3>Does SocialEraser work on mobile?</h3>
-      <p>
-        An Android (Capacitor) version is in development. iOS is planned for the future.
-        Sign up for the waitlist at <a href="mailto:support@socialeraser.app">support@socialeraser.app</a>.
-      </p>
-
-      <h3>What about TikTok / YouTube / Facebook?</h3>
-      <p>
-        Coming soon. The project is in active development. Follow
-        <a href="https://github.com/xiangping/SocialEraser" target="_blank" rel="noopener noreferrer">our GitHub</a>
-        for updates.
-      </p>
-
-      <h3>How do I uninstall?</h3>
-      <p>
-        Right-click the SocialEraser icon in Chrome's toolbar → "Remove from Chrome".
-        This deletes all locally stored data.
-      </p>
-
-      <h2>Report a Bug</h2>
-      <p>
-        Found a bug or have a feature request? Open an issue on
-        <a href="https://github.com/xiangping/SocialEraser/issues" target="_blank" rel="noopener noreferrer">GitHub</a>
-        or email <a href="mailto:support@socialeraser.app">support@socialeraser.app</a>.
+        Found a bug? Have a feature request? Want to say hi? Email
+        <a href="mailto:support@socialeraser.app">support@socialeraser.app</a> or open an
+        issue on <a href="https://github.com/xiangping/SocialEraser/issues" target="_blank" rel="noopener noreferrer">GitHub</a>.
+        We read every message.
       </p>
     </main>
 

@@ -440,6 +440,67 @@
   .hero { padding: var(--space-20) 0 var(--space-16); }
 }
 
+/* Hero platform picker (5 buttons, one per platform) */
+.hero-platforms {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+.hero-platform {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 132px;
+  padding: var(--space-4) var(--space-5);
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  text-decoration: none;
+  color: var(--text);
+  transition: all var(--duration) var(--ease);
+}
+.hero-platform:hover {
+  border-color: var(--border-accent);
+  transform: translateY(-2px);
+  color: var(--text);
+}
+.hero-platform__name {
+  font-size: var(--text-base);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+.hero-platform__action {
+  font-size: var(--text-xs);
+  color: var(--text-mute);
+  font-weight: 500;
+}
+.hero-platform--available {
+  background: var(--gradient-brand);
+  border-color: transparent;
+  color: #0a0a0a;
+  box-shadow: 0 6px 24px var(--accent-glow);
+}
+.hero-platform--available .hero-platform__action { color: rgba(10, 10, 11, 0.7); }
+.hero-platform--available:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px var(--accent-glow);
+  color: #0a0a0a;
+}
+.hero-platform--soon {
+  opacity: 0.6;
+}
+.hero-platform--soon:hover {
+  opacity: 1;
+}
+@media (max-width: 640px) {
+  .hero-platforms { gap: var(--space-2); }
+  .hero-platform { min-width: 100px; padding: var(--space-3) var(--space-4); }
+  .hero-platform__name { font-size: var(--text-sm); }
+}
+
 /* ====================== CTA Box (reusable download prompt) ====================== */
 .cta-box {
   text-align: center;
@@ -736,6 +797,9 @@
 @media (max-width: 768px) { .tabs__panel-grid { grid-template-columns: 1fr; } }
 
 @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+@keyframes estimator-flip { from { opacity: 0.35; transform: translateY(-3px); } to { opacity: 1; transform: translateY(0); } }
+.estimator__row-value.is-changing { animation: estimator-flip 220ms ease-out; }
 
 /* ====================== How It Works (3 steps) ====================== */
 .steps {
