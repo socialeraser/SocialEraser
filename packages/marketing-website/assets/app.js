@@ -161,3 +161,22 @@
     });
   });
 })();
+
+// Mobile menu: close the hamburger dropdown and the nested language picker
+// when the user clicks anywhere outside of them. The native <details>
+// element only closes on toggle of its own summary, so without this a
+// tap on the page behind the menu would leave it hanging open.
+(function () {
+  const targets = document.querySelectorAll('.site-nav--mobile, .site-nav--mobile-lang');
+  if (!targets.length) return;
+  document.addEventListener('click', (e) => {
+    targets.forEach((el) => {
+      if (el.open && !el.contains(e.target)) el.removeAttribute('open');
+    });
+  });
+  // Esc closes whichever dropdown is open.
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    targets.forEach((el) => el.removeAttribute('open'));
+  });
+})();
