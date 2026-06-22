@@ -122,7 +122,8 @@
   });
 })();
 
-// Time estimator: progressive enhancement. HTML pre-fills values; JS only updates on input change.
+// Time estimator: runs compute() on init to fill values from the default
+// input value, and re-runs on every input / quick-pick change.
 (function () {
   const fmt = (s) => {
     if (s <= 0) return '—';
@@ -159,6 +160,9 @@
     root.querySelectorAll('[data-estimator-quick]').forEach((b) => {
       b.addEventListener('click', () => { input.value = b.dataset.value; compute(); });
     });
+    // Run once on init so the right column shows real values for the
+    // default input value (HTML defaults are placeholders).
+    compute();
   });
 })();
 
