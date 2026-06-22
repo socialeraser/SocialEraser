@@ -251,10 +251,37 @@
   font-weight: 600;
 }
 
+/* ====================== Mobile back button (injected by app.js on subpages) ====================== */
+.site-header__back {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  margin-right: var(--space-1);
+  padding: 0;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.15s var(--ease), border-color 0.15s var(--ease);
+}
+.site-header__back:hover,
+.site-header__back:focus-visible {
+  background: var(--bg-elev-2);
+  border-color: var(--border-strong);
+  outline: none;
+}
+.site-header__back:active { transform: scale(0.95); }
+.site-header__back svg { width: 20px; height: 20px; }
+
 @media (max-width: 768px) {
   .site-header__inner { gap: var(--space-2); padding: 0 var(--space-4); }
   .site-nav { display: none; }
   .site-nav--mobile { display: block; }
+  .site-header__back { display: inline-flex; }
 }
 
 /* ====================== Language Switcher ====================== */
