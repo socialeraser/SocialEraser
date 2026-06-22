@@ -109,7 +109,16 @@
   color: var(--text);
 }
 .site-nav__platforms-menu a:hover { background: var(--bg-elev-3); }
-.site-nav__platforms-menu svg { width: 16px; height: 16px; }
+.site-nav__platforms-menu svg { width: 16px; height: 16px; flex-shrink: 0; }
+
+/* Nav popup platform icons: each link's icon in its platform's brand color.
+   X and TikTok have black brand marks → use light text color so they stay
+   visible on the dark popup surface. */
+.site-nav__platforms-menu a[href$="/platforms/x/"] svg        { color: #fafafa; }
+.site-nav__platforms-menu a[href$="/platforms/tiktok/"] svg   { color: #fafafa; }
+.site-nav__platforms-menu a[href$="/platforms/youtube/"] svg  { color: #FF0000; }
+.site-nav__platforms-menu a[href$="/platforms/instagram/"] svg { color: #E4405F; }
+.site-nav__platforms-menu a[href$="/platforms/facebook/"] svg { color: #1877F2; }
 
 @media (max-width: 768px) {
   .site-header__inner { gap: var(--space-2); padding: 0 var(--space-4); }
@@ -607,6 +616,17 @@
 
 .platform-card--coming { opacity: 0.7; }
 .platform-card--coming:hover { opacity: 1; }
+
+/* Platform card logo: actual brand color as background, white icon on top.
+   SVGs themselves stay `fill="currentColor"` (reusable). */
+.platform-card__logo { color: #ffffff; }
+.platform-card__logo[data-platform="x"]        { background: #000000; }
+.platform-card__logo[data-platform="tiktok"]   { background: #000000; }
+.platform-card__logo[data-platform="youtube"]  { background: #FF0000; }
+.platform-card__logo[data-platform="instagram"] {
+  background: linear-gradient(45deg, #f09433 0%, #e6683c 25%, #dc2743 50%, #cc2366 75%, #bc1888 100%);
+}
+.platform-card__logo[data-platform="facebook"] { background: #1877F2; }
 
 /* ====================== Badges ====================== */
 .badge {
