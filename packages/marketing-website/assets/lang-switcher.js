@@ -126,14 +126,20 @@
   }
 
   // Mobile menu language picker: fill any [data-lang-list] placeholder.
-  // A compact horizontal strip of short codes; the current language is
-  // highlighted. Hidden on desktop (CSS), only shown when the mobile
-  // hamburger menu is open.
+  // The placeholder lives inside a <details class="site-nav--mobile-lang">,
+  // so the trigger stays as "Language: <current>" and the list of 8
+  // options expands on click. The current language is highlighted.
   const mobileHtml = LANGS.map(l => `
-    <a href="${l.path}" hreflang="${l.code}" data-lang="${l.code}" data-path="${l.path}" class="lang-mobile__item${l.code === active.code ? ' lang-mobile__item--active' : ''}" aria-label="${l.label}" aria-current="${l.code === active.code ? 'true' : 'false'}">${l.short}</a>
+    <a href="${l.path}" hreflang="${l.code}" data-lang="${l.code}" data-path="${l.path}" class="lang-mobile__item${l.code === active.code ? ' lang-mobile__item--active' : ''}" aria-current="${l.code === active.code ? 'true' : 'false'}">${l.label}</a>
   `).join('');
   document.querySelectorAll('[data-lang-list]').forEach(host => {
     host.innerHTML = mobileHtml;
+    // Keep the summary's current-language label in sync with <html lang>.
+    const details = host.closest('.site-nav--mobile-lang');
+    if (details) {
+      const cur = details.querySelector('[data-lang-current]');
+      if (cur) cur.textContent = active.label;
+    }
     host.querySelectorAll('.lang-mobile__item').forEach(a => {
       a.addEventListener('click', () => {
         try {

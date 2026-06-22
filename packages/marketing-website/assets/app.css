@@ -175,47 +175,58 @@
   color: #fff;
 }
 
-/* Divider + language picker inside the mobile menu. The picker is filled
-   by lang-switcher.js into any [data-lang-list] placeholder, so adding a
-   new language only needs a JS change. */
-.site-nav--mobile-divider {
-  height: 1px;
-  background: var(--border);
-  margin: var(--space-3) var(--space-2) var(--space-2);
+/* Collapsible language picker inside the mobile menu. The picker is a
+   <details> with a "Language: <current>" trigger that expands to show
+   the 8 language links filled by lang-switcher.js. */
+.site-nav--mobile-lang > summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  color: var(--text);
+  user-select: none;
+  transition: background var(--duration) var(--ease);
 }
+.site-nav--mobile-lang > summary:hover { background: var(--bg-elev-3); }
+.site-nav--mobile-lang > summary::-webkit-details-marker { display: none; }
+.site-nav--mobile-lang > summary svg { width: 16px; height: 16px; flex-shrink: 0; }
+.site-nav--mobile-lang__current { flex: 1; }
+.site-nav--mobile-lang__chev {
+  margin-left: auto;
+  opacity: 0.6;
+  transition: transform var(--duration) var(--ease);
+}
+.site-nav--mobile-lang[open] > summary .site-nav--mobile-lang__chev { transform: rotate(180deg); }
+
 [data-lang-list] {
   display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-  padding: var(--space-2) var(--space-2) 0;
+  flex-direction: column;
+  gap: 1px;
+  padding: 0 var(--space-2) var(--space-2);
 }
 .lang-mobile__item {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  justify-content: center;
-  min-width: 36px;
-  height: 32px;
-  padding: 0 10px;
+  padding: var(--space-2) var(--space-4) var(--space-2) var(--space-8);
   border-radius: var(--radius);
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-dim);
   font-size: var(--text-sm);
-  font-weight: 600;
-  line-height: 1;
+  color: var(--text-dim);
   text-decoration: none;
-  transition: background var(--duration) var(--ease), color var(--duration) var(--ease), border-color var(--duration) var(--ease);
+  transition: background var(--duration) var(--ease), color var(--duration) var(--ease);
 }
 .lang-mobile__item:hover {
   background: var(--bg-elev-3);
   color: var(--text);
-  border-color: var(--border-strong);
   text-decoration: none;
 }
 .lang-mobile__item--active {
-  background: var(--bg-elev-3);
   color: var(--accent);
-  border-color: var(--accent);
+  font-weight: 600;
 }
 
 @media (max-width: 768px) {
