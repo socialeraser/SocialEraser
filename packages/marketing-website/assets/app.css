@@ -175,6 +175,49 @@
   color: #fff;
 }
 
+/* Divider + language picker inside the mobile menu. The picker is filled
+   by lang-switcher.js into any [data-lang-list] placeholder, so adding a
+   new language only needs a JS change. */
+.site-nav--mobile-divider {
+  height: 1px;
+  background: var(--border);
+  margin: var(--space-3) var(--space-2) var(--space-2);
+}
+[data-lang-list] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-2) 0;
+}
+.lang-mobile__item {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: var(--radius);
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  line-height: 1;
+  text-decoration: none;
+  transition: background var(--duration) var(--ease), color var(--duration) var(--ease), border-color var(--duration) var(--ease);
+}
+.lang-mobile__item:hover {
+  background: var(--bg-elev-3);
+  color: var(--text);
+  border-color: var(--border-strong);
+  text-decoration: none;
+}
+.lang-mobile__item--active {
+  background: var(--bg-elev-3);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
 @media (max-width: 768px) {
   .site-header__inner { gap: var(--space-2); padding: 0 var(--space-4); }
   .site-nav { display: none; }

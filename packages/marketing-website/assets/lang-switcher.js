@@ -125,6 +125,25 @@
     if (inner) inner.insertAdjacentHTML('beforeend', html);
   }
 
+  // Mobile menu language picker: fill any [data-lang-list] placeholder.
+  // A compact horizontal strip of short codes; the current language is
+  // highlighted. Hidden on desktop (CSS), only shown when the mobile
+  // hamburger menu is open.
+  const mobileHtml = LANGS.map(l => `
+    <a href="${l.path}" hreflang="${l.code}" data-lang="${l.code}" data-path="${l.path}" class="lang-mobile__item${l.code === active.code ? ' lang-mobile__item--active' : ''}" aria-label="${l.label}" aria-current="${l.code === active.code ? 'true' : 'false'}">${l.short}</a>
+  `).join('');
+  document.querySelectorAll('[data-lang-list]').forEach(host => {
+    host.innerHTML = mobileHtml;
+    host.querySelectorAll('.lang-mobile__item').forEach(a => {
+      a.addEventListener('click', () => {
+        try {
+          localStorage.setItem('se_lang', a.dataset.lang);
+          localStorage.setItem('se_lang_pref', a.dataset.lang);
+        } catch (_) {}
+      });
+    });
+  });
+
   // Persist language preference and let the default <a href> navigation happen
   document.querySelectorAll('.lang-switcher__item').forEach(a => {
     a.addEventListener('click', () => {
