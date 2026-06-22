@@ -1,169 +1,225 @@
 # SocialEraser
 
-跨平台 X/Twitter 批量清理工具。
+Cross-platform X/Twitter batch cleanup tool.
 
-## 当前阶段：Chrome Extension (开发中)
+## Current Stage: Chrome Extension (In Development)
 
-### 已完成功能
+### Completed Features
 
-| 功能 | 状态 | 说明 |
-|------|------|------|
-| 常驻侧边栏 | ✅ | Chrome Side Panel，不消失 |
-| 检测X网站 | ✅ | 自动识别 x.com / twitter.com |
-| 检测登录状态 | ✅ | 多语言支持 |
-| 批量删除选项 | ✅ | 推文/点赞/书签/关注（私信暂不支持，详见下方说明）|
-| 日期/关键字筛选 | ✅ | UI + 逻辑均已实现 |
-| 实时进度显示 | ✅ | 进度条 + 日志动画 |
-| 暂停/停止/继续 | ✅ | 状态机控制 |
-| 8种语言支持 | ✅ | en/zh-CN/ja/ko/pt/es/de/fr |
-| 远程配置 | ✅ | 支持远程更新选择器 |
-| 刷新配置按钮 | ✅ | 右上角手动刷新 |
-| 底部信任文案 | ✅ | 突出显示隐私承诺 |
-| DOM 操作引擎 | ✅ | 健壮的删除实现 |
-| 无后端设计 | ✅ | 纯前端，无需服务器 |
-| **批量取关 Following** | ✅ | 复用 processBookmarks 模式，cellInnerDiv 行 + 独立 confirm 选择器 |
-| **多 type 并行 session** | ✅ | 总预算共享（不再每 type 重复算额度）|
-| **无进展超时保护** | ✅ | 30s 无进展即停（防 X 改版死循环）|
-| **i18n 多上下文同步** | ✅ | storage.onChanged 跨 context 广播语言切换 |
-| **option-count 状态机** | ✅ | pending（灰 spinner）→ processing（蓝 spinner）→ done（数字）|
-| **status-card 自动收起** | ✅ | 状态正常时延迟 1s 平滑收起，异常立即展开 |
-| **登录态检测抗 SPA 跳转** | ✅ | **Sticky 状态机**：content.js 维护 `cachedIsLoggedIn` 缓存，一次正向检测后锁住，唯一翻转信号是 `checkIsLoginPage()`（URL 进登录页）；selector 用侧栏稳定元素（`/compose/post`、`/i/bookmarks`、`AppTabBar_*`）兜底；删除侧栏 10s retry 循环和 silent 轮询（这两层是误判源头）；新增 `scripts/verify-login-detection.js` 37 assert 防回归 |
-| **cleanup 不再无脑重试** | ✅ | 删除 `runCleanupWithRetry`（0 命中时无条件 sleep 4s 再跑一遍），与 `waitForArticles(3000)` 职责重复；改为 cleanup 本体只跑 1 次。修复前 0 likes 用户每页跑 2 次（共 4 次跨 likes+bookmarks，22s 浪费 8s）；新增 `scripts/verify-no-retry.js` 14 assert 防回归 |
-| **sidepanel 元素绑定断言** | ✅ | 加新 UI 元素时强制要求在 `afterLangLoaded()` 绑 `els.xxx`，否则 `updateTweetsOptionsVisibility / getTweetsOptions` 等函数会**静默失效**（之前 tweets 子选项 4 个新元素漏绑，子选项永远不显示）。新增 `scripts/verify-sidepanel-bindings.js` 6 assert 扫描所有 `els.<name>` 引用比对绑定点 |
-| **dailyUsage race condition 修复** | ✅ | 单飞串行链（`_dailyUsageChain`）串行化 read-modify-write；`.catch` 兜底不毒化链；callback 在 resolve 之前触发保证写后值 |
-| **Schema 对齐（DEFAULT_SELECTORS）** | ✅ | `like.unlikeButtons`（4 个）+ `bookmark.removeButtons`（6 个）已对齐到 `config/*.json`；新增 `scripts/check-schema.js` 自动扫描防止回归 |
-| **setConfig 字段级合并** | ✅ | 远程 config 缺键时不再整个块替换 DEFAULT，而是按字段合并；数组/对象字段深一层浅拷贝避免污染；新增 `scripts/verify-setconfig.js` 13 assert 单测 |
-| **批量删除推文（Tweets）** | ✅ | 引擎 `processTweets` + 原创删推文 + Retweet 撤销 repost；含回复开关 + Pinned 检测跳过；sidepanel 子选项可让用户选"含/不含回复"和"含/不含 retweet" |
+| Feature | Status | Description |
+|---|---|---|
+| Persistent side panel | ✅ | Chrome Side Panel, never disappears |
+| Detect X website | ✅ | Auto-detects x.com / twitter.com |
+| Detect login status | ✅ | Multi-language support |
+| Batch delete options | ✅ | Tweets / likes / bookmarks / following (Messages not yet supported, see details below) |
+| Date / keyword filter | ✅ | UI + logic both implemented |
+| Real-time progress display | ✅ | Progress bar + log animation |
+| Pause / Stop / Resume | ✅ | State machine control |
+| 8 language support | ✅ | en / zh-CN / ja / ko / pt / es / de / fr |
+| Remote config | ✅ | Supports remote selector updates |
+| Refresh config button | ✅ | Manual refresh in top-right |
+| Bottom trust statement | ✅ | Privacy commitment prominently displayed |
+| DOM manipulation engine | ✅ | Robust deletion implementation |
+| No-backend design | ✅ | Pure frontend, no server required |
+| **Batch unfollow Following** | ✅ | Reuses processBookmarks pattern, cellInnerDiv rows + dedicated confirm selectors |
+| **Multi-type parallel session** | ✅ | Shared total budget (no more per-type quota recomputation) |
+| **No-progress timeout protection** | ✅ | Stops after 30s of no progress (prevents X revision infinite loops) |
+| **i18n multi-context sync** | ✅ | storage.onChanged broadcasts language switch across contexts |
+| **option-count state machine** | ✅ | pending (gray spinner) → processing (blue spinner) → done (number) |
+| **status-card auto-collapse** | ✅ | Smoothly collapses after 1s when normal, immediately expands on error |
+| **Login state detection resistant to SPA navigation** | ✅ | **Sticky state machine**: content.js maintains `cachedIsLoggedIn` cache, locks in after one positive detection, the only flip signal is `checkIsLoginPage()` (URL enters login page); selectors use stable sidebar elements (`/compose/post`, `/i/bookmarks`, `AppTabBar_*`) as fallback; removed sidebar 10s retry loop and silent polling (these two layers were the misjudgment source); added `scripts/verify-login-detection.js` with 37 asserts to prevent regression |
+| **cleanup no longer blindly retries** | ✅ | Removed `runCleanupWithRetry` (which would unconditionally sleep 4s and re-run on 0 hits), which duplicated the responsibility of `waitForArticles(3000)`; cleanup body now runs only once. Previously, 0-likes users ran cleanup twice per page (totaling 4 times across likes+bookmarks, wasting 8s of 22s); added `scripts/verify-no-retry.js` with 14 asserts to prevent regression |
+| **sidepanel element binding assertion** | ✅ | When adding new UI elements, force requirement to bind `els.xxx` in `afterLangLoaded()`, otherwise functions like `updateTweetsOptionsVisibility / getTweetsOptions` will **silently fail** (previously, the 4 new elements for tweets sub-options were missed in binding, sub-options never showed). Added `scripts/verify-sidepanel-bindings.js` with 6 asserts to scan all `els.<name>` references and compare with binding points |
+| **dailyUsage race condition fix** | ✅ | Single-flight serial chain (`_dailyUsageChain`) serializes read-modify-write; `.catch` fallback doesn't poison the chain; callback triggered before resolve to guarantee post-write value |
+| **Schema alignment (DEFAULT_SELECTORS)** | ✅ | `like.unlikeButtons` (4) + `bookmark.removeButtons` (6) aligned to `config/*.json`; added `scripts/check-schema.js` for automatic scanning to prevent regression |
+| **setConfig field-level merge** | ✅ | When remote config has missing keys, no longer wholesale replaces DEFAULT, but merges field-by-field; deep shallow copy of array/object fields to prevent contamination; added `scripts/verify-setconfig.js` with 13 unit-test asserts |
+| **Batch delete tweets (Tweets)** | ✅ | Engine `processTweets` + original tweet deletion + Retweet undo repost; includes reply toggle + Pinned detection skip; sidepanel sub-options let users choose "with/without replies" and "with/without retweets" |
 
-### 暂不支持的功能
+### Currently Unsupported Features
 
-| 功能 | 状态 | 说明 |
-|------|------|------|
-| 批量删除 Messages（私信）| ❌ | X 使用 `event.isTrusted` 验证用户输入，content script 派发的 JS 事件（`dispatchEvent` / `mousedown`+`contextmenu` 等序列）全部被 X 拒绝。详见下方"为何 Messages 不支持" |
-| 实际删除操作 | 🔄 | Likes / Bookmarks / Following 端到端真机回归中；Tweets 三子类型（原创 / 回复 / 撤销转推）引擎完整，详见上方已完成的批量删除推文条目 |
-| 免费额度 5000/天 | 🔄 | 计数器已 per-type 化，弹窗未实现 |
-| 订阅系统 Creem | 🔄 | 架构待设计 |
-| Android App | 🔄 | Capacitor 工程已就绪，UI 待移植 |
+| Feature | Status | Description |
+|---|---|---|
+| Batch delete Messages (DMs) | ❌ | X uses `event.isTrusted` to verify user input; JS events dispatched by content scripts (`dispatchEvent` / `mousedown`+`contextmenu` sequences, etc.) are all rejected by X. See "Why Messages is not supported" below |
+| Actual deletion operation | 🔄 | End-to-end real-device regression testing for Likes / Bookmarks / Following; the 3 tweet sub-types (original / reply / undo repost) engine is complete, see "Batch delete tweets" item above |
+| 5000/day free quota | 🔄 | Counter is per-type, popup not yet implemented |
+| Subscription system Creem | 🔄 | Architecture to be designed |
+| Android App | 🔄 | Capacitor project ready, UI to be ported |
 
-### 待开发功能
+### To Be Developed
 
-| 功能 | 优先级 | 说明 |
-|------|--------|------|
-| 订阅系统 Creem | P1 | 付费会员解锁无限额度 + 速度加成 |
-| Android App | P2 | Capacitor 复用 injector.js 引擎 |
-| iOS App | P2 | Capacitor 复用 injector.js 引擎 |
-| 真实数据接入 option-count | P3 | 替代当前的"本次处理条数"语义，从 profile 头部读取 |
-| 高级过滤规则 | P3 | 正则、域名白名单、批量规则预设 |
+| Feature | Priority | Description |
+|---|---|---|
+| Subscription system Creem | P1 | Paid membership to unlock unlimited quota + speed boost |
+| Android App | P2 | Capacitor reuses x-automation.js engine |
+| iOS App | P2 | Capacitor reuses x-automation.js engine |
+| Real data integration for option-count | P3 | Replace current "this session count" semantics, read from profile header |
+| Advanced filter rules | P3 | Regex, domain whitelist, batch rule presets |
 
-### 已知问题
+### Known Issues
 
-| 问题 | 优先级 | 说明 |
-|------|--------|------|
-| Following confirm 弹窗选择器依赖 X 当前 UI | P2 | `[data-testid='confirmationSheetConfirm']` 可能随 X 改版失效，remote config 可热修 |
-| `unfollowUser` 旧配置兼容 | P3 | 已兼容 `unfollowButton`（旧字符串）和 `unfollowButtons`（新数组）两种 schema |
+| Issue | Priority | Description |
+|---|---|---|
+| Following confirm dialog selector depends on X's current UI | P2 | `[data-testid='confirmationSheetConfirm']` may break with X revisions, remote config can hot-fix |
+| `unfollowUser` old config compatibility | P3 | Compatible with both `unfollowButton` (old string) and `unfollowButtons` (new array) schemas |
 
-### 为何 Messages（私信）不支持
+### Why Messages (DMs) Are Not Supported
 
-X 的 Messages 列表页**只能通过 right-click（mac 两指点击 / Windows 右键）触发 Delete conversation 菜单**。经测试，X 在监听 `contextmenu` / `mousedown` 等事件时**校验 `event.isTrusted` 字段**——只有真实用户输入（OS 级事件）才为 `true`。
+X's Messages list page can **only trigger the Delete conversation menu via right-click (two-finger tap on Mac / right-click on Windows)**. After testing, X validates the `event.isTrusted` field when listening to `contextmenu` / `mousedown` events — only real user input (OS-level events) return `true`.
 
-Chrome extension content script 用以下任一方式派发事件，**全部失败**（`isTrusted=false`，被 X 忽略）：
+Chrome extension content script dispatches events using any of the following methods, **all of which fail** (`isTrusted=false`, ignored by X):
 
-| 派发方式 | 结果 |
-|---------|------|
-| `el.dispatchEvent(new MouseEvent('contextmenu', {...}))` | ✗ 失败 |
-| `mousedown` + `mouseup` + `contextmenu` 序列 | ✗ 失败 |
-| `pointerdown` + `mousedown` + `mouseup` + `contextmenu` 完整 PointerEvent 序列 | ✗ 失败 |
-| CDP `Input.dispatchMouseEvent`（浏览器内核级）| ✓ 有效（但 content script 无法调用）|
+| Dispatch method | Result |
+|---|---|
+| `el.dispatchEvent(new MouseEvent('contextmenu', {...}))` | ✗ Failed |
+| `mousedown` + `mouseup` + `contextmenu` sequence | ✗ Failed |
+| `pointerdown` + `mousedown` + `mouseup` + `contextmenu` full PointerEvent sequence | ✗ Failed |
+| CDP `Input.dispatchMouseEvent` (browser kernel-level) | ✓ Valid (but content script cannot call) |
 
-**唯一能模拟 native right click 的方式**是申请 `chrome.debugger` 权限 + background 用 `chrome.debugger.sendCommand('Input.dispatchMouseEvent')`。这会触发 Chrome 的权限警告（"该扩展程序可以访问与此扩展程序相关的页面上的所有数据"），对发布和用户信任有显著负面影响。
+**The only way to simulate native right-click** is to apply for `chrome.debugger` permission + use `chrome.debugger.sendCommand('Input.dispatchMouseEvent')` in background. This triggers Chrome's permission warning ("This extension can access all data on pages related to this extension"), which significantly impacts publishing and user trust.
 
-**其他类型（tweets/likes/bookmarks/following）不受影响**——它们用普通 `.click()` 触发删除，X 不对 click 校验 `isTrusted`，content script 直接调用 `el.click()` 即可。
+**Other types (tweets/likes/bookmarks/following) are not affected** — they use regular `.click()` to trigger deletion; X does not validate `isTrusted` for click, content script can call `el.click()` directly.
 
-**未来重新实现 Messages 的可能路径**：
-1. 申请 `debugger` 权限（影响发布和用户信任）
-2. 通过 X GraphQL API 直接删除（需要 OAuth token，超出 chrome extension 范畴）
-3. 等待 X 改版放弃 `isTrusted` 校验（小概率事件）
+**Future possible paths to re-implement Messages**:
+1. Apply for `debugger` permission (affects publishing and user trust)
+2. Delete directly via X GraphQL API (requires OAuth token, beyond chrome extension scope)
+3. Wait for X to drop `isTrusted` validation (low probability event)
 
-## 项目经验
+## Project Experience
 
-踩坑总结 + 设计取舍详见 [docs/lessons-learned.md](file:///Volumes/XPSSD/workspaces/SocialEraser/docs/lessons-learned.md)，核心 5 条：
+Pitfall summary + design tradeoffs see [docs/lessons-learned.md](docs/lessons-learned.md), core 5 points:
 
-1. **KISS > 过度设计** — 一件事 5 行能写完就别写 50 行
-2. **状态变更走 sticky，不走 poll** — 检测一次就缓存，唯一翻转信号 = 显式用户动作
-3. **状态机要三态**：`null`（未确认） / `true` / `false`
-4. **Selector 不可信** — 必须有语义锚点（href / URL / ARIA），不能全是 `data-testid`
-5. **删代码是改进** — 兜底 retry / silent polling / 老 API 兼容 shim 都要定期回头审视
+1. **KISS > Over-engineering** — Don't write 50 lines for something that can be done in 5
+2. **State changes go sticky, not poll** — Detect once and cache, the only flip signal = explicit user action
+3. **State machine needs 3 states**: `null` (unconfirmed) / `true` / `false`
+4. **Selectors are not trustworthy** — Must have semantic anchors (href / URL / ARIA), cannot be all `data-testid`
+5. **Deleting code is improvement** — Fallback retry / silent polling / old API compat shims need regular review
 
-最近六次实战案例（[docs/lessons-learned.md](file:///Volumes/XPSSD/workspaces/SocialEraser/docs/lessons-learned.md)）：
-- 登录态检测 → sticky 状态机（`scripts/verify-login-detection.js` 37 项 assert）
-- cleanup 去重 → 删 `runCleanupWithRetry`（`scripts/verify-no-retry.js` 14 项 assert）
-- sidepanel 元素漏绑 → 加 4 行 `getElementById` 绑定（`scripts/verify-sidepanel-bindings.js` 6 项 assert）
-- dailyUsage 计数竞态 → 单飞链 `_dailyUsageChain`（`scripts/verify-daily-usage-chain.js` 9 项 assert）
-- processTweets 增量设计 → 双模式扫描 + 8 语言 pinned 检测（`check-schema.js` 覆盖 moreButtons 数组升级）
-- setConfig 字段合并 → 手写 `_mergeConfig` 逐层浅合并（`scripts/verify-setconfig.js` 13 项 assert）
+Last six practical cases ([docs/lessons-learned.md](docs/lessons-learned.md)):
+- Login state detection → sticky state machine (`scripts/verify-login-detection.js` 37 asserts)
+- cleanup deduplication → removed `runCleanupWithRetry` (`scripts/verify-no-retry.js` 14 asserts)
+- sidepanel element missing binding → added 4 lines of `getElementById` binding (`scripts/verify-sidepanel-bindings.js` 6 asserts)
+- dailyUsage counter race → single-flight chain `_dailyUsageChain` (`scripts/verify-daily-usage-chain.js` 9 asserts)
+- processTweets incremental design → dual-mode scanning + 8-language pinned detection (`check-schema.js` covers moreButtons array upgrade)
+- setConfig field merge → manual `_mergeConfig` per-layer shallow merge (`scripts/verify-setconfig.js` 13 asserts)
 
-## 安装使用
+## Quick Start
 
-### Chrome 扩展
-
-1. 打开 `chrome://extensions/`
-2. 开启「开发者模式」
-3. 点击「加载已解压的扩展程序」
-4. 选择 `chrome-extension` 文件夹
-5. 打开 x.com 并登录
-6. 点击扩展图标，打开侧边栏
-7. 勾选要执行的操作，点击「开始清理」
-
-## 验证脚本
-
-> **为什么不用 jest？** 本项目的 verify 脚本是 **grep 源码 + `assert()` + `process.exit(0/1)`** 的纯静态扫描（不是单元测试）。跑得快（不需要 jsdom）、零依赖、易于写"防 X 改版"类锁（参见 [docs/lessons-learned.md](file:///Volumes/XPSSD/workspaces/SocialEraser/docs/lessons-learned.md) 第十节「Assert 比注释更长寿」）。统一入口是 `scripts/run-verify.js`，已被 `npm test` 绑定。
-
-### 推荐：统一入口
+This is a **monorepo**. To load the Chrome / Edge extension, you first need to build the deployable folders from the source folders.
 
 ```bash
-npm test                          # 跑全部 13 个 verify + check-schema
-npm run verify                    # 同 npm test
-npm run verify:single -- tweets-bug-3     # 跑单个（自动补 verify- 前缀和 .js 后缀）
-node scripts/run-verify.js --list         # 列出全部可用脚本
+# 1. Install dependencies
+npm install
+
+# 2. Generate build output (extensions/chrome-x/, extensions/edge-x/, platforms/*/www/)
+npm run sync
+
+# 3. Load the built extension in your browser (see below)
 ```
 
-### 单跑（也可直跑原脚本）
+### Chrome / Edge Extension
+
+1. Run `npm run sync` to generate `extensions/chrome-x/` (and `extensions/edge-x/`)
+2. Open `chrome://extensions/` (or `edge://extensions/`)
+3. Enable "Developer mode"
+4. Click "Load unpacked"
+5. Select `extensions/chrome-x/` (Chrome) or `extensions/edge-x/` (Edge)
+6. Open x.com and log in
+7. Click the extension icon to open the side panel
+8. Check the operations to perform, click "Start Cleanup"
+
+> The `chrome-source/` and `edge-source/` folders contain only the Chrome / Edge MV3 shell (`manifest.json` + `background.js`). The build step (`npm run sync` → `scripts/sync-shared.js`) merges them with `src/` (Web UI) and `scripts/` (core automation) into the final `extensions/<browser>-x/` folders. **You load the merged folder, not the shell folder.**
+
+### Android (Capacitor)
 
 ```bash
-node scripts/check-schema.js       # 4 项：DEFAULT_SELECTORS / config/*.json 字段对齐（防 remote 热修丢字段）
-node scripts/verify-setconfig.js   # 13 项：setConfig 字段级合并单测（防远程缺键时丢 DEFAULT 字段、防污染）
-node scripts/verify-i18n.js        # i18n 8 语言 × 30 keys = 240 entries 完整性
-node scripts/verify-following.js   # 回归检查（following 流程、状态机、auto-hide）
-node scripts/verify-login-detection.js  # 37 项：登录态检测 selector 健壮性 + sticky 状态机
-node scripts/verify-no-retry.js          # 14 项：cleanup 不再无脑重试（防 0 likes 用户每页跑 2 次）
-node scripts/verify-sidepanel-bindings.js  # 2 项：sidepanel.js 所有 els.xxx 引用 ↔ getElementById 绑定 1:1 锁定（防加新元素忘绑；6-type 重构前 6 项）
-node scripts/verify-daily-usage-chain.js  # 9 项：dailyUsage 单飞串行链（防 read-modify-write 竞态 + .catch 毒化链 + callback 顺序）
-node scripts/verify-actual-x-selectors.js  # 31 项：用真实 X 页面 HTML 锁定 selector 决策（防 X 改版后 selector 默默失效）
+npm run sync          # generate www/ + cap copy
+npm run android:open  # open Android Studio
+# then run from Android Studio
 ```
 
-## 项目结构
+### Marketing Website (Static)
+
+The `packages/marketing-website/` folder is a static site served at [socialeraser.app](https://socialeraser.app). See `packages/marketing-website/README.md` for details.
+
+## Verification Scripts
+
+> **Why not jest?** This project's verify scripts are **grep source + `assert()` + `process.exit(0/1)`** pure static scans (not unit tests). Runs fast (no jsdom needed), zero dependencies, easy to write "anti-X-revision" type locks (see [docs/lessons-learned.md](docs/lessons-learned.md) section 10 "Asserts outlive comments"). Unified entry is `scripts/run-verify.js`, bound to `npm test`.
+
+### Recommended: Unified Entry
+
+```bash
+npm test                          # Run all 13 verify + check-schema
+npm run verify                    # Same as npm test
+npm run verify:single -- tweets-bug-3     # Run single (auto-prefix verify- and .js suffix)
+node scripts/run-verify.js --list         # List all available scripts
+```
+
+### Individual Run (Direct Script Also Works)
+
+```bash
+node scripts/check-schema.js       # 4 items: DEFAULT_SELECTORS / config/*.json field alignment (prevent remote hot-fix from losing fields)
+node scripts/verify-setconfig.js   # 13 items: setConfig field-level merge unit tests (prevent remote missing keys from losing DEFAULT fields, prevent contamination)
+node scripts/verify-i18n.js        # i18n 8 languages × 30 keys = 240 entries completeness
+node scripts/verify-following.js   # Regression check (following flow, state machine, auto-hide)
+node scripts/verify-login-detection.js  # 37 items: login state detection selector robustness + sticky state machine
+node scripts/verify-no-retry.js          # 14 items: cleanup no longer blindly retries (prevent 0-likes users running twice per page)
+node scripts/verify-sidepanel-bindings.js  # 2 items: sidepanel.js all els.xxx references ↔ getElementById binding 1:1 lock (prevent adding new elements and forgetting to bind; 6-type pre-refactor had 6 items)
+node scripts/verify-daily-usage-chain.js  # 9 items: dailyUsage single-flight serial chain (prevent read-modify-write race + .catch chain poisoning + callback order)
+node scripts/verify-actual-x-selectors.js  # 31 items: use real X page HTML to lock selector decisions (prevent selectors silently failing after X revision)
+```
+
+## Project Structure
 
 ```
-SocialEraser/
-├── chrome-extension/       # Chrome 扩展（当前开发重点）
-│   ├── lib/
-│   │   ├── config.js     # 远程配置加载
-│   │   ├── i18n.js       # 多语言支持
-│   │   └── injector.js    # DOM 操作引擎
-│   ├── content.js         # 注入脚本
-│   ├── sidepanel.html/js  # 侧边栏 UI
-│   ├── background.js      # 后台脚本
-│   └── config/
-│       ├── default.json   # 本地后备配置
-│       └── remote-example.json  # 远程配置示例
-└── android/               # Android 原生项目（待开发）
+SocialEraser/                                  # monorepo root
+├── packages/
+│   ├── marketing-website/                     # Static site (socialeraser.app, Cloudflare Pages)
+│   │   ├── index.html                         # English landing
+│   │   ├── zh/, ja/                           # Localized landing pages
+│   │   ├── platforms/                         # 5 platform sub-pages (x, tiktok, youtube, instagram, facebook)
+│   │   ├── about.html, faq, privacy, terms    # Static content pages
+│   │   ├── assets/                            # CSS, JS, icons
+│   │   └── package.json
+│   ├── shared-core/                           # Cross-platform shared utilities (WIP)
+│   └── shared-ui/                             # Cross-platform shared components (WIP)
+├── platforms/
+│   ├── x-project/                             # X (Twitter) Eraser — main project
+│   │   ├── chrome-source/                     # Chrome MV3 shell: manifest.json + background.js
+│   │   ├── edge-source/                       # Edge MV3 shell: manifest.json + background.js
+│   │   ├── android/                           # Capacitor Android Studio project
+│   │   ├── ios/                               # Capacitor iOS Xcode project (placeholder)
+│   │   ├── scripts/                           # Core automation (loaded by content script)
+│   │   │   ├── x-automation.js                # DOM manipulation engine (DEFAULT_SELECTORS)
+│   │   │   ├── content.js                     # Content script entry
+│   │   │   └── i18n.js                        # 8-language translation tables
+│   │   ├── src/                               # Web UI bundle (loaded by side panel)
+│   │   │   ├── sidepanel.html, sidepanel.js   # Side panel UI
+│   │   │   ├── _locales/                      # 8 Chrome i18n message files
+│   │   │   ├── config/                        # default.json + remote-example.json
+│   │   │   └── icons/                         # Extension icons (16/48/128)
+│   │   ├── capacitor.config.json
+│   │   └── package.json
+│   └── tiktok-project/                        # TikTok Eraser (planned)
+├── scripts/                                   # Build + verification (Node.js)
+│   ├── run-verify.js                          # Unified entry for `npm test`
+│   ├── check-schema.js                        # DEFAULT_SELECTORS ↔ config/*.json alignment
+│   ├── verify-*.js                            # 13 verify scripts
+│   ├── deploy-website.sh                      # Cloudflare Pages deploy
+│   └── sync-shared.js                         # Build: src/ + scripts/ + *-source/ → extensions/, www/
+├── docs/
+│   ├── lessons-learned.md                     # Project experience & pitfall summary
+│   └── debug-history/                         # Per-bug debug writeups
+├── LICENSE                                    # MIT
+└── README.md                                  # This file
 ```
 
-## 远程配置
+> **Build outputs (gitignored)**: `extensions/chrome-x/`, `extensions/edge-x/`, `platforms/*/www/`, `platforms/*/android/app/src/main/assets/public/`, `platforms/*/ios/App/public/`. All are generated by `npm run sync`.
 
-配置文件支持热更新，X 官方改版后只需更新配置文件即可适配。
+## Remote Configuration
 
-### 配置结构
+The config file supports hot update, just update the config file to adapt after X official revisions.
+
+### Configuration Structure
 
 ```json
 {
@@ -178,109 +234,112 @@ SocialEraser/
 }
 ```
 
-> **schema 对齐约束**：`DEFAULT_SELECTORS`（`chrome-extension/lib/injector.js`）和
-> `config/default.json` / `config/remote-example.json` 的 selector 字段必须保持完全一致。
-> 修改任一处时必须同步修改其他两处，并跑 `node scripts/check-schema.js` 验证。
+> **Schema alignment constraint**: `DEFAULT_SELECTORS` in `platforms/x-project/scripts/x-automation.js` and `config/default.json` / `config/remote-example.json` in `platforms/x-project/src/config/` must remain completely consistent.
+> When modifying any one place, must synchronously modify the other two places, and run `node scripts/check-schema.js` to verify.
 
-### 部署配置
+### Deploying Configuration
 
-1. 修改 `remote-example.json` 内容
-2. 上传到可公开访问的 URL（如 GCS、GitHub Gist）
-3. 更新 `background.js` 中的 `CONFIG_URL`
+1. Modify `remote-example.json` content
+2. Upload to a publicly accessible URL (e.g., GCS, GitHub Gist)
+3. Update `CONFIG_URL` in `platforms/x-project/chrome-source/background.js` (and `edge-source/background.js` if it diverges)
 
-## 技术特点
+## Technical Features
 
-### ⚠️ 硬性要求：多语言适配
+### ⚠️ Hard Requirement: Multi-language Adaptation
 
-**所有面向用户的文案必须使用 i18n，禁止在代码中硬编码任何语言字符串。**
+**All user-facing text must use i18n, no language strings hard-coded in code is allowed.**
 
-#### 规则
+#### Rules
 
-1. **新增文案** → 先在 `lib/i18n.js` 的 8 种语言中添加翻译键，再在代码中通过 `t('key')` 调用
-2. **修改文案** → 同步更新 8 种语言的翻译
-3. **新增 UI 元素** → HTML 中使用 `data-i18n="key"` 或 `data-i18n-placeholder="key"` 属性
-4. **禁止** 在 JS/HTML 中出现 `alert('English text')`、`addLog('Some English')` 等硬编码字符串
-5. **占位符**：动态内容用 `{var}` 形式，如 `t('cleanupCompleted', {count: 10})`
+1. **New text** → First add the translation key in 8 languages in `platforms/x-project/scripts/i18n.js`, then call it in code via `t('key')`
+2. **Modify text** → Synchronously update 8 language translations
+3. **New UI elements** → Use `data-i18n="key"` or `data-i18n-placeholder="key"` attribute in HTML
+4. **Forbidden** JS/HTML with `alert('English text')`, `addLog('Some English')` and other hard-coded strings
+5. **Placeholders**: Dynamic content uses `{var}` format, e.g., `t('cleanupCompleted', {count: 10})`
 
-#### 支持的 8 种语言
+> Note: The Chrome / Edge extension's display name and description (in `chrome-source/manifest.json` and `edge-source/manifest.json`) are localized separately via `platforms/x-project/src/_locales/<lang>/messages.json` (Chrome's native i18n system, not `scripts/i18n.js`).
 
-| 代码 | 语言 |
-|------|------|
-| `en` | English |
-| `zh-CN` | 简体中文 |
-| `ja` | 日本語 |
-| `ko` | 한국어 |
-| `pt` | Português |
-| `es` | Español |
-| `de` | Deutsch |
-| `fr` | Français |
+#### Supported 8 Languages
 
-#### 检查清单（提交前必查）
+The "Code" column shows the locale key used in `scripts/i18n.js` (i.e. what you pass to `t('xxx', 'zh-CN')`).
 
-- [ ] 新文案已添加到 i18n.js 的 8 种语言
-- [ ] HTML 元素使用了 `data-i18n` 属性
-- [ ] JS 中所有 addLog/alert/confirm 使用了 `t()` 函数
-- [ ] 没有硬编码的英文字符串
-- [ ] 占位符 `{var}` 在 8 种语言中都有定义
+| Code | Language | Chrome `_locales/` folder |
+|---|---|---|
+| `en` | English | `_locales/en/` |
+| `zh-CN` | 简体中文 | `_locales/zh_CN/` |
+| `ja` | 日本語 | `_locales/ja/` |
+| `ko` | 한국어 | `_locales/ko/` |
+| `pt` | Português | `_locales/pt/` |
+| `es` | Español | `_locales/es/` |
+| `de` | Deutsch | `_locales/de/` |
+| `fr` | Français | `_locales/fr/` |
 
-#### 示例
+#### Pre-commit Checklist
 
-**错误**：
+- [ ] New text added to 8 languages in i18n.js
+- [ ] HTML elements use `data-i18n` attribute
+- [ ] All addLog/alert/confirm in JS use `t()` function
+- [ ] No hard-coded English strings
+- [ ] Placeholders `{var}` defined in all 8 languages
+
+#### Example
+
+**Wrong**:
 ```javascript
 alert('Please select at least one option');
 addLog('Cleanup started', 'info');
 ```
 
-**正确**：
+**Right**:
 ```javascript
 alert(t('noItemsSelected'));
 addLog(t('startingCleanup'), 'info');
 ```
 
 ```html
-<!-- 错误 -->
+<!-- Wrong -->
 <button>Start Cleanup</button>
 
-<!-- 正确 -->
+<!-- Right -->
 <button data-i18n="startCleanup">Start Cleanup</button>
 ```
 
-### 健壮性设计
+### Robustness Design
 
-- **选择器容错**：一个选择器失败自动尝试下一个
-- **错误容忍**：最多10次错误后停止，防止死循环
-- **标记已处理**：防止重复操作
-- **远程配置**：选择器通过远程 JSON 更新
+- **Selector fallback**: One selector failure automatically tries the next
+- **Error tolerance**: Stops after max 10 errors, prevents infinite loops
+- **Mark processed**: Prevents duplicate operations
+- **Remote config**: Selectors updated via remote JSON
 
-### 无后端
+### No Backend
 
-- 所有逻辑纯前端实现
-- 配置存储在 Chrome Storage 或远程 URL
-- 无需服务器支撑
+- All logic purely frontend
+- Config stored in Chrome Storage or remote URL
+- No server required
 
-## 开发计划
+## Development Plan
 
-### Phase 1: Chrome Extension 核心 ✅
-- [x] 侧边栏 UI
-- [x] 状态检测（含 login status 实时检测——3s 轮询 + statusUpdate 广播）
-- [x] 多语言（8 种语言 + storage.onChanged 跨 context 同步）
-- [x] DOM 操作引擎（含 setConfig 字段级合并 + Schema 对齐保护）
-- [x] dailyUsage 单飞串行链（防 progress 回调并发丢计数）
-- [x] 批量取关 Following（端到端流程通过）
-- [x] 批量删除 Likes / Bookmarks（引擎就绪，端到端真机测试中）
-- [x] 批量删除 Messages（已降级——X 校验 isTrusted，content script 无法模拟 native right click）
-- [x] 批量删除 Tweets（3 子类型 `processOriginalTweets` / `processReplies` / `processRetweets` + `getOriginalTweetsPageURL` / `getRepliesPageURL` / `getRetweetsPageURL` + 跨页续跑 + 8 语言 selector 全就位，端到端真机回归中）
-- [ ] 免费额度 5000/天弹窗
+### Phase 1: Chrome Extension Core ✅
+- [x] Side panel UI
+- [x] State detection (including login status real-time detection — 3s polling + statusUpdate broadcast)
+- [x] Multi-language (8 languages + storage.onChanged cross-context sync)
+- [x] DOM manipulation engine (including setConfig field-level merge + Schema alignment protection)
+- [x] dailyUsage single-flight serial chain (prevent progress callback concurrent loss count)
+- [x] Batch unfollow Following (end-to-end flow passed)
+- [x] Batch delete Likes / Bookmarks (engine ready, end-to-end real-device testing)
+- [x] Batch delete Messages (downgraded — X validates isTrusted, content script cannot simulate native right click)
+- [x] Batch delete Tweets (3 sub-types `processOriginalTweets` / `processReplies` / `processRetweets` + `getOriginalTweetsPageURL` / `getRepliesPageURL` / `getRetweetsPageURL` + cross-page resume + 8-language selector all in place, end-to-end real-device regression testing)
+- [ ] 5000/day free quota popup
 
-### Phase 2: Chrome Extension 完善
-- [ ] 日期过滤逻辑
-- [ ] 订阅系统（Creem）
-- [ ] 会员解锁
+### Phase 2: Chrome Extension Enhancement
+- [ ] Date filter logic
+- [ ] Subscription system (Creem)
+- [ ] Member unlock
 
-### Phase 3: 移动端
+### Phase 3: Mobile
 - [ ] Android App (Capacitor)
 - [ ] iOS App (Capacitor)
-- [ ] 跨端代码共享
+- [ ] Cross-platform code sharing
 
 ## License
 
