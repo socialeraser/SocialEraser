@@ -41,8 +41,8 @@ Cross-platform X/Twitter batch cleanup tool.
 |---|---|---|
 | Batch delete Messages (DMs) | ❌ | X uses `event.isTrusted` to verify user input; JS events dispatched by content scripts (`dispatchEvent` / `mousedown`+`contextmenu` sequences, etc.) are all rejected by X. See "Why Messages is not supported" below |
 | Actual deletion operation | 🔄 | End-to-end real-device regression testing for Likes / Bookmarks / Following; the 3 tweet sub-types (original / reply / undo repost) engine is complete, see "Batch delete tweets" item above |
-| 5000/day free quota | 🔄 | Counter is per-type, popup not yet implemented |
-| Subscription system Creem | 🔄 | Architecture to be designed |
+| 5000/day free quota | ✅ | Per-day safety cap (prevents X rate-limit / account ban) — counter + tip modal implemented, see "Monetization" below |
+| Tip / donation (Creem) | 🔄 | Support page live, Creem checkout links pending (5 tiers: ☕ $1 / 🍕 $3 / 🍱 $5 / 💖 $10 / 🎁 custom); see [docs/business-model.md](docs/business-model.md) |
 | Android App | 🔄 | Capacitor project ready, UI to be ported |
 
 ### To Be Developed
@@ -329,17 +329,33 @@ addLog(t('startingCleanup'), 'info');
 - [x] Batch delete Likes / Bookmarks (engine ready, end-to-end real-device testing)
 - [x] Batch delete Messages (downgraded — X validates isTrusted, content script cannot simulate native right click)
 - [x] Batch delete Tweets (3 sub-types `processOriginalTweets` / `processReplies` / `processRetweets` + `getOriginalTweetsPageURL` / `getRepliesPageURL` / `getRetweetsPageURL` + cross-page resume + 8-language selector all in place, end-to-end real-device regression testing)
-- [ ] 5000/day free quota popup
+- [x] 5000/day safety cap + tip modal (8 languages, see `scripts/verify-tip-model.js`)
 
 ### Phase 2: Chrome Extension Enhancement
 - [ ] Date filter logic
-- [ ] Subscription system (Creem)
-- [ ] Member unlock
+- [x] Tip page (5 tiers: $1 / $3 / $5 / $10 / custom) + Creem integration (links pending)
+- [ ] Tiered support recognition (stretch — public thank-you list, no feature gating)
 
 ### Phase 3: Mobile
 - [ ] Android App (Capacitor)
 - [ ] iOS App (Capacitor)
 - [ ] Cross-platform code sharing
+
+## Monetization
+
+SocialEraser uses a **tip / donation model**, not subscriptions. Decision rationale and full plan: [docs/business-model.md](docs/business-model.md).
+
+**Core principle**: All features are free forever. A tip is gratitude, never payment for features.
+
+**Pieces in place**:
+- 5000/day **safety cap** (prevents X rate-limit / account ban — not a paywall)
+- 8-language tip modal triggered when cap is reached (see `scripts/verify-tip-model.js`)
+- Marketing-site [support page](https://socialeraser.app/support.html) with 5 tiers (☕ $1 / 🍕 $3 / 🍱 $5 / 💖 $10 / 🎁 custom) + FAQ
+- `success.html` for Creem post-checkout redirect
+- Footer Support link in all 12 marketing pages
+- Creem account created; checkout links pending (`#TODO-CREEM-LINK-1/3/5/10/CUSTOM` placeholders in `support.html`)
+
+**Future (deferred until reviews/ratings land)**: monthly + yearly subscriptions, but only as a *second* revenue stream — never replacing the free tier.
 
 ## License
 

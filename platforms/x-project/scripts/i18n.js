@@ -94,12 +94,15 @@
       topAriaLabels: 'Top aria-labels: {list}',
 
       // 每日额度
-      dailyLimitReached: 'Daily free limit reached ({used}/{limit})',
-      dailyLimitReachedHint: 'You have used all {limit} free actions today.\nUpgrade to Premium for unlimited cleanup!',
-      upgradeToPremium: 'Upgrade to Premium',
+      dailyLimitReached: 'Daily safety limit reached ({used}/{limit})',
+      dailyLimitReachedHint: 'To protect your account from rate limiting, we pause cleanup at {limit}/day.\n\nCome back tomorrow — or support the developer to keep this free tool maintained.',
+      upgradeToPremium: '☕ Support the developer',
       maybeLater: 'Maybe Later',
       usedToday: 'Used today: {used} / {limit}',
       cleanupSkipped: 'Cleanup skipped due to daily limit',
+      considerSupporting: '💛 If this tool helped, consider supporting the developer.',
+      gotIt: 'Got it',
+      supportProject: '☕ Support',
 
       // 过滤
       invalidDateRange: 'Start date cannot be later than end date',
@@ -227,12 +230,15 @@
       topAriaLabels: '常用 aria-label: {list}',
 
       // 每日额度
-      dailyLimitReached: '已达到每日免费额度限制 ({used}/{limit})',
-      dailyLimitReachedHint: '您今日已使用全部 {limit} 次免费操作。\n升级到高级版享受无限清理！',
-      upgradeToPremium: '升级到高级版',
+      dailyLimitReached: '已达到今日安全上限 ({used}/{limit})',
+      dailyLimitReachedHint: '为避免账号触发平台限流，系统在 {limit}/天时自动暂停。\n\n明天再继续 — 或者打赏支持开发者，让这个免费工具持续维护。',
+      upgradeToPremium: '☕ 支持开发者',
       maybeLater: '稍后再说',
       usedToday: '今日已使用: {used} / {limit}',
       cleanupSkipped: '已达每日额度限制，跳过清理',
+      considerSupporting: '💛 如果这个工具有帮到你，欢迎打赏支持开发者。',
+      gotIt: '我知道了',
+      supportProject: '☕ 打赏支持',
 
       // 过滤
       invalidDateRange: '开始日期不能晚于结束日期',
@@ -358,12 +364,15 @@
       topAriaLabels: 'Principais aria-labels: {list}',
 
       // Limite diário
-      dailyLimitReached: 'Limite diário gratuito atingido ({used}/{limit})',
-      dailyLimitReachedHint: 'Você usou todas as {limit} ações gratuitas hoje.\nFaça upgrade para Premium e tenha limpeza ilimitada!',
-      upgradeToPremium: 'Fazer upgrade para Premium',
+      dailyLimitReached: 'Limite diário de segurança atingido ({used}/{limit})',
+      dailyLimitReachedHint: 'Para proteger sua conta contra limitação de taxa, pausamos a limpeza em {limit}/dia.\n\nVolte amanhã — ou apoie o desenvolvedor para manter esta ferramenta gratuita.',
+      upgradeToPremium: '☕ Apoiar o desenvolvedor',
       maybeLater: 'Talvez mais tarde',
       usedToday: 'Usado hoje: {used} / {limit}',
       cleanupSkipped: 'Limpeza pulada por atingir o limite diário',
+      considerSupporting: '💛 Se esta ferramenta ajudou, considere apoiar o desenvolvedor.',
+      gotIt: 'Entendi',
+      supportProject: '☕ Apoiar',
 
       // Filtros
       invalidDateRange: 'A data inicial não pode ser posterior à data final',
@@ -492,12 +501,15 @@
       topAriaLabels: '主要 aria-label: {list}',
 
       // 毎日の上限
-      dailyLimitReached: '1日の無料上限に達しました ({used}/{limit})',
-      dailyLimitReachedHint: '本日 {limit} 回の無料操作をすべて使用しました。\nプレミアムにアップグレードして無制限のクリーンアップを！',
-      upgradeToPremium: 'プレミアムにアップグレード',
+      dailyLimitReached: '1日の安全上限に達しました ({used}/{limit})',
+      dailyLimitReachedHint: 'アカウントのレート制限を防ぐため、{limit}/日でクリーンアップを一時停止します。\n\n明日また続けるか、この無料ツールの維持に寄付でサポートしてください。',
+      upgradeToPremium: '☕ 開発者をサポート',
       maybeLater: '後で',
       usedToday: '本日の使用: {used} / {limit}',
       cleanupSkipped: '1日の上限に達したためスキップ',
+      considerSupporting: '💛 このツールが役立ったなら、開発者へのサポートをご検討ください。',
+      gotIt: '了解',
+      supportProject: '☕ サポート',
 
       // フィルター
       invalidDateRange: '開始日は終了日より後にできません',
@@ -625,12 +637,15 @@
       topAriaLabels: '주요 aria-label: {list}',
 
       // 일일 한도
-      dailyLimitReached: '일일 무료 한도 도달 ({used}/{limit})',
-      dailyLimitReachedHint: '오늘 {limit}회 무료 작업을 모두 사용했습니다.\n무제한 정리를 위해 프리미엄으로 업그레이드하세요!',
-      upgradeToPremium: '프리미엄으로 업그레이드',
+      dailyLimitReached: '일일 안전 한도 도달 ({used}/{limit})',
+      dailyLimitReachedHint: '계정 속도 제한을 방지하기 위해 {limit}/일에서 정지합니다.\n\n내일 다시 시도하시거나, 이 무료 도구 유지를 위해 개발자를 후원해 주세요.',
+      upgradeToPremium: '☕ 개발자 후원',
       maybeLater: '나중에',
       usedToday: '오늘 사용: {used} / {limit}',
-      cleanupSkipped: '일일 한도 도달로 정리 건너뜀',
+      cleanupSkipped: '일일 한도 도달, 정리 건너뜀',
+      considerSupporting: '💛 이 도구가 도움이 됐다면 개발자 후원을 고려해 주세요.',
+      gotIt: '알겠습니다',
+      supportProject: '☕ 후원',
 
       // 필터
       invalidDateRange: '시작 날짜는 종료 날짜보다 늦을 수 없습니다',
@@ -756,12 +771,15 @@
       topAriaLabels: 'Top aria-labels: {list}',
 
       // Límite diario
-      dailyLimitReached: 'Límite diario gratuito alcanzado ({used}/{limit})',
-      dailyLimitReachedHint: 'Has usado las {limit} acciones gratuitas de hoy.\n¡Actualiza a Premium para limpieza ilimitada!',
-      upgradeToPremium: 'Actualizar a Premium',
+      dailyLimitReached: 'Límite diario de seguridad alcanzado ({used}/{limit})',
+      dailyLimitReachedHint: 'Para proteger tu cuenta de la limitación de velocidad, pausamos la limpieza en {limit}/día.\n\nVuelve mañana — o apoya al desarrollador para mantener esta herramienta gratuita.',
+      upgradeToPremium: '☕ Apoyar al desarrollador',
       maybeLater: 'Quizás más tarde',
       usedToday: 'Usado hoy: {used} / {limit}',
       cleanupSkipped: 'Limpieza omitida por límite diario',
+      considerSupporting: '💛 Si esta herramienta te ayudó, considera apoyar al desarrollador.',
+      gotIt: 'Entendido',
+      supportProject: '☕ Apoyar',
 
       // Filtro
       invalidDateRange: 'La fecha de inicio no puede ser posterior a la fecha de fin',
@@ -887,12 +905,15 @@
       topAriaLabels: 'Top aria-labels: {list}',
 
       // Tageslimit
-      dailyLimitReached: 'Tägliches kostenloses Limit erreicht ({used}/{limit})',
-      dailyLimitReachedHint: 'Du hast alle {limit} kostenlosen Aktionen heute verbraucht.\nUpgrade auf Premium für unbegrenzte Bereinigung!',
-      upgradeToPremium: 'Auf Premium upgraden',
+      dailyLimitReached: 'Tägliches Sicherheitslimit erreicht ({used}/{limit})',
+      dailyLimitReachedHint: 'Um dein Konto vor Ratenbegrenzung zu schützen, pausieren wir die Bereinigung bei {limit}/Tag.\n\nKomme morgen wieder — oder unterstütze den Entwickler, damit dieses kostenlose Tool weiterhin gepflegt wird.',
+      upgradeToPremium: '☕ Entwickler unterstützen',
       maybeLater: 'Vielleicht später',
       usedToday: 'Heute verwendet: {used} / {limit}',
       cleanupSkipped: 'Bereinigung wegen Tageslimit übersprungen',
+      considerSupporting: '💛 Wenn dieses Tool geholfen hat, erwäge, den Entwickler zu unterstützen.',
+      gotIt: 'Verstanden',
+      supportProject: '☕ Unterstützen',
 
       // Filter
       invalidDateRange: 'Das Startdatum darf nicht nach dem Enddatum liegen',
@@ -1019,12 +1040,15 @@
       topAriaLabels: 'Top aria-labels: {list}',
 
       // Limite quotidienne
-      dailyLimitReached: 'Limite quotidienne gratuite atteinte ({used}/{limit})',
-      dailyLimitReachedHint: 'Vous avez utilisé toutes les {limit} actions gratuites aujourd\'hui.\nPassez à Premium pour un nettoyage illimité !',
-      upgradeToPremium: 'Passer à Premium',
+      dailyLimitReached: 'Limite quotidienne de sécurité atteinte ({used}/{limit})',
+      dailyLimitReachedHint: 'Pour protéger votre compte de la limitation de débit, nous mettons le nettoyage en pause à {limit}/jour.\n\nRevenez demain — ou soutenez le développeur pour maintenir cet outil gratuit.',
+      upgradeToPremium: '☕ Soutenir le développeur',
       maybeLater: 'Peut-être plus tard',
       usedToday: 'Utilisé aujourd\'hui: {used} / {limit}',
       cleanupSkipped: 'Nettoyage ignoré (limite quotidienne)',
+      considerSupporting: '💛 Si cet outil vous a aidé, envisagez de soutenir le développeur.',
+      gotIt: 'Compris',
+      supportProject: '☕ Soutenir',
 
       // Filtre
       invalidDateRange: 'La date de début ne peut pas être postérieure à la date de fin',

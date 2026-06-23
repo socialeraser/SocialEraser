@@ -1291,4 +1291,79 @@ process.exit(failed ? 1 : 0);
 - **用户 IDE 里点开的"玄学错误"就是真错误**——verifier 没 catch 不代表没坏，user 一眼看出来的要立刻承认 + 修，别辩护
 - **品牌重命名三步走**：(1) grep 找 `Brand+IdentifierSuffix` 位置 (2) 显式 rename (3) 再 sed 处理纯字符串
 - **完整 session**：本对话上文 + commit history
-- **防回归**：`scripts/verify-syntax.js`（待建）— 全 platform 源 JS 文件 `node --check` 0 失败才能 `npm run build`
+
+---
+
+## 二十五、案例 20：⚠️ 铁律——营销站与扩展的「口径」必须 1:1 一致，不一致 = 用户被骗
+
+**症状**：
+切换到 Creem 打赏模式时出现第一版错位文案：
+
+| 位置 | 第一版文案 | 错在哪 |
+|------|------------|--------|
+| 营销站 `index.html` hero | "100% free. No quota, no trial, no cap." | ✅ 营销站承诺（承诺层） |
+| 营销站 `about.html` 价值观 | "No server is safer than any server. Free should mean free. No trial, no quota, no daily caps." | ✅ 营销站承诺 |
+| 扩展侧栏 footer | `<a data-i18n="upgradeToPremium">☕ Support the developer</a>` | ⚠️ 标签名 `upgradeToPremium` 是订阅时代遗留，键名误导 |
+| 扩展 5000/日触发弹窗 | "Daily safety limit reached. To protect your account from rate limiting, we pause cleanup at 5000/day. **Upgrade to Pro** to remove this limit." | ❌ **致命错位**——「Upgrade to Pro」和「No quota, no trial」正面冲突，等于营销站说"免费"扩展说"付钱解锁" |
+| 扩展弹窗按钮 | `[Continue with Free] [Upgrade to Pro]` | ❌ 同样错位——「Continue with Free」隐含"你现在用的是受限免费版" |
+
+**根因**：
+- 业务模型**有两条叙事线**：(1) 营销站面向**潜在用户**讲"为什么用 SocialEraser"（信任驱动）；(2) 扩展面向**已安装用户**讲"如何用 + 如何续费"（转化驱动）。
+- 当我们把模型从订阅（freemium）切到打赏（tip jar）时，**扩展侧栏的「转化驱动」叙事没跟着切**——订阅时代的 "Upgrade to Pro" / "Continue with Free" 是直接搬运过来的。
+- **口径不一致的直接后果**：用户先在 marketing site 看到"free, no quota"，安装扩展用满 5000/日后弹"Upgrade to Pro"——**用户第一反应是"这不就是骗人吗"**，信任瞬间归零，对 5 档打赏按钮的转化也是致命的（"我都付了钱你还让我付钱"）。
+- 业务模型决策散落在多个地方（`sidepanel.js` / `i18n.js` / `support.html` / `README.md`），改一个地方忘了改其他是必然的——没有一个**单一的真相源**。
+
+**修法**：
+
+**(1) 业务模型必须有单一真相源**——单独一个 `docs/business-model.md`，列清楚"我们怎么赚钱 + 不做什么"：
+- ✅ 核心承诺：所有功能永远免费
+- ✅ 5000/日是平台安全上限，**永不**对付款用户放开
+- ✅ 弹窗文案只有两种角色：safety notice（说明原因）+ soft ask（打赏按钮）
+- ❌ 绝对禁用：「Upgrade to Pro」/「Continue with Free」/「Get Premium」/「Unlock unlimited」这类订阅时代词汇
+
+**(2) 扩展文案重写**——把「付费解锁」叙事完全替换成「感谢支持」叙事：
+```javascript
+// 旧（订阅版）
+title:  'Daily limit reached',
+hint:   'Upgrade to Pro to remove this limit.',
+btns:   ['Continue with Free', 'Upgrade to Pro'],
+
+// 新（打赏版）
+title:  t('dailyLimitReached', {used, limit}),  // "已达到今日安全上限 (5000/5000)"
+hint:   t('dailyLimitReachedHint', {limit}),     // "为避免账号触发平台限流...明天再继续 — 或者打赏支持开发者"
+btns:   [t('gotIt'), t('upgradeToPremium')],     // ["我知道了", "☕ 支持开发者"]
+// 主按钮视觉：橙色渐变（高亮打赏） / 次按钮：描边（关闭）
+// 关键：主按钮是"建议"不是"必需"——次按钮文案"我知道了"就是默认动作
+```
+
+**(3) 8 语言 i18n 同步**——8 个语言块要 1:1 替换对应键，禁止只改 en 让其他语言留旧文：
+- `dailyLimitReached` / `dailyLimitReachedHint` —— 8 语言全部改"安全上限"叙事
+- `upgradeToPremium` —— **键名保留**（历史原因 + 改键名要同步 8 语言 + manifest），但**值**改成「☕ Support the developer」（en）/「☕ 支持开发者」（zh-CN）等
+- 新增 `considerSupporting` / `gotIt` / `supportProject` —— 8 语言全量补齐
+
+**(4) 营销站加 `support.html` + `success.html`**——打赏必须有独立落地页，不能只靠扩展弹窗：
+- 5 档按钮（☕ $1 Coffee / 🍕 $3 Slice of Pizza / 🍱 $5 Lunch / 💖 $10 Generous / 🎁 Custom）+ FAQ（重点回答"打赏能解锁什么？答：什么都不解锁"）
+- 营销站 12 个 HTML 文件 footer **批量**加 Support 链接（`scripts/inject-support-footer.py` 一次跑完）
+- Creem 跳转目标 `success.html`（`noindex, nofollow`），说"谢谢"+ 引导回首页
+
+**(5) 加 verify 脚本锁住口径**——`scripts/verify-tip-model.js`：
+```js
+// 6 类硬护栏（具体见脚本）
+// 1) sidepanel.js / i18n.js 不能出现 "Upgrade to Pro" / "Continue with Free" 等订阅时代词汇
+// 2) FREE_LIMIT_PER_DAY 仍然是 5000（不是被改成了"无上限"或别的数）
+// 3) i18n 8 语言的 dailyLimitReachedHint 都包含「明天再来」+「支持开发者」关键词
+// 4) i18n 8 语言的 upgradeToPremium 值都是打赏按钮文案（不是"Upgrade"）
+// 5) 扩展侧栏 footer / 营销站 footer 都有 Support 链接
+// 6) support.html / success.html 存在且 5 档按钮齐
+```
+
+**经验**：
+- **业务模型只有一个真相源**——任何「免费承诺 vs 付费解锁」的冲突都是**叙事没切干净**。营销站说一套、扩展说另一套 = 公开自杀。
+- **i18n 8 语言是「口径同步」的最后一关**——只改 en 让其他 7 个语言留旧文，等于 87% 用户看到的还是旧承诺。
+- **文案主按钮的角色 = 文案次按钮的角色**——主按钮"支持开发者"必须和次按钮"我知道了"**价值对等**。如果用户感受是"我点次按钮就是低人一等"，那这个弹窗就是 paywall。
+- **遗留键名（`upgradeToPremium`）改不改看场景**——纯文案值的键可以保留键名（改值 = 8 语言文本替换），改键名 = 8 语言 + manifest + 注释全要改，ROI 太低。
+- **支持页必须有"打赏能解锁什么"FAQ**——不写这一条，70% 用户会以为打赏 = 解锁更多功能。
+- **「支持」 vs 「解锁」是两种心理契约**——前者用户给钱是**感谢**，后者用户给钱是**购买**。混淆这两种心理契约 = 长期看做不大。
+- **verify 脚本不只验代码，也验「业务约束」**——`verify-tip-model.js` 验的不是字符串存在，是「这个项目**不**应该出现的字符串**不出现**」。语义护栏比语法护栏更值钱。
+- **完整 session**：[docs/business-model.md](docs/business-model.md)（决策全文）+ 本对话上文
+- **防回归**：`scripts/verify-tip-model.js` 6 类 40+ assert；新增文案时**必须**先过这个脚本再 commit

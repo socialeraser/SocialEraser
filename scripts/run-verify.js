@@ -40,6 +40,7 @@ const ALL_SCRIPTS = [
   'verify-sidepanel-bindings.js',
   'verify-syntax.js',
   'verify-tweets-bug-3.js',
+  'verify-tip-model.js',
 ];
 
 function parseArgs(argv) {

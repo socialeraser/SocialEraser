@@ -874,113 +874,107 @@
     }
     var filters = (fromDate || toDate || keyword) ? { fromDate: fromDate, toDate: toDate, keyword: keyword } : null;
 
-    // 检查会员状态 + 每日额度
-    chrome.storage.local.get(['subscription'], function(subResult) {
-      var subscription = subResult.subscription;
-      var isPremium = !!(subscription && subscription.active === true);
+    // 打赏模式：5000 软上限（防平台限流封号），无会员/订阅分支
+    getDailyUsage(function(used) {
+      var remaining = FREE_LIMIT_PER_DAY - used;
+      if (remaining <= 0) {
+        addLog(t('dailyLimitReached', {used: used, limit: FREE_LIMIT_PER_DAY}), 'warn');
+        showTipModal(used);
+        return;
+      }
+      var maxPerType = remaining;
 
-      getDailyUsage(function(used) {
-        var remaining, maxPerType;
-        if (isPremium) {
-          // 会员：无限额（占位，Creem 接入后此分支自动生效）
-          remaining = -1;
-          maxPerType = 99999;
-        } else {
-          remaining = FREE_LIMIT_PER_DAY - used;
-          if (remaining <= 0) {
-            addLog(t('dailyLimitReached', {used: used, limit: FREE_LIMIT_PER_DAY}), 'error');
-            showUpgradeModal(used);
-            return;
-          }
-          maxPerType = remaining;
-        }
+      state.isRunning = true;
+      state.isPaused = false;
+      state.processedItems = 0;
+      // 修复（共处理跨 type 累加）：清空当前 type 基线，否则上次值污染本轮 typeDelta
+      state.typeStartCumulative = 0;
+      state.dailyRemaining = remaining;
+      state.totalItems = remaining;
+      state.cleanupOptions = { types: options, maxPerType: maxPerType, filters: filters };
 
-        state.isRunning = true;
-        state.isPaused = false;
-        state.processedItems = 0;
-        // 修复（共处理跨 type 累加）：清空当前 type 基线，否则上次值污染本轮 typeDelta
-        state.typeStartCumulative = 0;
-        state.dailyRemaining = remaining;
-        state.totalItems = isPremium ? '∞' : remaining;
-        state.cleanupOptions = { types: options, maxPerType: maxPerType, filters: filters };
-
-        // 重置所有 option-count 到 idle（避免上次 done 数字残留），再把选中项设 pending
-        resetAllOptionStates();
-        options.forEach(function(type) {
-          setOptionState(type, 'pending');
-        });
-
-        if (els.progressCard) els.progressCard.className = 'progress-card active';
-        if (els.logArea) els.logArea.innerHTML = '';
-        // 自动滚动到日志框，让用户看到清理进度
-        setTimeout(function() {
-          if (els.progressCard) {
-            els.progressCard.scrollIntoView({behavior: 'smooth', block: 'center'});
-          }
-        }, 50);
-        if (els.progressText) els.progressText.textContent = t('processing');
-        if (els.progressSpinner) els.progressSpinner.className = 'progress-spinner';
-        if (els.controlButtons) els.controlButtons.style.display = 'none';
-        if (els.runningButtons) els.runningButtons.style.display = 'flex';
-
-        addLog(t('usedToday', {used: used, limit: isPremium ? '∞' : FREE_LIMIT_PER_DAY}), 'info');
-        addLog(t('startingCleanup'), 'info');
-
-        console.log('[X Eraser sidepanel] state.cleanupOptions:', state.cleanupOptions);
-
-        // 写 session 后必须 readback 确认（MV3 service worker cold start / 写失败时 session 可能丢）
-        function writeSessionAndStart() {
-          chrome.storage.session.set({ pendingCleanup: state.cleanupOptions }).then(function() {
-            // 写后立即 readback 确认
-            return chrome.storage.session.get('pendingCleanup');
-          }).then(function(readback) {
-            console.log('[X Eraser sidepanel] session readback:', readback);
-            if (!readback || !readback.pendingCleanup) {
-              console.warn('[X Eraser sidepanel] session write/readback failed, retrying...');
-              // 重试一次
-              return chrome.storage.session.set({ pendingCleanup: state.cleanupOptions }).then(function() {
-                return chrome.storage.session.get('pendingCleanup');
-              });
-            }
-            return readback;
-          }).then(function(finalReadback) {
-            if (!finalReadback || !finalReadback.pendingCleanup) {
-              console.error('[X Eraser sidepanel] session write FAILED after retry, pending cleanup will not work');
-              addLog(t('sessionWriteFailed'), 'error');
-              // 即便失败也发 startCleanup（让单页流程仍能 work）
-            }
-            activateXTab(function() {
-              chrome.runtime.sendMessage({type: 'startCleanup', options: state.cleanupOptions});
-            });
-          }).catch(function(err) {
-            console.error('[X Eraser sidepanel] session write error:', err);
-            activateXTab(function() {
-              chrome.runtime.sendMessage({type: 'startCleanup', options: state.cleanupOptions});
-            });
-          });
-        }
-
-        writeSessionAndStart();
+      // 重置所有 option-count 到 idle（避免上次 done 数字残留），再把选中项设 pending
+      resetAllOptionStates();
+      options.forEach(function(type) {
+        setOptionState(type, 'pending');
       });
+
+      if (els.progressCard) els.progressCard.className = 'progress-card active';
+      if (els.logArea) els.logArea.innerHTML = '';
+      // 自动滚动到日志框，让用户看到清理进度
+      setTimeout(function() {
+        if (els.progressCard) {
+          els.progressCard.scrollIntoView({behavior: 'smooth', block: 'center'});
+        }
+      }, 50);
+      if (els.progressText) els.progressText.textContent = t('processing');
+      if (els.progressSpinner) els.progressSpinner.className = 'progress-spinner';
+      if (els.controlButtons) els.controlButtons.style.display = 'none';
+      if (els.runningButtons) els.runningButtons.style.display = 'flex';
+
+      addLog(t('usedToday', {used: used, limit: FREE_LIMIT_PER_DAY}), 'info');
+      addLog(t('startingCleanup'), 'info');
+
+      console.log('[X Eraser sidepanel] state.cleanupOptions:', state.cleanupOptions);
+
+      // 写 session 后必须 readback 确认（MV3 service worker cold start / 写失败时 session 可能丢）
+      function writeSessionAndStart() {
+        chrome.storage.session.set({ pendingCleanup: state.cleanupOptions }).then(function() {
+          // 写后立即 readback 确认
+          return chrome.storage.session.get('pendingCleanup');
+        }).then(function(readback) {
+          console.log('[X Eraser sidepanel] session readback:', readback);
+          if (!readback || !readback.pendingCleanup) {
+            console.warn('[X Eraser sidepanel] session write/readback failed, retrying...');
+            // 重试一次
+            return chrome.storage.session.set({ pendingCleanup: state.cleanupOptions }).then(function() {
+              return chrome.storage.session.get('pendingCleanup');
+            });
+          }
+          return readback;
+        }).then(function(finalReadback) {
+          if (!finalReadback || !finalReadback.pendingCleanup) {
+            console.error('[X Eraser sidepanel] session write FAILED after retry, pending cleanup will not work');
+            addLog(t('sessionWriteFailed'), 'error');
+            // 即便失败也发 startCleanup（让单页流程仍能 work）
+          }
+          activateXTab(function() {
+            chrome.runtime.sendMessage({type: 'startCleanup', options: state.cleanupOptions});
+          });
+        }).catch(function(err) {
+          console.error('[X Eraser sidepanel] session write error:', err);
+          activateXTab(function() {
+            chrome.runtime.sendMessage({type: 'startCleanup', options: state.cleanupOptions});
+          });
+        });
+      }
+
+      writeSessionAndStart();
     });
   }
 
-  // 显示升级弹窗
-  function showUpgradeModal(used) {
+  // 显示打赏提示弹窗（替代订阅升级弹窗）
+  // 作用：到 5000 上限后，建议用户明天继续（防平台限流封号），并可选择打赏支持开发者
+  function showTipModal(used) {
     // 移除已有的
-    var existing = document.getElementById('upgrade-modal');
+    var existing = document.getElementById('tip-modal');
     if (existing) existing.remove();
 
     var modal = document.createElement('div');
-    modal.id = 'upgrade-modal';
-    modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;';
+    modal.id = 'tip-modal';
+    modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;cursor:pointer;';
+    // 点击遮罩关闭（弹窗不阻挡）
+    modal.addEventListener('click', function(e) {
+      if (e.target === modal) modal.remove();
+    });
 
     var box = document.createElement('div');
-    box.style.cssText = 'background:#18181b;border:1px solid #27272a;border-radius:12px;padding:24px;max-width:320px;width:90%;text-align:center;';
+    box.style.cssText = 'background:#18181b;border:1px solid #27272a;border-radius:12px;padding:24px;max-width:320px;width:90%;text-align:center;cursor:default;';
+    box.addEventListener('click', function(e) { e.stopPropagation(); });
 
     var icon = document.createElement('div');
     icon.style.cssText = 'font-size:48px;margin-bottom:12px;';
-    icon.textContent = '🚀';
+    icon.textContent = '☕';
 
     var title = document.createElement('h2');
     title.style.cssText = 'font-size:18px;font-weight:600;color:#f59e0b;margin-bottom:8px;';
@@ -995,20 +989,20 @@
 
     var btnLater = document.createElement('button');
     btnLater.style.cssText = 'flex:1;padding:10px;border:1px solid #3f3f46;background:transparent;color:#a1a1aa;border-radius:8px;font-size:13px;cursor:pointer;';
-    btnLater.textContent = t('maybeLater');
+    btnLater.textContent = t('gotIt');
     btnLater.onclick = function() { modal.remove(); };
 
-    var btnUpgrade = document.createElement('button');
-    btnUpgrade.style.cssText = 'flex:1;padding:10px;border:none;background:linear-gradient(135deg,#f59e0b,#d97706);color:#0f0f0f;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;';
-    btnUpgrade.textContent = t('upgradeToPremium');
-    btnUpgrade.onclick = function() {
-      // TODO: 跳转到 Creem 订阅链接
-      chrome.tabs.create({url: 'https://creem.io'});
+    var btnTip = document.createElement('button');
+    btnTip.style.cssText = 'flex:1;padding:10px;border:none;background:linear-gradient(135deg,#f59e0b,#d97706);color:#0f0f0f;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;';
+    btnTip.textContent = t('upgradeToPremium');
+    btnTip.onclick = function() {
+      // 跳到打赏落地页（5 档按钮 + 文案）
+      chrome.tabs.create({url: 'https://socialeraser.app/support.html'});
       modal.remove();
     };
 
     btnRow.appendChild(btnLater);
-    btnRow.appendChild(btnUpgrade);
+    btnRow.appendChild(btnTip);
 
     box.appendChild(icon);
     box.appendChild(title);
@@ -1073,11 +1067,12 @@
       els.btnPause.onclick = pauseCleanup;
     }
 
-    // 达到每日额度后弹升级窗
+    // 跑批完成：永远 addLog 软提示（打赏引流）；达到 5000 上限再弹打赏提示
+    addLog(t('considerSupporting'), 'info');
     if (state.limitReached) {
       getDailyUsage(function(used) {
-        addLog(t('dailyLimitReached', {used: used, limit: FREE_LIMIT_PER_DAY}), 'error');
-        showUpgradeModal(used);
+        addLog(t('dailyLimitReached', {used: used, limit: FREE_LIMIT_PER_DAY}), 'warn');
+        showTipModal(used);
       });
     }
   }
