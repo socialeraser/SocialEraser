@@ -74,6 +74,7 @@ These are intentionally **not** in the current sprint. We want to see organic us
 | Replace `#TODO-CREEM-LINK-*` placeholders with real Creem checkout URLs | Need to set up the 4 products in Creem dashboard — 1-time work, but blocks the page going live as a "real" payment page |
 | Monthly + yearly subscriptions | Only as a *second* stream, never replacing the free tier. We want to know what people would pay for *before* we build it |
 | Public thank-you list | Stretch goal. No feature gating — just a `THANKS.md` in the repo |
+| **Re-enable the "Reviewed by Real Users" section** in `index.html` / `zh/` / `ja/` | Currently hidden behind `<!-- REVIEWS-HIDDEN ... -->` in all 3 home pages — the 6 review cards were fabricated to fill the layout, and **Creem's TOS bans fabricated testimonials** used to promote a paid product. Re-enable only when we have **at least 6 real quotes** collected from public sources (Chrome Web Store reviews, GitHub stars, Product Hunt comments, Twitter mentions). The `<!-- REVIEWS-HIDDEN -->` block in HTML references this row. |
 | "Lifetime supporter" cosmetic badge in side panel | Stretch goal. Visual only, zero functional impact |
 | Webhook handler in a future backend (if we ever get one) | Required to grant license keys if/when we add premium features. Not needed for tip model |
 
