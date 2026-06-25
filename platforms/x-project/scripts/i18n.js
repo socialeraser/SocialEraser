@@ -103,6 +103,9 @@
       considerSupporting: '💛 If this tool helped, consider supporting the developer.',
       gotIt: 'Got it',
       supportProject: '☕ Support',
+      feedbackTooltip: 'Send feedback',
+      summaryDone: 'Done! {count} items cleaned',
+      summaryStats: '{types} types · {duration}',
 
       // 过滤
       invalidDateRange: 'Start date cannot be later than end date',
@@ -510,6 +513,9 @@
       considerSupporting: '💛 このツールが役立ったなら、開発者へのサポートをご検討ください。',
       gotIt: '了解',
       supportProject: '☕ サポート',
+      feedbackTooltip: 'フィードバックを送信',
+      summaryDone: '完了！{count} 件削除しました',
+      summaryStats: '{types} 種類 · {duration}',
 
       // フィルター
       invalidDateRange: '開始日は終了日より後にできません',
@@ -1049,6 +1055,9 @@
       considerSupporting: '💛 Si cet outil vous a aidé, envisagez de soutenir le développeur.',
       gotIt: 'Compris',
       supportProject: '☕ Soutenir',
+      feedbackTooltip: 'Envoyer des commentaires',
+      summaryDone: 'Terminé ! {count} éléments supprimés',
+      summaryStats: '{types} types · {duration}',
 
       // Filtre
       invalidDateRange: 'La date de début ne peut pas être postérieure à la date de fin',

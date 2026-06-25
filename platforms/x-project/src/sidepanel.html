@@ -321,6 +321,39 @@
       from { transform: rotate(0deg); }
       to { transform: rotate(360deg); }
     }
+    /* 完成总结卡片（非模式，与 progress-card 同一槽位复用） */
+    .summary-card {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .summary-card.active { display: block; }
+    .summary-header {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 6px;
+    }
+    .summary-icon { font-size: 18px; }
+    .summary-title { flex: 1; font-size: 13px; font-weight: 600; color: #22c55e; }
+    .summary-stats { font-size: 11px; color: #71717a; margin-bottom: 10px; }
+    .summary-tip-cta {
+      display: block; text-align: center;
+      padding: 9px 12px; border-radius: 8px;
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: #0f0f0f; font-size: 12px; font-weight: 600;
+      text-decoration: none;
+    }
+    .summary-tip-cta:hover { opacity: 0.9; }
+
+    /* 顶部 Support 胶囊已移除（侧边栏窄屏挤压标题），仅保留 footer 链接视觉升级 */
+    .trust-link.support-link {
+      color: #f59e0b;
+      font-size: 12px;
+    }
+    .trust-link.support-link:hover { color: #fbbf24; }
+
     .progress-close {
       background: none;
       border: none;
@@ -561,6 +594,7 @@
         <button id="btn-refresh" title="Refresh">
           <span id="refresh-icon" class="refresh-icon">↻</span>
         </button>
+        <a id="btn-feedback" class="lang-btn" href="mailto:support@socialeraser.app?subject=[X%20Eraser%20Feedback]" data-i18n-title="feedbackTooltip" title="Send feedback">✉️</a>
       </div>
     </div>
 
@@ -668,6 +702,16 @@
       </div>
     </div>
 
+    <div id="summary-card" class="summary-card">
+      <div class="summary-header">
+        <span class="summary-icon">✅</span>
+        <span class="summary-title" id="summary-title">Done!</span>
+        <button id="btn-close-summary" class="progress-close" title="Close">&times;</button>
+      </div>
+      <p class="summary-stats" id="summary-stats"></p>
+      <a class="summary-tip-cta" href="https://socialeraser.app/support.html" target="_blank" rel="noopener noreferrer" data-i18n="considerSupporting">Support the developer</a>
+    </div>
+
     <div id="open-x-section">
       <button id="btn-open-x" class="btn btn-primary">Open X Website</button>
     </div>
@@ -687,7 +731,7 @@
         <a class="trust-link" href="https://socialeraser.app/privacy.html" target="_blank" rel="noopener noreferrer" data-i18n="privacy">Privacy</a>
         <a class="trust-link" href="https://socialeraser.app/terms.html" target="_blank" rel="noopener noreferrer" data-i18n="terms">Terms</a>
         <a class="trust-link" href="https://socialeraser.app/help.html" target="_blank" rel="noopener noreferrer" data-i18n="help">Help</a>
-        <a class="trust-link" href="https://socialeraser.app/support.html" target="_blank" rel="noopener noreferrer" data-i18n="supportProject">☕ Support</a>
+        <a class="trust-link support-link" href="https://socialeraser.app/support.html" target="_blank" rel="noopener noreferrer" data-i18n="supportProject">☕ Support</a>
       </div>
     </div>
   </div>

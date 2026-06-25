@@ -17,6 +17,10 @@
     typeStartCumulative: 0,
     statusHideTimer: null,
     totalItems: 0,
+    // 清理起始时间戳：用于 summary card 展示耗时
+    cleanupStartTime: 0,
+    // 总结卡片是否已展开：用户主动关闭后本轮不重新弹
+    summaryDismissed: false,
     // 登录态持续 8s 卡在"检测中"时弹出"请刷新 X 页面"提示
     // 触发条件：state.isX && state.checkingLogin 进入 8s 后仍未变
     // 清除条件：state.checkingLogin 翻转为 false
@@ -147,6 +151,11 @@
     els.btnLang = document.getElementById('btn-lang');
     els.langFlag = document.getElementById('lang-flag');
     els.langDropdown = document.getElementById('lang-dropdown');
+    els.btnFeedback = document.getElementById('btn-feedback');
+    els.summaryCard = document.getElementById('summary-card');
+    els.summaryTitle = document.getElementById('summary-title');
+    els.summaryStats = document.getElementById('summary-stats');
+    els.btnCloseSummary = document.getElementById('btn-close-summary');
 
     // 6 个顶级 checkbox DOM 引用（3 个推文子类型：original-tweets / replies / retweets）
     els.optOriginalTweets = document.getElementById('opt-original-tweets');
@@ -245,6 +254,13 @@
       placeholders[j].setAttribute('placeholder', t(pkey));
     }
 
+    // data-i18n-title: 翻译 title 属性（tooltip 用，例如反馈按钮的悬停文案）
+    var titled = document.querySelectorAll('[data-i18n-title]');
+    for (var tt = 0; tt < titled.length; tt++) {
+      var tkey = titled[tt].getAttribute('data-i18n-title');
+      titled[tt].setAttribute('title', t(tkey));
+    }
+
     // trust badge
     var trustTitle = document.querySelector('.trust-badge-title');
     if (trustTitle) trustTitle.textContent = t('trustTitle');
@@ -274,6 +290,7 @@
     if (els.btnRefresh) els.btnRefresh.onclick = refreshConfig;
     if (els.btnLang) els.btnLang.onclick = toggleLangDropdown;
     if (els.btnCopyDiag) els.btnCopyDiag.onclick = copyDiagnosticLog;
+    if (els.btnCloseSummary) els.btnCloseSummary.onclick = hideSummaryCard;
 
     // Original Tweets 备份提示联动：
     //   勾上 → .option-item 加 .show-backup-tip → CSS 把内嵌 .backup-tip 从 display:none 切到 display:flex
@@ -833,6 +850,8 @@
   // 收集 Tweets 子选项函数已删除（2026-06-18 重构：tweets 拆为 3 个独立顶级 type，不再有子选项）
 
   function startCleanup() {
+    // 开启新清理：收起上轮 summary 卡（不触碰 summaryDismissed，仍允许本轮完成后再弹）
+    if (els.summaryCard) els.summaryCard.classList.remove('active');
     var options = [];
     // 6 type 完全独立：原 tweets 拆为 originalTweets / replies / retweets
     var checkboxIds = ['opt-original-tweets', 'opt-replies', 'opt-retweets', 'opt-likes', 'opt-bookmarks', 'opt-following'];
@@ -892,6 +911,9 @@
       state.dailyRemaining = remaining;
       state.totalItems = remaining;
       state.cleanupOptions = { types: options, maxPerType: maxPerType, filters: filters };
+      // 记录开始时间（用于 summary card 展示耗时） + 重新允许 summary 弹出
+      state.cleanupStartTime = Date.now();
+      state.summaryDismissed = false;
 
       // 重置所有 option-count 到 idle（避免上次 done 数字残留），再把选中项设 pending
       resetAllOptionStates();
@@ -1069,12 +1091,47 @@
 
     // 跑批完成：永远 addLog 软提示（打赏引流）；达到 5000 上限再弹打赏提示
     addLog(t('considerSupporting'), 'info');
+    // 非模式 summary 卡：processedItems > 0 且用户未在本轮手动关过 → 弹
+    if (state.processedItems > 0 && !state.summaryDismissed) {
+      showSummaryCard();
+    }
     if (state.limitReached) {
       getDailyUsage(function(used) {
         addLog(t('dailyLimitReached', {used: used, limit: FREE_LIMIT_PER_DAY}), 'warn');
         showTipModal(used);
       });
     }
+  }
+
+  // 格式化毫秒为简短中文/英文"1m 23s"（i18n 友好的通用格式，digits only）
+  function formatDuration(ms) {
+    if (!ms || ms < 0) return '0s';
+    var s = Math.floor(ms / 1000);
+    if (s < 60) return s + 's';
+    var m = Math.floor(s / 60);
+    var rs = s % 60;
+    return m + 'm ' + rs + 's';
+  }
+
+  // 显示完成总结卡（非模式：复用 progress-card 槽位，不遮罩，× 手动关）
+  function showSummaryCard() {
+    if (!els.summaryCard) return;
+    var count = state.processedItems || 0;
+    var types = (state.cleanupOptions && state.cleanupOptions.types) || [];
+    var duration = state.cleanupStartTime ? formatDuration(Date.now() - state.cleanupStartTime) : '0s';
+    if (els.summaryTitle) els.summaryTitle.textContent = t('summaryDone', { count: count });
+    if (els.summaryStats) els.summaryStats.textContent = t('summaryStats', { types: types.length, duration: duration });
+    els.summaryCard.classList.add('active');
+    // 滚到卡片位置（用户可能停留在 log 区）
+    setTimeout(function() {
+      if (els.summaryCard) els.summaryCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 50);
+  }
+
+  // 用户主动关闭：mark dismissed → 本轮不再弹；新 startCleanup 时清回 false
+  function hideSummaryCard() {
+    if (els.summaryCard) els.summaryCard.classList.remove('active');
+    state.summaryDismissed = true;
   }
 
   function onPaused() {
