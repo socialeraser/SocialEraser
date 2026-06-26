@@ -26,6 +26,18 @@
   .logo-text h1 { font-size: 16px; font-weight: 600; }
   .logo-text p { font-size: 10px; color: #71717a; }
 
+  .toolbar { display: flex; align-items: center; gap: 4px; }
+  .toolbar button, .toolbar a {
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    background: transparent; color: #a1a1aa;
+    border: 1px solid #27272a; border-radius: 6px;
+    font-size: 14px; line-height: 1; text-decoration: none;
+    cursor: default;
+  }
+  .toolbar .refresh-icon.spinning { animation: refreshSpin 0.8s linear infinite; display: inline-block; }
+  @keyframes refreshSpin { to { transform: rotate(360deg); } }
+
   .status-card { background: #18181b; border: 1px solid #27272a; border-radius: 10px; padding: 12px; margin-bottom: 12px; }
   .status-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
   .status-item:last-child { margin-bottom: 0; }
@@ -106,6 +118,11 @@
         <h1>X Eraser</h1>
         <p>v0.4.0 · open source</p>
       </div>
+    </div>
+    <div class="toolbar">
+      <button id="btn-lang" title="Language"><span>🇺🇸</span></button>
+      <button id="btn-refresh" title="Refresh"><span class="refresh-icon">↻</span></button>
+      <a id="btn-feedback" title="Send feedback">✉️</a>
     </div>
   </div>
 
