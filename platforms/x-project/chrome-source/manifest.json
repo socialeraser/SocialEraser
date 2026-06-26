@@ -17,7 +17,8 @@
     "scripting"
   ],
   "host_permissions": [
-    "<all_urls>"
+    "*://x.com/*",
+    "*://twitter.com/*"
   ],
   "background": {
     "service_worker": "background.js"
