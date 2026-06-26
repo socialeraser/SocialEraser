@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>X Eraser — running</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: #0f0f0f;
+    color: #fff;
+    padding: 16px;
+    width: 500px;
+    min-height: 900px;
+    overflow: hidden;
+  }
+  .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+  .logo { display: flex; align-items: center; gap: 10px; }
+  .logo-icon {
+    width: 32px; height: 32px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; font-weight: 800; color: #1a1a1a;
+  }
+  .logo-text h1 { font-size: 16px; font-weight: 600; }
+  .logo-text p { font-size: 10px; color: #71717a; }
+
+  .status-card { background: #18181b; border: 1px solid #27272a; border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+  .status-item { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .status-item:last-child { margin-bottom: 0; }
+  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: #22c55e; }
+  .status-dot.pulsing {
+    background: #3b82f6;
+    animation: dotPulse 1.2s ease-in-out infinite;
+  }
+  @keyframes dotPulse {
+    0%   { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+    50%  { box-shadow: 0 0 0 6px rgba(59, 130, 246, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
+  }
+  .status-text { font-size: 12px; color: #a1a1aa; }
+
+  .options-card { background: #18181b; border: 1px solid #27272a; border-radius: 10px; padding: 12px; margin-bottom: 12px; }
+  .section-title { font-size: 11px; font-weight: 600; color: #71717a; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .option-item { display: flex; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid #27272a; }
+  .option-item:last-child { border-bottom: none; padding-bottom: 0; }
+  .option-item.processing { background: rgba(59, 130, 246, 0.08); border-radius: 6px; margin: 0 -6px; padding: 6px; }
+  .option-item.done { opacity: 0.5; }
+  .option-checkbox { width: 16px; height: 16px; accent-color: #f59e0b; }
+  .option-label { font-size: 13px; color: #fff; flex: 1; }
+  .option-count { font-size: 11px; color: #a1a1aa; background: #27272a; padding: 2px 8px; border-radius: 10px; min-width: 28px; text-align: center; }
+
+  .progress-card { background: #18181b; border: 1px solid #27272a; border-radius: 10px; padding: 14px; margin-bottom: 12px; }
+  .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .progress-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+  .progress-spinner {
+    display: inline-block; width: 12px; height: 12px;
+    border: 2px solid #27272a; border-top-color: #f59e0b;
+    border-radius: 50%;
+    animation: progressSpin 0.8s linear infinite;
+  }
+  @keyframes progressSpin { to { transform: rotate(360deg); } }
+  .progress-counter { font-size: 13px; color: #fbbf24; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .progress-bar { width: 100%; height: 6px; background: #27272a; border-radius: 3px; overflow: hidden; }
+  .progress-bar__fill {
+    height: 100%;
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+    width: 0%;
+    border-radius: 3px;
+  }
+  .progress-meta { display: flex; justify-content: space-between; margin-top: 8px; font-size: 11px; color: #71717a; }
+
+  .log-card { background: #18181b; border: 1px solid #27272a; border-radius: 10px; padding: 10px 12px; max-height: 200px; overflow: hidden; }
+  .log-entry { font-size: 11px; color: #a1a1aa; font-family: ui-monospace, "SF Mono", Menlo, monospace; padding: 1px 0; line-height: 1.5; }
+  .log-entry .tag { color: #71717a; }
+  .log-entry .ok { color: #22c55e; }
+  .log-entry .skip { color: #71717a; }
+</style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">S</div>
+      <div class="logo-text">
+        <h1>X Eraser</h1>
+        <p>v0.4.0 · open source</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-card">
+    <div class="status-item"><div class="status-dot"></div><span class="status-text">x.com connected</span></div>
+    <div class="status-item"><div class="status-dot"></div><span class="status-text">logged in as @you</span></div>
+    <div class="status-item"><div class="status-dot pulsing"></div><span class="status-text" id="status-text">Cleanup running</span></div>
+  </div>
+
+  <div class="options-card">
+    <div class="section-title" id="section-title">Deleting</div>
+    <div class="option-item done">
+      <input type="checkbox" class="option-checkbox" checked disabled>
+      <span class="option-label">Likes</span>
+      <span class="option-count" id="count-likes">2,847</span>
+    </div>
+    <div class="option-item processing" id="opt-tweets">
+      <input type="checkbox" class="option-checkbox" checked disabled>
+      <span class="option-label">Original tweets</span>
+      <span class="option-count" id="count-tweets">0</span>
+    </div>
+  </div>
+
+  <div class="progress-card">
+    <div class="progress-header">
+      <div class="progress-title">
+        <span class="progress-spinner" id="spinner"></span>
+        <span id="progress-label">Cleaning tweets…</span>
+      </div>
+      <div class="progress-counter" id="counter">0 / 4,108</div>
+    </div>
+    <div class="progress-bar"><div class="progress-bar__fill" id="bar"></div></div>
+    <div class="progress-meta">
+      <span id="rate">~0 / sec</span>
+      <span id="eta">calculating…</span>
+    </div>
+  </div>
+
+  <div class="log-card" id="log"></div>
+
+<script>
+  // Static state driven by ?t=N query param (ms into animation).
+  // This avoids relying on requestAnimationFrame under headless virtual time.
+  const TOTAL = 4108;
+  const DURATION = 5000;
+
+  const logPlan = [
+    { at: 0.05, html: '<span class="tag">[12:01:14]</span> <span class="ok">delete</span> 1700000000000000' },
+    { at: 0.10, html: '<span class="tag">[12:01:14]</span> <span class="ok">delete</span> 1700000000001000' },
+    { at: 0.15, html: '<span class="tag">[12:01:14]</span> <span class="ok">delete</span> 1700000000002000' },
+    { at: 0.20, html: '<span class="tag">[12:01:15]</span> <span class="ok">delete</span> 1700000000003000' },
+    { at: 0.25, html: '<span class="tag">[12:01:15]</span> <span class="ok">delete</span> 1700000000004000' },
+    { at: 0.30, html: '<span class="tag">[12:01:15]</span> <span class="ok">delete</span> 1700000000005000' },
+    { at: 0.35, html: '<span class="tag">[12:01:15]</span> <span class="skip">skip</span> 1700000000006000 (repost)' },
+    { at: 0.40, html: '<span class="tag">[12:01:15]</span> <span class="ok">delete</span> 1700000000007000' },
+    { at: 0.45, html: '<span class="tag">[12:01:15]</span> <span class="ok">delete</span> 1700000000008000' },
+    { at: 0.50, html: '<span class="tag">[12:01:15]</span> <span class="ok">delete</span> 1700000000009000' },
+    { at: 0.55, html: '<span class="tag">[12:01:16]</span> <span class="ok">delete</span> 1700000000010000' },
+    { at: 0.60, html: '<span class="tag">[12:01:16]</span> <span class="ok">delete</span> 1700000000011000' },
+    { at: 0.65, html: '<span class="tag">[12:01:16]</span> <span class="ok">delete</span> 1700000000012000' },
+    { at: 0.70, html: '<span class="tag">[12:01:16]</span> <span class="ok">delete</span> 1700000000013000' },
+    { at: 0.75, html: '<span class="tag">[12:01:16]</span> <span class="ok">delete</span> 1700000000014000' },
+    { at: 0.80, html: '<span class="tag">[12:01:16]</span> <span class="ok">delete</span> 1700000000015000' },
+    { at: 0.85, html: '<span class="tag">[12:01:16]</span> <span class="ok">delete</span> 1700000000016000' },
+    { at: 0.90, html: '<span class="tag">[12:01:17]</span> <span class="ok">delete</span> 1700000000017000' },
+    { at: 0.95, html: '<span class="tag">[12:01:17]</span> <span class="ok">delete</span> 1700000000018000' },
+    { at: 1.00, html: '<span class="tag">[12:01:17]</span> <span class="ok">done</span> — 4,108 tweets removed' },
+  ];
+
+  const fmt = (n) => n.toLocaleString("en-US");
+
+  // Read ?t=N
+  const params = new URLSearchParams(location.search);
+  const tMs = parseInt(params.get("t") || "0", 10);
+  const t = Math.max(0, Math.min(1.05, tMs / DURATION));
+
+  // Compute derived state
+  const pct = Math.min(t, 1);
+  const done = Math.floor(pct * TOTAL);
+  const elapsed = Math.max(tMs, 1) / 1000; // virtual seconds since start
+  const rate = done / elapsed;
+  const remaining = TOTAL - done;
+  const etaSec = remaining / Math.max(rate, 1);
+
+  // Apply state
+  document.getElementById("bar").style.width = (pct * 100).toFixed(1) + "%";
+  document.getElementById("counter").textContent = fmt(done) + " / " + fmt(TOTAL);
+  document.getElementById("count-tweets").textContent = fmt(done);
+  document.getElementById("rate").textContent = "~" + Math.round(rate) + " / sec";
+  document.getElementById("eta").textContent =
+    remaining === 0 ? "done" :
+    etaSec > 60 ? "~" + Math.round(etaSec/60) + " min left" :
+    "~" + Math.round(etaSec) + "s left";
+
+  // Log entries
+  const log = document.getElementById("log");
+  for (const e of logPlan) {
+    if (t >= e.at) {
+      const el = document.createElement("div");
+      el.className = "log-entry";
+      el.innerHTML = e.html;
+      log.appendChild(el);
+    }
+  }
+  // Cap visible log entries to 8
+  while (log.children.length > 8) log.removeChild(log.firstChild);
+
+  // End state changes
+  if (pct >= 1) {
+    document.getElementById("opt-tweets").classList.remove("processing");
+    document.getElementById("opt-tweets").classList.add("done");
+    document.getElementById("spinner").style.animation = "none";
+    document.getElementById("spinner").style.borderTopColor = "#22c55e";
+    document.getElementById("progress-label").textContent = "Done";
+    document.getElementById("status-text").textContent = "Cleanup complete";
+    document.getElementById("section-title").textContent = "Completed";
+  }
+</script>
+</body>
+</html>
