@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>X Eraser — running</title>
+<title>X Eraser — demo</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -10,8 +10,8 @@
     background: #0f0f0f;
     color: #fff;
     padding: 16px;
-    width: 500px;
-    min-height: 900px;
+    width: 280px;
+    min-height: 504px;
     overflow: hidden;
   }
   .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
@@ -76,6 +76,26 @@
   .log-entry .tag { color: #71717a; }
   .log-entry .ok { color: #22c55e; }
   .log-entry .skip { color: #71717a; }
+
+  /* step 1: connect/idle */
+  .cta-btn {
+    display: block; width: 100%; padding: 12px;
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: #1a1a1a; font-weight: 700; font-size: 13px;
+    border: none; border-radius: 8px; text-align: center;
+    margin-bottom: 12px; cursor: default;
+  }
+  .privacy-banner {
+    display: flex; align-items: center; gap: 8px;
+    background: rgba(34, 197, 94, 0.08);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+    border-radius: 10px; padding: 12px;
+    font-size: 12px; color: #22c55e;
+  }
+  .privacy-banner .icon { font-size: 16px; }
+  .privacy-banner .text { flex: 1; }
+  .privacy-banner .text b { display: block; margin-bottom: 2px; }
+  .privacy-banner .text small { color: #71717a; font-weight: 400; }
 </style>
 </head>
 <body>
@@ -92,43 +112,61 @@
   <div class="status-card">
     <div class="status-item"><div class="status-dot"></div><span class="status-text">x.com connected</span></div>
     <div class="status-item"><div class="status-dot"></div><span class="status-text">logged in as @you</span></div>
-    <div class="status-item"><div class="status-dot pulsing"></div><span class="status-text" id="status-text">Cleanup running</span></div>
-  </div>
-
-  <div class="options-card">
-    <div class="section-title" id="section-title">Deleting</div>
-    <div class="option-item done">
-      <input type="checkbox" class="option-checkbox" checked disabled>
-      <span class="option-label">Likes</span>
-      <span class="option-count" id="count-likes">2,847</span>
-    </div>
-    <div class="option-item processing" id="opt-tweets">
-      <input type="checkbox" class="option-checkbox" checked disabled>
-      <span class="option-label">Original tweets</span>
-      <span class="option-count" id="count-tweets">0</span>
+    <div class="status-item" id="status-row-3">
+      <div class="status-dot" id="status-dot-3"></div>
+      <span class="status-text" id="status-text">ready to start</span>
     </div>
   </div>
 
-  <div class="progress-card">
-    <div class="progress-header">
-      <div class="progress-title">
-        <span class="progress-spinner" id="spinner"></span>
-        <span id="progress-label">Cleaning tweets…</span>
+  <!-- state=connect: CTA + privacy banner -->
+  <div data-show="connect">
+    <button class="cta-btn">Open X Website</button>
+    <div class="privacy-banner">
+      <span class="icon">🛡️</span>
+      <div class="text">
+        <b>100% Local Processing</b>
+        <small>No data leaves your browser.</small>
       </div>
-      <div class="progress-counter" id="counter">0 / 4,108</div>
-    </div>
-    <div class="progress-bar"><div class="progress-bar__fill" id="bar"></div></div>
-    <div class="progress-meta">
-      <span id="rate">~0 / sec</span>
-      <span id="eta">calculating…</span>
     </div>
   </div>
 
-  <div class="log-card" id="log"></div>
+  <!-- state=pick: items list -->
+  <div data-show="pick run" id="options-wrap">
+    <div class="options-card">
+      <div class="section-title" id="section-title">Select items to delete</div>
+      <div class="option-item">
+        <input type="checkbox" class="option-checkbox" id="opt-likes" checked>
+        <span class="option-label">Likes</span>
+        <span class="option-count" id="count-likes">2,847</span>
+      </div>
+      <div class="option-item" id="opt-tweets">
+        <input type="checkbox" class="option-checkbox" id="opt-tweets-cb" checked>
+        <span class="option-label">Original tweets</span>
+        <span class="option-count" id="count-tweets">141</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- state=run: progress card + log -->
+  <div data-show="run" id="progress-wrap">
+    <div class="progress-card">
+      <div class="progress-header">
+        <div class="progress-title">
+          <span class="progress-spinner" id="spinner"></span>
+          <span id="progress-label">Cleaning tweets…</span>
+        </div>
+        <div class="progress-counter" id="counter">0 / 4,108</div>
+      </div>
+      <div class="progress-bar"><div class="progress-bar__fill" id="bar"></div></div>
+      <div class="progress-meta">
+        <span id="rate">~0 / sec</span>
+        <span id="eta">calculating…</span>
+      </div>
+    </div>
+    <div class="log-card" id="log"></div>
+  </div>
 
 <script>
-  // Static state driven by ?t=N query param (ms into animation).
-  // This avoids relying on requestAnimationFrame under headless virtual time.
   const TOTAL = 4108;
   const DURATION = 5000;
 
@@ -157,51 +195,70 @@
 
   const fmt = (n) => n.toLocaleString("en-US");
 
-  // Read ?t=N
   const params = new URLSearchParams(location.search);
+  const state = params.get("state") || "run";
   const tMs = parseInt(params.get("t") || "0", 10);
   const t = Math.max(0, Math.min(1.05, tMs / DURATION));
 
-  // Compute derived state
-  const pct = Math.min(t, 1);
-  const done = Math.floor(pct * TOTAL);
-  const elapsed = Math.max(tMs, 1) / 1000; // virtual seconds since start
-  const rate = done / elapsed;
-  const remaining = TOTAL - done;
-  const etaSec = remaining / Math.max(rate, 1);
+  // Show only sections that match state
+  document.querySelectorAll("[data-show]").forEach(el => {
+    const allowed = el.dataset.show.split(/\s+/);
+    el.style.display = allowed.includes(state) ? "" : "none";
+  });
 
-  // Apply state
-  document.getElementById("bar").style.width = (pct * 100).toFixed(1) + "%";
-  document.getElementById("counter").textContent = fmt(done) + " / " + fmt(TOTAL);
-  document.getElementById("count-tweets").textContent = fmt(done);
-  document.getElementById("rate").textContent = "~" + Math.round(rate) + " / sec";
-  document.getElementById("eta").textContent =
-    remaining === 0 ? "done" :
-    etaSec > 60 ? "~" + Math.round(etaSec/60) + " min left" :
-    "~" + Math.round(etaSec) + "s left";
-
-  // Log entries
-  const log = document.getElementById("log");
-  for (const e of logPlan) {
-    if (t >= e.at) {
-      const el = document.createElement("div");
-      el.className = "log-entry";
-      el.innerHTML = e.html;
-      log.appendChild(el);
-    }
+  // Pick: lock checkboxes + cap counts to selection
+  if (state === "pick") {
+    document.getElementById("opt-tweets").classList.remove("processing", "done");
+    document.getElementById("opt-likes").disabled = true;
+    document.getElementById("opt-tweets-cb").disabled = true;
+    document.getElementById("count-tweets").textContent = "141";
   }
-  // Cap visible log entries to 8
-  while (log.children.length > 8) log.removeChild(log.firstChild);
 
-  // End state changes
-  if (pct >= 1) {
-    document.getElementById("opt-tweets").classList.remove("processing");
-    document.getElementById("opt-tweets").classList.add("done");
-    document.getElementById("spinner").style.animation = "none";
-    document.getElementById("spinner").style.borderTopColor = "#22c55e";
-    document.getElementById("progress-label").textContent = "Done";
-    document.getElementById("status-text").textContent = "Cleanup complete";
-    document.getElementById("section-title").textContent = "Completed";
+  if (state === "run") {
+    const pct = Math.min(t, 1);
+    const done = Math.floor(pct * TOTAL);
+    const elapsed = Math.max(tMs, 1) / 1000;
+    const rate = done / elapsed;
+    const remaining = TOTAL - done;
+    const etaSec = remaining / Math.max(rate, 1);
+
+    document.getElementById("bar").style.width = (pct * 100).toFixed(1) + "%";
+    document.getElementById("counter").textContent = fmt(done) + " / " + fmt(TOTAL);
+    document.getElementById("count-tweets").textContent = fmt(done);
+    document.getElementById("rate").textContent = "~" + Math.round(rate) + " / sec";
+    document.getElementById("eta").textContent =
+      remaining === 0 ? "done" :
+      etaSec > 60 ? "~" + Math.round(etaSec/60) + " min left" :
+      "~" + Math.round(etaSec) + "s left";
+
+    // Likes always shown as "done" during run
+    document.getElementById("opt-likes").disabled = true;
+    document.getElementById("opt-tweets-cb").disabled = true;
+    document.getElementById("opt-tweets").classList.add("processing");
+
+    const log = document.getElementById("log");
+    for (const e of logPlan) {
+      if (t >= e.at) {
+        const el = document.createElement("div");
+        el.className = "log-entry";
+        el.innerHTML = e.html;
+        log.appendChild(el);
+      }
+    }
+    while (log.children.length > 8) log.removeChild(log.firstChild);
+
+    // Third status row: pulsing during run
+    document.getElementById("status-dot-3").classList.add("pulsing");
+
+    if (pct >= 1) {
+      document.getElementById("opt-tweets").classList.remove("processing");
+      document.getElementById("opt-tweets").classList.add("done");
+      document.getElementById("spinner").style.animation = "none";
+      document.getElementById("spinner").style.borderTopColor = "#22c55e";
+      document.getElementById("progress-label").textContent = "Done";
+      document.getElementById("status-text").textContent = "Cleanup complete";
+      document.getElementById("section-title").textContent = "Completed";
+    }
   }
 </script>
 </body>
