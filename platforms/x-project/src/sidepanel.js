@@ -30,6 +30,18 @@
   // 每日额度配置
   var FREE_LIMIT_PER_DAY = 5000;
 
+  // CWS extension id — used by the rating prompt to deep-link to the review page.
+  // For Edge the review URL differs (Edge opens a tab on microsoftedge.microsoft.com);
+  // we keep just the Chrome path for now, since the prompt is shown on Chrome+Edge
+  // identically and Edge will redirect on its own.
+  var CWS_EXTENSION_ID = 'hmlbkkbflcdofngldhekoajeedgcjfch';
+  var CWS_REVIEW_URL = 'https://chromewebstore.google.com/detail/' + CWS_EXTENSION_ID + '/reviews';
+  // Rating prompt cooldown: 30 days between prompts. After 3 skips the prompt
+  // is permanently muted. Once the user rates 4 or 5 stars it's permanently
+  // dismissed (we never pester a satisfied user again).
+  var RATING_COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000;
+  var RATING_MAX_SKIPS = 3;
+
   // 单飞串行链：所有 dailyUsage 读写都排队走这条 Promise 链
   // 修复并发的 read-modify-write 竞态——cleanupProgress 回调高频触发时旧实现会丢计数
   var _dailyUsageChain = Promise.resolve();
@@ -156,6 +168,7 @@
     els.summaryTitle = document.getElementById('summary-title');
     els.summaryStats = document.getElementById('summary-stats');
     els.btnCloseSummary = document.getElementById('btn-close-summary');
+    els.btnRateFooter = document.getElementById('rate-footer-link');
 
     // 6 个顶级 checkbox DOM 引用（3 个推文子类型：original-tweets / replies / retweets）
     els.optOriginalTweets = document.getElementById('opt-original-tweets');
@@ -291,6 +304,20 @@
     if (els.btnLang) els.btnLang.onclick = toggleLangDropdown;
     if (els.btnCopyDiag) els.btnCopyDiag.onclick = copyDiagnosticLog;
     if (els.btnCloseSummary) els.btnCloseSummary.onclick = hideSummaryCard;
+    if (els.btnRateFooter) {
+      els.btnRateFooter.onclick = function(e) {
+        e.preventDefault();
+        // footer 主动点击：直接弹评分窗（绕过冷却/未达成 processedItems>10 等限制）
+        getRatingState(function(s) {
+          if (s.hasRated) {
+            // 已评过分：直接跳 CWS 复评
+            chrome.tabs.create({ url: CWS_REVIEW_URL });
+            return;
+          }
+          showRatingPrompt(s);
+        });
+      };
+    }
 
     // Original Tweets 备份提示联动：
     //   勾上 → .option-item 加 .show-backup-tip → CSS 把内嵌 .backup-tip 从 display:none 切到 display:flex
@@ -1034,6 +1061,262 @@
     document.body.appendChild(modal);
   }
 
+  // ============================================================================
+  // Rating prompt (post-cleanup feedback)
+  // 触发条件:
+  //   - cleanup 成功（processedItems > 10，由 caller 检查）
+  //   - 未永禁（neverAsk=false）
+  //   - 未评过分（hasRated=false）
+  //   - (skipCount < RATING_MAX_SKIP) OR (距 lastShown > 30天)
+  // 行为:
+  //   - 4-5 星：跳 CWS 评分页（hasRated=true）
+  //   - 1-3 星：打开内联反馈表单，存到 storage.local，不跳 CWS
+  //   - Skip：skipCount++，lastShown=now
+  //   - Never：neverAsk=true
+  //   - 点击遮罩：等同 Skip
+  // ============================================================================
+  function getRatingState(cb) {
+    chrome.storage.local.get(['ratingPrompt'], function(result) {
+      var def = {
+        lastShown: 0,
+        skipCount: 0,
+        hasRated: false,
+        neverAsk: false,
+        lastFeedback: ''
+      };
+      var s = result && result.ratingPrompt ? result.ratingPrompt : def;
+      // 兜底：缺字段时补齐（storage 升级 / 部分写入时防御）
+      s.lastShown = s.lastShown || 0;
+      s.skipCount = s.skipCount || 0;
+      s.hasRated = !!s.hasRated;
+      s.neverAsk = !!s.neverAsk;
+      s.lastFeedback = s.lastFeedback || '';
+      cb(s);
+    });
+  }
+  function setRatingState(s, cb) {
+    chrome.storage.local.set({ ratingPrompt: s }, function() {
+      if (cb) cb();
+    });
+  }
+  function maybeShowRatingPrompt() {
+    getRatingState(function(s) {
+      if (s.hasRated || s.neverAsk) return;
+      if (s.skipCount >= RATING_MAX_SKIPS) {
+        var ageMs = Date.now() - s.lastShown;
+        if (ageMs < RATING_COOLDOWN_MS) return;
+      }
+      showRatingPrompt(s);
+    });
+  }
+  function closeRatingPrompt(s, modal) {
+    setRatingState(s);
+    if (modal && modal.parentNode) modal.remove();
+  }
+  function showRatingPrompt(stateIn) {
+    // 防重复弹：DOM 已有则 return
+    if (document.getElementById('rating-prompt')) return;
+
+    var modal = document.createElement('div');
+    modal.id = 'rating-prompt';
+    modal.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;z-index:9999;cursor:pointer;';
+    modal.addEventListener('click', function(e) {
+      // 点击遮罩 = 跳过
+      if (e.target === modal) {
+        var ns = Object.assign({}, stateIn, {
+          lastShown: Date.now(),
+          skipCount: stateIn.skipCount + 1
+        });
+        closeRatingPrompt(ns, modal);
+      }
+    });
+
+    var box = document.createElement('div');
+    box.style.cssText = 'background:#18181b;border:1px solid #27272a;border-radius:12px;padding:24px;max-width:340px;width:92%;text-align:center;cursor:default;';
+    box.addEventListener('click', function(e) { e.stopPropagation(); });
+
+    var icon = document.createElement('div');
+    icon.style.cssText = 'font-size:36px;margin-bottom:8px;';
+    icon.textContent = '⭐';
+
+    var title = document.createElement('h2');
+    title.style.cssText = 'font-size:16px;font-weight:600;color:#fff;margin-bottom:6px;';
+    title.textContent = t('ratePromptTitle');
+
+    var body = document.createElement('p');
+    body.style.cssText = 'font-size:12px;color:#a1a1aa;margin-bottom:16px;line-height:1.5;';
+    body.textContent = t('ratePromptBody');
+
+    // 5 星按钮行
+    var stars = document.createElement('div');
+    stars.style.cssText = 'display:flex;justify-content:center;gap:6px;margin-bottom:16px;';
+    var starBtns = [];
+    var starLabels = [
+      t('ratePromptLabel1'),
+      t('ratePromptLabel2'),
+      t('ratePromptLabel3'),
+      t('ratePromptLabel4'),
+      t('ratePromptLabel5')
+    ];
+    for (var i = 1; i <= 5; i++) {
+      (function(rating) {
+        var b = document.createElement('button');
+        b.type = 'button';
+        b.setAttribute('aria-label', rating + ' star' + (rating > 1 ? 's' : '') + ': ' + starLabels[rating - 1]);
+        b.title = starLabels[rating - 1];
+        b.dataset.rating = String(rating);
+        b.style.cssText = 'background:transparent;border:none;cursor:pointer;padding:4px;font-size:28px;line-height:1;color:#3f3f46;transition:color 0.1s ease,transform 0.1s ease;';
+        b.textContent = '★';
+        // hover 实时预览：把当前及之前的星变金色
+        b.addEventListener('mouseenter', function() {
+          for (var k = 0; k < starBtns.length; k++) {
+            starBtns[k].style.color = (k < rating) ? '#f59e0b' : '#3f3f46';
+          }
+        });
+        b.addEventListener('mouseleave', function() {
+          for (var k = 0; k < starBtns.length; k++) {
+            starBtns[k].style.color = '#3f3f46';
+          }
+        });
+        b.addEventListener('click', function() {
+          handleRatingChoice(rating, stateIn, modal);
+        });
+        starBtns.push(b);
+        stars.appendChild(b);
+      })(i);
+    }
+
+    // 按钮行：Maybe later / Don't ask again
+    var btnRow = document.createElement('div');
+    btnRow.style.cssText = 'display:flex;gap:8px;';
+
+    var btnSkip = document.createElement('button');
+    btnSkip.type = 'button';
+    btnSkip.style.cssText = 'flex:1;padding:8px;border:1px solid #3f3f46;background:transparent;color:#a1a1aa;border-radius:6px;font-size:12px;cursor:pointer;';
+    btnSkip.textContent = t('ratePromptSkip');
+    btnSkip.onclick = function() {
+      var ns = Object.assign({}, stateIn, {
+        lastShown: Date.now(),
+        skipCount: stateIn.skipCount + 1
+      });
+      closeRatingPrompt(ns, modal);
+    };
+
+    var btnNever = document.createElement('button');
+    btnNever.type = 'button';
+    btnNever.style.cssText = 'flex:1;padding:8px;border:none;background:transparent;color:#71717a;border-radius:6px;font-size:12px;cursor:pointer;text-decoration:underline;';
+    btnNever.textContent = t('ratePromptNever');
+    btnNever.onclick = function() {
+      var ns = Object.assign({}, stateIn, { neverAsk: true });
+      closeRatingPrompt(ns, modal);
+    };
+
+    btnRow.appendChild(btnSkip);
+    btnRow.appendChild(btnNever);
+
+    box.appendChild(icon);
+    box.appendChild(title);
+    box.appendChild(body);
+    box.appendChild(stars);
+    box.appendChild(btnRow);
+    modal.appendChild(box);
+    document.body.appendChild(modal);
+  }
+
+  // 用户点击 1-5 星后的处理
+  function handleRatingChoice(rating, stateIn, modal) {
+    if (rating >= 4) {
+      // 4-5 星：跳 CWS 评分页，标记 hasRated
+      var ns = Object.assign({}, stateIn, { hasRated: true });
+      setRatingState(ns);
+      // 用一个轻量 toast 反馈（"正在跳转"）
+      showRatingThanksToast(modal, function() {
+        chrome.tabs.create({ url: CWS_REVIEW_URL });
+        modal.remove();
+      });
+    } else {
+      // 1-3 星：内联反馈表单（不跳 CWS）
+      showRatingFeedbackForm(stateIn, modal, rating);
+    }
+  }
+
+  function showRatingThanksToast(modal, cb) {
+    // 替换 modal 中心 box 为简短 toast，1s 后回调
+    var box = modal.querySelector('div');
+    if (!box) { if (cb) cb(); return; }
+    box.innerHTML = '';
+    var msg = document.createElement('p');
+    msg.style.cssText = 'font-size:14px;color:#22c55e;font-weight:600;';
+    msg.textContent = t('ratePromptRatingThanks');
+    box.appendChild(msg);
+    setTimeout(function() { if (cb) cb(); }, 900);
+  }
+
+  function showRatingFeedbackForm(stateIn, modal, rating) {
+    var box = modal.querySelector('div');
+    if (!box) return;
+    box.innerHTML = '';
+
+    var title = document.createElement('h2');
+    title.style.cssText = 'font-size:15px;font-weight:600;color:#fff;margin-bottom:4px;';
+    title.textContent = t('ratePromptFeedbackTitle');
+
+    var stars = document.createElement('div');
+    stars.style.cssText = 'font-size:18px;color:#f59e0b;margin-bottom:12px;letter-spacing:2px;';
+    stars.textContent = '★★★★★'.slice(0, rating) + '☆☆☆☆☆'.slice(0, 5 - rating);
+
+    var textarea = document.createElement('textarea');
+    textarea.style.cssText = 'width:100%;min-height:80px;background:#0f0f0f;border:1px solid #27272a;border-radius:6px;padding:8px;color:#fff;font-size:12px;font-family:inherit;resize:vertical;box-sizing:border-box;margin-bottom:12px;';
+    textarea.placeholder = t('ratePromptFeedbackPlaceholder');
+    textarea.value = stateIn.lastFeedback || '';
+
+    var btnRow = document.createElement('div');
+    btnRow.style.cssText = 'display:flex;gap:8px;';
+
+    var btnCancel = document.createElement('button');
+    btnCancel.type = 'button';
+    btnCancel.style.cssText = 'flex:1;padding:8px;border:1px solid #3f3f46;background:transparent;color:#a1a1aa;border-radius:6px;font-size:12px;cursor:pointer;';
+    btnCancel.textContent = t('ratePromptSkip');
+    btnCancel.onclick = function() {
+      var ns = Object.assign({}, stateIn, {
+        lastShown: Date.now(),
+        skipCount: stateIn.skipCount + 1
+      });
+      closeRatingPrompt(ns, modal);
+    };
+
+    var btnSend = document.createElement('button');
+    btnSend.type = 'button';
+    btnSend.style.cssText = 'flex:1;padding:8px;border:none;background:linear-gradient(135deg,#f59e0b,#d97706);color:#0f0f0f;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;';
+    btnSend.textContent = t('ratePromptFeedbackSend');
+    btnSend.onclick = function() {
+      var feedback = (textarea.value || '').trim();
+      // 不跳 CWS，只保存反馈
+      var ns = Object.assign({}, stateIn, {
+        lastShown: Date.now(),
+        skipCount: stateIn.skipCount + 1,
+        lastFeedback: feedback
+      });
+      setRatingState(ns);
+      // 显示 thanks 后关闭
+      box.innerHTML = '';
+      var msg = document.createElement('p');
+      msg.style.cssText = 'font-size:14px;color:#22c55e;font-weight:600;margin:8px 0;';
+      msg.textContent = t('ratePromptFeedbackSent');
+      box.appendChild(msg);
+      setTimeout(function() { modal.remove(); }, 1200);
+    };
+
+    btnRow.appendChild(btnCancel);
+    btnRow.appendChild(btnSend);
+
+    box.appendChild(title);
+    box.appendChild(stars);
+    box.appendChild(textarea);
+    box.appendChild(btnRow);
+    textarea.focus();
+  }
+
   function pauseCleanup() {
     state.isPaused = true;
     if (els.progressText) els.progressText.textContent = t('paused');
@@ -1094,6 +1377,11 @@
     // 非模式 summary 卡：processedItems > 0 且用户未在本轮手动关过 → 弹
     if (state.processedItems > 0 && !state.summaryDismissed) {
       showSummaryCard();
+    }
+    // 评分提示：清理体验好的时机钩入（>10 项 + 30 天冷却 + 未永禁）
+    if (state.processedItems > 10) {
+      // 延迟 2.5s 弹，让用户先看完成总结卡（summary-card 自动 scroll 到中心）
+      setTimeout(maybeShowRatingPrompt, 2500);
     }
     if (state.limitReached) {
       getDailyUsage(function(used) {

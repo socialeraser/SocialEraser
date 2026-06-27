@@ -150,8 +150,24 @@
 
       // Auto-resume retry limit reached (page mismatch)
       cleanupAbortedPageNotFound: 'Cleanup aborted: could not reach the target page after 3 retries. Please navigate manually and try again.',
-    },
 
+      // Rating prompt (post-cleanup feedback)
+      ratePromptTitle: 'How was your cleanup?',
+      ratePromptBody: 'Your feedback helps me keep X Eraser free and open source.',
+      ratePromptLabel1: 'It didn\'t work',
+      ratePromptLabel2: 'Has issues',
+      ratePromptLabel3: 'Could be better',
+      ratePromptLabel4: 'Pretty good',
+      ratePromptLabel5: 'Excellent!',
+      ratePromptSkip: 'Maybe later',
+      ratePromptNever: 'Don\'t ask again',
+      ratePromptRatingThanks: 'Thanks! Redirecting to the Chrome Web Store…',
+      ratePromptFeedbackTitle: 'What can be improved?',
+      ratePromptFeedbackPlaceholder: 'Optional. Your feedback stays on your device.',
+      ratePromptFeedbackSend: 'Send',
+      ratePromptFeedbackSent: 'Thanks — feedback saved locally.',
+      ratePromptFooterLink: '⭐ Rate',
+    },
     'zh-CN': {
       openXWebsite: '打开 X 网站',
       pleaseLogin: '请先登录',
@@ -286,8 +302,24 @@
 
       // Auto-resume retry limit reached (page mismatch)
       cleanupAbortedPageNotFound: '清理已中止：3 次重试后仍无法到达目标页面，请手动导航后重试。',
-    },
 
+      // Rating prompt (post-cleanup feedback)
+      ratePromptTitle: '清理体验如何？',
+      ratePromptBody: '你的反馈帮助我保持 X Eraser 免费开源。',
+      ratePromptLabel1: '不太好用',
+      ratePromptLabel2: '有些问题',
+      ratePromptLabel3: '还行',
+      ratePromptLabel4: '不错',
+      ratePromptLabel5: '非常棒！',
+      ratePromptSkip: '稍后',
+      ratePromptNever: '不再提醒',
+      ratePromptRatingThanks: '谢谢！正在跳转到 Chrome 应用商店…',
+      ratePromptFeedbackTitle: '哪里可以改进？',
+      ratePromptFeedbackPlaceholder: '可选。你的反馈仅保存在本地。',
+      ratePromptFeedbackSend: '发送',
+      ratePromptFeedbackSent: '谢谢 —— 反馈已保存到本地。',
+      ratePromptFooterLink: '⭐ 评分',
+    },
     'pt': {
       openXWebsite: 'Abrir o site do X',
       pleaseLogin: 'Faça login primeiro',
@@ -420,6 +452,23 @@
 
       // Auto-resume retry limit reached (page mismatch)
       cleanupAbortedPageNotFound: 'Limpeza abortada: não foi possível chegar à página alvo após 3 tentativas. Navegue manualmente e tente novamente.',
+
+      // Rating prompt (post-cleanup feedback)
+      ratePromptTitle: 'Como foi sua limpeza?',
+      ratePromptBody: 'Seu feedback me ajuda a manter o X Eraser gratuito e de código aberto.',
+      ratePromptLabel1: 'Não funcionou',
+      ratePromptLabel2: 'Tem problemas',
+      ratePromptLabel3: 'Pode melhorar',
+      ratePromptLabel4: 'Bem bom',
+      ratePromptLabel5: 'Excelente!',
+      ratePromptSkip: 'Mais tarde',
+      ratePromptNever: 'Não perguntar de novo',
+      ratePromptRatingThanks: 'Obrigado! Redirecionando para a Chrome Web Store…',
+      ratePromptFeedbackTitle: 'O que pode ser melhorado?',
+      ratePromptFeedbackPlaceholder: 'Opcional. Seu feedback fica no seu dispositivo.',
+      ratePromptFeedbackSend: 'Enviar',
+      ratePromptFeedbackSent: 'Obrigado — feedback salvo localmente.',
+      ratePromptFooterLink: '⭐ Avaliar',
     },
 
     ja: {
@@ -560,6 +609,23 @@
 
       // Auto-resume retry limit reached (page mismatch)
       cleanupAbortedPageNotFound: 'クリーンアップ中止：3 回再試行しても対象ページに到達できません。手動で移動して再試行してください。',
+
+      // Rating prompt (post-cleanup feedback)
+      ratePromptTitle: 'クリーンアップはいかがでしたか？',
+      ratePromptBody: 'あなたのフィードバックが X Eraser を無料でオープンソースに保ち続ける助けになります。',
+      ratePromptLabel1: '動かなかった',
+      ratePromptLabel2: '問題がある',
+      ratePromptLabel3: '改善できる',
+      ratePromptLabel4: 'なかなか良い',
+      ratePromptLabel5: '素晴らしい！',
+      ratePromptSkip: '後で',
+      ratePromptNever: '次回から表示しない',
+      ratePromptRatingThanks: 'ありがとうございます！Chrome ウェブストアにリダイレクトしています…',
+      ratePromptFeedbackTitle: '改善できる点は？',
+      ratePromptFeedbackPlaceholder: '任意。フィードバックは端末内にのみ保存されます。',
+      ratePromptFeedbackSend: '送信',
+      ratePromptFeedbackSent: 'ありがとうございます — フィードバックをローカルに保存しました。',
+      ratePromptFooterLink: '⭐ 評価',
     },
 
     ko: {
@@ -696,6 +762,23 @@
 
       // Auto-resume retry limit reached (page mismatch)
       cleanupAbortedPageNotFound: '정리 중단: 3회 재시도 후에도 대상 페이지에 도달할 수 없습니다. 수동으로 이동 후 다시 시도하세요.',
+
+      // Rating prompt (post-cleanup feedback)
+      ratePromptTitle: '정리 경험은 어떠셨나요?',
+      ratePromptBody: '피드백이 X Eraser를 무료 오픈소스로 유지하는 데 도움이 됩니다.',
+      ratePromptLabel1: '작동하지 않음',
+      ratePromptLabel2: '문제 있음',
+      ratePromptLabel3: '개선 가능',
+      ratePromptLabel4: '꽤 좋음',
+      ratePromptLabel5: '훌륭해요!',
+      ratePromptSkip: '나중에',
+      ratePromptNever: '다시 묻지 않기',
+      ratePromptRatingThanks: '감사합니다! Chrome 웹 스토어로 이동 중…',
+      ratePromptFeedbackTitle: '어떤 점이 개선될 수 있을까요?',
+      ratePromptFeedbackPlaceholder: '선택 사항. 피드백은 기기에만 저장됩니다.',
+      ratePromptFeedbackSend: '보내기',
+      ratePromptFeedbackSent: '감사합니다 — 피드백이 로컬에 저장되었습니다.',
+      ratePromptFooterLink: '⭐ 평가',
     },
 
     es: {
@@ -830,6 +913,23 @@
 
       // Auto-resume retry limit reached (page mismatch)
       cleanupAbortedPageNotFound: 'Limpieza abortada: no se pudo llegar a la página objetivo después de 3 reintentos. Navega manualmente y vuelve a intentarlo.',
+
+      // Rating prompt (post-cleanup feedback)
+      ratePromptTitle: '¿Cómo fue tu limpieza?',
+      ratePromptBody: 'Tus comentarios me ayudan a mantener X Eraser gratuito y de código abierto.',
+      ratePromptLabel1: 'No funcionó',
+      ratePromptLabel2: 'Tiene problemas',
+      ratePromptLabel3: 'Podría mejorar',
+      ratePromptLabel4: 'Bastante bien',
+      ratePromptLabel5: '¡Excelente!',
+      ratePromptSkip: 'Quizá luego',
+      ratePromptNever: 'No volver a preguntar',
+      ratePromptRatingThanks: '¡Gracias! Redirigiendo a Chrome Web Store…',
+      ratePromptFeedbackTitle: '¿Qué se puede mejorar?',
+      ratePromptFeedbackPlaceholder: 'Opcional. Tus comentarios se quedan en tu dispositivo.',
+      ratePromptFeedbackSend: 'Enviar',
+      ratePromptFeedbackSent: 'Gracias: comentarios guardados localmente.',
+      ratePromptFooterLink: '⭐ Valorar',
     },
 
     de: {
@@ -964,6 +1064,23 @@
 
       // Auto-resume retry limit reached (page mismatch)
       cleanupAbortedPageNotFound: 'Bereinigung abgebrochen: Zielseite nach 3 Versuchen nicht erreichbar. Bitte manuell navigieren und erneut versuchen.',
+
+      // Rating prompt (post-cleanup feedback)
+      ratePromptTitle: 'Wie war deine Bereinigung?',
+      ratePromptBody: 'Dein Feedback hilft mir, X Eraser kostenlos und Open Source zu halten.',
+      ratePromptLabel1: 'Hat nicht funktioniert',
+      ratePromptLabel2: 'Hat Probleme',
+      ratePromptLabel3: 'Könnte besser sein',
+      ratePromptLabel4: 'Ziemlich gut',
+      ratePromptLabel5: 'Ausgezeichnet!',
+      ratePromptSkip: 'Vielleicht später',
+      ratePromptNever: 'Nicht mehr fragen',
+      ratePromptRatingThanks: 'Danke! Weiterleitung zum Chrome Web Store…',
+      ratePromptFeedbackTitle: 'Was kann verbessert werden?',
+      ratePromptFeedbackPlaceholder: 'Optional. Dein Feedback bleibt auf deinem Gerät.',
+      ratePromptFeedbackSend: 'Senden',
+      ratePromptFeedbackSent: 'Danke — Feedback lokal gespeichert.',
+      ratePromptFooterLink: '⭐ Bewerten',
     },
 
     fr: {
@@ -1102,6 +1219,23 @@
 
       // Auto-resume retry limit reached (page mismatch)
       cleanupAbortedPageNotFound: 'Nettoyage annulé : impossible d\'atteindre la page cible après 3 tentatives. Naviguez manuellement et réessayez.',
+
+      // Rating prompt (post-cleanup feedback)
+      ratePromptTitle: 'Comment s\'est passé votre nettoyage ?',
+      ratePromptBody: 'Vos commentaires m\'aident à garder X Eraser gratuit et open source.',
+      ratePromptLabel1: 'N\'a pas fonctionné',
+      ratePromptLabel2: 'A des problèmes',
+      ratePromptLabel3: 'Peut être amélioré',
+      ratePromptLabel4: 'Assez bien',
+      ratePromptLabel5: 'Excellent !',
+      ratePromptSkip: 'Peut-être plus tard',
+      ratePromptNever: 'Ne plus demander',
+      ratePromptRatingThanks: 'Merci ! Redirection vers le Chrome Web Store…',
+      ratePromptFeedbackTitle: 'Qu\'est-ce qui peut être amélioré ?',
+      ratePromptFeedbackPlaceholder: 'Facultatif. Vos commentaires restent sur votre appareil.',
+      ratePromptFeedbackSend: 'Envoyer',
+      ratePromptFeedbackSent: 'Merci — commentaires enregistrés localement.',
+      ratePromptFooterLink: '⭐ Évaluer',
     },
   };
 
