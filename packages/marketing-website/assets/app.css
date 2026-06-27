@@ -1230,3 +1230,38 @@ strong { color: inherit; font-weight: 600; }
 .legal-content a:hover { border-bottom-color: var(--accent); }
 .legal-content code { background: var(--bg-elev-2); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; color: var(--accent); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
 .legal-content strong { color: var(--text); font-weight: 600; }
+
+/* ====================== Video Section (lite-youtube-embed) ====================== */
+.video-section { text-align: center; }
+.video-section .section-head__h2 { margin-bottom: var(--space-3); }
+.video-section .section-head__sub { color: var(--text-dim); max-width: 560px; margin: 0 auto var(--space-8); }
+.video-frame {
+  max-width: 720px;
+  margin: 0 auto;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--bg-elev-1);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.4);
+}
+lite-youtube {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: #000;
+}
+lite-youtube::before {
+  content: "";
+  display: block;
+  padding-top: 56.25%;
+}
+lite-youtube > iframe {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+@media (max-width: 640px) {
+  .video-frame { border-radius: 8px; }
+}

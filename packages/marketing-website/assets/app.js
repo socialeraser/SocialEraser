@@ -216,3 +216,51 @@
     targets.forEach((el) => el.removeAttribute('open'));
   });
 })();
+
+// lite-youtube-embed: custom element that renders a YouTube poster (maxresdefault
+// thumbnail) and only loads the iframe + player JS when the user clicks play.
+// The `si` parameter is the share identifier YouTube generates when copying the
+// embed code from the Share menu — it tells YouTube the embed came from a real
+// share and avoids the "Sign in to confirm you're not a bot" wall on videos
+// that otherwise fail with error 153.
+const YOUTUBE_EMBED_SI = 'WumRKezaHB8o4Xiy';
+
+class LiteYTEmbed extends HTMLElement {
+  connectedCallback() {
+    this.videoId = this.getAttribute('videoid');
+    this.playLabel = this.getAttribute('playlabel') || 'Play video';
+    if (!this.videoId) return;
+    this.style.backgroundImage = `url("https://i.ytimg.com/vi/${this.videoId}/maxresdefault.jpg")`;
+    this.style.backgroundSize = 'cover';
+    this.style.backgroundPosition = 'center';
+    this.style.position = 'relative';
+    this.style.cursor = 'pointer';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.setAttribute('aria-label', this.playLabel);
+    btn.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:68px;height:48px;border:0;background:transparent;cursor:pointer;';
+    btn.innerHTML = '<svg height="100%" version="1.1" viewBox="0 0 68 48" width="100%"><path d="M66.52 7.74c-.78-2.93-2.49-5.41-5.42-6.19C55.79.13 34 0 34 0S12.21.13 6.9 1.55C3.97 2.33 2.27 4.81 1.48 7.74.06 13.05 0 24 0 24s.06 10.95 1.48 16.26c.78 2.93 2.49 5.41 5.42 6.19C12.21 47.87 34 48 34 48s21.79-.13 27.1-1.55c2.93-.78 4.64-3.26 5.42-6.19C67.94 34.95 68 24 68 24s-.06-10.95-1.48-16.26z" fill="#f00" fill-opacity="0.8"/><path d="M45 24 27 14v20" fill="#fff"/></svg>';
+    btn.addEventListener('click', () => this._activate());
+    this.appendChild(btn);
+    this.addEventListener('click', (e) => {
+      if (e.target === this) this._activate();
+    });
+  }
+  _activate() {
+    if (this._activated) return;
+    this._activated = true;
+    this.style.backgroundImage = '';
+    this.innerHTML = '';
+    const iframe = document.createElement('iframe');
+    iframe.src = `https://www.youtube.com/embed/${this.videoId}?autoplay=1&rel=0&si=${YOUTUBE_EMBED_SI}&origin=${encodeURIComponent(location.origin)}`;
+    iframe.title = this.playLabel;
+    iframe.setAttribute('frameborder', '0');
+    iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share');
+    iframe.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
+    iframe.setAttribute('allowfullscreen', '');
+    this.appendChild(iframe);
+  }
+}
+if (!customElements.get('lite-youtube')) {
+  customElements.define('lite-youtube', LiteYTEmbed);
+}
