@@ -18,7 +18,8 @@
   ],
   "host_permissions": [
     "*://x.com/*",
-    "*://twitter.com/*"
+    "*://twitter.com/*",
+    "https://storage.googleapis.com/*"
   ],
   "background": {
     "service_worker": "background.js"
