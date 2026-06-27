@@ -1101,11 +1101,18 @@
   }
   function maybeShowRatingPrompt() {
     getRatingState(function(s) {
-      if (s.hasRated || s.neverAsk) return;
+      if (s.hasRated || s.neverAsk) {
+        console.log('[X Eraser] rating prompt suppressed: hasRated=' + s.hasRated + ' neverAsk=' + s.neverAsk);
+        return;
+      }
       if (s.skipCount >= RATING_MAX_SKIPS) {
         var ageMs = Date.now() - s.lastShown;
-        if (ageMs < RATING_COOLDOWN_MS) return;
+        if (ageMs < RATING_COOLDOWN_MS) {
+          console.log('[X Eraser] rating prompt suppressed: in cooldown (skipCount=' + s.skipCount + ', ageMs=' + Math.round(ageMs/86400000) + 'd)');
+          return;
+        }
       }
+      console.log('[X Eraser] showing rating prompt');
       showRatingPrompt(s);
     });
   }
@@ -1378,8 +1385,10 @@
     if (state.processedItems > 0 && !state.summaryDismissed) {
       showSummaryCard();
     }
-    // 评分提示：清理体验好的时机钩入（>10 项 + 30 天冷却 + 未永禁）
-    if (state.processedItems > 10) {
+    // 评分提示：清理体验好的时机钩入（>0 项 + 30 天冷却 + 未永禁）
+    //   原本门槛是 >10，结果小批量清理（删几条赞/推文）永远触发不了。
+    //   30 天冷却 + 3 次跳过永禁已经能防骚扰，不需要再叠数量门槛。
+    if (state.processedItems > 0) {
       // 延迟 2.5s 弹，让用户先看完成总结卡（summary-card 自动 scroll 到中心）
       setTimeout(maybeShowRatingPrompt, 2500);
     }
