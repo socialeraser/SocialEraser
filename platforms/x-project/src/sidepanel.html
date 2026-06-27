@@ -11,7 +11,7 @@
       background: #0f0f0f;
       color: #fff;
       min-height: 100vh;
-      padding: 16px;
+      padding: 16px 16px 64px;  /* 64px 底部留白给固定 footer 工具栏，避免遮挡日志最后一行 */
     }
     .container { max-width: 100%; }
 
@@ -562,16 +562,27 @@
       line-height: 1.5;
     }
     .trust-links {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
       display: flex;
-      justify-content: center;
-      gap: 16px;
-      margin-bottom: 8px;
+      justify-content: space-around;   /* 平均分布，比 center 抗溢出 */
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: #18181b;
+      border-top: 1px solid #27272a;
+      z-index: 100;
+      box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.4);
     }
     .trust-link {
       font-size: 11px;
       color: #71717a;
       text-decoration: none;
       cursor: pointer;
+      white-space: nowrap;   /* 防止换行导致视觉跳动 */
+      flex: 0 0 auto;        /* 固定自然宽度，配合 justify-content: space-around 分布 */
     }
     .trust-link:hover { color: #f59e0b; }
   </style>
@@ -725,10 +736,8 @@
       <div class="trust-badge-text">
         Your data is processed locally. We never store your credentials or personal information.
       </div>
-      <div class="trust-links" style="margin-top: 12px;">
+      <div class="trust-links">
         <a class="trust-link" href="https://socialeraser.app/" target="_blank" rel="noopener noreferrer" data-i18n="home">Home</a>
-        <a class="trust-link" href="https://socialeraser.app/privacy.html" target="_blank" rel="noopener noreferrer" data-i18n="privacy">Privacy</a>
-        <a class="trust-link" href="https://socialeraser.app/terms.html" target="_blank" rel="noopener noreferrer" data-i18n="terms">Terms</a>
         <a class="trust-link" href="https://socialeraser.app/help.html" target="_blank" rel="noopener noreferrer" data-i18n="help">Help</a>
         <a class="trust-link support-link" href="https://socialeraser.app/support.html" target="_blank" rel="noopener noreferrer" data-i18n="supportProject">☕ Support</a>
         <a class="trust-link" href="#" id="rate-footer-link" rel="noopener noreferrer" data-i18n="ratePromptFooterLink">⭐ Rate</a>
