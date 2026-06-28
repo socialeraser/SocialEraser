@@ -1,0 +1,35 @@
+{
+  "appId": "com.socialeraser.tiktok",
+  "appName": "TikTok Eraser",
+  "webDir": "www",
+  "android": {
+    "allowMixedContent": true,
+    "webContentsDebuggingEnabled": true,
+    "backgroundColor": "#0F0F0F"
+  },
+  "ios": {
+    "allowsLinkPreview": true,
+    "webviewSnapshots": true
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#0F0F0F",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#0F0F0F"
+    },
+    "CapacitorStorage": {
+      "clearOnUpgrade": false
+    },
+    "WebView": {
+      "allowFileAccess": true,
+      "allowFileAccessFromFileURLs": true,
+      "allowUniversalAccessFromFileURLs": true,
+      "interceptNavigation": true
+    }
+  },
+  "bundledWebRuntime": false
+}

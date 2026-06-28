@@ -1,6 +1,12 @@
 {
   "name": "@social-eraser/tiktok-project",
-  "version": "0.0.0",
-  "description": "TikTok bulk-delete platform (placeholder, not started).",
-  "private": true
+  "version": "0.1.0",
+  "description": "TikTok bulk-delete platform (Videos, Reposts, Likes, Favorites, Following). Web UI + Capacitor Android/iOS.",
+  "private": true,
+  "dependencies": {
+    "@capacitor/android": "^2.5.0",
+    "@capacitor/cli": "^2.5.0",
+    "@capacitor/core": "^2.5.0",
+    "cordova-android": "^9.1.0"
+  }
 }

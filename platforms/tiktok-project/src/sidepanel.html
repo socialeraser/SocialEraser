@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TikTok Eraser</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0F0F0F;
+      color: #fff;
+      min-height: 100vh;
+      padding: 16px 16px 64px;
+    }
+    .container { max-width: 100%; }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, #FE2C55, #25F4EE);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+    .logo-text h1 { font-size: 18px; font-weight: 600; }
+    .logo-text p { font-size: 11px; color: #71717a; }
+
+    .status-card {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+      max-height: 180px;
+      overflow: hidden;
+      transition: opacity 0.3s ease, max-height 0.3s ease,
+                  padding 0.3s ease, margin-bottom 0.3s ease,
+                  border-width 0.3s ease;
+    }
+    .status-hint {
+      font-size: 11px;
+      color: #fbbf24;
+      margin-top: 8px;
+      padding: 6px 8px;
+      background: rgba(251, 191, 36, 0.08);
+      border-radius: 6px;
+    }
+
+    .status-card.hidden {
+      opacity: 0;
+      max-height: 0 !important;
+      padding-top: 0 !important;
+      padding-bottom: 0 !important;
+      margin-bottom: 0 !important;
+      border-top-width: 0 !important;
+      border-bottom-width: 0 !important;
+      pointer-events: none;
+    }
+    .status-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .status-item:last-child { margin-bottom: 0; }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+    .status-dot.red { background: #ef4444; }
+    .status-dot.green { background: #22c55e; }
+    .status-dot.yellow { background: #eab308; }
+    .status-dot.pulsing {
+      animation: dotPulse 1.2s ease-in-out infinite;
+      box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.6);
+    }
+    @keyframes dotPulse {
+      0% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.6); transform: scale(1); }
+      50% { box-shadow: 0 0 0 6px rgba(234, 179, 8, 0); transform: scale(1.2); }
+      100% { box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); transform: scale(1); }
+    }
+    .status-text.checking {
+      color: #eab308;
+      animation: textFade 1.2s ease-in-out infinite;
+    }
+    @keyframes textFade {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    .status-text { font-size: 12px; color: #a1a1aa; }
+    .status-text.error { color: #ef4444; }
+    .status-text.success { color: #22c55e; }
+
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: #71717a;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 10px;
+    }
+
+    .options-card {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .option-item {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #27272a;
+    }
+    .option-item:last-child { border-bottom: none; padding-bottom: 0; }
+    .option-item:first-child { padding-top: 0; }
+    .backup-tip {
+      display: none;
+      flex: 0 0 100%;
+      margin-top: 8px;
+      padding: 8px 10px;
+      background: rgba(254, 44, 85, 0.12);
+      border-left: 3px solid #FE2C55;
+      border-radius: 4px;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #ffd1dc;
+      box-sizing: border-box;
+    }
+    .option-item.show-backup-tip .backup-tip { display: flex; align-items: flex-start; gap: 4px; }
+    .backup-tip-icon { flex-shrink: 0; line-height: 1.5; }
+    .backup-tip-text { flex: 1; }
+    .backup-tip a { color: #FE2C55; text-decoration: underline; }
+    .option-checkbox {
+      width: 18px;
+      height: 18px;
+      accent-color: #FE2C55;
+      cursor: pointer;
+    }
+    .option-label {
+      font-size: 13px;
+      color: #fff;
+      cursor: pointer;
+      flex: 1;
+    }
+    .option-count {
+      font-size: 11px;
+      color: #71717a;
+      background: #27272a;
+      padding: 2px 8px;
+      border-radius: 10px;
+      min-width: 24px;
+      text-align: center;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .option-item.pending .option-count { opacity: 0.55; }
+    .option-item.processing {
+      background: rgba(37, 244, 238, 0.08);
+      border-radius: 6px;
+      margin: -4px -6px;
+      padding: 4px 6px;
+    }
+    .option-item.processing .option-count {
+      background: rgba(37, 244, 238, 0.18);
+      color: #25F4EE;
+    }
+    .option-item.processing .option-label { color: #25F4EE; }
+    .option-item.done .option-count {
+      color: #e4e4e7;
+      background: #3f3f46;
+    }
+    .option-count .spinner {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border: 2px solid currentColor;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: option-spin 0.8s linear infinite;
+    }
+    @keyframes option-spin { to { transform: rotate(360deg); } }
+
+    .filter-section {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    .filter-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .filter-row:last-child { margin-bottom: 0; }
+    .filter-input {
+      flex: 1;
+      background: #27272a;
+      border: 1px solid #3f3f46;
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #fff;
+      outline: none;
+    }
+    .filter-input:focus { border-color: #FE2C55; }
+    .filter-input::placeholder { color: #71717a; }
+    .filter-label {
+      font-size: 11px;
+      color: #71717a;
+      margin-bottom: 6px;
+    }
+
+    .progress-card {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 10px;
+      padding: 12px;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .progress-card.active { display: block; }
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+    .progress-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+    .progress-spinner {
+      display: inline-block;
+      width: 12px;
+      height: 12px;
+      border: 2px solid #FE2C55;
+      border-top-color: transparent;
+      border-radius: 50%;
+      animation: option-spin 0.8s linear infinite;
+    }
+    .progress-close {
+      background: transparent;
+      border: none;
+      color: #71717a;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+    .progress-bar-container {
+      width: 100%;
+      height: 4px;
+      background: #27272a;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 10px;
+    }
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #FE2C55, #25F4EE);
+      transition: width 0.3s ease;
+    }
+    .progress-stats {
+      font-size: 12px;
+      color: #a1a1aa;
+      margin-bottom: 10px;
+    }
+    .progress-stats .current { color: #FE2C55; font-weight: 600; }
+    .log-area {
+      background: #0F0F0F;
+      border: 1px solid #27272a;
+      border-radius: 6px;
+      padding: 8px;
+      max-height: 200px;
+      overflow-y: auto;
+      font-size: 11px;
+      font-family: -apple-system, BlinkMacSystemFont, monospace;
+    }
+    .log-toolbar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 6px;
+    }
+    .log-toolbar button {
+      background: transparent;
+      border: 1px solid #3f3f46;
+      color: #a1a1aa;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .log-toolbar button:hover { background: #27272a; color: #e4e4e7; }
+    .log-entry { color: #a1a1aa; margin-bottom: 4px; line-height: 1.4; }
+    .log-entry.success { color: #22c55e; }
+    .log-entry.error { color: #ef4444; }
+    .log-entry.info { color: #25F4EE; }
+    .log-time { color: #52525b; margin-right: 6px; }
+
+    #refresh-section { display: flex; align-items: center; gap: 8px; }
+    .lang-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: transparent;
+      border: 1px solid #3f3f46;
+      border-radius: 8px;
+      font-size: 18px;
+      cursor: pointer;
+      padding: 0;
+    }
+    .lang-btn:hover { background: #27272a; border-color: #FE2C55; }
+    .lang-dropdown {
+      position: absolute;
+      top: 56px;
+      right: 16px;
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 10px;
+      padding: 6px;
+      min-width: 180px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+      z-index: 1000;
+      display: none;
+    }
+    .lang-dropdown.open { display: block; }
+    .lang-option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #a1a1aa;
+    }
+    .lang-option:hover { background: #27272a; color: #fff; }
+    .lang-option.active { color: #FE2C55; background: rgba(254, 44, 85, 0.1); }
+    .lang-option .flag { font-size: 18px; }
+    .lang-option .name { flex: 1; }
+    .lang-option .check { color: #FE2C55; opacity: 0; }
+    .lang-option.active .check { opacity: 1; }
+    #btn-refresh {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: transparent;
+      border: 1px solid #3f3f46;
+      border-radius: 8px;
+      color: #71717a;
+      font-size: 18px;
+      cursor: pointer;
+    }
+    #btn-refresh:hover { background: #27272a; color: #FE2C55; border-color: #FE2C55; }
+    #btn-refresh:disabled { opacity: 0.5; cursor: not-allowed; }
+    .refresh-icon { display: inline-block; }
+    .refresh-icon.spinning { animation: spin 1s linear infinite; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    .control-buttons {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .btn {
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #FE2C55, #25F4EE);
+      color: #0F0F0F;
+    }
+    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+    .btn-danger { background: #dc2626; color: #fff; }
+    .btn-warning { background: #FE2C55; color: #0F0F0F; }
+
+    .trust-badge {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05));
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      border-radius: 12px;
+      padding: 16px;
+      margin-top: 16px;
+      text-align: center;
+    }
+    .trust-icon { font-size: 32px; margin-bottom: 8px; display: block; }
+    .trust-badge-title { font-size: 13px; font-weight: 600; color: #22c55e; margin-bottom: 6px; }
+    .trust-badge-text { font-size: 12px; color: #a1a1aa; line-height: 1.5; }
+    .trust-links {
+      position: fixed;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: #18181b;
+      border-top: 1px solid #27272a;
+      z-index: 100;
+    }
+    .trust-link {
+      font-size: 11px;
+      color: #71717a;
+      text-decoration: none;
+      cursor: pointer;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+    .trust-link:hover { color: #FE2C55; }
+
+    .summary-card {
+      background: #18181b;
+      border: 1px solid #27272a;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 12px;
+      display: none;
+    }
+    .summary-card.active { display: block; }
+    .summary-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .summary-icon { font-size: 24px; }
+    .summary-title { font-size: 16px; font-weight: 600; flex: 1; }
+    .summary-stats { font-size: 13px; color: #a1a1aa; margin-bottom: 12px; }
+    .summary-tip-cta {
+      display: block;
+      padding: 10px;
+      background: linear-gradient(135deg, rgba(254, 44, 85, 0.1), rgba(37, 244, 238, 0.1));
+      border: 1px solid rgba(254, 44, 85, 0.3);
+      border-radius: 8px;
+      color: #FE2C55;
+      text-decoration: none;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 500;
+    }
+    .summary-tip-cta:hover { background: linear-gradient(135deg, rgba(254, 44, 85, 0.2), rgba(37, 244, 238, 0.2)); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">
+        <div class="logo-icon">🎵</div>
+        <div class="logo-text">
+          <h1>TikTok Eraser</h1>
+          <p>v0.1.0</p>
+        </div>
+      </div>
+      <div id="refresh-section">
+        <button id="btn-lang" class="lang-btn" title="Language">
+          <span id="lang-flag">🇺🇸</span>
+        </button>
+        <button id="btn-refresh" title="Refresh">
+          <span id="refresh-icon" class="refresh-icon">↻</span>
+        </button>
+        <a id="btn-feedback" class="lang-btn" href="mailto:support@socialeraser.app?subject=[TikTok%20Eraser%20Feedback]" data-i18n-title="feedbackTooltip" title="Send feedback">✉️</a>
+      </div>
+    </div>
+
+    <div id="status-card" class="status-card">
+      <div class="status-item">
+        <div id="status-tiktok-dot" class="status-dot yellow"></div>
+        <span id="status-tiktok-text" class="status-text">Checking...</span>
+      </div>
+      <div class="status-item">
+        <div id="status-login-dot" class="status-dot yellow"></div>
+        <span id="status-login-text" class="status-text">Checking...</span>
+      </div>
+      <div id="status-login-hint" class="status-hint" style="display: none;"></div>
+    </div>
+
+    <div id="options-section" style="display: none;">
+      <div class="section-title" data-i18n="selectOptions">Select items to delete</div>
+      <div class="options-card">
+        <div class="option-item">
+          <input type="checkbox" id="opt-videos" class="option-checkbox">
+          <label for="opt-videos" class="option-label" data-i18n="videos">Your Videos</label>
+          <span class="option-count">0</span>
+          <div class="backup-tip">
+            <span class="backup-tip-icon" aria-hidden="true">⚠️</span>
+            <span class="backup-tip-text" data-i18n-html="videosBackupTip">Videos are permanently deleted and cannot be recovered. We recommend downloading your <a href="https://www.tiktok.com/settings/privacy-and-safety/download-your-data" target="_blank" rel="noopener">TikTok data archive</a> first.</span>
+          </div>
+        </div>
+        <div class="option-item">
+          <input type="checkbox" id="opt-reposts" class="option-checkbox">
+          <label for="opt-reposts" class="option-label" data-i18n="reposts">Reposts</label>
+          <span class="option-count">0</span>
+          <div class="backup-tip">
+            <span class="backup-tip-icon" aria-hidden="true">⚠️</span>
+            <span class="backup-tip-text" data-i18n-html="repostsBackupTip">Reposts cannot be undone separately. Deleting a repost will also remove the original video from your profile.</span>
+          </div>
+        </div>
+        <div class="option-item">
+          <input type="checkbox" id="opt-likes" class="option-checkbox" checked>
+          <label for="opt-likes" class="option-label" data-i18n="likes">Likes</label>
+          <span class="option-count">0</span>
+        </div>
+        <div class="option-item">
+          <input type="checkbox" id="opt-favorites" class="option-checkbox" checked>
+          <label for="opt-favorites" class="option-label" data-i18n="favorites">Favorites</label>
+          <span class="option-count">0</span>
+        </div>
+        <div class="option-item">
+          <input type="checkbox" id="opt-following" class="option-checkbox" checked>
+          <label for="opt-following" class="option-label" data-i18n="following">Following</label>
+          <span class="option-count">0</span>
+        </div>
+      </div>
+
+      <div class="section-title" data-i18n="filterOptions">Filter options</div>
+      <div class="filter-section">
+        <div class="filter-row">
+          <div style="flex: 1;">
+            <div class="filter-label" data-i18n="fromDate">From date</div>
+            <input type="date" id="filter-date-from" class="filter-input">
+          </div>
+          <div style="flex: 1;">
+            <div class="filter-label" data-i18n="toDate">To date</div>
+            <input type="date" id="filter-date-to" class="filter-input">
+          </div>
+        </div>
+        <div class="filter-row">
+          <input type="text" id="filter-keyword" class="filter-input"
+                 data-i18n-placeholder="keywordPlaceholder" placeholder="Filter by keyword...">
+        </div>
+        <div class="filter-row">
+          <div style="flex: 1;">
+            <div class="filter-label" data-i18n="minViewCount">Min view count</div>
+            <input type="number" id="filter-view-min" class="filter-input" placeholder="0" min="0">
+          </div>
+          <div style="flex: 1;">
+            <div class="filter-label" data-i18n="maxViewCount">Max view count</div>
+            <input type="number" id="filter-view-max" class="filter-input" placeholder="(unlimited)" min="0">
+          </div>
+        </div>
+      </div>
+
+      <div id="control-buttons" class="control-buttons">
+        <button id="btn-start" class="btn btn-primary">Start Cleanup</button>
+      </div>
+      <div id="running-buttons" class="control-buttons" style="display: none;">
+        <button id="btn-pause" class="btn btn-warning">Pause</button>
+        <button id="btn-stop" class="btn btn-danger">Stop</button>
+      </div>
+
+      <div id="progress-card" class="progress-card">
+        <div class="progress-header">
+          <span class="progress-title">
+            <span id="progress-spinner" class="progress-spinner"></span>
+            <span id="progress-text">Processing...</span>
+          </span>
+          <button id="btn-close-progress" class="progress-close">&times;</button>
+        </div>
+        <div class="progress-bar-container">
+          <div id="progress-bar" class="progress-bar" style="width: 0%;"></div>
+        </div>
+        <div class="progress-stats">
+          <span data-i18n="processed">Processed</span>: <span id="progress-current" class="current">0</span>
+        </div>
+        <div id="log-area" class="log-area">
+          <div class="log-entry info"><span class="log-time">--:--:--</span>Waiting for start...</div>
+        </div>
+        <div class="log-toolbar">
+          <button id="btn-copy-diag" data-i18n="copyDiagnosticLog" title="Copy diagnostic info to clipboard for bug reports">Copy Diagnostic Log</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="summary-card" class="summary-card">
+      <div class="summary-header">
+        <span class="summary-icon">✅</span>
+        <span class="summary-title" id="summary-title">Done!</span>
+        <button id="btn-close-summary" class="progress-close" title="Close">&times;</button>
+      </div>
+      <p class="summary-stats" id="summary-stats"></p>
+      <a class="summary-tip-cta" href="https://socialeraser.app/support.html" target="_blank" rel="noopener noreferrer" data-i18n="considerSupporting">Support the developer</a>
+    </div>
+
+    <div id="open-tiktok-section">
+      <button id="btn-open-tiktok" class="btn btn-primary">Open TikTok Website</button>
+    </div>
+
+    <div id="login-section" style="display: none;">
+      <button id="btn-login" class="btn btn-primary">Please Login First</button>
+    </div>
+
+    <div class="trust-badge">
+      <span class="trust-icon">🛡️</span>
+      <div class="trust-badge-title">100% Local Processing</div>
+      <div class="trust-badge-text">
+        Your data is processed locally. We never store your credentials or personal information.
+      </div>
+      <div class="trust-links">
+        <a class="trust-link" href="https://socialeraser.app/" target="_blank" rel="noopener noreferrer" data-i18n="home">Home</a>
+        <a class="trust-link" href="https://socialeraser.app/help.html" target="_blank" rel="noopener noreferrer" data-i18n="help">Help</a>
+        <a class="trust-link support-link" href="https://socialeraser.app/support.html" target="_blank" rel="noopener noreferrer" data-i18n="supportProject">☕ Support</a>
+        <a class="trust-link" href="#" id="rate-footer-link" rel="noopener noreferrer" data-i18n="ratePromptFooterLink">⭐ Rate</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="i18n.js"></script>
+  <script src="sidepanel.js"></script>
+
+  <!-- 语言下拉菜单 -->
+  <div id="lang-dropdown" class="lang-dropdown"></div>
+</body>
+</html>
