@@ -9,10 +9,10 @@
   //   "Cancel" → "取消" / "キャンセル" / "취소" 等
   //   "Undo repost" → "撤销转推" / "リポストを取り消す" / "리트윗 취소" 等
   // 之前我们只用英文 selector / 英文文字（0 命中非 en 用户），现在统一在 DEFAULT_I18N 里维护 8 语言默认值
-  // 远程配置（remote-example.json 的 selectors.i18n）可覆盖这些数组 —— X 改了翻译时改配置即可，不用发新版
+  // 远程配置（x-remote-example.json 的 selectors.i18n）可覆盖这些数组 —— X 改了翻译时改配置即可，不用发新版
   // 8 语言 selector 关键字默认值已挪到 lib/i18n.js 的 DEFAULT_I18N（window.XEraseri18n.DEFAULT_I18N）
   //   - i18n.js = 所有 8 语言数据的家（TRANSLATIONS 给 UI 文案用，DEFAULT_I18N 给 selector 关键字用）
-  //   - 运行时合并：setConfig 用 window.XEraseri18n.DEFAULT_I18N 作默认 + remote-example.json 的 selectors.i18n 覆盖
+  //   - 运行时合并：setConfig 用 window.XEraseri18n.DEFAULT_I18N 作默认 + x-remote-example.json 的 selectors.i18n 覆盖
   //   - X 改版改了翻译：改 i18n.js 或远程配置即可，不用动 injector.js
   // Backwards-compat 别名（让旧 verify 断言不破）：CANCEL_KEYWORDS_8LANG / CONFIRM_KEYWORDS_8LANG 来自 i18n.js DEFAULT_I18N
   const CANCEL_KEYWORDS_8LANG = (window.XEraseri18n && window.XEraseri18n.DEFAULT_I18N) ? window.XEraseri18n.DEFAULT_I18N.cancelKeywords : ['Cancel'];

@@ -17,7 +17,7 @@ function check(name, cond, detail) {
 // 1. 读取 3 个文件（lib/config.js 已删 —— 2026-XX-XX 重构移除了死代码）
 const contentJs = fs.readFileSync(path.join(ROOT, 'platforms/x-project/scripts/content.js'), 'utf8');
 const defaultCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'platforms/x-project/src/config/default.json'), 'utf8'));
-const remoteCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'platforms/x-project/src/config/remote-example.json'), 'utf8'));
+const remoteCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'platforms/x-project/src/config/x-remote-example.json'), 'utf8'));
 
 // 2. 必须含有的侧栏稳定 selector（任何登录页都有）
 // 2026-XX-XX 精简：删 a[href='/i/bookmarks']（X 2026 侧栏已无 bookmarks 直链）
@@ -57,7 +57,7 @@ for (const bad of FORBIDDEN) {
 }
 
 // 6. config/*.json loggedInElements 必须包含所有侧栏锚点
-for (const cfgName of ['default.json', 'remote-example.json']) {
+for (const cfgName of ['default.json', 'x-remote-example.json']) {
   const cfg = cfgName === 'default.json' ? defaultCfg : remoteCfg;
   const loggedIn = cfg.selectors && cfg.selectors.login && cfg.selectors.login.loggedInElements;
   check(cfgName + ' 有 selectors.login.loggedInElements', Array.isArray(loggedIn) && loggedIn.length > 0);

@@ -1244,7 +1244,7 @@
   //   - 这些不是 UI 文案，是「X 改版时要改的 selector 关键字」（Delete / 撤销转推 / Cancel 等）
   //   - 项目惯例：i18n.js = 所有 8 语言数据的家
   //   - 运行时合并：injector.js 的 setConfig 用 window.XEraseri18n.DEFAULT_I18N 作默认值
-  //     再叠加 remote-example.json 的 selectors.i18n 覆盖
+  //     再叠加 x-remote-example.json 的 selectors.i18n 覆盖
   //   - X 改版改了翻译时，改这里或远程配置即可（不用动 injector.js）
   // ============================================================================
   const DEFAULT_I18N = {

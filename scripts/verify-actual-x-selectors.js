@@ -29,7 +29,7 @@ const i18nSrc = fs.existsSync(I18N_PATH) ? fs.readFileSync(I18N_PATH, 'utf8') : 
 
 // 加载 config 文件（2026-XX-XX 重构：section 7 改为检查 config 而非 DEFAULT_SELECTORS）
 const DEFAULT_CFG_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'default.json');
-const REMOTE_CFG_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'remote-example.json');
+const REMOTE_CFG_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'x-remote-example.json');
 const defaultCfg = fs.existsSync(DEFAULT_CFG_PATH) ? JSON.parse(fs.readFileSync(DEFAULT_CFG_PATH, 'utf8')) : {};
 const remoteCfg = fs.existsSync(REMOTE_CFG_PATH) ? JSON.parse(fs.readFileSync(REMOTE_CFG_PATH, 'utf8')) : {};
 
@@ -487,26 +487,26 @@ console.log('[12] i18n 全部配置化（DEFAULT_I18N 在 i18n.js + injector.js 
 console.log();
 
 // ------------------------------------------------------------------
-// 13) remote-example.json：i18n section 完整 + 8 语言全有
+// 13) x-remote-example.json：i18n section 完整 + 8 语言全有
 //   关键：远程配置是 X 改版时第一个改的地方 —— 改了翻译只 push GCS 即可，不用发新版扩展
 // ------------------------------------------------------------------
-console.log('[13] remote-example.json - i18n section 完整 + 8 语言全有');
+console.log('[13] x-remote-example.json - i18n section 完整 + 8 语言全有');
 {
-  const configPath = path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'remote-example.json');
+  const configPath = path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'x-remote-example.json');
   if (fs.existsSync(configPath)) {
     const configSrc = fs.readFileSync(configPath, 'utf8');
     let config = null;
     try {
       config = JSON.parse(configSrc);
     } catch (e) {
-      console.log('  FAIL  remote-example.json JSON 解析失败: ' + e.message);
+      console.log('  FAIL  x-remote-example.json JSON 解析失败: ' + e.message);
       failed++;
     }
     if (config) {
       // 1. selectors.i18n 节点存在
       assert(
         config.selectors && config.selectors.i18n,
-        'remote-example.json: selectors.i18n 节点存在'
+        'x-remote-example.json: selectors.i18n 节点存在'
       );
 
       if (config.selectors && config.selectors.i18n) {
@@ -560,13 +560,13 @@ console.log('[13] remote-example.json - i18n section 完整 + 8 语言全有');
       }
     }
   } else {
-    console.log('  SKIP  remote-example.json not found');
+    console.log('  SKIP  x-remote-example.json not found');
   }
 }
 console.log();
 
 // ------------------------------------------------------------------
-// 14a) default.json + remote-example.json：login.checkElements 8 语言实测文本（不是猜的）
+// 14a) default.json + x-remote-example.json：login.checkElements 8 语言实测文本（不是猜的）
 //   实证数据（2026-06-21 MCP Chrome 切 ?lang=xx 抓 /i/jf/onboarding/web 实际 DOM）：
 //     X 2026 web onboarding 流程：所有语言都改为"Continue + Continue with phone/Apple"模式
 //     旧的"Sign in / Create your account"风格已完全废弃
@@ -577,7 +577,7 @@ console.log('[14a] login.checkElements 8 语言实测文本（2026-06-21 MCP 验
 {
   const files = [
     path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'default.json'),
-    path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'remote-example.json')
+    path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'x-remote-example.json')
   ];
   // 8 语言实测：每语言 [主按钮, alt sign-in (手机/Apple), 输入框占位]
   const LOGIN_8LANG = {

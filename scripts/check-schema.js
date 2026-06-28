@@ -2,7 +2,7 @@
 /**
  * Schema 对齐检查
  *
- * 验证 config/default.json / config/remote-example.json 两处 selector schema 完全一致。
+ * 验证 config/default.json / config/x-remote-example.json 两处 selector schema 完全一致。
  *
  * 目的：避免 X 改版时只更新了其中一个 config 导致远程热修失效。
  * 历史：2026-XX-XX 之前还对比 lib/injector.js 的 DEFAULT_SELECTORS 块，
@@ -20,7 +20,7 @@ const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
 const DEFAULT_CFG = path.join(ROOT, 'platforms/x-project/src/config/default.json');
-const REMOTE_CFG = path.join(ROOT, 'platforms/x-project/src/config/remote-example.json');
+const REMOTE_CFG = path.join(ROOT, 'platforms/x-project/src/config/x-remote-example.json');
 
 const EXCLUDE_FROM_CHECK = new Set(['login', 'xWebsite', 'i18n']);
 

@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 // verify-config-sync.js
-// 防回归：default.json 和 remote-example.json 内容不同步
+// 防回归：default.json 和 x-remote-example.json 内容不同步
 //
 // 根因（2026-06-19 教训）：
 //   之前修 tweets-bug-7（bookmark 改用 cellInnerDiv + unbookmark）只改了 default.json，
-//   忘了改 remote-example.json。断网时用 default（修了，能用），
+//   忘了改 x-remote-example.json。断网时用 default（修了，能用），
 //   联网时用 remote（没修，X 2026 改版后失效）—— 同一份修复分两份，行为不一致。
 //   i18n 块（deleteKeywords / unretweetKeywords / ...）也有同样问题：
 //   remote 加了，default 缺 → 断网时用 default 跑 confirm 按钮只能靠 testid 兜底。
 //
-// 锁定：default.json 和 remote-example.json 的 selectors 内容必须字节级一致
+// 锁定：default.json 和 x-remote-example.json 的 selectors 内容必须字节级一致
 
 'use strict';
 
@@ -17,7 +17,7 @@ const fs = require('fs');
 const path = require('path');
 
 const DEFAULT_CFG_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'default.json');
-const REMOTE_CFG_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'remote-example.json');
+const REMOTE_CFG_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'x-remote-example.json');
 
 const defaultCfg = JSON.parse(fs.readFileSync(DEFAULT_CFG_PATH, 'utf8'));
 const remoteCfg = JSON.parse(fs.readFileSync(REMOTE_CFG_PATH, 'utf8'));
@@ -48,11 +48,11 @@ function sortKeysDeep(obj) {
 }
 
 console.log('=== verify-config-sync.js ===');
-console.log('防 default.json / remote-example.json 不同步回归（2026-06-19 教训）\n');
+console.log('防 default.json / x-remote-example.json 不同步回归（2026-06-19 教训）\n');
 
 // 1. 两个文件都存在且 JSON 解析成功
 assert(defaultCfg && typeof defaultCfg === 'object', 'default.json 可解析为 JSON');
-assert(remoteCfg && typeof remoteCfg === 'object', 'remote-example.json 可解析为 JSON');
+assert(remoteCfg && typeof remoteCfg === 'object', 'x-remote-example.json 可解析为 JSON');
 
 // 2. 顶层 version 字段一致
 assert(
@@ -73,7 +73,7 @@ assert(
 );
 assert(
   remoteCfg.selectors && typeof remoteCfg.selectors === 'object',
-  'remote-example.json 有 selectors 块'
+  'x-remote-example.json 有 selectors 块'
 );
 
 // 5. selectors 下所有顶层 key 一致（防止漏加 i18n / retweet 等整块）
@@ -126,9 +126,9 @@ console.log('  failed: ' + failed);
 if (failed > 0) {
   console.log('\nFAIL: ' + failed + ' check(s) failed');
   console.log('提示: 改完 config 后必须同步两份文件。');
-  console.log('  改 default.json → 同步改 remote-example.json（反之亦然）');
+  console.log('  改 default.json → 同步改 x-remote-example.json（反之亦然）');
   console.log('  或跑 node scripts/sync-config.js 从 source of truth 自动生成另一份');
   process.exit(1);
 }
-console.log('OK: default.json 和 remote-example.json 完全一致');
+console.log('OK: default.json 和 x-remote-example.json 完全一致');
 process.exit(0);

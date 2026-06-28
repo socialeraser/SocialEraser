@@ -22,7 +22,7 @@ const fs = require('fs');
 const path = require('path');
 
 const DEFAULT_CFG_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'default.json');
-const REMOTE_CFG_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'remote-example.json');
+const REMOTE_CFG_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'src', 'config', 'x-remote-example.json');
 const INJECTOR_PATH = path.join(__dirname, '..', 'platforms', 'x-project', 'scripts', 'x-automation.js');
 
 const defaultCfg = JSON.parse(fs.readFileSync(DEFAULT_CFG_PATH, 'utf8'));
@@ -73,11 +73,11 @@ for (const sel of EXPECTED_ARIA_LABELS) {
   assert(arrayContains(defaultUnreTweet, sel), 'default.json: retweet.unreTweetButtons 含 ' + sel);
 }
 
-// 1b) remote-example.json
+// 1b) x-remote-example.json
 const remoteUnreTweet = remoteCfg.selectors && remoteCfg.selectors.retweet && remoteCfg.selectors.retweet.unreTweetButtons;
-assert(Array.isArray(remoteUnreTweet), 'remote-example.json: retweet.unreTweetButtons 是数组');
+assert(Array.isArray(remoteUnreTweet), 'x-remote-example.json: retweet.unreTweetButtons 是数组');
 for (const sel of EXPECTED_ARIA_LABELS) {
-  assert(arrayContains(remoteUnreTweet, sel), 'remote-example.json: retweet.unreTweetButtons 含 ' + sel);
+  assert(arrayContains(remoteUnreTweet, sel), 'x-remote-example.json: retweet.unreTweetButtons 含 ' + sel);
 }
 
 console.log();
@@ -206,7 +206,7 @@ const DEAD_SELECTORS = [
 
 for (const sel of DEAD_SELECTORS) {
   assert(!arrayContains(defaultUnreTweet, sel), 'default.json: unreTweetButtons 不含 ' + sel);
-  assert(!arrayContains(remoteUnreTweet, sel), 'remote-example.json: unreTweetButtons 不含 ' + sel);
+  assert(!arrayContains(remoteUnreTweet, sel), 'x-remote-example.json: unreTweetButtons 不含 ' + sel);
 }
 
 console.log();
@@ -222,7 +222,7 @@ const REQUIRED_TESTID_SELECTORS = [
 
 for (const sel of REQUIRED_TESTID_SELECTORS) {
   assert(arrayContains(defaultUnreTweet, sel), 'default.json: unreTweetButtons 含 ' + sel);
-  assert(arrayContains(remoteUnreTweet, sel), 'remote-example.json: unreTweetButtons 含 ' + sel);
+  assert(arrayContains(remoteUnreTweet, sel), 'x-remote-example.json: unreTweetButtons 含 ' + sel);
 }
 
 console.log();
@@ -331,11 +331,11 @@ console.log('[7] unretweetConfirmButtons 保持现状（有文字兜底）');
 const defaultUnretweetConfirm = defaultCfg.selectors && defaultCfg.selectors.retweet && defaultCfg.selectors.retweet.unretweetConfirmButtons;
 const remoteUnretweetConfirm = remoteCfg.selectors && remoteCfg.selectors.retweet && remoteCfg.selectors.retweet.unretweetConfirmButtons;
 assert(Array.isArray(defaultUnretweetConfirm), 'default.json: retweet.unretweetConfirmButtons 是数组');
-assert(Array.isArray(remoteUnretweetConfirm), 'remote-example.json: retweet.unretweetConfirmButtons 是数组');
+assert(Array.isArray(remoteUnretweetConfirm), 'x-remote-example.json: retweet.unretweetConfirmButtons 是数组');
 assert(arrayContains(defaultUnretweetConfirm, "[data-testid='unretweetConfirm']"),
   'default.json: retweet.unretweetConfirmButtons 含 [data-testid=unretweetConfirm]');
 assert(arrayContains(remoteUnretweetConfirm, "[data-testid='unretweetConfirm']"),
-  'remote-example.json: retweet.unretweetConfirmButtons 含 [data-testid=unretweetConfirm]');
+  'x-remote-example.json: retweet.unretweetConfirmButtons 含 [data-testid=unretweetConfirm]');
 
 console.log();
 

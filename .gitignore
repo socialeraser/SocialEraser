@@ -16,7 +16,9 @@ www/
 # (synced from platforms/*/src + scripts + chrome-source/; chrome-source
 # also produces extensions/edge-x/ via BROWSER_ALIASES in sync-shared.js).
 /extensions/chrome-x/
+/extensions/chrome-tiktok/
 /extensions/edge-x/
+/extensions/edge-tiktok/
 
 # Gradle cache
 .gradle/

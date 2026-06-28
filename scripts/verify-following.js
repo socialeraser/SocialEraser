@@ -12,13 +12,13 @@ function check(name, cond, detail) {
 
 // 1. JSON 合法性
 const defaultCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'platforms/x-project/src/config/default.json'), 'utf8'));
-const remoteCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'platforms/x-project/src/config/remote-example.json'), 'utf8'));
+const remoteCfg = JSON.parse(fs.readFileSync(path.join(ROOT, 'platforms/x-project/src/config/x-remote-example.json'), 'utf8'));
 check('default.json JSON 合法', true);
-check('remote-example.json JSON 合法', true);
+check('x-remote-example.json JSON 合法', true);
 
 // 2. JSON 中 following 配置结构
 const newKeys = ['container', 'unfollowButtons', 'confirmButton'];
-for (const cfgName of ['default.json', 'remote-example.json']) {
+for (const cfgName of ['default.json', 'x-remote-example.json']) {
   const cfg = cfgName === 'default.json' ? defaultCfg : remoteCfg;
   const f = cfg.selectors && cfg.selectors.following;
   check(`${cfgName} 含 following 配置`, !!f, JSON.stringify(f).slice(0, 100));

@@ -239,7 +239,7 @@ The config file supports hot update, just update the config file to adapt after 
 
 ### Deploying Configuration
 
-1. Modify `remote-example.json` content
+1. Modify `x-remote-example.json` content
 2. Upload to a publicly accessible URL (e.g., GCS, GitHub Gist)
 3. Update `CONFIG_URL` in `platforms/x-project/chrome-source/background.js` (and `edge-source/background.js` if it diverges)
 
