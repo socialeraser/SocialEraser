@@ -6,6 +6,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.1] — 2026-06-28
+
 ### Added
 - Top feedback button (✉️) in side panel header — opens default mail client to `support@socialeraser.app` with pre-filled subject `[X Eraser Feedback]`
 - Non-modal completion summary card: shows item count, type count, duration, and a support CTA; dismissible via `×`; only shown when at least one item was cleaned
@@ -15,6 +17,9 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - `ROADMAP.md` and `CHANGELOG.md` created; footer links across all 14 marketing pages unified to the full 4-column layout (Brand / Platforms / Product / Company)
 - **End-to-end real-device regression passed** for Original Tweets / Replies / Retweets / Likes / Bookmarks on 2026-06-28 (Following already passed in v1.0.0); only Messages / DMs remain unsupported due to X's `event.isTrusted` check
 - **Creem production checkout links live** — 5 `https://www.creem.io/payment/prod_*` URLs wired up in `support.html` for the 5 tiers ($1 / $3 / $5 / $10 / Custom); the `#TODO-CREEM-LINK-*` placeholders are no longer present
+
+### Changed
+- Renamed local + remote config file from `remote-example.json` to `x-remote-example.json` (platform-prefix consistency; aligned with TikTok). CDN URL `https://storage.googleapis.com/social-tool-bucket/x-remote-example.json` updated; `CONFIG_URL` in `chrome-source/background.js` + `edge-source/background.js` updated; all 6 verify scripts + 3 docs updated. Old `remote-example.json` removed from CDN.
 
 ## [1.1.0] — 2026-06-XX
 

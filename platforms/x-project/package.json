@@ -1,6 +1,6 @@
 {
   "name": "@social-eraser/x-project",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "X (Twitter) bulk-delete platform. Web UI + Capacitor Android/iOS.",
   "private": true,
   "dependencies": {
