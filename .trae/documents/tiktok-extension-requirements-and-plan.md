@@ -355,7 +355,7 @@ Side Panel 启动时
 | 维度 | 要求 |
 |---|---|
 | Selector 远程热修 | 改 selector → 上传 CDN → 用户无需更新扩展 |
-| Schema 对齐 | `default.json` ↔ `remote-example.json` 字段严格一致 |
+| Schema 对齐 | `default.json` ↔ `tiktok-remote-example.json` 字段严格一致 |
 | Verify 脚本 | 3 个 TikTok 专用 + 复用 x-project 9 个共 12 个 |
 | Tip model 解耦 | 不含订阅逻辑（与 x-project 同步）|
 | 命名空间隔离 | TikTok 全局变量 / storage key / port name 用 `tiktok` / `TikTok` 前缀 |
@@ -396,7 +396,7 @@ platforms/tiktok-project/
 │   │   └── fr/messages.json
 │   ├── config/                    # 远程配置（❌ 全部待创建）
 │   │   ├── default.json
-│   │   └── remote-example.json
+│   │   └── tiktok-remote-example.json
 │   └── icons/                     # 16/48/128 PNG（❌ 待创建）
 └── android/  ios/                 # Capacitor 平台（推迟到 Q1 2027）
 ```
@@ -601,7 +601,7 @@ idle ──startCleanup()──→ running ──pause()──→ paused
 - i18n 关键字数组同理（远程可整体替换某 key 的 8 语言列表）
 
 **Schema 对齐**（`scripts/check-schema.js`）：
-- `default.json` 与 `remote-example.json` 的 `selectors` 块字段名严格一致
+- `default.json` 与 `tiktok-remote-example.json` 的 `selectors` 块字段名严格一致
 - 排除块：`login`（独立 merge）/ `tiktokWebsite`（独立 merge）/ `i18n`（远程可整体覆盖）
 - 字段缺失 → CI 失败 → 拒绝合并（避免远程热修把某个 selector 块缺失导致 fallback）
 
@@ -724,7 +724,7 @@ idle ──startCleanup()──→ running ──pause()──→ paused
 
 ### 8.1 远程配置 schema
 
-`src/config/default.json` 与 `src/config/remote-example.json` 必须字段一致：
+`src/config/default.json` 与 `src/config/tiktok-remote-example.json` 必须字段一致：
 
 ```json
 {
@@ -960,7 +960,7 @@ src/sidepanel.html  ─┬─→ www/                  (Capacitor webDir)
 - [ ] `npm test` 全绿
 - [ ] `scripts/verify-tiktok-i18n.js` 8 语言 × TikTok 新 key 完整
 - [ ] `scripts/verify-actual-tiktok-selectors.js` 真实 TikTok DOM 验证 selector 决策
-- [ ] `scripts/verify-tiktok-config-sync.js` default.json ↔ remote-example.json 对齐
+- [ ] `scripts/verify-tiktok-config-sync.js` default.json ↔ tiktok-remote-example.json 对齐
 - [ ] `scripts/check-schema.js` 迭代 `platforms/*-project/`（扩展后）
 - [ ] `scripts/verify-syntax.js` 扫所有 `platforms/*-project/scripts/`
 - [ ] `scripts/verify-sidepanel-bindings.js` 扫所有 `platforms/*-project/src/sidepanel.js`
@@ -1076,11 +1076,11 @@ src/sidepanel.html  ─┬─→ www/                  (Capacitor webDir)
 | [src/_locales/de/messages.json](file:///Volumes/XPSSD/workspaces/SocialEraser/platforms/tiktok-project/src/_locales/de/messages.json) | P0 | 同上 |
 | [src/_locales/fr/messages.json](file:///Volumes/XPSSD/workspaces/SocialEraser/platforms/tiktok-project/src/_locales/fr/messages.json) | P0 | 同上 |
 | [src/config/default.json](file:///Volumes/XPSSD/workspaces/SocialEraser/platforms/tiktok-project/src/config/default.json) | P0 | tiktok-automation.js setConfig |
-| [src/config/remote-example.json](file:///Volumes/XPSSD/workspaces/SocialEraser/platforms/tiktok-project/src/config/remote-example.json) | P0 | default.json |
+| [src/config/tiktok-remote-example.json](file:///Volumes/XPSSD/workspaces/SocialEraser/platforms/tiktok-project/src/config/tiktok-remote-example.json) | P0 | default.json |
 | [src/icons/icon{16,48,128}.png](file:///Volumes/XPSSD/workspaces/SocialEraser/platforms/tiktok-project/src/icons/) | P0 | CWS 审核 |
 | [scripts/verify-tiktok-i18n.js](file:///Volumes/XPSSD/workspaces/SocialEraser/scripts/verify-tiktok-i18n.js) | P1 | i18n.js + _locales |
 | [scripts/verify-actual-tiktok-selectors.js](file:///Volumes/XPSSD/workspaces/SocialEraser/scripts/verify-actual-tiktok-selectors.js) | P1 | tiktok-automation.js |
-| [scripts/verify-tiktok-config-sync.js](file:///Volumes/XPSSD/workspaces/SocialEraser/scripts/verify-tiktok-config-sync.js) | P1 | default.json + remote-example.json |
+| [scripts/verify-tiktok-config-sync.js](file:///Volumes/XPSSD/workspaces/SocialEraser/scripts/verify-tiktok-config-sync.js) | P1 | default.json + tiktok-remote-example.json |
 
 ### A.3 跨平台扩展（需修改的现有脚本）
 
