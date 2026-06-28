@@ -40,9 +40,9 @@ Cross-platform X/Twitter batch cleanup tool.
 | Feature | Status | Description |
 |---|---|---|
 | Batch delete Messages (DMs) | ❌ | X uses `event.isTrusted` to verify user input; JS events dispatched by content scripts (`dispatchEvent` / `mousedown`+`contextmenu` sequences, etc.) are all rejected by X. See "Why Messages is not supported" below |
-| Actual deletion operation | 🔄 | End-to-end real-device regression testing for Likes / Bookmarks / Following; the 3 tweet sub-types (original / reply / undo repost) engine is complete, see "Batch delete tweets" item above |
 | 5000/day free quota | ✅ | Per-day safety cap (prevents X rate-limit / account ban) — counter + tip modal implemented, see "Monetization" below |
-| Tip / donation (Creem) | 🔄 | Support page live, Creem checkout links pending (5 tiers: ☕ $1 / 🍕 $3 / 🍱 $5 / 💖 $10 / 🎁 custom); see [docs/business-model.md](docs/business-model.md) |
+| **End-to-end real-device regression** | ✅ | Original Tweets / Replies / Retweets / Likes / Bookmarks all passed real-account regression on 2026-06-28 (Following passed in v1.0.0); only Messages / DMs remain unsupported (see below) |
+| Tip / donation (Creem) | ✅ | Support page live + 5 production Creem checkout links wired up (5 tiers: ☕ $1 / 🍕 $3 / 🍱 $5 / 💖 $10 / 🎁 custom); see [docs/business-model.md](docs/business-model.md) |
 | Android App | 🔄 | Capacitor project ready, UI to be ported |
 
 ### To Be Developed
@@ -333,7 +333,7 @@ addLog(t('startingCleanup'), 'info');
 
 ### Phase 2: Chrome Extension Enhancement
 - [ ] Date filter logic
-- [x] Tip page (5 tiers: $1 / $3 / $5 / $10 / custom) + Creem integration (links pending)
+- [x] Tip page (5 tiers: $1 / $3 / $5 / $10 / custom) + Creem integration (5 production `https://www.creem.io/payment/prod_*` links live in `support.html`)
 - [ ] Tiered support recognition (stretch — public thank-you list, no feature gating)
 
 ### Phase 3: Mobile
@@ -353,7 +353,7 @@ SocialEraser uses a **tip / donation model**, not subscriptions. Decision ration
 - Marketing-site [support page](https://socialeraser.app/support.html) with 5 tiers (☕ $1 / 🍕 $3 / 🍱 $5 / 💖 $10 / 🎁 custom) + FAQ
 - `success.html` for Creem post-checkout redirect
 - Footer Support link in all 12 marketing pages
-- Creem account created; checkout links pending (`#TODO-CREEM-LINK-1/3/5/10/CUSTOM` placeholders in `support.html`)
+- Creem account created; 5 production checkout links live (`https://www.creem.io/payment/prod_*`) in `support.html` for the 5 tiers
 
 **Future (deferred until reviews/ratings land)**: monthly + yearly subscriptions, but only as a *second* revenue stream — never replacing the free tier.
 

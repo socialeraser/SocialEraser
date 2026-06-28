@@ -13,6 +13,8 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - Footer Support link upgraded to brand color (`#f59e0b` / 12px) across all marketing pages
 - `success.html` (post-payment landing) restored to full footer structure
 - `ROADMAP.md` and `CHANGELOG.md` created; footer links across all 14 marketing pages unified to the full 4-column layout (Brand / Platforms / Product / Company)
+- **End-to-end real-device regression passed** for Original Tweets / Replies / Retweets / Likes / Bookmarks on 2026-06-28 (Following already passed in v1.0.0); only Messages / DMs remain unsupported due to X's `event.isTrusted` check
+- **Creem production checkout links live** — 5 `https://www.creem.io/payment/prod_*` URLs wired up in `support.html` for the 5 tiers ($1 / $3 / $5 / $10 / Custom); the `#TODO-CREEM-LINK-*` placeholders are no longer present
 
 ## [1.1.0] — 2026-06-XX
 
