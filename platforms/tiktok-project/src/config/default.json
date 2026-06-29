@@ -80,6 +80,7 @@
         "[data-e2e='user-following-item']",
         "article"
       ],
+      "_comment_videoMoreButtons": "DEPRECATED for videos (TikTok 2026 hides 'More' on profile cards). Kept as fallback for reposts when DOM still has them. Video deletion now uses videoActionButton + videoStudioUrl.",
       "videoMoreButtons": [
         "[data-e2e='video-more']",
         "button[aria-label='More']",
@@ -92,24 +93,68 @@
         "button[aria-label*='Mehr']",
         "button[aria-label*='Plus']"
       ],
+      "_comment_videoStudioUrl": "TikTok Web does NOT expose video deletion on /@user profile. Must navigate to TikTok Studio to delete posted/draft videos.",
+      "videoStudioUrl": "https://www.tiktok.com/tiktokstudio/content?status=posted",
+      "videoStudioUrlDraft": "https://www.tiktok.com/tiktokstudio/content?status=draft",
+      "videoActionButton": [
+        "button[data-tt='components_ActionCell_Clickable']"
+      ],
+      "videoRowContainer": [
+        "div[data-tt='components_RowLayout_FlexRow']"
+      ],
+      "videoRowFilter": "button[data-tt='components_ActionCell_Clickable']",
+      "videoMenuPopover": [
+        "[data-tt='components_Popover_Container']"
+      ],
+      "videoMenuDeleteIcon": [
+        "[data-icon='Backspace']",
+        "[data-testid='Backspace']"
+      ],
+      "videoMenuItemClickable": [
+        "div[data-tt='components_ActionCell_FlexRow']"
+      ],
+      "videoMenuPinIcon": [
+        "[data-icon='Pin']",
+        "[data-testid='Pin']"
+      ],
+      "videoMenuDownloadIcon": [
+        "[data-icon='Download']",
+        "[data-testid='Download']"
+      ],
+      "videoConfirmModal": [
+        "[data-tt='components_Modal_TUXModal']",
+        "[role='dialog']"
+      ],
+      "videoConfirmButton": [
+        "button[data-tt='components_Modal_TUXButton']"
+      ],
+      "_comment_confirmButton": "Generic confirmButton (legacy); for TikTok Studio prefer videoConfirmButton + i18n deleteKeywords text match (primary button has class css-y1m958; cancel has css-35jbna).",
       "confirmButton": [
-        "button[data-e2e='confirm']",
+        "button[data-tt='confirm']",
         "button[class*='confirm']",
-        "div[role='button'][data-e2e='confirm']"
+        "div[role='button'][data-tt='confirm']"
       ],
       "socialContext": [
+        "[data-tt='components_PublishStageLabel_TUXText']",
         "[data-e2e='social-context']",
         "[data-testid='socialContext']"
       ],
+      "_comment_timeElement": "TikTok Studio 帖子时间在 PublishStageLabel_TUXText（中文格式 '6月29日 14:13'，需要 parseStudioDateText 解析），不是 HTML5 <time>。",
       "timeElement": [
-        "time[datetime]"
+        "time[datetime]",
+        "[data-tt='components_PublishStageLabel_TUXText']"
       ],
+      "_comment_videoText": "Studio 帖子描述在 PostInfoCell_TUXText / TruncateText。",
       "videoText": [
+        "[data-tt='components_PostInfoCell_TUXText']",
+        "[data-tt='components_PostInfoCell_TruncateText']",
         "[data-e2e='video-desc']",
         "[data-e2e='video-meta']",
         "[data-testid='video-desc']"
       ],
+      "_comment_viewCount": "Studio view count 在 ItemRow_TUXText 第 1 个 (TUXText 集合按 '观看/赞/评论' 顺序)。",
       "viewCount": [
+        "[data-tt='components_ItemRow_TUXText']",
         "[data-e2e='video-views']",
         "[data-e2e='video-view-count']",
         "strong[data-e2e='video-views']"

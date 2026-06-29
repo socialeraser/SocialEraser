@@ -224,8 +224,10 @@
   }
 
   // 检测当前页面类型（用于自动判断用户在哪个 tab 决定是否需要跳转）
+  // TikTok Studio (/tiktokstudio/content) 也算 'videos'，因为 TikTok 只能在 Studio 删除视频
   function detectPageType() {
     var pathname = location.pathname || '';
+    if (/^\/tiktokstudio\/content/.test(pathname)) return 'videos';
     if (/^\/@[A-Za-z0-9._-]+$/.test(pathname)) return 'videos';
     if (/^\/@[A-Za-z0-9._-]+\/likes$/.test(pathname)) return 'likes';
     if (/^\/@[A-Za-z0-9._-]+\/favorites$/.test(pathname)) return 'favorites';

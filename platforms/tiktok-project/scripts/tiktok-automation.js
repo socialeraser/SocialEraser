@@ -12,6 +12,21 @@
 //   - i18n 关键字从 window.TikTokEraseri18n.DEFAULT_I18N 读
 //   - 帧数驱动（不靠经验时间）
 //   - 3 种点击事件兜底（click / MouseEvent / PointerEvent）
+//
+// 视频 / Repost 删除流程（实测自 tiktok.com/tiktokstudio/content, 2026-06）：
+//   TikTok Web 在 /@user 主页不再暴露 video 删除入口（'more' 按钮已被隐藏）。
+//   唯一可走的删除路径是 TikTok Studio：
+//     1. processVideos 自动跳转 https://www.tiktok.com/tiktokstudio/content?status=posted
+//     2. 每行 = div[data-tt="components_RowLayout_FlexRow"]，内含 kebab 按钮
+//        button[data-tt="components_ActionCell_Clickable"]
+//     3. 点 kebab → 菜单 popover [data-tt="components_Popover_Container"]
+//        内含 3 项：Pin / Download / Delete（按 data-icon 区分：Pin / Download / Backspace）
+//     4. 点 Delete 菜单项 → 模态框 [data-tt="components_Modal_TUXModal"]
+//        内含 2 按钮：取消 (css-35jbna) / 删除 (css-y1m958)，都是 data-tt="components_Modal_TUXButton"
+//     5. 点 "删除" 确认 → row 从 DOM 消失
+//   兜底机制：
+//     - 找菜单 Delete 项：主路径走 [data-icon="Backspace"]（语言无关），找不到再走 8 语言 text 匹配
+//     - 找 confirm 按钮：主路径走 "删除" 8 语言 text 匹配（主按钮 class css-y1m958 vs cancel css-35jbna）
 
 (function() {
   'use strict';
@@ -368,94 +383,186 @@
     }
 
     // 删除一条 TikTok 视频（processVideos / processReposts 里调用）
-    // 流程（3 步点击）:
-    //   1. 点视频上的 more/··· 按钮 → 弹出菜单
-    //   2. 菜单里点 "Delete" 菜单项（按 8 语言文字匹配）
-    //   3. 确认弹窗点 confirmButton
-    // 返回: true = 3 步全成功；false = 任一步骤失败
+    // 流程（3 步点击 + 1 步等待）:
+    //   1. 点 row 上的 kebab 按钮 (button[data-tt="components_ActionCell_Clickable"])
+    //   2. 等 popover 出现，定位 Delete 菜单项（主路径: [data-icon="Backspace"]；兜底: 8 语言文字)
+    //   3. 点 Delete → 等 modal → 点 "删除" 确认（8 语言文字匹配；区分主/取消按钮 class）
+    // 返回: true = row 从 DOM 消失；false = 任一步骤失败
     async deleteVideo(container) {
       if (!container) return false;
 
       var _delStartTime = Date.now();
-      var _delArticleSig = (container.textContent || '').trim().substring(0, 50);
-      this.debug('[deleteVideo start] video="' + _delArticleSig + '", isConnected=' + container.isConnected);
+      var _delSig = (container.textContent || '').trim().substring(0, 50);
+      this.debug('[deleteVideo start] video="' + _delSig + '", isConnected=' + container.isConnected);
 
-      const moreBtnSelectors = (this.config.common && Array.isArray(this.config.common.videoMoreButtons))
-        ? this.config.common.videoMoreButtons : [];
-      if (moreBtnSelectors.length === 0) {
-        this.error('No common.videoMoreButtons for deleteVideo');
+      // 步骤 1: 定位 row 内的 kebab 按钮
+      var actionSelectors = (this.config.common && Array.isArray(this.config.common.videoActionButton))
+        ? this.config.common.videoActionButton
+        : (this.config.common && Array.isArray(this.config.common.videoMoreButtons))
+          ? this.config.common.videoMoreButtons : [];
+      if (actionSelectors.length === 0) {
+        this.error('deleteVideo: No videoActionButton / videoMoreButtons in config');
+        return false;
+      }
+      var kebab = this.findElement(actionSelectors, container);
+      if (!kebab) {
+        this.error('deleteVideo: kebab button not found in container');
         return false;
       }
 
-      const moreButton = this.findElement(moreBtnSelectors, container);
-      if (!moreButton) {
-        this.error('deleteVideo: more button not found in container');
-        return false;
-      }
+      // 点击前记录 row，用于后续判断是否消失
+      var rowEl = container;
+      var wasConnected = rowEl.isConnected;
 
-      // 主路径：等菜单已弹出（TikTok 通常立即弹）→ 直接命中
-      let deleteItem = await this.waitForMenuItemByText(this._i18n.deleteKeywords, 1000);
+      await this.safeClick(kebab, 0);
+      this.debug('[deleteVideo] kebab clicked, elapsed=' + (Date.now() - _delStartTime) + 'ms');
+
+      // 步骤 2: 等 popover 出现，定位 Delete 菜单项
+      var deleteItem = await this._findDeleteMenuItem();
       if (!deleteItem) {
-        // 兜底：click more 弹菜单
-        await this.safeClick(moreButton, 0);
-        deleteItem = await this.waitForMenuItemByText(this._i18n.deleteKeywords, 3000);
-        if (!deleteItem) {
-          this.error('deleteVideo: Delete menu item not found (3s timeout)');
-          this.debug('[deleteVideo fail-3s] video="' + _delArticleSig + '", isConnected=' + container.isConnected + ', elapsed=' + (Date.now() - _delStartTime) + 'ms');
-          return false;
-        }
+        this.error('deleteVideo: Delete menu item not found (Backspace icon + 8-lang text fallback failed)');
+        this.debug('[deleteVideo fail] video="' + _delSig + '", elapsed=' + (Date.now() - _delStartTime) + 'ms');
+        return false;
       }
+      this.debug('[deleteVideo] delete menu item found, elapsed=' + (Date.now() - _delStartTime) + 'ms');
 
       await this.safeClick(deleteItem, 0);
 
-      // MO 监听 + confirm 按钮
-      let mSucceeded = false;
-      let mConfirmClicked = false;
-
-      if (!container.isConnected) {
-        return true;
-      }
-
-      const self = this;
-      const parentNode = container.parentNode || document.body;
-      const obs = new MutationObserver(function() {
-        if (!container.isConnected) {
-          mSucceeded = true;
-          obs.disconnect();
-        }
-      });
-      obs.observe(parentNode, { childList: true, subtree: true });
-
-      const commonConfirmSel = (this.config.common && Array.isArray(this.config.common.confirmButton))
-        ? this.config.common.confirmButton[0] : null;
-
-      if (commonConfirmSel) {
-        const confirmButton = await this.waitForElement(commonConfirmSel);
-        if (confirmButton) {
-          await this.safeClick(confirmButton, 0);
-          mConfirmClicked = true;
-        }
-      }
-
-      const MAX_FRAMES = 600;
-      await new Promise(function(resolve) {
-        if (mSucceeded) { resolve(); return; }
-        let frameCount = 0;
-        function rafTick() {
-          if (mSucceeded) { resolve(); return; }
-          frameCount++;
-          if (frameCount >= MAX_FRAMES) { resolve(); return; }
-          requestAnimationFrame(rafTick);
-        }
-        requestAnimationFrame(rafTick);
-      });
-
-      obs.disconnect();
-      if (!mSucceeded) {
-        this.error('deleteVideo: container still exists after click Delete (max frames reached, confirmClicked=' + mConfirmClicked + ')');
+      // 步骤 3: 等 modal 出现，点 "删除" 确认
+      var confirmBtn = await this._findStudioConfirmButton(5000);
+      if (!confirmBtn) {
+        this.error('deleteVideo: confirm button not found in modal (5s timeout)');
         return false;
       }
+      this.debug('[deleteVideo] confirm button found, elapsed=' + (Date.now() - _delStartTime) + 'ms');
+
+      await this.safeClick(confirmBtn, 0);
+
+      // 步骤 4: 等 row 从 DOM 消失（成功标志）
+      var disappeared = await this._waitForRowRemoved(rowEl, 6000);
+      if (!disappeared) {
+        this.error('deleteVideo: row still in DOM after 6s (confirm may have failed silently)');
+        return false;
+      }
+      this.debug('[deleteVideo] success, elapsed=' + (Date.now() - _delStartTime) + 'ms, wasConnected=' + wasConnected);
       return true;
+    }
+
+    // 定位 TikTok Studio kebab 菜单中的 "Delete" 菜单项
+    // 主路径: [data-icon="Backspace"]（语言无关，TikTok 内部用 Backspace 图标表示删除）
+    // 兜底: 8 语言文字匹配（在 popover 中找含 "Delete"/"删除" 等关键字的 FlexRow）
+    async _findDeleteMenuItem() {
+      var self = this;
+      var MAX_FRAMES = 60;
+      var iconSelectors = (this.config.common && Array.isArray(this.config.common.videoMenuDeleteIcon))
+        ? this.config.common.videoMenuDeleteIcon : ['[data-icon="Backspace"]', '[data-testid="Backspace"]'];
+      var itemSel = (this.config.common && Array.isArray(this.config.common.videoMenuItemClickable))
+        ? this.config.common.videoMenuItemClickable[0] : 'div[data-tt="components_ActionCell_FlexRow"]';
+      var popSel = (this.config.common && Array.isArray(this.config.common.videoMenuPopover))
+        ? this.config.common.videoMenuPopover[0] : '[data-tt="components_Popover_Container"]';
+
+      return new Promise(function(resolve) {
+        var frame = 0;
+        function tick() {
+          // 主路径：找 popover 中 Backspace icon → 它的 FlexRow 父就是菜单项
+          var popovers = document.querySelectorAll(popSel);
+          for (var p = 0; p < popovers.length; p++) {
+            var popover = popovers[p];
+            // 只看可见 popover（offsetParent 非 null）
+            if (popover.offsetParent === null) continue;
+            // 找 Backspace icon
+            for (var s = 0; s < iconSelectors.length; s++) {
+              var icon = popover.querySelector(iconSelectors[s]);
+              if (!icon) continue;
+              var clickable = icon.closest(itemSel);
+              if (clickable) { resolve(clickable); return; }
+            }
+            // 兜底：8 语言文字匹配
+            var deleteKw = (self._i18n && self._i18n.deleteKeywords) || ['Delete'];
+            var items = popover.querySelectorAll(itemSel);
+            for (var i = 0; i < items.length; i++) {
+              var text = (items[i].textContent || '').trim();
+              for (var k = 0; k < deleteKw.length; k++) {
+                if (text === deleteKw[k] || text.indexOf(deleteKw[k]) >= 0) {
+                  resolve(items[i]);
+                  return;
+                }
+              }
+            }
+          }
+          if (frame++ >= MAX_FRAMES) { resolve(null); return; }
+          requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      });
+    }
+
+    // 定位 TikTok Studio 删除 modal 中的 "删除/确认" 按钮
+    // 主路径: 找含 deleteKeywords 文字的 button[data-tt="components_Modal_TUXButton"]
+    // 兜底: 找 modal 内第 1 个 button（TikTok 模态框：取消 在右，删除 在左）
+    async _findStudioConfirmButton(maxFrames) {
+      if (maxFrames === undefined) maxFrames = 300;
+      var self = this;
+      var modalSel = (this.config.common && Array.isArray(this.config.common.videoConfirmModal))
+        ? this.config.common.videoConfirmModal : ['[data-tt="components_Modal_TUXModal"]'];
+      var btnSel = (this.config.common && Array.isArray(this.config.common.videoConfirmButton))
+        ? this.config.common.videoConfirmButton[0] : 'button[data-tt="components_Modal_TUXButton"]';
+
+      return new Promise(function(resolve) {
+        var frame = 0;
+        function tick() {
+          for (var s = 0; s < modalSel.length; s++) {
+            try {
+              var modals = document.querySelectorAll(modalSel[s]);
+              for (var m = 0; m < modals.length; m++) {
+                var modal = modals[m];
+                if (modal.offsetParent === null) continue;
+                var btns = modal.querySelectorAll(btnSel);
+                if (btns.length === 0) continue;
+                // 主路径：8 语言文字匹配 "Delete" / "删除" 等
+                var delKw = (self._i18n && self._i18n.deleteKeywords) || ['Delete'];
+                for (var b = 0; b < btns.length; b++) {
+                  var t = (btns[b].textContent || '').trim();
+                  for (var k = 0; k < delKw.length; k++) {
+                    if (t === delKw[k]) { resolve(btns[b]); return; }
+                  }
+                }
+                // 兜底：8 语言 cancelKeywords 排除后取第 1 个
+                var cancelKw = (self._i18n && self._i18n.cancelKeywords) || ['Cancel'];
+                for (var b2 = 0; b2 < btns.length; b2++) {
+                  var t2 = (btns[b2].textContent || '').trim();
+                  var isCancel = false;
+                  for (var ck = 0; ck < cancelKw.length; ck++) {
+                    if (t2 === cancelKw[ck]) { isCancel = true; break; }
+                  }
+                  if (!isCancel) { resolve(btns[b2]); return; }
+                }
+                // 终极兜底：取第 1 个
+                resolve(btns[0]);
+                return;
+              }
+            } catch (e) {}
+          }
+          if (frame++ >= maxFrames) { resolve(null); return; }
+          requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      });
+    }
+
+    // 等待 row 从 DOM 消失（删除成功的可靠标志）
+    async _waitForRowRemoved(rowEl, maxFrames) {
+      if (!rowEl) return true;
+      if (maxFrames === undefined) maxFrames = 300;
+      return new Promise(function(resolve) {
+        var frame = 0;
+        function tick() {
+          if (!rowEl.isConnected) { resolve(true); return; }
+          if (frame++ >= maxFrames) { resolve(false); return; }
+          requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      });
     }
 
     // 通用 helper：等文本匹配任一关键字的 menuitem
@@ -579,17 +686,72 @@
       this.error('Unknown itemType: ' + itemType);
     }
 
+    // 解析 TikTok Studio PublishStageLabel 日期文字
+    // 支持格式:
+    //   - 中文: '6月29日 14:13' / '6月29日'
+    //   - 英文: 'Jun 29, 2026' / 'Jun 29'
+    //   - ISO: '2026-06-29'
+    // 返回: 'YYYY-MM-DD' 或 null
+    parseStudioDateText(text) {
+      if (!text) return null;
+      var s = String(text).trim();
+      if (!s) return null;
+
+      // ISO YYYY-MM-DD
+      var iso = s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+      if (iso) {
+        return iso[1] + '-' + this._pad2(iso[2]) + '-' + this._pad2(iso[3]);
+      }
+
+      // 中文 '6月29日 14:13' 或 '6月29日'
+      var cn = s.match(/(\d{1,2})\s*月\s*(\d{1,2})\s*日/);
+      if (cn) {
+        var year = new Date().getFullYear();
+        return year + '-' + this._pad2(cn[1]) + '-' + this._pad2(cn[2]);
+      }
+
+      // 英文 'Jun 29, 2026' / 'Jun 29 2026' / 'Jun 29'
+      var monthMap = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
+      var en = s.match(/([A-Za-z]{3,})\s+(\d{1,2})(?:[,\s]+(\d{4}))?/);
+      if (en) {
+        var m = monthMap[en[1].toLowerCase().substring(0, 3)];
+        if (m) {
+          var yr = en[3] ? parseInt(en[3], 10) : new Date().getFullYear();
+          return yr + '-' + this._pad2(m) + '-' + this._pad2(en[2]);
+        }
+      }
+
+      // 数字 '6/29/2026' / '6/29'
+      var num = s.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
+      if (num) {
+        var y2 = num[3] ? parseInt(num[3], 10) : new Date().getFullYear();
+        if (y2 < 100) y2 += 2000;
+        return y2 + '-' + this._pad2(num[1]) + '-' + this._pad2(num[2]);
+      }
+
+      return null;
+    }
+
+    _pad2(n) {
+      n = String(parseInt(n, 10));
+      return n.length < 2 ? '0' + n : n;
+    }
+
     // 提取容器的元数据（日期 + 文本 + view count），给 matchesFilter 用来过滤
     // 返回: { dateISO: 'YYYY-MM-DD' | null, text: '...', viewCount: number | null }
     extractMeta(container, itemType) {
       var meta = { dateISO: null, text: '', viewCount: null };
       if (!container) return meta;
 
-      // 日期：HTML5 <time datetime="..."> 属性
+      // 日期：先试 HTML5 <time datetime="..."> 属性，兜底用 parseStudioDateText
       var timeEl = this.findElement(this.config.common && this.config.common.timeElement, container);
       if (timeEl) {
-        var dt = timeEl.getAttribute('datetime') || '';
-        meta.dateISO = dt.slice(0, 10);
+        var dt = timeEl.getAttribute && timeEl.getAttribute('datetime');
+        if (dt) {
+          meta.dateISO = dt.slice(0, 10);
+        } else {
+          meta.dateISO = this.parseStudioDateText(timeEl.textContent);
+        }
       }
 
       // 文本
@@ -679,46 +841,55 @@
       return repostRe.test(text);
     }
 
-    // 删 TikTok 视频（profile 主页跑，过滤掉 repost 卡片）
+    // 删 TikTok 已发布视频（TikTok Studio 'Posted' tab 跑）
+    // 流程:
+    //   1. 自动跳转 https://www.tiktok.com/tiktokstudio/content?status=posted（如果不在）
+    //   2. 等 row 容器渲染稳定
+    //   3. 遍历每个 row → 调用 deleteVideo
     // 路径: deleteVideo
     async processVideos(maxItems) {
       if (maxItems === undefined) maxItems = 50;
-      const self = this;
+      var self = this;
       this._keywordLower = (this.filters && this.filters.keyword)
         ? this.filters.keyword.toLowerCase() : '';
 
       this.log(t('startingVideosCleanup'));
 
-      // 等 videos 渲染 + 内容稳定
-      await this.waitForContentStable(['[data-e2e="user-post-item"]', 'article', "[data-testid='cellInnerDiv']"]);
+      // 步骤 1: 跳转 TikTok Studio
+      var navigated = await this._ensureOnTikTokStudio('posted');
+      if (!navigated) {
+        this.error('processVideos: failed to navigate to TikTok Studio');
+        return;
+      }
+      this.debug('[processVideos] on TikTok Studio, waiting for rows...');
+
+      // 步骤 2: 等 row 容器渲染
+      var rowSel = (self.config.common && Array.isArray(self.config.common.videoRowContainer))
+        ? self.config.common.videoRowContainer[0] : 'div[data-tt="components_RowLayout_FlexRow"]';
+      var actionSel = (self.config.common && Array.isArray(self.config.common.videoActionButton))
+        ? self.config.common.videoActionButton[0] : 'button[data-tt="components_ActionCell_Clickable"]';
+      var rowFilterSel = (self.config.common && self.config.common.videoRowFilter)
+        ? self.config.common.videoRowFilter : actionSel;
+
+      await this.waitForContentStable([rowSel, actionSel]);
       this._diagnosePage();
 
-      const moreButtons = (self.config.common && Array.isArray(self.config.common.videoMoreButtons))
-        ? self.config.common.videoMoreButtons : [];
-      const articleSel = (self.config.common && self.config.common.articleContainers) || ['[data-e2e="user-post-item"]', 'article'];
-      const topLevelRule = self.config.common && self.config.common.topLevelArticle;
-
-      function collectCandidates() {
-        const candidates = [];
-        const seen = new Set();
-        for (let s = 0; s < moreButtons.length; s++) {
-          const btns = self.findElements(moreButtons[s]);
-          for (let i = 0; i < btns.length; i++) {
-            const btn = btns[i];
-            if (seen.has(btn)) continue;
-            seen.add(btn);
-            const article = btn.closest('article') || self.findClosest(articleSel, btn);
-            if (!article) continue;
-            // 跳过 repost 卡片（processReposts 负责）
-            if (self.isRepostCard(article)) continue;
-            if (topLevelRule === 'parent' && article.parentElement && article.parentElement.closest('article')) continue;
-            candidates.push({ btn: btn, article: article });
-          }
+      function collectRows() {
+        var rows = self.findElements(rowSel);
+        var out = [];
+        var seen = new Set();
+        for (var i = 0; i < rows.length; i++) {
+          var r = rows[i];
+          if (seen.has(r)) continue;
+          // 必须是含 kebab 按钮的 row（排除 header 等非视频行）
+          var action = r.querySelector(rowFilterSel);
+          if (!action) continue;
+          // 排除 header 行：header 也有 RowLayout_FlexRow 但无 PostInfoCell
+          if (!r.querySelector('[data-tt="components_PostInfoCell_Container"]')) continue;
+          seen.add(r);
+          out.push({ row: r, action: action });
         }
-        if (candidates.length === 0) {
-          self._logPageState({ moreButtons: moreButtons }, '[videos]');
-        }
-        return candidates;
+        return out;
       }
 
       let emptyScrolls = 0;
@@ -728,9 +899,9 @@
         if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) { this.log(t('cleanupStuck')); break; }
         if (this.isPaused) { await this.sleep(500); continue; }
 
-        const candidates = collectCandidates();
-        const pending = candidates.filter(c => {
-          const p = c.btn.dataset.socialEraserProcessed;
+        var rows = collectRows();
+        var pending = rows.filter(function(pair) {
+          var p = pair.action.dataset.socialEraserProcessed;
           return !p || (p !== 'true' && p !== 'skipped' && p !== 'failed');
         });
 
@@ -743,82 +914,121 @@
         }
         emptyScrolls = 0;
 
-        const c = pending[0];
-        const article = c.article;
+        var pair = pending[0];
+        var row = pair.row;
+        var action = pair.action;
 
         if (this.shouldFilter('videos')) {
-          var meta = this.extractMeta(article, 'videos');
+          var meta = this.extractMeta(row, 'videos');
           if (!this.matchesFilter(meta, this.filters)) {
-            c.btn.dataset.socialEraserProcessed = 'skipped';
+            action.dataset.socialEraserProcessed = 'skipped';
             await this.sleep(50); continue;
           }
         }
 
         try {
-          var success = await this.deleteVideo(article);
+          var success = await this.deleteVideo(row);
           if (success) {
-            c.btn.dataset.socialEraserProcessed = 'true';
+            action.dataset.socialEraserProcessed = 'true';
             this.processedCount++;
             lastProgressTime = Date.now();
             this.progress('Video #' + this.processedCount);
             this.log(t('videoDeleted', {count: this.processedCount}));
           } else {
-            c.btn.dataset.socialEraserProcessed = 'failed';
+            action.dataset.socialEraserProcessed = 'failed';
             this.error(t('videoDeleteFailed'));
             this.errorCount++;
           }
         } catch (e) {
-          c.btn.dataset.socialEraserProcessed = 'failed';
+          action.dataset.socialEraserProcessed = 'failed';
           this.error('deleteVideo threw: ' + e.message);
           this.errorCount++;
         }
-        await this.sleep(800);  // TikTok 反自动化：比 X 慢（500 → 800ms）
+        await this.sleep(800);  // TikTok 反自动化：比 X 慢
       }
 
       if (this.processedCount === 0 && this.filters) this.log(t('noItemsMatched'));
     }
 
-    // 删 Reposts（profile 主页跑，识别 repost 标记 → 走 processVideos 删除）
+    // 自动跳转到 TikTok Studio（如果不在）
+    // status: 'posted' (已发布) | 'draft' (草稿)
+    // 返回: true = 已在 Studio；false = 跳转失败
+    async _ensureOnTikTokStudio(status) {
+      if (status === undefined) status = 'posted';
+      var studioUrl = (this.config.common && this.config.common.videoStudioUrl)
+        ? this.config.common.videoStudioUrl
+        : 'https://www.tiktok.com/tiktokstudio/content?status=' + status;
+      // 把 status 替换成传入值（处理 draft）
+      studioUrl = studioUrl.replace(/status=[^&]*/, 'status=' + status);
+
+      var cur = window.location.href;
+      if (cur.indexOf('/tiktokstudio/content') >= 0 && cur.indexOf('status=' + status) >= 0) {
+        return true;
+      }
+      this.log('Navigating to TikTok Studio: ' + studioUrl);
+      try {
+        window.location.href = studioUrl;
+      } catch (e) {
+        this.error('_ensureOnTikTokStudio: navigation threw: ' + e.message);
+        return false;
+      }
+      // navigation 不会立刻完成，需要等几秒
+      await this.sleep(3000);
+      // 二次校验
+      if (window.location.href.indexOf('/tiktokstudio/content') < 0) {
+        return false;
+      }
+      return true;
+    }
+
+    // 删 Reposts（TikTok Studio 'Posted' tab 跑，识别 repost 标记 → 走 deleteVideo 删除）
     // 重要提示：TikTok Web 不支持"撤销 repost"独立操作，删除 repost = 删除该视频
+    // 在 Studio 中 repost 与原创视频外观相同，需用 socialContext / 标题附近文字识别
     async processReposts(maxItems) {
       if (maxItems === undefined) maxItems = 50;
-      const self = this;
+      var self = this;
       this._keywordLower = (this.filters && this.filters.keyword)
         ? this.filters.keyword.toLowerCase() : '';
 
-      // 首次提示用户
       this.log(t('repostWarning'));
       this.log(t('startingRepostsCleanup'));
 
-      await this.waitForContentStable(['[data-e2e="user-post-item"]', 'article', "[data-testid='cellInnerDiv']"]);
+      // 步骤 1: 跳转 TikTok Studio (reposts 也只能在 Studio 里删除)
+      var navigated = await this._ensureOnTikTokStudio('posted');
+      if (!navigated) {
+        this.error('processReposts: failed to navigate to TikTok Studio');
+        return;
+      }
+
+      // 步骤 2: 等 row 容器渲染
+      var rowSel = (self.config.common && Array.isArray(self.config.common.videoRowContainer))
+        ? self.config.common.videoRowContainer[0] : 'div[data-tt="components_RowLayout_FlexRow"]';
+      var actionSel = (self.config.common && Array.isArray(self.config.common.videoActionButton))
+        ? self.config.common.videoActionButton[0] : 'button[data-tt="components_ActionCell_Clickable"]';
+      var rowFilterSel = (self.config.common && self.config.common.videoRowFilter)
+        ? self.config.common.videoRowFilter : actionSel;
+
+      await this.waitForContentStable([rowSel, actionSel]);
       this._diagnosePage();
 
-      const moreButtons = (self.config.common && Array.isArray(self.config.common.videoMoreButtons))
-        ? self.config.common.videoMoreButtons : [];
-      const articleSel = (self.config.common && self.config.common.articleContainers) || ['[data-e2e="user-post-item"]', 'article'];
-      const topLevelRule = self.config.common && self.config.common.topLevelArticle;
-
-      function collectCandidates() {
-        const candidates = [];
-        const seen = new Set();
-        for (let s = 0; s < moreButtons.length; s++) {
-          const btns = self.findElements(moreButtons[s]);
-          for (let i = 0; i < btns.length; i++) {
-            const btn = btns[i];
-            if (seen.has(btn)) continue;
-            seen.add(btn);
-            const article = btn.closest('article') || self.findClosest(articleSel, btn);
-            if (!article) continue;
-            // 只保留 repost 卡片
-            if (!self.isRepostCard(article)) continue;
-            if (topLevelRule === 'parent' && article.parentElement && article.parentElement.closest('article')) continue;
-            candidates.push({ btn: btn, article: article });
-          }
+      function collectRepostRows() {
+        var rows = self.findElements(rowSel);
+        var out = [];
+        var seen = new Set();
+        for (var i = 0; i < rows.length; i++) {
+          var r = rows[i];
+          if (seen.has(r)) continue;
+          var action = r.querySelector(rowFilterSel);
+          if (!action) continue;
+          if (!r.querySelector('[data-tt="components_PostInfoCell_Container"]')) continue;
+          if (!self._isStudioRepost(r)) continue;
+          seen.add(r);
+          out.push({ row: r, action: action });
         }
-        if (candidates.length === 0) {
-          self._logPageState({ moreButtons: moreButtons, repostKeywords: self._i18n.repostKeywords }, '[reposts]');
+        if (out.length === 0) {
+          self._logPageState({ rowSel: rowSel, repostKeywords: self._i18n.repostKeywords }, '[reposts]');
         }
-        return candidates;
+        return out;
       }
 
       let emptyScrolls = 0;
@@ -828,9 +1038,9 @@
         if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) { this.log(t('cleanupStuck')); break; }
         if (this.isPaused) { await this.sleep(500); continue; }
 
-        const candidates = collectCandidates();
-        const pending = candidates.filter(c => {
-          const p = c.btn.dataset.socialEraserProcessed;
+        var rows = collectRepostRows();
+        var pending = rows.filter(function(pair) {
+          var p = pair.action.dataset.socialEraserProcessed;
           return !p || (p !== 'true' && p !== 'skipped' && p !== 'failed');
         });
 
@@ -843,32 +1053,33 @@
         }
         emptyScrolls = 0;
 
-        const c = pending[0];
-        const article = c.article;
+        var pair = pending[0];
+        var row = pair.row;
+        var action = pair.action;
 
         if (this.shouldFilter('reposts')) {
-          var meta = this.extractMeta(article, 'reposts');
+          var meta = this.extractMeta(row, 'reposts');
           if (!this.matchesFilter(meta, this.filters)) {
-            c.btn.dataset.socialEraserProcessed = 'skipped';
+            action.dataset.socialEraserProcessed = 'skipped';
             await this.sleep(50); continue;
           }
         }
 
         try {
-          var success = await this.deleteVideo(article);
+          var success = await this.deleteVideo(row);
           if (success) {
-            c.btn.dataset.socialEraserProcessed = 'true';
+            action.dataset.socialEraserProcessed = 'true';
             this.processedCount++;
             lastProgressTime = Date.now();
             this.progress('Repost #' + this.processedCount);
             this.log(t('repostDeleted', {count: this.processedCount}));
           } else {
-            c.btn.dataset.socialEraserProcessed = 'failed';
+            action.dataset.socialEraserProcessed = 'failed';
             this.error(t('repostDeleteFailed'));
             this.errorCount++;
           }
         } catch (e) {
-          c.btn.dataset.socialEraserProcessed = 'failed';
+          action.dataset.socialEraserProcessed = 'failed';
           this.error('repost delete threw: ' + e.message);
           this.errorCount++;
         }
@@ -876,6 +1087,26 @@
       }
 
       if (this.processedCount === 0 && this.filters) this.log(t('noItemsMatched'));
+    }
+
+    // 检测 Studio row 是否是 repost
+    // 策略: 在 socialContext / PostInfoCell 内查找 8 语言 repost 关键字
+    // 注：未实测 Studio 内 repost 的 DOM 标识，fallback 到全文搜索
+    _isStudioRepost(row) {
+      if (!row) return false;
+      var repostKw = (this._i18n && this._i18n.repostKeywords) || ['Repost'];
+      var scope = row.querySelector('[data-tt="components_PostInfoCell_Container"]') || row;
+      var socialContext = this.findElement(this.config.common && this.config.common.socialContext, scope);
+      var text = (socialContext ? socialContext.textContent : '') || '';
+      if (!text) {
+        text = scope.textContent || '';
+      }
+      var textLower = text.toLowerCase();
+      for (var i = 0; i < repostKw.length; i++) {
+        var kw = repostKw[i].toLowerCase();
+        if (kw && textLower.indexOf(kw) >= 0) return true;
+      }
+      return false;
     }
 
     // 取消点赞（likes 标签页）
