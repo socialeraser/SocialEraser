@@ -13,8 +13,16 @@ Public-facing development plan. Times are estimates, not commitments. Updated as
 ## Next (Q4 2026 – Q1 2027) — Mobile & TikTok
 - Android (Capacitor): UI port + QA on real devices
 - iOS (Capacitor): scaffold + port
-- TikTok project: copy x-project scaffold, write TikTok automation engine
+- TikTok project: MVP code complete (5-type + 8-language + verify suite), pending CWS/Edge Web Store submission
 - Restore reviews section once ≥6 real reviews collected (Chrome Web Store, GitHub stars, Product Hunt)
+
+### TikTok Eraser — explicitly deferred to V2+ (NOT on roadmap until real demand)
+The following TikTok cleanup types are intentionally **not** in V1 and have no timeline. They are listed here only to set user expectations — do not infer a commitment from inclusion in this list. If a type accumulates 10+ user requests, it can be promoted to a V2 milestone.
+- **Comments** — TikTok Web DOM structure for comment threads is significantly different from like/repost cards; would require a separate `processComments` method and selector schema
+- **Watch history** — TikTok Web does not expose a public "watch history" tab (it lives in the mobile app's "Your activity" → "Watch history" only); no Web selector to target
+- **Drafts** — TikTok Web does not support drafts at all; this is a mobile-app-only feature
+- **Photos / photo carousels** — TikTok rolled out photo posts in 2024 but the Web DOM is still rolling out and `data-e2e` selectors are not yet stable
+- **Albums** — same constraint as Photos, deferred until Web DOM stabilizes
 
 ## Later (Q2 – Q3 2027) — Multi-platform expansion
 - YouTube: unlike videos, un-save, clear watch history

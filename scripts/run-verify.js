@@ -41,6 +41,10 @@ const ALL_SCRIPTS = [
   'verify-syntax.js',
   'verify-tweets-bug-3.js',
   'verify-tip-model.js',
+  // TikTok platform (5-type MVP)
+  'verify-tiktok-i18n.js',
+  'verify-actual-tiktok-selectors.js',
+  'verify-tiktok-config-sync.js',
 ];
 
 function parseArgs(argv) {

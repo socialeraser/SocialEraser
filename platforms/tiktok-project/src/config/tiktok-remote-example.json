@@ -1,0 +1,239 @@
+{
+  "selectors": {
+    "tiktokWebsite": {
+      "patterns": [
+        "tiktok.com",
+        "www.tiktok.com"
+      ]
+    },
+    "login": {
+      "checkElements": {
+        "de": [
+          { "type": "text", "value": "Anmelden" },
+          { "type": "text", "value": "Weiter" },
+          { "type": "text", "value": "Telefon" },
+          { "type": "selector", "value": "[data-e2e='login-button']" }
+        ],
+        "en": [
+          { "type": "text", "value": "Log in" },
+          { "type": "text", "value": "Sign in" },
+          { "type": "text", "value": "Continue with phone" },
+          { "type": "selector", "value": "[data-e2e='login-button']" }
+        ],
+        "es": [
+          { "type": "text", "value": "Iniciar sesión" },
+          { "type": "text", "value": "Continuar" },
+          { "type": "text", "value": "Teléfono" },
+          { "type": "selector", "value": "[data-e2e='login-button']" }
+        ],
+        "fr": [
+          { "type": "text", "value": "Se connecter" },
+          { "type": "text", "value": "Continuer" },
+          { "type": "text", "value": "Téléphone" },
+          { "type": "selector", "value": "[data-e2e='login-button']" }
+        ],
+        "ja": [
+          { "type": "text", "value": "ログイン" },
+          { "type": "text", "value": "電話番号で続ける" },
+          { "type": "text", "value": "メールアドレス" },
+          { "type": "selector", "value": "[data-e2e='login-button']" }
+        ],
+        "ko": [
+          { "type": "text", "value": "로그인" },
+          { "type": "text", "value": "전화번호로 계속하기" },
+          { "type": "text", "value": "이메일" },
+          { "type": "selector", "value": "[data-e2e='login-button']" }
+        ],
+        "pt": [
+          { "type": "text", "value": "Entrar" },
+          { "type": "text", "value": "Continuar" },
+          { "type": "text", "value": "Telemóvel" },
+          { "type": "selector", "value": "[data-e2e='login-button']" }
+        ],
+        "zh-CN": [
+          { "type": "text", "value": "登录" },
+          { "type": "text", "value": "使用手机" },
+          { "type": "text", "value": "使用邮箱" },
+          { "type": "selector", "value": "[data-e2e='login-button']" }
+        ]
+      },
+      "loggedInElements": [
+        { "type": "selector", "value": "a[href='/upload']" },
+        { "type": "selector", "value": "a[href^='/messages']" },
+        { "type": "selector", "value": "a[href^='/notifications']" },
+        { "type": "selector", "value": "[data-e2e='profile-icon']" },
+        { "type": "selector", "value": "[data-e2e='nav-profile']" }
+      ],
+      "globalIndicators": [
+        "a[href='/upload']",
+        "a[href^='/messages']",
+        "a[href^='/notifications']",
+        "[data-e2e='profile-icon']",
+        "[data-e2e='nav-profile']"
+      ]
+    },
+    "common": {
+      "articleContainers": [
+        "[data-e2e='user-post-item']",
+        "[data-e2e='user-liked-item']",
+        "[data-e2e='user-favorite-item']",
+        "[data-e2e='user-following-item']",
+        "article"
+      ],
+      "videoMoreButtons": [
+        "[data-e2e='video-more']",
+        "button[aria-label='More']",
+        "button[aria-label*='More']",
+        "button[aria-label*='更多']",
+        "button[aria-label*='詳細']",
+        "button[aria-label*='더 보기']",
+        "button[aria-label*='Mais']",
+        "button[aria-label*='Más']",
+        "button[aria-label*='Mehr']",
+        "button[aria-label*='Plus']"
+      ],
+      "confirmButton": [
+        "button[data-e2e='confirm']",
+        "button[class*='confirm']",
+        "div[role='button'][data-e2e='confirm']"
+      ],
+      "socialContext": [
+        "[data-e2e='social-context']",
+        "[data-testid='socialContext']"
+      ],
+      "timeElement": [
+        "time[datetime]"
+      ],
+      "videoText": [
+        "[data-e2e='video-desc']",
+        "[data-e2e='video-meta']",
+        "[data-testid='video-desc']"
+      ],
+      "viewCount": [
+        "[data-e2e='video-views']",
+        "[data-e2e='video-view-count']",
+        "strong[data-e2e='video-views']"
+      ],
+      "userInfo": {
+        "userCell": [
+          "[data-e2e='user-card']",
+          "[data-testid='UserCell']"
+        ],
+        "userName": [
+          "[data-e2e='user-card-unique-id']",
+          "[data-testid='User-Name']"
+        ],
+        "userDescription": [
+          "[data-e2e='user-card-bio']",
+          "[data-testid='UserDescription']"
+        ]
+      }
+    },
+    "like": {
+      "unlikeButtons": [
+        "[data-e2e='like-icon']",
+        "[data-e2e='browse-like']",
+        "button[aria-label*='Liked']",
+        "button[aria-label*='Unlike']",
+        "button[aria-label*='已点赞']",
+        "button[aria-label*='いいね済み']",
+        "button[aria-label*='마음에 들어함']",
+        "button[aria-label*='Curtiu']",
+        "button[aria-label*='Me gusta']",
+        "button[aria-label*='Gefällt mir']",
+        "button[aria-label*=\"J'aime\"]"
+      ]
+    },
+    "favorite": {
+      "unfavoriteButtons": [
+        "[data-e2e='favorite-icon']",
+        "[data-e2e='browse-favorite']",
+        "button[aria-label*='Favorited']",
+        "button[aria-label*='Favorites']",
+        "button[aria-label*='已收藏']",
+        "button[aria-label*='お気に入り']",
+        "button[aria-label*='즐겨찾기']",
+        "button[aria-label*='Favorito']",
+        "button[aria-label*='Favoris']"
+      ]
+    },
+    "following": {
+      "unfollowButtons": [
+        "button[data-e2e='follow-button']",
+        "button[aria-label*='Following']",
+        "button[aria-label*='Unfollow']",
+        "button[aria-label*='フォロー中']",
+        "button[aria-label*='팔로잉']",
+        "button[aria-label*='Seguindo']",
+        "button[aria-label*='Siguiendo']",
+        "button[aria-label*='Abonné']",
+        "button[aria-label*='Folge ich']"
+      ],
+      "confirmButton": [
+        "button[data-e2e='unfollow-button']",
+        "button[data-e2e='confirm-unfollow']",
+        "div[role='button'][data-e2e='unfollow-button']"
+      ]
+    },
+    "repost": {
+      "cardMarker": [
+        "[data-e2e='repost']",
+        "[data-e2e='repost-card']"
+      ]
+    },
+    "i18n": {
+      "cancelKeywords": [
+        "Cancel",
+        "取消",
+        "キャンセル",
+        "취소",
+        "Cancelar",
+        "Cancelar",
+        "Abbrechen",
+        "Annuler"
+      ],
+      "confirmKeywords": [
+        "Delete",
+        "删除",
+        "削除",
+        "삭제",
+        "Excluir",
+        "Eliminar",
+        "Löschen",
+        "Supprimer"
+      ],
+      "deleteKeywords": [
+        "Delete",
+        "删除",
+        "削除",
+        "삭제",
+        "Excluir",
+        "Eliminar",
+        "Löschen",
+        "Supprimer"
+      ],
+      "unfollowKeywords": [
+        "Unfollow",
+        "取消关注",
+        "フォロー解除",
+        "언팔로우",
+        "Deixar de seguir",
+        "Dejar de seguir",
+        "Entfolgen",
+        "Ne plus suivre"
+      ],
+      "repostKeywords": [
+        "Repost",
+        "转发",
+        "再投稿する",
+        "리포스트",
+        "Republicar",
+        "Compartir",
+        "Erneut veröffentlichen",
+        "Republier"
+      ]
+    }
+  },
+  "updated": "2026-06-28",
+  "version": "1.0.0"
+}

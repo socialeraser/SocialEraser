@@ -1,0 +1,10 @@
+{
+  "ext_name": {
+    "message": "TikTok Eraser",
+    "description": "Extension name"
+  },
+  "ext_description": {
+    "message": "TikTok 一括削除ツール",
+    "description": "Extension description"
+  }
+}

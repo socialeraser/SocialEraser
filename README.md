@@ -199,7 +199,7 @@ SocialEraser/                                  # monorepo root
 │   │   │   └── icons/                         # Extension icons (16/48/128)
 │   │   ├── capacitor.config.json
 │   │   └── package.json
-│   └── tiktok-project/                        # TikTok Eraser (planned)
+│   └── tiktok-project/                        # TikTok Eraser (MVP ready, pending CWS submission)
 ├── scripts/                                   # Build + verification (Node.js)
 │   ├── run-verify.js                          # Unified entry for `npm test`
 │   ├── check-schema.js                        # DEFAULT_SELECTORS ↔ config/*.json alignment

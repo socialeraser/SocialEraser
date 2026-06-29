@@ -189,6 +189,17 @@
       color: #e4e4e7;
       background: #3f3f46;
     }
+    /* 2026-XX-XX 新增：暂停状态下停止 .spinner 旋转，并给个明显的灰背景区分 done
+       之前只设 .done 会把未完成的 type 误标记为完成；.paused 专门表示"中途暂停" */
+    .option-item.paused .option-count {
+      color: #a1a1aa;
+      background: #3f3f46;
+    }
+    .option-item.paused .option-count .spinner {
+      animation: none;
+      border-top-color: currentColor;
+      opacity: 0.4;
+    }
     .option-count .spinner {
       display: inline-block;
       width: 10px;
@@ -261,6 +272,14 @@
       border-top-color: transparent;
       border-radius: 50%;
       animation: option-spin 0.8s linear infinite;
+    }
+    /* 2026-XX-XX 新增：与 x-project 对齐——Activity 状态（paused 类）下停止旋转
+       不加这条规则时，progress-spinner 即使被 JS 加 .paused class 仍继续转
+       用户反馈：刷新完成后 Activity 左边的 loading 图标应该停止转动 */
+    .progress-spinner.paused {
+      animation: none;
+      border-top-color: #FE2C55;
+      opacity: 0.5;
     }
     .progress-close {
       background: transparent;
@@ -406,8 +425,11 @@
     }
     .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
     .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-    .btn-danger { background: #dc2626; color: #fff; }
-    .btn-warning { background: #FE2C55; color: #0F0F0F; }
+    /* 2026-06-29 调整：Stop 用纯红 #ef4444 表达"破坏性操作"语义，与 Pause（品牌渐变）和 Start 拉开视觉距离
+       Pause 保留品牌渐变以匹配 Start 的"安全/继续"语义；Stop 走纯红通道以与 x-project btn-danger 风格对齐 */
+    .btn-warning { background: linear-gradient(135deg, #FE2C55, #25F4EE); color: #0F0F0F; }
+    .btn-danger { background: #ef4444; color: #fff; }
+    .btn-danger:hover { background: #dc2626; }
 
     .trust-badge {
       background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05));
@@ -597,6 +619,8 @@
         </div>
         <div class="progress-stats">
           <span data-i18n="processed">Processed</span>: <span id="progress-current" class="current">0</span>
+          <span>/</span>
+          <span id="progress-total">0</span>
         </div>
         <div id="log-area" class="log-area">
           <div class="log-entry info"><span class="log-time">--:--:--</span>Waiting for start...</div>

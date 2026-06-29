@@ -240,6 +240,17 @@
     return m ? m[1] : null;
   }
 
+  // 检测当前是否在 TikTok 站点（域名命中 patterns）
+  // 用于 getStatus 返回 isTikTok 字段（sidepanel 据此决定显示登录区还是选区）
+  function isTargetWebsite() {
+    var patterns = (window.TikTokEraserConfig && window.TikTokEraserConfig.getWebsitePatterns) ?
+      window.TikTokEraserConfig.getWebsitePatterns() : ['tiktok.com', 'www.tiktok.com'];
+    var host = location.hostname || '';
+    return patterns.some(function(p) {
+      return host === p || host.endsWith('.' + p);
+    });
+  }
+
   // 初始化 injector
   async function initInjector(remoteConfig) {
     initTikTokEraserConfig(remoteConfig);
@@ -255,8 +266,41 @@
     return ij;
   }
 
+  // 综合状态查询 —— 一次返回所有 sidepanel 需要的状态
+  // 返回: { isTikTok, isLoggedIn, isLoginPage, pageType, url }
+  //   sidepanel 启动时 + 轮询都调这个
+  //   关键：必须在 handleMessage 里实现，否则 sidepanel 拿到 undefined → checkingLogin 卡死
+  //   （修复前 bug：sidepanel.js:474 发送 {type:'getStatus'}，content.js 没有这个 case，
+  //    sendResponse 永远不被调用 → 死循环在 "Checking login status..."）
+  function checkTikTokStatus() {
+    var isT = isTargetWebsite();
+    var isLoggedIn = isT ? getEffectiveLoginStatus() : false;
+    var isLoginPage = isT ? checkIsLoginPage() : false;
+    var pageType = isT ? detectPageType() : null;
+
+    return {
+      isTikTok: isT,
+      isLoggedIn: isLoggedIn,
+      isLoginPage: isLoginPage,
+      pageType: pageType,
+      url: window.location.href
+    };
+  }
+
   // 处理 sidepanel 发来的命令
   function handleMessage(message, sender, sendResponse) {
+    // 过滤：只处理 target=content 的消息（与 x-project 一致，避免误处理 background 自己的消息）
+    if (message.target && message.target !== 'content') return false;
+
+    if (message.type === 'getStatus') {
+      // 综合状态查询（sidepanel 启动时 + 轮询用）
+      sendResponse(checkTikTokStatus());
+      return false;
+    }
+    if (message.type === 'ping') {
+      sendResponse({ pong: true });
+      return false;
+    }
     if (message.type === 'startCleanup') {
       if (!injector) {
         sendResponse({ error: 'Injector not ready' });
