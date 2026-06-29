@@ -981,9 +981,17 @@
       return true;
     }
 
-    // 删 Reposts（TikTok Studio 'Posted' tab 跑，识别 repost 标记 → 走 deleteVideo 删除）
-    // 重要提示：TikTok Web 不支持"撤销 repost"独立操作，删除 repost = 删除该视频
-    // 在 Studio 中 repost 与原创视频外观相同，需用 socialContext / 标题附近文字识别
+    // 删 Reposts（profile Reposts tab 跑，每个 repost card 跳到原视频页 → share → Remove repost）
+    // 流程（实测 @social_eraser 2026-06-29）:
+    //   1. 跳转 /@user
+    //   2. 点 Reposts tab（[data-e2e="repost-tab"]）
+    //   3. 等 [data-e2e="user-repost-item"] 渲染
+    //   4. 取 card 内 a[href*="/video/"] 的原视频 URL
+    //   5. window.location.href = 原视频 URL
+    //   6. 等右侧 [class*="SectionActionBarContainer"] 出现（5 个 button: follow/like/comment/save/share）
+    //   7. 点 share（5th button, idx=4）
+    //   8. 等 share dialog → 点 [data-e2e="share-repost"]（"Remove repost"）
+    //   9. 关闭 dialog → 跳回 /@user → 重新收集剩余 reposts
     async processReposts(maxItems) {
       if (maxItems === undefined) maxItems = 50;
       var self = this;
@@ -993,93 +1001,72 @@
       this.log(t('repostWarning'));
       this.log(t('startingRepostsCleanup'));
 
-      // 步骤 1: 跳转 TikTok Studio (reposts 也只能在 Studio 里删除)
-      var navigated = await this._ensureOnTikTokStudio('posted');
-      if (!navigated) {
-        this.error('processReposts: failed to navigate to TikTok Studio');
+      var username = this._currentUsername;
+      if (!username) {
+        this.error('processReposts: no username in config, cannot navigate to profile');
         return;
-      }
-
-      // 步骤 2: 等 row 容器渲染
-      var rowSel = (self.config.common && Array.isArray(self.config.common.videoRowContainer))
-        ? self.config.common.videoRowContainer[0] : 'div[data-tt="components_RowLayout_FlexRow"]';
-      var actionSel = (self.config.common && Array.isArray(self.config.common.videoActionButton))
-        ? self.config.common.videoActionButton[0] : 'button[data-tt="components_ActionCell_Clickable"]';
-      var rowFilterSel = (self.config.common && self.config.common.videoRowFilter)
-        ? self.config.common.videoRowFilter : actionSel;
-
-      await this.waitForContentStable([rowSel, actionSel]);
-      this._diagnosePage();
-
-      function collectRepostRows() {
-        var rows = self.findElements(rowSel);
-        var out = [];
-        var seen = new Set();
-        for (var i = 0; i < rows.length; i++) {
-          var r = rows[i];
-          if (seen.has(r)) continue;
-          var action = r.querySelector(rowFilterSel);
-          if (!action) continue;
-          if (!r.querySelector('[data-tt="components_PostInfoCell_Container"]')) continue;
-          if (!self._isStudioRepost(r)) continue;
-          seen.add(r);
-          out.push({ row: r, action: action });
-        }
-        if (out.length === 0) {
-          self._logPageState({ rowSel: rowSel, repostKeywords: self._i18n.repostKeywords }, '[reposts]');
-        }
-        return out;
       }
 
       let emptyScrolls = 0;
       var lastProgressTime = Date.now();
-      var STUCK_TIMEOUT_MS = 30000;
+      var STUCK_TIMEOUT_MS = 60000;
       while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
         if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) { this.log(t('cleanupStuck')); break; }
         if (this.isPaused) { await this.sleep(500); continue; }
 
-        var rows = collectRepostRows();
-        var pending = rows.filter(function(pair) {
-          var p = pair.action.dataset.socialEraserProcessed;
+        await this._ensureOnProfileRepostsTab(username);
+        await this.waitForContentStable(['[data-e2e="user-repost-item"]']);
+        this._diagnosePage();
+
+        var cards = this.findElements('[data-e2e="user-repost-item"]');
+        var pending = cards.filter(function(card) {
+          var p = card.dataset.socialEraserProcessed;
           return !p || (p !== 'true' && p !== 'skipped' && p !== 'failed');
         });
 
         if (pending.length === 0) {
           emptyScrolls++;
-          if (emptyScrolls > 3) { this.log(t('noMoreReposts')); break; }
+          if (emptyScrolls > 2) { this.log(t('noMoreReposts')); break; }
           var hasMore = await this.scrollToBottom();
           if (!hasMore) { this.log(t('endOfReposts')); break; }
           continue;
         }
         emptyScrolls = 0;
 
-        var pair = pending[0];
-        var row = pair.row;
-        var action = pair.action;
+        var card = pending[0];
+        var anchor = card.querySelector('a[href*="/video/"]');
+        if (!anchor) {
+          this.error('processReposts: no anchor in repost card, marking failed');
+          card.dataset.socialEraserProcessed = 'failed';
+          this.errorCount++;
+          continue;
+        }
+        var videoUrl = anchor.href;
 
         if (this.shouldFilter('reposts')) {
-          var meta = this.extractMeta(row, 'reposts');
+          var meta = this.extractMeta(card, 'reposts');
           if (!this.matchesFilter(meta, this.filters)) {
-            action.dataset.socialEraserProcessed = 'skipped';
-            await this.sleep(50); continue;
+            card.dataset.socialEraserProcessed = 'skipped';
+            await this.sleep(50);
+            continue;
           }
         }
 
         try {
-          var success = await this.deleteVideo(row);
+          var success = await this._removeRepostViaShareDialog(videoUrl);
           if (success) {
-            action.dataset.socialEraserProcessed = 'true';
+            card.dataset.socialEraserProcessed = 'true';
             this.processedCount++;
             lastProgressTime = Date.now();
             this.progress('Repost #' + this.processedCount);
             this.log(t('repostDeleted', {count: this.processedCount}));
           } else {
-            action.dataset.socialEraserProcessed = 'failed';
+            card.dataset.socialEraserProcessed = 'failed';
             this.error(t('repostDeleteFailed'));
             this.errorCount++;
           }
         } catch (e) {
-          action.dataset.socialEraserProcessed = 'failed';
+          card.dataset.socialEraserProcessed = 'failed';
           this.error('repost delete threw: ' + e.message);
           this.errorCount++;
         }
@@ -1089,24 +1076,100 @@
       if (this.processedCount === 0 && this.filters) this.log(t('noItemsMatched'));
     }
 
-    // 检测 Studio row 是否是 repost
-    // 策略: 在 socialContext / PostInfoCell 内查找 8 语言 repost 关键字
-    // 注：未实测 Studio 内 repost 的 DOM 标识，fallback 到全文搜索
-    _isStudioRepost(row) {
-      if (!row) return false;
-      var repostKw = (this._i18n && this._i18n.repostKeywords) || ['Repost'];
-      var scope = row.querySelector('[data-tt="components_PostInfoCell_Container"]') || row;
-      var socialContext = this.findElement(this.config.common && this.config.common.socialContext, scope);
-      var text = (socialContext ? socialContext.textContent : '') || '';
-      if (!text) {
-        text = scope.textContent || '';
+    // 跳转并切到 profile Reposts tab
+    async _ensureOnProfileRepostsTab(username) {
+      var path = '/@' + username;
+      if (location.pathname !== path) {
+        this.debug('[reposts] navigating to ' + path);
+        window.location.href = 'https://www.tiktok.com' + path;
+        return;
       }
-      var textLower = text.toLowerCase();
-      for (var i = 0; i < repostKw.length; i++) {
-        var kw = repostKw[i].toLowerCase();
-        if (kw && textLower.indexOf(kw) >= 0) return true;
+      var tab = document.querySelector('[data-e2e="repost-tab"]');
+      if (!tab) return;
+      if (tab.getAttribute('aria-selected') === 'true') return;
+      tab.click();
+    }
+
+    // 跳到原视频页 → share dialog → Remove repost
+    async _removeRepostViaShareDialog(videoUrl) {
+      this.debug('[removeRepost] navigating to ' + videoUrl);
+      window.location.href = videoUrl;
+
+      var actionBar = await this._waitForActionBar(1500);
+      if (!actionBar) {
+        this.error('_removeRepostViaShareDialog: action bar not found on video page');
+        return false;
       }
-      return false;
+
+      var shareBtn = this._findShareButton(actionBar);
+      if (!shareBtn) {
+        this.error('_removeRepostViaShareDialog: share button not found');
+        return false;
+      }
+      await this.safeClick(shareBtn, 0);
+
+      var removeBtn = await this.waitForElement('[data-e2e="share-repost"]', 300);
+      if (!removeBtn) {
+        // 该视频当前不是 reposted（已 removed / 别人原创）→ 视为成功
+        this.debug('_removeRepostViaShareDialog: no [data-e2e="share-repost"], assume already removed');
+        return true;
+      }
+      await this.safeClick(removeBtn, 0);
+
+      var removed = await this._waitForElementGone('[data-e2e="share-repost"]', 300);
+      if (!removed) {
+        this.error('_removeRepostViaShareDialog: share-repost element did not disappear');
+        return false;
+      }
+      this.debug('[removeRepost] success');
+      return true;
+    }
+
+    // 等右侧 [class*="SectionActionBarContainer"] 出现
+    async _waitForActionBar(maxFrames) {
+      if (maxFrames === undefined) maxFrames = 600;
+      var self = this;
+      return new Promise(function(resolve) {
+        var frame = 0;
+        function tick() {
+          var bar = document.querySelector('[class*="SectionActionBarContainer"]');
+          if (bar && bar.querySelectorAll('button').length >= 5) {
+            resolve(bar);
+            return;
+          }
+          if (frame++ >= maxFrames) { resolve(null); return; }
+          requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      });
+    }
+
+    // 找 action bar 内的 share 按钮（5 个 button 中第 5 个；path d 以 'M23.82 3.5' 开头为 share icon）
+    _findShareButton(actionBar) {
+      if (!actionBar) return null;
+      var btns = actionBar.querySelectorAll('button');
+      if (btns.length < 5) return null;
+      var candidate = btns[4];
+      var path = candidate.querySelector('svg path');
+      var d = path ? path.getAttribute('d') : '';
+      if (d && d.indexOf('M23.82 3.5') === 0) return candidate;
+      return candidate; // 兜底
+    }
+
+    // 等元素消失
+    async _waitForElementGone(selector, maxFrames) {
+      if (maxFrames === undefined) maxFrames = 300;
+      var self = this;
+      return new Promise(function(resolve) {
+        var frame = 0;
+        function tick() {
+          var el = self.findElement(selector);
+          if (!el || !el.isConnected) { resolve(true); return; }
+          if (frame++ >= maxFrames) { resolve(false); return; }
+          requestAnimationFrame(tick);
+        }
+        requestAnimationFrame(tick);
+      });
     }
 
     // 取消点赞（likes 标签页）

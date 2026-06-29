@@ -1358,6 +1358,18 @@
       'Repost',                    // es
       'Repost',                    // de
       'Repost'                     // fr
+    ],
+    // Share dialog 中的 "Remove repost" 按钮（[data-e2e="share-repost"] 容器内）
+    // 主路径靠 data-e2e="share-repost"（语言无关），text 仅作 fallback
+    removeRepostKeywords: [
+      'Remove repost',             // en
+      '移除转发',                  // zh-CN
+      'リポストを取り消す',        // ja
+      '리포스트 취소',              // ko
+      'Remover repost',            // pt
+      'Quitar repost',             // es
+      'Repost entfernen',          // de
+      'Annuler le repost'          // fr
     ]
   };
 

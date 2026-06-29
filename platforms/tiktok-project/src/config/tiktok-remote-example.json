@@ -224,6 +224,18 @@
       "cardMarker": [
         "[data-e2e='repost']",
         "[data-e2e='repost-card']"
+      ],
+      "repostTab": [
+        "[data-e2e='repost-tab']"
+      ],
+      "repostItem": [
+        "[data-e2e='user-repost-item']"
+      ],
+      "shareRepost": [
+        "[data-e2e='share-repost']"
+      ],
+      "actionBar": [
+        "[class*='SectionActionBarContainer']"
       ]
     },
     "i18n": {
@@ -276,9 +288,19 @@
         "Compartir",
         "Erneut veröffentlichen",
         "Republier"
+      ],
+      "removeRepostKeywords": [
+        "Remove repost",
+        "移除转发",
+        "リポストを取り消す",
+        "리포스트 취소",
+        "Remover repost",
+        "Quitar repost",
+        "Repost entfernen",
+        "Annuler le repost"
       ]
     }
   },
-  "updated": "2026-06-28",
+  "updated": "2026-06-29",
   "version": "1.0.0"
 }
