@@ -317,6 +317,30 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     return true;
   }
 
+  // 5b. 登录态 sticky 持久化（修复 forcePageLoad 跳页后侧栏闪 "Not logged in"）
+  //   与 x-project 对齐：cachedIsLoggedIn 是 content.js IIFE 闭包变量，
+  //   完整页面重载被销毁 → 通过 chrome.storage.session.loginStatus 跨进程恢复。
+  if (message.target === 'readLoginStatus') {
+    chrome.storage.session.get('loginStatus').then(function(result) {
+      sendResponse({ status: (result && result.loginStatus) ? result.loginStatus : null });
+    });
+    return true;
+  }
+
+  if (message.target === 'writeLoginStatus') {
+    chrome.storage.session.set({ loginStatus: message.status }).then(function() {
+      sendResponse({ success: true });
+    });
+    return true;
+  }
+
+  if (message.target === 'clearLoginStatus') {
+    chrome.storage.session.remove('loginStatus').then(function() {
+      sendResponse({ success: true });
+    });
+    return true;
+  }
+
   // 6. Content script 跳页
   if (message.target === 'forceNavigation') {
     getTikTokTab().then(function(tab) {

@@ -52,10 +52,39 @@
   const RESERVED_PATHS = ['upload', 'messages', 'notifications', 'discover', 'live', 'search', 'settings', 'login', 'signup', 'explore', 'following', 'foryou'];
 
   // 登录态 sticky 缓存：
-  //   null = 尚未检测
-  //   true = 已确认登录
-  //   false = 已确认未登录
+  // - null = 尚未检测（首次启动 / hydrate 还没回来）
+  // - true = 已确认登录
+  // - false = 已确认未登录
+  //
+  // 设计原则（2026-07-02 与 x-project 对齐）：
+  //   1. 首次 hydrate 完成后，正向检测（checkLoginStatus）只跑一次，结果锁死
+  //   2. 之后唯一能翻转状态的信号：用户在登录页 / 主动登出（isLoggedOut 严格判断）
+  //   3. 不再在每次轮询时跑正向检测 —— DOM 偶发抓空会让状态错误翻转
   let cachedIsLoggedIn = null;
+
+  // 把登录态持久化到 session storage（fire-and-forget）。
+  // 只在 sticky 状态真正翻转时调用，避免每 3s 轮询都打 IPC。
+  // status: true = logged_in / false = logged_out
+  function persistLoginStatus(status) {
+    var value = status === true ? 'logged_in' : 'logged_out';
+    chrome.runtime.sendMessage({
+      target: 'writeLoginStatus',
+      status: value
+    }).catch(function() { /* background 不可用：忽略 */ });
+  }
+
+  // 启动时从 session storage 恢复 sticky 状态（fire-and-forget）。
+  // hydrate 完成前 cachedIsLoggedIn 仍是 null，hydrate 后用真值。
+  function hydrateLoginStatus() {
+    chrome.runtime.sendMessage({ target: 'readLoginStatus' }).then(function(resp) {
+      if (!resp || !resp.status) return;
+      if (resp.status === 'logged_in' || resp.status === 'logged_out') {
+        cachedIsLoggedIn = (resp.status === 'logged_in');
+        console.log('[TikTok Eraser] Hydrated login status from session storage:', resp.status);
+      }
+    }).catch(function() { /* background 不可用时跳过 */ });
+  }
+  hydrateLoginStatus();
 
   // 直接从 storage 读远程配置
   async function getRemoteConfig() {
@@ -201,10 +230,34 @@
     };
   }
 
-  // 检测登录页：URL 进入 /login 路径
-  function checkIsLoginPage() {
-    var pathname = location.pathname || '';
-    return pathname.indexOf('/login') >= 0 || pathname.indexOf('/signup') >= 0;
+  // 严格判断「用户在登录页 / 已登出」
+  // 2026-07-02 替换原 checkIsLoginPage()（与 x-project 对齐）：
+  //   唯一翻转 true→false 的信号，不跑模糊 innerText 匹配。
+  //   只查两类硬信号：
+  //     1. URL 路径明确是登录/登出页
+  //     2. 登录表单 input 是页面主区域可见元素
+  function isLoggedOut() {
+    var path = window.location.pathname.toLowerCase();
+    // 1. URL 是 TikTok 的登录/登出相关路径
+    if (path === '/login'
+        || path === '/signup'
+        || path === '/passport/web/login'
+        || path === '/passport/web/signup') {
+      return true;
+    }
+
+    // 2. 登录表单 input 是页面主区域可见元素
+    var loginInputs = document.querySelectorAll(
+      'input[autocomplete="username"], input[name="username"], input[name="password"]'
+    );
+    for (var i = 0; i < loginInputs.length; i++) {
+      var el = loginInputs[i];
+      if (!el.offsetParent) continue;
+      if (el.closest('main, [role="main"]')) {
+        return true;
+      }
+    }
+    return false;
   }
 
   // 等待指定元素出现（仿 X 平台的 waitForArticles，使用 MutationObserver + idle count）
@@ -285,14 +338,40 @@
     return false;
   }
 
-  // Sticky 登录态获取
+  // Sticky 状态机（2026-07-02 与 x-project 对齐）：
+  //   1. cachedIsLoggedIn === null（首次启动 / hydrate 还没回来）：
+  //      跑一次 checkLoginStatus() 正向检测，命中锁 true / persist
+  //   2. cachedIsLoggedIn 已有值（true 或 false）：
+  //      唯一能翻转的信号是 isLoggedOut() 命中
+  //      检测到登出 → flip 到 false / persist
+  //   3. 不再每次轮询跑正向检测
   function getEffectiveLoginStatus() {
-    if (cachedIsLoggedIn === true) {
-      if (checkIsLoginPage()) { cachedIsLoggedIn = false; return false; }
+    if (!isTargetWebsite()) return false;
+
+    // 唯一翻转信号：用户在登录页 / 已登出
+    if (isLoggedOut()) {
+      if (cachedIsLoggedIn !== false) {
+        cachedIsLoggedIn = false;
+        persistLoginStatus(false);
+        console.log('[TikTok Eraser] Logout detected, flipping to false');
+      }
+      return false;
+    }
+
+    // 已确认过状态：直接返回缓存值（不重检）
+    if (cachedIsLoggedIn !== null) {
+      return cachedIsLoggedIn;
+    }
+
+    // 首次检测：跑一次正向 selector 检测
+    if (checkLoginStatus()) {
+      cachedIsLoggedIn = true;
+      persistLoginStatus(true);
+      console.log('[TikTok Eraser] Login confirmed (sticky cached)');
       return true;
     }
-    if (checkIsLoginPage()) { cachedIsLoggedIn = false; return false; }
-    if (checkLoginStatus()) { cachedIsLoggedIn = true; return true; }
+
+    // 还没确认：返回 null 让侧栏显示"检测中"
     return null;
   }
 
@@ -356,7 +435,7 @@
   function checkTikTokStatus() {
     var isT = isTargetWebsite();
     var isLoggedIn = isT ? getEffectiveLoginStatus() : false;
-    var isLoginPage = isT ? checkIsLoginPage() : false;
+    var isLoginPage = isT ? isLoggedOut() : false;
     var pageType = isT ? detectPageType() : null;
 
     return {

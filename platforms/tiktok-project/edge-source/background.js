@@ -258,6 +258,28 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     sendResponse({ success: true });
     return true;
   }
+
+  // 6. 登录态 sticky 持久化（与 chrome-source + x-project 对齐）
+  if (message.target === 'readLoginStatus') {
+    chrome.storage.session.get('loginStatus').then(function(result) {
+      sendResponse({ status: (result && result.loginStatus) ? result.loginStatus : null });
+    });
+    return true;
+  }
+
+  if (message.target === 'writeLoginStatus') {
+    chrome.storage.session.set({ loginStatus: message.status }).then(function() {
+      sendResponse({ success: true });
+    });
+    return true;
+  }
+
+  if (message.target === 'clearLoginStatus') {
+    chrome.storage.session.remove('loginStatus').then(function() {
+      sendResponse({ success: true });
+    });
+    return true;
+  }
 });
 
 function handleBackgroundMessage(message, sendResponse) {
