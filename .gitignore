@@ -10,8 +10,12 @@ www/
 # Capacitor webDir for each platform
 /platforms/*/www/
 # Capacitor native assets (synced from platforms/*/www/)
+#   注意：iOS 项目结构有 `ios/App/App/public`（双 App，新版 Capacitor 3+）
+#   和 `ios/App/public`（单 App，老版本）两种，gitignore 的 * 不跨 /，
+#   所以需要两个模式分别覆盖
 /platforms/*/android/app/src/main/assets/public/
 /platforms/*/ios/App/public/
+/platforms/*/ios/App/App/public/
 # Chrome and Edge browser extensions are 100% build output
 # (synced from platforms/*/src + scripts + chrome-source/; chrome-source
 # also produces extensions/edge-x/ via BROWSER_ALIASES in sync-shared.js).
