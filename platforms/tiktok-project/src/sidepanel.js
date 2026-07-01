@@ -171,7 +171,7 @@
     updateLangFlag();
     applyI18n();
     bindEvents();
-    // Videos + Reposts 默认未 checked → backup tip 默认收起
+    // Videos 默认未 checked → backup tip 默认收起
     syncBackupTip();
     checkTikTokTabStatus();
 
@@ -198,10 +198,10 @@
     }
   }
 
-  // 同步 Videos + Reposts 备份提示的展开状态
+  // 同步 Videos 备份提示的展开状态
   // 勾上 → 显示黄色警告条；取消 → 收起
   function syncBackupTip() {
-    ['opt-videos', 'opt-reposts'].forEach(function(id) {
+    ['opt-videos'].forEach(function(id) {
       var cb = document.getElementById(id);
       if (!cb) return;
       var item = cb.closest('.option-item');
@@ -231,12 +231,12 @@
       labels[i].textContent = t(key);
     }
 
-    // data-i18n-html: 含 <a> 的富文本（videosBackupTip / repostsBackupTip）
+    // data-i18n-html: 含 <a> 的富文本（videosBackupTip）
     var htmlLabels = document.querySelectorAll('[data-i18n-html]');
     for (var m = 0; m < htmlLabels.length; m++) {
       var hkey = htmlLabels[m].getAttribute('data-i18n-html');
       var linkHTML =
-        '<a href="https://www.tiktok.com/settings/privacy-and-safety/download-your-data" ' +
+        '<a href="https://www.tiktok.com/setting/download-your-data" ' +
         'target="_blank" rel="noopener noreferrer">' + t('archiveLinkText') + '</a>';
       htmlLabels[m].innerHTML = t(hkey, { link: linkHTML });
     }
@@ -296,11 +296,9 @@
       };
     }
 
-    // Videos + Reposts 备份提示联动
-    ['opt-videos', 'opt-reposts'].forEach(function(id) {
-      var cb = document.getElementById(id);
-      if (cb) cb.addEventListener('change', syncBackupTip);
-    });
+    // Videos 备份提示联动
+    var videosCb = document.getElementById('opt-videos');
+    if (videosCb) videosCb.addEventListener('change', syncBackupTip);
 
     // 点击其他地方关闭语言下拉
     document.addEventListener('click', function(e) {
@@ -311,7 +309,7 @@
 
     chrome.runtime.onMessage.addListener(function(msg) {
       if (msg.type === 'cleanupProgress') {
-        var newCount = msg.data.count;
+        var newCount = parseInt(msg.processed, 10) || 0;
         var baseTotal = state.typeStartCumulative || 0;
         var prevTotal = state.processedItems || 0;
         state.processedItems = baseTotal + newCount;
@@ -328,11 +326,11 @@
           setOptionCount(state.currentType, newCount);
         }
       } else if (msg.type === 'cleanupLog') {
-        addLog(msg.data.message, msg.data.level);
+        addLog(msg.message, msg.level);
       } else if (msg.type === 'cleanupComplete') {
         onCleanupComplete();
       } else if (msg.type === 'cleanupError') {
-        addLog(msg.data.message, 'error');
+        addLog(msg.message, 'error');
       } else if (msg.type === 'cleanupPaused') {
         onPaused();
       } else if (msg.type === 'cleanupResumed') {
@@ -342,22 +340,20 @@
       } else if (msg.type === 'cleanupAborted') {
         onStopped();
       } else if (msg.type === 'cleanupTypeStart') {
-        state.currentType = msg.data.type;
+        state.currentType = msg.itemType;
         state.typeStartCumulative = state.processedItems;
-        setOptionState(msg.data.type, 'processing');
+        setOptionState(msg.itemType, 'processing');
       } else if (msg.type === 'cleanupTypeComplete') {
         state.currentType = null;
-        setOptionState(msg.data.type, 'done', msg.data.processed);
+        setOptionState(msg.itemType, 'done', msg.processed);
       } else if (msg.type === 'statusUpdate') {
-        if (msg.data) {
-          if (typeof msg.data.isTikTok === 'boolean' && msg.data.isTikTok !== state.isTikTok) {
-            state.isTikTok = msg.data.isTikTok;
-          }
-          if (typeof msg.data.isLoggedIn === 'boolean' && msg.data.isLoggedIn !== state.isLoggedIn) {
-            state.isLoggedIn = msg.data.isLoggedIn;
-            state.checkingLogin = false;
-            updateUI();
-          }
+        if (typeof msg.isTikTok === 'boolean' && msg.isTikTok !== state.isTikTok) {
+          state.isTikTok = msg.isTikTok;
+        }
+        if (typeof msg.isLoggedIn === 'boolean' && msg.isLoggedIn !== state.isLoggedIn) {
+          state.isLoggedIn = msg.isLoggedIn;
+          state.checkingLogin = false;
+          updateUI();
         }
       }
     });

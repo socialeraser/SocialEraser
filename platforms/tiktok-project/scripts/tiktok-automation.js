@@ -1,53 +1,7 @@
-// TikTok Eraser Injector
-// 健壮的 DOM 操作引擎，支持远程配置选择器
-//
-// 与 x-automation.js 的关系：
-//   - 继承所有通用 helper（findElement/findClosest/safeClick/scrollToBottom/waitForElement/waitForContentStable/waitForMenuItemByText/findButtonByText/extractMeta/matchesFilter）
-//   - 重写 type-specific 入口：5 个 process 方法（Videos/Reposts/Likes/Favorites/Following）
-//   - X 的 6 type 中删 4：tweets/replies/retweets/bookmarks（TikTok 无对应；reposts 走特殊处理）
-//   - TikTok 新增 1 type：Favorites
-//
-// 设计原则（与 x-project 一致）：
-//   - 字段级合并 selector（远程只覆盖显式提供的字段）
-//   - i18n 关键字从 window.TikTokEraseri18n.DEFAULT_I18N 读
-//   - 帧数驱动（不靠经验时间）
-//   - 3 种点击事件兜底（click / MouseEvent / PointerEvent）
-//
-// 视频 / Repost 删除流程（实测自 tiktok.com/tiktokstudio/content, 2026-06）：
-//   TikTok Web 在 /@user 主页不再暴露 video 删除入口（'more' 按钮已被隐藏）。
-//   唯一可走的删除路径是 TikTok Studio：
-//     1. processVideos 自动跳转 https://www.tiktok.com/tiktokstudio/content?status=posted
-//     2. 每行 = div[data-tt="components_RowLayout_FlexRow"]，内含 kebab 按钮
-//        button[data-tt="components_ActionCell_Clickable"]
-//     3. 点 kebab → 菜单 popover [data-tt="components_Popover_Container"]
-//        内含 3 项：Pin / Download / Delete（按 data-icon 区分：Pin / Download / Backspace）
-//     4. 点 Delete 菜单项 → 模态框 [data-tt="components_Modal_TUXModal"]
-//        内含 2 按钮：取消 (css-35jbna) / 删除 (css-y1m958)，都是 data-tt="components_Modal_TUXButton"
-//     5. 点 "删除" 确认 → row 从 DOM 消失
-//   兜底机制：
-//     - 找菜单 Delete 项：主路径走 [data-icon="Backspace"]（语言无关），找不到再走 8 语言 text 匹配
-//     - 找 confirm 按钮：主路径走 "删除" 8 语言 text 匹配（主按钮 class css-y1m958 vs cancel css-35jbna）
-
 (function() {
   'use strict';
 
-  // 8 语言 i18n 关键字（默认在 i18n.js，远程配置可覆盖）
-  // TikTok 把按钮 aria-label + 菜单文字都按用户显示语言翻译
-  // 例: "Cancel" → "取消" / "キャンセル" / "취소" / "Cancelar" / "Abbrechen" / "Annuler" / "Annulla"
-  // 远程配置 (default.json 的 selectors.i18n) 可整体覆盖这些数组 —— TikTok 改了翻译时改配置即可
-  const CANCEL_KEYWORDS_8LANG = (window.TikTokEraseri18n && window.TikTokEraseri18n.DEFAULT_I18N) ? window.TikTokEraseri18n.DEFAULT_I18N.cancelKeywords : ['Cancel'];
-  const CONFIRM_KEYWORDS_8LANG = (window.TikTokEraseri18n && window.TikTokEraseri18n.DEFAULT_I18N) ? window.TikTokEraseri18n.DEFAULT_I18N.confirmKeywords : ['Delete'];
-  const REPOST_KEYWORDS_8LANG = (window.TikTokEraseri18n && window.TikTokEraseri18n.DEFAULT_I18N) ? window.TikTokEraseri18n.DEFAULT_I18N.repostKeywords : ['Repost'];
-
   class TikTokInjector {
-    // TikTok Eraser 主引擎 —— 在 TikTok 页面上下文里跑（被 content.js 注入）
-    //
-    // 职责:
-    //   1. 接收 content.js 传过来的远程配置（setConfig），合并 i18n 关键字
-    //   2. 5 个入口方法: processVideos / processReposts / processLikes / processFavorites / processFollowing
-    //   3. 提供 DOM 操作 helper
-    //   4. 提供 8 语言关键字查找 helper
-    //   5. 提供过滤器: shouldFilter / extractMeta / matchesFilter
     constructor() {
       this.config = null;
       this.isRunning = false;
@@ -57,6 +11,9 @@
       this.maxErrors = 10;
       this.filters = null;
       this._dateMissingWarned = new Set();
+      this._currentUsername = null;
+      this._deletedRepostUrls = [];
+      this._deletedLikesUrls = [];
       this.onProgress = null;
       this.onLog = null;
       this.onComplete = null;
@@ -65,8 +22,6 @@
       this.onTypeComplete = null;
     }
 
-    // 配置入口：字段级合并 selector（远程只覆盖显式提供的字段）
-    // 浅拷贝（3 层）：防止 processXxx 写入 merged 污染 source config
     setConfig(config) {
       var merged = {};
       if (config && config.selectors && typeof config.selectors === 'object') {
@@ -94,9 +49,7 @@
         }
       }
       this.config = merged;
-      this._currentUsername = (merged.common && merged.common.userInfo && merged.common.userInfo.username) || null;
 
-      // 合并 i18n 8 语言关键字数组
       var DEFAULT_I18N_REF = (window.TikTokEraseri18n && window.TikTokEraseri18n.DEFAULT_I18N) || {};
       var i18nRemote = (config && config.selectors && config.selectors.i18n) || {};
       this._i18n = {};
@@ -109,16 +62,62 @@
       }
     }
 
+    setCurrentUsername(username) {
+      this._currentUsername = (username && typeof username === 'string') ? username : null;
+    }
+
+    async _loadDeletedRepostUrls() {
+      try {
+        var resp = await chrome.runtime.sendMessage({ target: 'readDeletedRepostUrls' });
+        if (resp && Array.isArray(resp.urls)) {
+          this._deletedRepostUrls = resp.urls.slice();
+          this.debug('[TikTok Eraser] Loaded ' + this._deletedRepostUrls.length + ' deleted repost URLs');
+        }
+      } catch (e) {}
+    }
+
+    async _saveDeletedRepostUrls() {
+      try {
+        await chrome.runtime.sendMessage({
+          target: 'writeDeletedRepostUrls',
+          urls: this._deletedRepostUrls
+        });
+      } catch (e) {}
+    }
+
+    async _loadDeletedLikesUrls() {
+      try {
+        var resp = await chrome.runtime.sendMessage({ target: 'readDeletedLikesUrls' });
+        if (resp && Array.isArray(resp.urls)) {
+          this._deletedLikesUrls = resp.urls.slice();
+          this.debug('[TikTok Eraser] Loaded ' + this._deletedLikesUrls.length + ' deleted likes URLs');
+        }
+      } catch (e) {}
+    }
+
+    async _saveDeletedLikesUrls() {
+      try {
+        await chrome.runtime.sendMessage({
+          target: 'writeDeletedLikesUrls',
+          urls: this._deletedLikesUrls
+        });
+      } catch (e) {}
+    }
+
     findElement(selectors, context) {
       if (!selectors) return null;
       if (!context) context = document;
+
       const selectorList = Array.isArray(selectors) ? selectors : [selectors];
+
       for (let i = 0; i < selectorList.length; i++) {
         const selector = selectorList[i];
         if (typeof selector === 'string') {
           try {
             const element = context.querySelector(selector);
-            if (element) return element;
+            if (element) {
+              return element;
+            }
           } catch (e) {}
         }
       }
@@ -143,8 +142,10 @@
     findElements(selectors, context) {
       if (!selectors) return [];
       if (!context) context = document;
+
       const results = [];
       const selectorList = Array.isArray(selectors) ? selectors : [selectors];
+
       for (let i = 0; i < selectorList.length; i++) {
         const selector = selectorList[i];
         if (typeof selector === 'string') {
@@ -179,20 +180,11 @@
         });
 
         const rect = element.getBoundingClientRect();
-        if (rect.width === 0 || rect.height === 0) return false;
+        if (rect.width === 0 || rect.height === 0) {
+          return false;
+        }
 
-        // TikTok 反自动化检测比 X 严：3 种事件兜底（与 x 一致）
         try { element.click(); } catch (e) {}
-        try {
-          const evt = new MouseEvent('click', { bubbles: true, cancelable: true, view: window, button: 0 });
-          element.dispatchEvent(evt);
-        } catch (e) {}
-        try {
-          const evt = new PointerEvent('pointerdown', { bubbles: true, cancelable: true });
-          element.dispatchEvent(evt);
-          const evt2 = new PointerEvent('pointerup', { bubbles: true, cancelable: true });
-          element.dispatchEvent(evt2);
-        } catch (e) {}
 
         if (delayAfter > 0) {
           await this.sleep(delayAfter);
@@ -205,21 +197,16 @@
     }
 
     async scrollToBottom() {
-      // TikTok 2026 同样用 IntersectionObserver 懒加载
-      // 沿用 x-project 的 MO + RAF 事件驱动设计
       const MAX_FRAMES = 300;
       const STABLE_FRAMES = 30;
-      const SCROLL_RETRY_FRAMES = 5;
-      const self = this;
 
       function getContainerSelector() {
-        // TikTok video card 容器候选（实测后可能需调整）
-        if (document.querySelectorAll('[data-e2e="user-post-item"]').length > 0) return '[data-e2e="user-post-item"]';
-        if (document.querySelectorAll('[data-e2e="user-liked-item"]').length > 0) return '[data-e2e="user-liked-item"]';
-        if (document.querySelectorAll('[data-e2e="user-favorite-item"]').length > 0) return '[data-e2e="user-favorite-item"]';
-        if (document.querySelectorAll('[data-e2e="user-following-item"]').length > 0) return '[data-e2e="user-following-item"]';
         if (document.querySelectorAll('article').length > 0) return 'article';
-        if (document.querySelectorAll("[data-testid='cellInnerDiv']").length > 0) return "[data-testid='cellInnerDiv']";
+        if (document.querySelectorAll("[data-e2e='user-post-item']").length > 0) return "[data-e2e='user-post-item']";
+        if (document.querySelectorAll("[data-e2e='user-repost-item']").length > 0) return "[data-e2e='user-repost-item']";
+        if (document.querySelectorAll("[data-e2e='user-liked-item']").length > 0) return "[data-e2e='user-liked-item']";
+        if (document.querySelectorAll("[data-e2e='user-favorite-item']").length > 0) return "[data-e2e='user-favorite-item']";
+        if (document.querySelectorAll("[data-e2e='user-following-item']").length > 0) return "[data-e2e='user-following-item']";
         return null;
       }
 
@@ -237,25 +224,31 @@
         }
       }
 
-      const self2 = self;
+      const self = this;
       return new Promise(function(resolve) {
-        const start = Date.now();
         let totalFrames = 0;
         let stableFrames = 0;
-        let lastContainerCount = containerSel ? document.querySelectorAll(containerSel).length : 0;
+        let lastContainerCount = containerSel
+          ? document.querySelectorAll(containerSel).length
+          : 0;
         let initialContainerCount = lastContainerCount;
         let rafId;
         let loadedNewContent = false;
 
         function rafTick() {
           totalFrames++;
-          const currentCount = containerSel ? document.querySelectorAll(containerSel).length : 0;
+          const currentCount = containerSel
+            ? document.querySelectorAll(containerSel).length
+            : 0;
 
           if (currentCount === lastContainerCount) {
             stableFrames++;
             if (stableFrames >= STABLE_FRAMES) {
+              self.debug('scrollToBottom: stable ' + STABLE_FRAMES + ' frames, containers ' + initialContainerCount + '->' + currentCount);
               cancelAnimationFrame(rafId);
-              if (loadedNewContent) window.scrollTo(0, 0);
+              if (loadedNewContent) {
+                window.scrollTo(0, 0);
+              }
               resolve(currentCount > initialContainerCount);
               return;
             }
@@ -273,8 +266,11 @@
           }
 
           if (totalFrames >= MAX_FRAMES) {
+            self.debug('scrollToBottom: max frames reached, containers ' + initialContainerCount + '->' + currentCount);
             cancelAnimationFrame(rafId);
-            if (loadedNewContent) window.scrollTo(0, 0);
+            if (loadedNewContent) {
+              window.scrollTo(0, 0);
+            }
             resolve(currentCount > initialContainerCount);
             return;
           }
@@ -288,6 +284,7 @@
     async waitForElement(selector, maxFrames) {
       if (maxFrames === undefined) maxFrames = 600;
       const self = this;
+
       return new Promise((resolve) => {
         let frameCount = 0;
         const check = () => {
@@ -301,14 +298,131 @@
       });
     }
 
-    async waitForContentStable(selectors) {
-      // 沿用 x-project 设计：帧数驱动 + 主动 scroll 触发 IntersectionObserver
+    async waitForMenuItemByText(keywords, timeout) {
+      if (!Array.isArray(keywords) || keywords.length === 0) return null;
+      const startTime = Date.now();
+      const startCount = this.findElements('[role="menuitem"]', document).length;
+      while (Date.now() - startTime < timeout) {
+        const items = this.findElements('[role="menuitem"]', document);
+        for (let i = 0; i < items.length; i++) {
+          const item = items[i];
+          const text = (item.textContent || '').trim();
+          const ariaLabel = (item.getAttribute('aria-label') || '').trim();
+          for (let j = 0; j < keywords.length; j++) {
+            const k = keywords[j];
+            if (text.indexOf(k) !== -1 || ariaLabel.indexOf(k) !== -1) {
+              return item;
+            }
+          }
+        }
+        await this.sleep(150);
+      }
+      const finalItems = this.findElements('[role="menuitem"]', document);
+      const snap = Array.prototype.map.call(finalItems, function(m) {
+        return {
+          text: (m.textContent || '').trim().substring(0, 40),
+          testid: m.getAttribute('data-testid'),
+          ariaLabel: (m.getAttribute('aria-label') || '').substring(0, 40)
+        };
+      });
+      this.debug('[waitForMenuItemByText] timeout ' + timeout + 'ms, keywords='
+        + JSON.stringify(keywords) + ', menuitemCount=' + finalItems.length
+        + ' (startCount=' + startCount + '), snapshot=' + JSON.stringify(snap));
+      return null;
+    }
+
+    async findButtonByText(keywords, timeout) {
+      if (!Array.isArray(keywords) || keywords.length === 0) return null;
+      const startTime = Date.now();
+      while (Date.now() - startTime < timeout) {
+        const buttons = this.findElements('[role="button"]', document);
+        for (let i = 0; i < buttons.length; i++) {
+          const text = (buttons[i].textContent || '').trim();
+          if (keywords.indexOf(text) !== -1) {
+            return buttons[i];
+          }
+        }
+        await this.sleep(150);
+      }
+      return null;
+    }
+
+    async sleep(ms) {
+      return new Promise(function(resolve) {
+        setTimeout(resolve, ms);
+      });
+    }
+
+    parseViewCount(text) {
+      if (!text) return null;
+      var t = (text + '').trim();
+      if (!t) return null;
+      var match = t.match(/^([\d.,]+)\s*([KMB]?)$/i);
+      if (!match) return null;
+      var num = parseFloat(match[1].replace(/,/g, ''));
+      var suffix = (match[2] || '').toUpperCase();
+      if (suffix === 'K') return Math.round(num * 1000);
+      if (suffix === 'M') return Math.round(num * 1000000);
+      if (suffix === 'B') return Math.round(num * 1000000000);
+      return Math.round(num);
+    }
+
+    async _activateProfileTab(tabName) {
+      // 优先用 data-e2e 匹配（MCP 实证，永不翻译，8 语言通用）：
+      //   'Liked' → [data-e2e='liked-tab']
+      //   'Reposts' → [data-e2e='repost-tab']
+      //   'Favorites' → [class*='PFavorite']（TikTok 组件 class，跨语言稳定）
+      //   'Following' → [data-e2e='following-tab']
+      const e2eMap = {
+        'Likes': '[data-e2e="liked-tab"]',
+        'Liked': '[data-e2e="liked-tab"]',
+        'Reposts': '[data-e2e="repost-tab"]',
+        'Repost': '[data-e2e="repost-tab"]',
+        'Videos': '[data-e2e="video-tab"]',
+        'Video': '[data-e2e="video-tab"]',
+        'Favorites': '[class*="PFavorite"]',
+        'Favorite': '[class*="PFavorite"]',
+        'Following': '[data-e2e="following-tab"]'
+      };
+      const e2eSelector = e2eMap[tabName];
+      if (e2eSelector) {
+        try {
+          const tab = document.querySelector(e2eSelector);
+          if (tab) {
+            const selected = tab.getAttribute('aria-selected');
+            if (selected !== 'true') {
+              await this.safeClick(tab, 500);
+            }
+            return true;
+          }
+        } catch (e) {}
+      }
+      // 兜底：text 匹配（注意：8 语言下 text 不同，严格相等会失败）
+      try {
+        const tabs = document.querySelectorAll('[role="tab"]');
+        for (let i = 0; i < tabs.length; i++) {
+          const text = (tabs[i].textContent || '').trim();
+          if (text === tabName) {
+            const selected = tabs[i].getAttribute('aria-selected');
+            if (selected !== 'true') {
+              await this.safeClick(tabs[i], 500);
+              return true;
+            }
+            break;
+          }
+        }
+      } catch (e) {}
+      return false;
+    }
+
+    waitForContentStable(selectors) {
       const STABLE_FRAMES = 30;
       const MAX_IDLE_FRAMES = 600;
       const MAX_SCROLL_TRIGGERS = 3;
       const SCROLL_STABLE_FRAMES = 30;
       const self = this;
       const selectorList = Array.isArray(selectors) ? selectors : [selectors];
+
       return new Promise(function(resolve) {
         const start = Date.now();
         let lastCount = -1;
@@ -321,7 +435,9 @@
         function getTotalCount() {
           let total = 0;
           for (let s = 0; s < selectorList.length; s++) {
-            total += document.querySelectorAll(selectorList[s]).length;
+            try {
+              total += document.querySelectorAll(selectorList[s]).length;
+            } catch (e) {}
           }
           return total;
         }
@@ -377,387 +493,157 @@
 
           rafId = requestAnimationFrame(rafTick);
         }
+
         rafId = requestAnimationFrame(rafTick);
         triggerScrollLoad();
       });
     }
 
-    // 删除一条 TikTok 视频（processVideos / processReposts 里调用）
-    // 流程（3 步点击 + 1 步等待）:
-    //   1. 点 row 上的 kebab 按钮 (button[data-tt="components_ActionCell_Clickable"])
-    //   2. 等 popover 出现，定位 Delete 菜单项（主路径: [data-icon="Backspace"]；兜底: 8 语言文字)
-    //   3. 点 Delete → 等 modal → 点 "删除" 确认（8 语言文字匹配；区分主/取消按钮 class）
-    // 返回: true = row 从 DOM 消失；false = 任一步骤失败
-    async deleteVideo(container) {
-      if (!container) return false;
-
-      var _delStartTime = Date.now();
-      var _delSig = (container.textContent || '').trim().substring(0, 50);
-      this.debug('[deleteVideo start] video="' + _delSig + '", isConnected=' + container.isConnected);
-
-      // 步骤 1: 定位 row 内的 kebab 按钮
-      var actionSelectors = (this.config.common && Array.isArray(this.config.common.videoActionButton))
-        ? this.config.common.videoActionButton
-        : (this.config.common && Array.isArray(this.config.common.videoMoreButtons))
-          ? this.config.common.videoMoreButtons : [];
-      if (actionSelectors.length === 0) {
-        this.error('deleteVideo: No videoActionButton / videoMoreButtons in config');
-        return false;
-      }
-      var kebab = this.findElement(actionSelectors, container);
-      if (!kebab) {
-        this.error('deleteVideo: kebab button not found in container');
-        return false;
-      }
-
-      // 点击前记录 row，用于后续判断是否消失
-      var rowEl = container;
-      var wasConnected = rowEl.isConnected;
-
-      await this.safeClick(kebab, 0);
-      this.debug('[deleteVideo] kebab clicked, elapsed=' + (Date.now() - _delStartTime) + 'ms');
-
-      // 步骤 2: 等 popover 出现，定位 Delete 菜单项
-      var deleteItem = await this._findDeleteMenuItem();
-      if (!deleteItem) {
-        this.error('deleteVideo: Delete menu item not found (Backspace icon + 8-lang text fallback failed)');
-        this.debug('[deleteVideo fail] video="' + _delSig + '", elapsed=' + (Date.now() - _delStartTime) + 'ms');
-        return false;
-      }
-      this.debug('[deleteVideo] delete menu item found, elapsed=' + (Date.now() - _delStartTime) + 'ms');
-
-      await this.safeClick(deleteItem, 0);
-
-      // 步骤 3: 等 modal 出现，点 "删除" 确认
-      var confirmBtn = await this._findStudioConfirmButton(5000);
-      if (!confirmBtn) {
-        this.error('deleteVideo: confirm button not found in modal (5s timeout)');
-        return false;
-      }
-      this.debug('[deleteVideo] confirm button found, elapsed=' + (Date.now() - _delStartTime) + 'ms');
-
-      await this.safeClick(confirmBtn, 0);
-
-      // 步骤 4: 等 row 从 DOM 消失（成功标志）
-      var disappeared = await this._waitForRowRemoved(rowEl, 6000);
-      if (!disappeared) {
-        this.error('deleteVideo: row still in DOM after 6s (confirm may have failed silently)');
-        return false;
-      }
-      this.debug('[deleteVideo] success, elapsed=' + (Date.now() - _delStartTime) + 'ms, wasConnected=' + wasConnected);
-      return true;
-    }
-
-    // 定位 TikTok Studio kebab 菜单中的 "Delete" 菜单项
-    // 主路径: [data-icon="Backspace"]（语言无关，TikTok 内部用 Backspace 图标表示删除）
-    // 兜底: 8 语言文字匹配（在 popover 中找含 "Delete"/"删除" 等关键字的 FlexRow）
-    async _findDeleteMenuItem() {
-      var self = this;
-      var MAX_FRAMES = 60;
-      var iconSelectors = (this.config.common && Array.isArray(this.config.common.videoMenuDeleteIcon))
-        ? this.config.common.videoMenuDeleteIcon : ['[data-icon="Backspace"]', '[data-testid="Backspace"]'];
-      var itemSel = (this.config.common && Array.isArray(this.config.common.videoMenuItemClickable))
-        ? this.config.common.videoMenuItemClickable[0] : 'div[data-tt="components_ActionCell_FlexRow"]';
-      var popSel = (this.config.common && Array.isArray(this.config.common.videoMenuPopover))
-        ? this.config.common.videoMenuPopover[0] : '[data-tt="components_Popover_Container"]';
-
-      return new Promise(function(resolve) {
-        var frame = 0;
-        function tick() {
-          // 主路径：找 popover 中 Backspace icon → 它的 FlexRow 父就是菜单项
-          var popovers = document.querySelectorAll(popSel);
-          for (var p = 0; p < popovers.length; p++) {
-            var popover = popovers[p];
-            // 只看可见 popover（offsetParent 非 null）
-            if (popover.offsetParent === null) continue;
-            // 找 Backspace icon
-            for (var s = 0; s < iconSelectors.length; s++) {
-              var icon = popover.querySelector(iconSelectors[s]);
-              if (!icon) continue;
-              var clickable = icon.closest(itemSel);
-              if (clickable) { resolve(clickable); return; }
-            }
-            // 兜底：8 语言文字匹配
-            var deleteKw = (self._i18n && self._i18n.deleteKeywords) || ['Delete'];
-            var items = popover.querySelectorAll(itemSel);
-            for (var i = 0; i < items.length; i++) {
-              var text = (items[i].textContent || '').trim();
-              for (var k = 0; k < deleteKw.length; k++) {
-                if (text === deleteKw[k] || text.indexOf(deleteKw[k]) >= 0) {
-                  resolve(items[i]);
-                  return;
-                }
-              }
-            }
+    _dismissOverlays() {
+      const dismissSelectors = (this.config.common && this.config.common.dismissOverlays) || [];
+      for (let i = 0; i < dismissSelectors.length; i++) {
+        try {
+          const overlay = document.querySelector(dismissSelectors[i]);
+          if (overlay) {
+            overlay.remove();
           }
-          if (frame++ >= MAX_FRAMES) { resolve(null); return; }
-          requestAnimationFrame(tick);
-        }
-        requestAnimationFrame(tick);
-      });
+        } catch (e) {}
+      }
     }
 
-    // 定位 TikTok Studio 删除 modal 中的 "删除/确认" 按钮
-    // 主路径: 找含 deleteKeywords 文字的 button[data-tt="components_Modal_TUXButton"]
-    // 兜底: 找 modal 内第 1 个 button（TikTok 模态框：取消 在右，删除 在左）
-    async _findStudioConfirmButton(maxFrames) {
-      if (maxFrames === undefined) maxFrames = 300;
-      var self = this;
-      var modalSel = (this.config.common && Array.isArray(this.config.common.videoConfirmModal))
-        ? this.config.common.videoConfirmModal : ['[data-tt="components_Modal_TUXModal"]'];
-      var btnSel = (this.config.common && Array.isArray(this.config.common.videoConfirmButton))
-        ? this.config.common.videoConfirmButton[0] : 'button[data-tt="components_Modal_TUXButton"]';
-
+    // 等待 list 重新加载 + 稳定（专门用于 videos 类型删除后）
+    // TikTok Studio 删除单条后会 fetch + re-render 整个 list，
+    // 期间 button 全部消失，loading skeleton 出现
+    // 用 action button 数量作为"list 真的加载完"的判定（比数 row container 更准）
+    // 三阶段：
+    //   ① appearing: count === 0 等出现
+    //   ② stable: count > 0 等 30 帧 stable
+    //   ③ confirming: 再 30 帧确认不消失（解决瞬态误判）
+    // 空状态快速检测：count === 0 持续 10 秒 → 视为 list 已清空，立即返回 false
+    //   （避免删完最后一个 video 后卡 30 秒超时；10 秒已覆盖慢网络场景）
+    // maxMs 默认 30 秒终极兜底
+    // 返回: true=list 真的稳定了, false=list 已清空或超时
+    async _waitForListReloaded(selectors, maxMs) {
+      if (!selectors) return true;
+      const selectorList = Array.isArray(selectors) ? selectors : [selectors];
+      const max = maxMs || 30000;
+      const start = Date.now();
+      const self = this;
+      const EMPTY_FRAMES = 600;  // 10 秒 @ 60fps
       return new Promise(function(resolve) {
-        var frame = 0;
-        function tick() {
-          for (var s = 0; s < modalSel.length; s++) {
+        let phase = 'appearing';
+        let stableFrameCount = 0;
+        let confirmFrameCount = 0;
+        let lastCount = 0;
+        let emptyFrameCount = 0;
+
+        function check() {
+          let total = 0;
+          for (let i = 0; i < selectorList.length; i++) {
             try {
-              var modals = document.querySelectorAll(modalSel[s]);
-              for (var m = 0; m < modals.length; m++) {
-                var modal = modals[m];
-                if (modal.offsetParent === null) continue;
-                var btns = modal.querySelectorAll(btnSel);
-                if (btns.length === 0) continue;
-                // 主路径：8 语言文字匹配 "Delete" / "删除" 等
-                var delKw = (self._i18n && self._i18n.deleteKeywords) || ['Delete'];
-                for (var b = 0; b < btns.length; b++) {
-                  var t = (btns[b].textContent || '').trim();
-                  for (var k = 0; k < delKw.length; k++) {
-                    if (t === delKw[k]) { resolve(btns[b]); return; }
-                  }
-                }
-                // 兜底：8 语言 cancelKeywords 排除后取第 1 个
-                var cancelKw = (self._i18n && self._i18n.cancelKeywords) || ['Cancel'];
-                for (var b2 = 0; b2 < btns.length; b2++) {
-                  var t2 = (btns[b2].textContent || '').trim();
-                  var isCancel = false;
-                  for (var ck = 0; ck < cancelKw.length; ck++) {
-                    if (t2 === cancelKw[ck]) { isCancel = true; break; }
-                  }
-                  if (!isCancel) { resolve(btns[b2]); return; }
-                }
-                // 终极兜底：取第 1 个
-                resolve(btns[0]);
-                return;
-              }
+              total += document.querySelectorAll(selectorList[i]).length;
             } catch (e) {}
           }
-          if (frame++ >= maxFrames) { resolve(null); return; }
-          requestAnimationFrame(tick);
-        }
-        requestAnimationFrame(tick);
-      });
-    }
 
-    // 等待 row 从 DOM 消失（删除成功的可靠标志）
-    async _waitForRowRemoved(rowEl, maxFrames) {
-      if (!rowEl) return true;
-      if (maxFrames === undefined) maxFrames = 300;
-      return new Promise(function(resolve) {
-        var frame = 0;
-        function tick() {
-          if (!rowEl.isConnected) { resolve(true); return; }
-          if (frame++ >= maxFrames) { resolve(false); return; }
-          requestAnimationFrame(tick);
-        }
-        requestAnimationFrame(tick);
-      });
-    }
+          // 空状态快速检测：连续 N 帧 count === 0 → list 真的空了
+          if (total === 0) {
+            emptyFrameCount++;
+            if (emptyFrameCount >= EMPTY_FRAMES && (Date.now() - start) > 2000) {
+              // 至少等 2 秒再判断 empty（避免刚删完还没开始 fetch 时误判）
+              self.debug('List reloaded to empty state, ending');
+              resolve(false);
+              return;
+            }
+          } else {
+            emptyFrameCount = 0;
+          }
 
-    // 通用 helper：等文本匹配任一关键字的 menuitem
-    async waitForMenuItemByText(keywords, timeout) {
-      if (!Array.isArray(keywords) || keywords.length === 0) return null;
-      const startTime = Date.now();
-      const startCount = this.findElements('[role="menuitem"]', document).length;
-      while (Date.now() - startTime < timeout) {
-        const items = this.findElements('[role="menuitem"]', document);
-        for (let i = 0; i < items.length; i++) {
-          const item = items[i];
-          const text = (item.textContent || '').trim();
-          const ariaLabel = (item.getAttribute('aria-label') || '').trim();
-          for (let j = 0; j < keywords.length; j++) {
-            const k = keywords[j];
-            if (text.indexOf(k) !== -1 || ariaLabel.indexOf(k) !== -1) {
-              return item;
+          if (phase === 'appearing') {
+            if (total > 0) {
+              lastCount = total;
+              stableFrameCount = 0;
+              phase = 'stable';
+            }
+          } else if (phase === 'stable') {
+            if (total !== lastCount || total === 0) {
+              phase = 'appearing';
+              lastCount = 0;
+            } else {
+              stableFrameCount++;
+              if (stableFrameCount >= 30) {
+                phase = 'confirming';
+                confirmFrameCount = 0;
+              }
+            }
+          } else if (phase === 'confirming') {
+            if (total !== lastCount || total === 0) {
+              phase = 'appearing';
+              lastCount = 0;
+              stableFrameCount = 0;
+              confirmFrameCount = 0;
+            } else {
+              confirmFrameCount++;
+              if (confirmFrameCount >= 30) {
+                self.debug('List reloaded: ' + total + ' buttons stable (1s)');
+                resolve(true);
+                return;
+              }
             }
           }
-        }
-        await this.sleep(150);
-      }
-      const finalItems = this.findElements('[role="menuitem"]', document);
-      const snap = Array.prototype.map.call(finalItems, function(m) {
-        return {
-          text: (m.textContent || '').trim().substring(0, 40),
-          testid: m.getAttribute('data-testid'),
-          ariaLabel: (m.getAttribute('aria-label') || '').substring(0, 40)
-        };
-      });
-      this.debug('[waitForMenuItemByText] timeout ' + timeout + 'ms, keywords='
-        + JSON.stringify(keywords) + ', menuitemCount=' + finalItems.length
-        + ' (startCount=' + startCount + '), snapshot=' + JSON.stringify(snap));
-      return null;
-    }
 
-    // 通用 helper：等文本匹配任一关键字的 button
-    async findButtonByText(keywords, timeout) {
-      if (!Array.isArray(keywords) || keywords.length === 0) return null;
-      const startTime = Date.now();
-      while (Date.now() - startTime < timeout) {
-        const buttons = this.findElements('[role="button"]', document);
-        for (let i = 0; i < buttons.length; i++) {
-          const text = (buttons[i].textContent || '').trim();
-          if (keywords.indexOf(text) !== -1) {
-            return buttons[i];
+          if (Date.now() - start >= max) {
+            self.debug('List reload timeout after ' + max + 'ms, last count=' + total);
+            resolve(total > 0);
+            return;
           }
+          requestAnimationFrame(check);
         }
-        await this.sleep(150);
-      }
-      return null;
+        check();
+      });
     }
 
-    // 取关（processFollowing 里调用）
-    // 流程（2 步点击）:
-    //   1. 点 cell 上的 unfollow 按钮（"Following" 绿色按钮）
-    //   2. confirm 弹窗点 confirmButton
-    async unfollowUser(container) {
-      if (!container) return false;
-
-      const selectors = this.config.following || {};
-      const btnSelectors = Array.isArray(selectors.unfollowButtons)
-        ? selectors.unfollowButtons
-        : (selectors.unfollowButton ? [selectors.unfollowButton] : []);
-
-      if (btnSelectors.length === 0) return false;
-
-      const unfollowButton = this.findElement(btnSelectors, container);
-      if (!unfollowButton) return false;
-
-      await this.safeClick(unfollowButton, 0);
-
-      const confirmSel = (selectors && selectors.confirmButton)
-        || (this.config.common && this.config.common.confirmButton && this.config.common.confirmButton[0]);
-
-      const confirmButton = await this.waitForElement(confirmSel, 600);
-      if (confirmButton) {
-        await this.safeClick(confirmButton, 500);
-      }
-
-      return true;
+    // 等待 selector 从 DOM 消失（反向 waitForElement）
+    // 用于删除后等 modal/toast 完全消失，避免残留状态污染下次 click
+    // maxMs: 超时（ms），超时后 resolve 不阻塞后续流程
+    _waitForElementGone(selectors, maxMs) {
+      if (!selectors) return Promise.resolve(true);
+      const selectorList = Array.isArray(selectors) ? selectors : [selectors];
+      const start = Date.now();
+      const self = this;
+      return new Promise(function(resolve) {
+        function check() {
+          let stillVisible = false;
+          for (let i = 0; i < selectorList.length; i++) {
+            try {
+              if (document.querySelector(selectorList[i])) { stillVisible = true; break; }
+            } catch (e) {}
+          }
+          if (!stillVisible) { resolve(true); return; }
+          if (Date.now() - start >= maxMs) { resolve(false); return; }
+          requestAnimationFrame(check);
+        }
+        check();
+      });
     }
 
-    // 5 个 type 启用日期+关键字过滤；viewCount 是 TikTok 特有
     shouldFilter(itemType) {
       if (!this.filters) return false;
-      return itemType === 'videos' || itemType === 'reposts'
-        || itemType === 'likes' || itemType === 'favorites'
-        || itemType === 'following';
+      return itemType === 'likes' || itemType === 'favorites' || itemType === 'following'
+        || itemType === 'videos' || itemType === 'reposts';
     }
 
-    async processItems(itemType, maxItems) {
-      if (maxItems === undefined) maxItems = 50;
-
-      var CONFIG_KEY_MAP = {
-        videos: 'common',
-        reposts: 'common',
-        likes: 'like',
-        favorites: 'favorite',
-        following: 'following'
-      };
-      var configKey = CONFIG_KEY_MAP[itemType] || itemType;
-
-      this._keywordLower = (this.filters && this.filters.keyword)
-        ? this.filters.keyword.toLowerCase() : '';
-
-      if (!this.isRunning) return;
-
-      const selectors = this.config[configKey];
-      if (!selectors) {
-        this.error('No selectors for ' + itemType);
-        return;
-      }
-
-      if (itemType === 'videos') { await this.processVideos(maxItems); return; }
-      if (itemType === 'reposts') { await this.processReposts(maxItems); return; }
-      if (itemType === 'likes') { await this.processLikes(maxItems); return; }
-      if (itemType === 'favorites') { await this.processFavorites(maxItems); return; }
-      if (itemType === 'following') { await this.processFollowing(maxItems); return; }
-
-      this.error('Unknown itemType: ' + itemType);
-    }
-
-    // 解析 TikTok Studio PublishStageLabel 日期文字
-    // 支持格式:
-    //   - 中文: '6月29日 14:13' / '6月29日'
-    //   - 英文: 'Jun 29, 2026' / 'Jun 29'
-    //   - ISO: '2026-06-29'
-    // 返回: 'YYYY-MM-DD' 或 null
-    parseStudioDateText(text) {
-      if (!text) return null;
-      var s = String(text).trim();
-      if (!s) return null;
-
-      // ISO YYYY-MM-DD
-      var iso = s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
-      if (iso) {
-        return iso[1] + '-' + this._pad2(iso[2]) + '-' + this._pad2(iso[3]);
-      }
-
-      // 中文 '6月29日 14:13' 或 '6月29日'
-      var cn = s.match(/(\d{1,2})\s*月\s*(\d{1,2})\s*日/);
-      if (cn) {
-        var year = new Date().getFullYear();
-        return year + '-' + this._pad2(cn[1]) + '-' + this._pad2(cn[2]);
-      }
-
-      // 英文 'Jun 29, 2026' / 'Jun 29 2026' / 'Jun 29'
-      var monthMap = { jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, oct: 10, nov: 11, dec: 12 };
-      var en = s.match(/([A-Za-z]{3,})\s+(\d{1,2})(?:[,\s]+(\d{4}))?/);
-      if (en) {
-        var m = monthMap[en[1].toLowerCase().substring(0, 3)];
-        if (m) {
-          var yr = en[3] ? parseInt(en[3], 10) : new Date().getFullYear();
-          return yr + '-' + this._pad2(m) + '-' + this._pad2(en[2]);
-        }
-      }
-
-      // 数字 '6/29/2026' / '6/29'
-      var num = s.match(/(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?/);
-      if (num) {
-        var y2 = num[3] ? parseInt(num[3], 10) : new Date().getFullYear();
-        if (y2 < 100) y2 += 2000;
-        return y2 + '-' + this._pad2(num[1]) + '-' + this._pad2(num[2]);
-      }
-
-      return null;
-    }
-
-    _pad2(n) {
-      n = String(parseInt(n, 10));
-      return n.length < 2 ? '0' + n : n;
-    }
-
-    // 提取容器的元数据（日期 + 文本 + view count），给 matchesFilter 用来过滤
-    // 返回: { dateISO: 'YYYY-MM-DD' | null, text: '...', viewCount: number | null }
     extractMeta(container, itemType) {
-      var meta = { dateISO: null, text: '', viewCount: null };
+      var meta = { dateISO: null, text: '' };
       if (!container) return meta;
 
-      // 日期：先试 HTML5 <time datetime="..."> 属性，兜底用 parseStudioDateText
       var timeEl = this.findElement(this.config.common && this.config.common.timeElement, container);
       if (timeEl) {
-        var dt = timeEl.getAttribute && timeEl.getAttribute('datetime');
-        if (dt) {
-          meta.dateISO = dt.slice(0, 10);
-        } else {
-          meta.dateISO = this.parseStudioDateText(timeEl.textContent);
-        }
+        var dt = timeEl.getAttribute('datetime') || '';
+        meta.dateISO = dt.slice(0, 10);
       }
 
-      // 文本
       var parts = [];
       if (itemType === 'following') {
-        // following 页是 UserCell：取用户名 / @handle / bio 作为关键字匹配源
         var userInfoCfg = (this.config.common && this.config.common.userInfo) || {};
         var userCell = this.findElement(userInfoCfg.userCell, container);
         var scope = userCell || container;
@@ -769,43 +655,15 @@
         if (bioEl) parts.push(bioEl.textContent || '');
       } else {
         var textEls = this.findElements(this.config.common && this.config.common.videoText, container);
-        for (var i = 0; i < textEls.length; i++) {
-          parts.push(textEls[i].textContent || '');
+        for (var t = 0; t < textEls.length; t++) {
+          parts.push(textEls[t].textContent || '');
         }
       }
       meta.text = parts.join(' ').trim();
 
-      // view count（TikTok 特有，营销页宣传的"view count floor"过滤）
-      if (itemType === 'videos' || itemType === 'reposts') {
-        var viewCountCfg = this.config.common && this.config.common.viewCount;
-        if (viewCountCfg) {
-          var viewEl = this.findElement(viewCountCfg, container);
-          if (viewEl) {
-            // TikTok view count 文字格式：'1.2K' / '3.4M' / '123'
-            var viewText = (viewEl.textContent || '').trim();
-            meta.viewCount = this.parseViewCount(viewText);
-          }
-        }
-      }
-
       return meta;
     }
 
-    // 解析 TikTok view count 文字
-    // 支持 '1.2K' / '3.4M' / '5B' / '123' 等格式
-    parseViewCount(text) {
-      if (!text) return null;
-      var m = text.match(/^([\d.]+)\s*([KMB]?)$/i);
-      if (!m) return null;
-      var num = parseFloat(m[1]);
-      var suffix = (m[2] || '').toUpperCase();
-      if (suffix === 'K') num *= 1000;
-      else if (suffix === 'M') num *= 1000000;
-      else if (suffix === 'B') num *= 1000000000;
-      return num;
-    }
-
-    // 判断 meta 是否匹配 filters（所有条件 AND 关系）
     matchesFilter(meta, filters) {
       if (!filters) return true;
       if (filters.fromDate && (!meta.dateISO || meta.dateISO < filters.fromDate)) return false;
@@ -814,471 +672,788 @@
         var haystack = (meta.text || '').toLowerCase();
         if (haystack.indexOf(this._keywordLower) < 0) return false;
       }
-      // view count floor（TikTok 特有）
-      if (filters.minViewCount != null && meta.viewCount != null && meta.viewCount < filters.minViewCount) return false;
-      if (filters.maxViewCount != null && meta.viewCount != null && meta.viewCount > filters.maxViewCount) return false;
       return true;
     }
 
-    // 检测 repost 卡片：通过 socialContext 文字标记
-    // TikTok 标记 repost 用 "Repost" / "Reposted" / 8 语言关键字
-    isRepostCard(article) {
-      if (!article) return false;
-      var socialContext = this.findElement(this.config.common && this.config.common.socialContext, article);
-      var text = '';
-      if (socialContext) {
-        text = (socialContext.textContent || '').toLowerCase();
-      } else {
-        // 兜底：全文匹配
-        text = (article.textContent || '').toLowerCase();
+    async startCleanup(options) {
+      this.isRunning = true;
+      this.isPaused = false;
+      this.processedCount = 0;
+      this.errorCount = 0;
+      this.filters = options.filters || null;
+      this._keywordLower = (this.filters && this.filters.keyword)
+        ? this.filters.keyword.toLowerCase() : '';
+
+      const types = options.types || [];
+      const maxPerType = options.maxPerType || 50;
+
+      for (let i = 0; i < types.length; i++) {
+        if (!this.isRunning) break;
+        const type = types[i];
+        if (this.onTypeStart) this.onTypeStart(type);
+        await this.processItems(type, maxPerType);
+        if (this.onTypeComplete) this.onTypeComplete(type, this.processedCount);
       }
-      var repostRe = new RegExp(
-        this._i18n.repostKeywords.map(function(k) {
-          return k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        }).join('|'),
-        'i'
-      );
-      return repostRe.test(text);
+
+      if (this.onComplete) {
+        this.onComplete({ processed: this.processedCount, errors: this.errorCount });
+      }
     }
 
-    // 删 TikTok 已发布视频（TikTok Studio 'Posted' tab 跑）
-    // 流程:
-    //   1. 自动跳转 https://www.tiktok.com/tiktokstudio/content?status=posted（如果不在）
-    //   2. 等 row 容器渲染稳定
-    //   3. 遍历每个 row → 调用 deleteVideo
-    // 路径: deleteVideo
+    pause() {
+      this.isPaused = true;
+    }
+
+    resume() {
+      this.isPaused = false;
+    }
+
+    stop() {
+      this.isRunning = false;
+      this.isPaused = false;
+    }
+
+    getStatus() {
+      return {
+        isRunning: this.isRunning,
+        isPaused: this.isPaused,
+        processedCount: this.processedCount,
+        errorCount: this.errorCount
+      };
+    }
+
+    async processItems(itemType, maxItems) {
+      if (maxItems === undefined) maxItems = 50;
+
+      var CONFIG_KEY_MAP = {
+        videos: 'common',
+        reposts: 'repost',
+        likes: 'like',
+        favorites: 'favorite',
+        following: 'following'
+      };
+      var configKey = CONFIG_KEY_MAP[itemType] || itemType;
+
+      if (!this.isRunning) return;
+
+      const selectors = this.config[configKey];
+      if (!selectors) {
+        this.error('No selectors for ' + itemType);
+        return;
+      }
+
+      if (itemType === 'videos') {
+        await this.processVideos(maxItems);
+        return;
+      }
+      if (itemType === 'reposts') {
+        await this.processReposts(maxItems);
+        return;
+      }
+      if (itemType === 'likes') {
+        await this.processLikes(maxItems);
+        return;
+      }
+      if (itemType === 'favorites') {
+        await this.processFavorites(maxItems);
+        return;
+      }
+      if (itemType === 'following') {
+        await this.processFollowing(maxItems);
+        return;
+      }
+
+      this.error('Unknown itemType: ' + itemType);
+    }
+
+    log(message) {
+      if (this.onLog) this.onLog(message, 'info');
+    }
+
+    error(message) {
+      if (this.onError) this.onError(message);
+      if (this.onLog) this.onLog(message, 'error');
+    }
+
+    debug(message) {
+      console.log('[TikTok Eraser]', message);
+    }
+
+    progress(message) {
+      if (this.onProgress) this.onProgress(this.processedCount, message);
+    }
+
     async processVideos(maxItems) {
-      if (maxItems === undefined) maxItems = 50;
-      var self = this;
-      this._keywordLower = (this.filters && this.filters.keyword)
-        ? this.filters.keyword.toLowerCase() : '';
-
-      this.log(t('startingVideosCleanup'));
-
-      // 步骤 1: 跳转 TikTok Studio
-      var navigated = await this._ensureOnTikTokStudio('posted');
-      if (!navigated) {
-        this.error('processVideos: failed to navigate to TikTok Studio');
-        return;
-      }
-      this.debug('[processVideos] on TikTok Studio, waiting for rows...');
-
-      // 步骤 2: 等 row 容器渲染
-      var rowSel = (self.config.common && Array.isArray(self.config.common.videoRowContainer))
-        ? self.config.common.videoRowContainer[0] : 'div[data-tt="components_RowLayout_FlexRow"]';
-      var actionSel = (self.config.common && Array.isArray(self.config.common.videoActionButton))
-        ? self.config.common.videoActionButton[0] : 'button[data-tt="components_ActionCell_Clickable"]';
-      var rowFilterSel = (self.config.common && self.config.common.videoRowFilter)
-        ? self.config.common.videoRowFilter : actionSel;
-
-      await this.waitForContentStable([rowSel, actionSel]);
-      this._diagnosePage();
-
-      function collectRows() {
-        var rows = self.findElements(rowSel);
-        var out = [];
-        var seen = new Set();
-        for (var i = 0; i < rows.length; i++) {
-          var r = rows[i];
-          if (seen.has(r)) continue;
-          // 必须是含 kebab 按钮的 row（排除 header 等非视频行）
-          var action = r.querySelector(rowFilterSel);
-          if (!action) continue;
-          // 排除 header 行：header 也有 RowLayout_FlexRow 但无 PostInfoCell
-          if (!r.querySelector('[data-tt="components_PostInfoCell_Container"]')) continue;
-          seen.add(r);
-          out.push({ row: r, action: action });
-        }
-        return out;
-      }
-
-      let emptyScrolls = 0;
-      var lastProgressTime = Date.now();
-      var STUCK_TIMEOUT_MS = 30000;
-      while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
-        if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) { this.log(t('cleanupStuck')); break; }
-        if (this.isPaused) { await this.sleep(500); continue; }
-
-        var rows = collectRows();
-        var pending = rows.filter(function(pair) {
-          var p = pair.action.dataset.socialEraserProcessed;
-          return !p || (p !== 'true' && p !== 'skipped' && p !== 'failed');
-        });
-
-        if (pending.length === 0) {
-          emptyScrolls++;
-          if (emptyScrolls > 3) { this.log(t('noMoreVideos')); break; }
-          var hasMore = await this.scrollToBottom();
-          if (!hasMore) { this.log(t('endOfVideos')); break; }
-          continue;
-        }
-        emptyScrolls = 0;
-
-        var pair = pending[0];
-        var row = pair.row;
-        var action = pair.action;
-
-        if (this.shouldFilter('videos')) {
-          var meta = this.extractMeta(row, 'videos');
-          if (!this.matchesFilter(meta, this.filters)) {
-            action.dataset.socialEraserProcessed = 'skipped';
-            await this.sleep(50); continue;
-          }
-        }
-
-        try {
-          var success = await this.deleteVideo(row);
-          if (success) {
-            action.dataset.socialEraserProcessed = 'true';
-            this.processedCount++;
-            lastProgressTime = Date.now();
-            this.progress('Video #' + this.processedCount);
-            this.log(t('videoDeleted', {count: this.processedCount}));
-          } else {
-            action.dataset.socialEraserProcessed = 'failed';
-            this.error(t('videoDeleteFailed'));
-            this.errorCount++;
-          }
-        } catch (e) {
-          action.dataset.socialEraserProcessed = 'failed';
-          this.error('deleteVideo threw: ' + e.message);
-          this.errorCount++;
-        }
-        await this.sleep(800);  // TikTok 反自动化：比 X 慢
-      }
-
-      if (this.processedCount === 0 && this.filters) this.log(t('noItemsMatched'));
-    }
-
-    // 自动跳转到 TikTok Studio（如果不在）
-    // status: 'posted' (已发布) | 'draft' (草稿)
-    // 返回: true = 已在 Studio；false = 跳转失败
-    async _ensureOnTikTokStudio(status) {
-      if (status === undefined) status = 'posted';
-      var studioUrl = (this.config.common && this.config.common.videoStudioUrl)
-        ? this.config.common.videoStudioUrl
-        : 'https://www.tiktok.com/tiktokstudio/content?status=' + status;
-      // 把 status 替换成传入值（处理 draft）
-      studioUrl = studioUrl.replace(/status=[^&]*/, 'status=' + status);
-
-      var cur = window.location.href;
-      if (cur.indexOf('/tiktokstudio/content') >= 0 && cur.indexOf('status=' + status) >= 0) {
-        return true;
-      }
-      this.log('Navigating to TikTok Studio: ' + studioUrl);
-      try {
-        window.location.href = studioUrl;
-      } catch (e) {
-        this.error('_ensureOnTikTokStudio: navigation threw: ' + e.message);
-        return false;
-      }
-      // navigation 不会立刻完成，需要等几秒
-      await this.sleep(3000);
-      // 二次校验
-      if (window.location.href.indexOf('/tiktokstudio/content') < 0) {
-        return false;
-      }
-      return true;
-    }
-
-    // 删 Reposts（profile Reposts tab 跑，每个 repost card 跳到原视频页 → share → Remove repost）
-    // 流程（实测 @social_eraser 2026-06-29）:
-    //   1. 跳转 /@user
-    //   2. 点 Reposts tab（[data-e2e="repost-tab"]）
-    //   3. 等 [data-e2e="user-repost-item"] 渲染
-    //   4. 取 card 内 a[href*="/video/"] 的原视频 URL
-    //   5. window.location.href = 原视频 URL
-    //   6. 等右侧 [class*="SectionActionBarContainer"] 出现（5 个 button: follow/like/comment/save/share）
-    //   7. 点 share（5th button, idx=4）
-    //   8. 等 share dialog → 点 [data-e2e="share-repost"]（"Remove repost"）
-    //   9. 关闭 dialog → 跳回 /@user → 重新收集剩余 reposts
-    async processReposts(maxItems) {
-      if (maxItems === undefined) maxItems = 50;
-      var self = this;
-      this._keywordLower = (this.filters && this.filters.keyword)
-        ? this.filters.keyword.toLowerCase() : '';
-
-      this.log(t('repostWarning'));
-      this.log(t('startingRepostsCleanup'));
-
-      var username = this._currentUsername;
-      if (!username) {
-        this.error('processReposts: no username in config, cannot navigate to profile');
-        return;
-      }
-
-      let emptyScrolls = 0;
-      var lastProgressTime = Date.now();
-      var STUCK_TIMEOUT_MS = 60000;
-      while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
-        if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) { this.log(t('cleanupStuck')); break; }
-        if (this.isPaused) { await this.sleep(500); continue; }
-
-        await this._ensureOnProfileRepostsTab(username);
-        await this.waitForContentStable(['[data-e2e="user-repost-item"]']);
-        this._diagnosePage();
-
-        var cards = this.findElements('[data-e2e="user-repost-item"]');
-        var pending = cards.filter(function(card) {
-          var p = card.dataset.socialEraserProcessed;
-          return !p || (p !== 'true' && p !== 'skipped' && p !== 'failed');
-        });
-
-        if (pending.length === 0) {
-          emptyScrolls++;
-          if (emptyScrolls > 2) { this.log(t('noMoreReposts')); break; }
-          var hasMore = await this.scrollToBottom();
-          if (!hasMore) { this.log(t('endOfReposts')); break; }
-          continue;
-        }
-        emptyScrolls = 0;
-
-        var card = pending[0];
-        var anchor = card.querySelector('a[href*="/video/"]');
-        if (!anchor) {
-          this.error('processReposts: no anchor in repost card, marking failed');
-          card.dataset.socialEraserProcessed = 'failed';
-          this.errorCount++;
-          continue;
-        }
-        var videoUrl = anchor.href;
-
-        if (this.shouldFilter('reposts')) {
-          var meta = this.extractMeta(card, 'reposts');
-          if (!this.matchesFilter(meta, this.filters)) {
-            card.dataset.socialEraserProcessed = 'skipped';
-            await this.sleep(50);
-            continue;
-          }
-        }
-
-        try {
-          var success = await this._removeRepostViaShareDialog(videoUrl);
-          if (success) {
-            card.dataset.socialEraserProcessed = 'true';
-            this.processedCount++;
-            lastProgressTime = Date.now();
-            this.progress('Repost #' + this.processedCount);
-            this.log(t('repostDeleted', {count: this.processedCount}));
-          } else {
-            card.dataset.socialEraserProcessed = 'failed';
-            this.error(t('repostDeleteFailed'));
-            this.errorCount++;
-          }
-        } catch (e) {
-          card.dataset.socialEraserProcessed = 'failed';
-          this.error('repost delete threw: ' + e.message);
-          this.errorCount++;
-        }
-        await this.sleep(800);
-      }
-
-      if (this.processedCount === 0 && this.filters) this.log(t('noItemsMatched'));
-    }
-
-    // 跳转并切到 profile Reposts tab
-    async _ensureOnProfileRepostsTab(username) {
-      var path = '/@' + username;
-      if (location.pathname !== path) {
-        this.debug('[reposts] navigating to ' + path);
-        window.location.href = 'https://www.tiktok.com' + path;
-        return;
-      }
-      var tab = document.querySelector('[data-e2e="repost-tab"]');
-      if (!tab) return;
-      if (tab.getAttribute('aria-selected') === 'true') return;
-      tab.click();
-    }
-
-    // 跳到原视频页 → share dialog → Remove repost
-    async _removeRepostViaShareDialog(videoUrl) {
-      this.debug('[removeRepost] navigating to ' + videoUrl);
-      window.location.href = videoUrl;
-
-      var actionBar = await this._waitForActionBar(1500);
-      if (!actionBar) {
-        this.error('_removeRepostViaShareDialog: action bar not found on video page');
-        return false;
-      }
-
-      var shareBtn = this._findShareButton(actionBar);
-      if (!shareBtn) {
-        this.error('_removeRepostViaShareDialog: share button not found');
-        return false;
-      }
-      await this.safeClick(shareBtn, 0);
-
-      var removeBtn = await this.waitForElement('[data-e2e="share-repost"]', 300);
-      if (!removeBtn) {
-        // 该视频当前不是 reposted（已 removed / 别人原创）→ 视为成功
-        this.debug('_removeRepostViaShareDialog: no [data-e2e="share-repost"], assume already removed');
-        return true;
-      }
-      await this.safeClick(removeBtn, 0);
-
-      var removed = await this._waitForElementGone('[data-e2e="share-repost"]', 300);
-      if (!removed) {
-        this.error('_removeRepostViaShareDialog: share-repost element did not disappear');
-        return false;
-      }
-      this.debug('[removeRepost] success');
-      return true;
-    }
-
-    // 等右侧 [class*="SectionActionBarContainer"] 出现
-    async _waitForActionBar(maxFrames) {
-      if (maxFrames === undefined) maxFrames = 600;
-      var self = this;
-      return new Promise(function(resolve) {
-        var frame = 0;
-        function tick() {
-          var bar = document.querySelector('[class*="SectionActionBarContainer"]');
-          if (bar && bar.querySelectorAll('button').length >= 5) {
-            resolve(bar);
-            return;
-          }
-          if (frame++ >= maxFrames) { resolve(null); return; }
-          requestAnimationFrame(tick);
-        }
-        requestAnimationFrame(tick);
-      });
-    }
-
-    // 找 action bar 内的 share 按钮（5 个 button 中第 5 个；path d 以 'M23.82 3.5' 开头为 share icon）
-    _findShareButton(actionBar) {
-      if (!actionBar) return null;
-      var btns = actionBar.querySelectorAll('button');
-      if (btns.length < 5) return null;
-      var candidate = btns[4];
-      var path = candidate.querySelector('svg path');
-      var d = path ? path.getAttribute('d') : '';
-      if (d && d.indexOf('M23.82 3.5') === 0) return candidate;
-      return candidate; // 兜底
-    }
-
-    // 等元素消失
-    async _waitForElementGone(selector, maxFrames) {
-      if (maxFrames === undefined) maxFrames = 300;
-      var self = this;
-      return new Promise(function(resolve) {
-        var frame = 0;
-        function tick() {
-          var el = self.findElement(selector);
-          if (!el || !el.isConnected) { resolve(true); return; }
-          if (frame++ >= maxFrames) { resolve(false); return; }
-          requestAnimationFrame(tick);
-        }
-        requestAnimationFrame(tick);
-      });
-    }
-
-    // 取消点赞（likes 标签页）
-    async processLikes(maxItems) {
       if (maxItems === undefined) maxItems = 50;
 
       let emptyScrolls = 0;
       const maxEmptyScrolls = 3;
 
-      await this.waitForContentStable(['[data-e2e="user-liked-item"]', 'article', "[data-testid='cellInnerDiv']"]);
+      await this.waitForContentStable(["[data-tt='components_RowLayout_FlexRow']", "[data-tt='components_PostInfoCell_Container']"]);
 
-      var remoteUnlike = (this.config && this.config.like && Array.isArray(this.config.like.unlikeButtons))
-        ? this.config.like.unlikeButtons : [];
-      const unlikeSelectors = remoteUnlike;
+      var actionBtnSelectors = (this.config.common && Array.isArray(this.config.common.videoActionButton))
+        ? this.config.common.videoActionButton : [];
 
-      this.log(t('startingLikesCleanup'));
+      this.log(t('startingVideosCleanup'));
 
-      if (emptyScrolls === 0) this._diagnosePage();
+      if (emptyScrolls === 0) {
+        this._diagnosePage();
+      }
 
       var lastProgressTime = Date.now();
       var STUCK_TIMEOUT_MS = 30000;
 
       while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
-        if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) { this.log(t('cleanupStuck')); break; }
-        if (this.isPaused) { await this.sleep(500); continue; }
-
-        let unlikeButtons = [];
-        for (let s = 0; s < unlikeSelectors.length; s++) {
-          unlikeButtons = this.findElements(unlikeSelectors[s]);
-          if (unlikeButtons.length > 0) break;
+        if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) {
+          this.log(t('cleanupStuck'));
+          break;
+        }
+        if (this.isPaused) {
+          await this.sleep(500);
+          continue;
         }
 
-        const pending = unlikeButtons.filter(function(btn) {
+        let actionButtons = [];
+        let matchedSelector = null;
+        for (let s = 0; s < actionBtnSelectors.length; s++) {
+          actionButtons = this.findElements(actionBtnSelectors[s]);
+          if (actionButtons.length > 0) {
+            matchedSelector = actionBtnSelectors[s];
+            break;
+          }
+        }
+
+        const pending = actionButtons.filter(function(btn) {
           var p = btn.dataset.socialEraserProcessed;
           return !p || (p !== 'true' && p !== 'skipped');
         });
 
         if (pending.length === 0) {
+          if (actionButtons.length === 0 && emptyScrolls === 1) {
+            this.log(t('noMoreVideos'));
+            console.log('[TikTok Eraser] Tried selectors:', actionBtnSelectors);
+          }
           emptyScrolls++;
-          if (emptyScrolls > maxEmptyScrolls) { this.log(t('noMoreLikes')); break; }
-          var hasMore = await this.scrollToBottom();
-          if (!hasMore) { this.log(t('endOfLikes')); break; }
+          if (emptyScrolls > maxEmptyScrolls) {
+            this.log(t('endOfVideos'));
+            break;
+          }
+          const hasMore = await this.scrollToBottom();
+          if (!hasMore) {
+            this.log(t('endOfVideos'));
+            break;
+          }
           continue;
         }
+
         emptyScrolls = 0;
+
+        if (matchedSelector && emptyScrolls === 0) {
+          this.log(t('foundButtonsCount', {count: actionButtons.length}));
+        }
 
         const btn = pending[0];
 
-        if (this.shouldFilter('likes')) {
-          var article = this.findClosest(this.config.common && this.config.common.articleContainers, btn) || btn.parentElement;
-          var meta = this.extractMeta(article, 'likes');
+        if (this.shouldFilter('videos')) {
+          var row = this.findClosest(this.config.common && this.config.common.videoRowContainer, btn) || btn.parentElement;
+          var meta = this.extractMeta(row, 'videos');
           if (!this.matchesFilter(meta, this.filters)) {
             btn.dataset.socialEraserProcessed = 'skipped';
+            if ((this.filters.fromDate || this.filters.toDate) && !meta.dateISO
+                && !this._dateMissingWarned.has('videos')) {
+              this._dateMissingWarned.add('videos');
+              this.log(t('dateFilterSkipped', {type: 'videos'}));
+            }
             await this.sleep(50);
             continue;
           }
         }
 
         try {
-          const ok = await this.safeClick(btn, 800);
-          if (ok) {
-            btn.dataset.socialEraserProcessed = 'true';
+          // 先清掉可能遮挡 button 的 toast/snackbar/modal（TikTok Studio 删除后
+          // 弹的 "Deleted successfully" 通知会覆盖在 video row 上，click 实际点到 toast）
+          this._dismissOverlays();
+
+          const ok = await this.safeClick(btn, 500);
+          if (!ok) {
+            this.errorCount++;
+            this.error(t('videoDeleteFailed', {error: 'Action button click failed'}));
+            await this.sleep(500);
+            continue;
+          }
+
+          // 1 秒内找 popover（缩短自 600 帧=10秒，避免单次失败卡 10 秒）
+          // TikTok popover 通常 < 200ms 出现；超时说明 click 被遮挡或 selector 失效
+          const popoverSelectors = (this.config.common && this.config.common.videoMenuPopover) || [];
+          let popover = await this.waitForElement(popoverSelectors, 60);
+          if (!popover) {
+            // 第一次可能被 toast 遮挡 —— dismiss 后再点一次 button retry
+            this.debug('Popover not found on first try, retrying after dismiss');
+            this._dismissOverlays();
+            await this.sleep(300);
+            await this.safeClick(btn, 500);
+            popover = await this.waitForElement(popoverSelectors, 60);
+          }
+          if (!popover) {
+            this.errorCount++;
+            this.error(t('videoDeleteFailed', {error: 'Popover not found'}));
+            await this.sleep(500);
+            continue;
+          }
+
+          const deleteIconSelectors = (this.config.common && this.config.common.videoMenuDeleteIcon) || [];
+          const deleteIcon = this.findElement(deleteIconSelectors, popover);
+          if (!deleteIcon) {
+            this.errorCount++;
+            this.error(t('videoDeleteFailed', {error: 'Delete icon not found'}));
+            await this.sleep(500);
+            continue;
+          }
+
+          const clickableItem = this.findClosest(this.config.common && this.config.common.videoMenuItemClickable, deleteIcon);
+          const deleteItem = clickableItem || deleteIcon;
+
+          await this.safeClick(deleteItem, 500);
+
+          const confirmModalSelectors = (this.config.common && this.config.common.videoConfirmModal) || [];
+          const confirmModal = await this.waitForElement(confirmModalSelectors, 60);
+          if (!confirmModal) {
             this.processedCount++;
             lastProgressTime = Date.now();
-            this.progress('Unlike #' + this.processedCount);
-            this.log(t('clickedUnlike', {count: this.processedCount}));
-          } else {
-            this.errorCount++;
-            this.error(t('clickReturnedFalse'));
+            btn.dataset.socialEraserProcessed = 'true';
+            this.progress('Video');
+            this.log(t('videoDeleted', {count: this.processedCount}));
+            await this.sleep(500);
+            continue;
           }
+
+          const confirmBtnSelectors = (this.config.common && this.config.common.videoConfirmButton) || [];
+          const confirmBtn = await this.waitForElement(confirmBtnSelectors, 60);
+          if (confirmBtn) {
+            await this.safeClick(confirmBtn, 500);
+          }
+
+          btn.dataset.socialEraserProcessed = 'true';
+          this.processedCount++;
+          lastProgressTime = Date.now();
+          this.progress('Video');
+          this.log(t('videoDeleted', {count: this.processedCount}));
+
         } catch (e) {
-          this.error(t('unlikeFailed', {error: e.message}));
+          this.error(t('videoDeleteFailed', {error: e.message}));
           this.errorCount++;
         }
 
-        await this.sleep(500);
+        // 删除后等 modal/toast 完全消失 + 等 list 重新 fetch + re-render 完成
+        // 关键：用 action button 数量（不是 row container）判断 list 是否真的加载完
+        // 旧的 waitForContentStable 数 row container，loading skeleton 也算，
+        // 导致提前返回 → 回到 while → 找不到 button → end of list
+        if (this.isRunning) {
+          await this._waitForElementGone((this.config.common && this.config.common.videoConfirmModal) || [], 3000);
+          await this._dismissOverlays();
+          const listReady = await this._waitForListReloaded(actionBtnSelectors, 30000);
+          if (!listReady) {
+            // 超时且 list 真的空了 —— 视为 list 已被清空，结束循环
+            this.debug('List empty after reload wait, ending videos cleanup');
+            this.log(t('endOfVideos'));
+            break;
+          }
+          emptyScrolls = 0;
+        }
       }
 
-      if (this.processedCount === 0 && this.filters) this.log(t('noItemsMatched'));
+      if (this.processedCount === 0 && this.filters) {
+        this.log(t('noItemsMatched'));
+      }
     }
 
-    // 取消收藏（favorites 标签页）
+    async processReposts(maxItems) {
+      if (maxItems === undefined) maxItems = 50;
+      this.processedCount = 0;
+
+      let emptyScrolls = 0;
+      const maxEmptyScrolls = 3;
+
+      await this.waitForContentStable(["[data-e2e='user-repost-item']", "[data-e2e='repost']"]);
+
+      var cardSelectors = (this.config.repost && Array.isArray(this.config.repost.repostItem))
+        ? this.config.repost.repostItem : [];
+
+      var anchorSelectors = (this.config.common && Array.isArray(this.config.common.videoAnchor))
+        ? this.config.common.videoAnchor : [];
+
+      var shareRepostSelectors = (this.config.repost && Array.isArray(this.config.repost.videoShareRepost))
+        ? this.config.repost.videoShareRepost : [];
+
+      this.log(t('startingRepostsCleanup'));
+
+      await this._loadDeletedRepostUrls();
+
+      await this._activateProfileTab('转发');
+
+      await this.sleep(1000);
+
+      if (emptyScrolls === 0) {
+        this._diagnosePage();
+      }
+
+      var lastProgressTime = Date.now();
+      var STUCK_TIMEOUT_MS = 30000;
+
+      while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
+        if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) {
+          this.log(t('cleanupStuck'));
+          break;
+        }
+        if (this.isPaused) {
+          await this.sleep(500);
+          continue;
+        }
+
+        let cards = [];
+        let matchedSelector = null;
+        for (let s = 0; s < cardSelectors.length; s++) {
+          cards = this.findElements(cardSelectors[s]);
+          if (cards.length > 0) {
+            matchedSelector = cardSelectors[s];
+            break;
+          }
+        }
+
+        const pending = cards.filter(function(card) {
+          var p = card.dataset.socialEraserProcessed;
+          return !p || (p !== 'true' && p !== 'skipped');
+        });
+
+        if (pending.length === 0) {
+          if (cards.length === 0 && emptyScrolls === 1) {
+            this.log(t('noMoreReposts'));
+            console.log('[TikTok Eraser] Tried selectors:', cardSelectors);
+          }
+          emptyScrolls++;
+          if (emptyScrolls > maxEmptyScrolls) {
+            this.log(t('endOfReposts'));
+            break;
+          }
+          const hasMore = await this.scrollToBottom();
+          if (!hasMore) {
+            this.log(t('endOfReposts'));
+            break;
+          }
+          continue;
+        }
+
+        emptyScrolls = 0;
+
+        if (matchedSelector && emptyScrolls === 0) {
+          this.log(t('foundButtonsCount', {count: cards.length}));
+        }
+
+        const card = pending[0];
+
+        if (this.shouldFilter('reposts')) {
+          var meta = this.extractMeta(card, 'reposts');
+          if (!this.matchesFilter(meta, this.filters)) {
+            card.dataset.socialEraserProcessed = 'skipped';
+            if ((this.filters.fromDate || this.filters.toDate) && !meta.dateISO
+                && !this._dateMissingWarned.has('reposts')) {
+              this._dateMissingWarned.add('reposts');
+              this.log(t('dateFilterSkipped', {type: 'reposts'}));
+            }
+            await this.sleep(50);
+            continue;
+          }
+        }
+
+        try {
+          const anchor = this.findElement(anchorSelectors, card);
+          if (!anchor) {
+            this.errorCount++;
+            this.error(t('repostDeleteFailed', {error: 'Video anchor not found'}));
+            await this.sleep(500);
+            continue;
+          }
+
+          const videoUrl = anchor.getAttribute('href');
+          if (videoUrl && this._deletedRepostUrls.indexOf(videoUrl) >= 0) {
+            card.dataset.socialEraserProcessed = 'true';
+            await this.sleep(50);
+            continue;
+          }
+
+          await this.safeClick(anchor, 1500);
+
+          const exitReason = await this._processRepostBatch(videoUrl, shareRepostSelectors, maxItems, lastProgressTime);
+
+          lastProgressTime = Date.now();
+
+          if (exitReason === 'complete' || exitReason === 'end') {
+            break;
+          }
+
+          card.dataset.socialEraserProcessed = 'true';
+          await this.sleep(50);
+
+        } catch (e) {
+          this.error(t('repostDeleteFailed', {error: e.message}));
+          this.errorCount++;
+          lastProgressTime = Date.now();
+          await this.sleep(500);
+        }
+      }
+
+      if (this.processedCount === 0 && this.filters) {
+        this.log(t('noItemsMatched'));
+      }
+    }
+
+    async _processRepostBatch(startUrl, shareRepostSelectors, maxItems, lastProgressTime) {
+      const nextVideoSelectors = this._buildNextVideoSelectors();
+
+      while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
+        if (Date.now() - lastProgressTime > 30000) {
+          this.log(t('cleanupStuck'));
+          break;
+        }
+        if (this.isPaused) {
+          await this.sleep(500);
+          continue;
+        }
+
+        try {
+          this._dismissOverlays();
+
+          const currentUrl = window.location.href;
+          if (this._deletedRepostUrls.indexOf(currentUrl) >= 0) {
+            const nextBtn = await this.waitForElement(nextVideoSelectors, 2000);
+            if (nextBtn && nextBtn.disabled !== true) {
+              await this.safeClick(nextBtn, 1000);
+            } else {
+              break;
+            }
+            continue;
+          }
+
+          const shareRepostBtn = await this.waitForElement(shareRepostSelectors, 3000);
+          if (!shareRepostBtn) {
+            this.errorCount++;
+            this.error(t('repostDeleteFailed', {error: 'video-share-repost not found on video page'}));
+            const nextBtn = await this.waitForElement(nextVideoSelectors, 2000);
+            if (nextBtn && nextBtn.disabled !== true) {
+              await this.safeClick(nextBtn, 1000);
+            } else {
+              break;
+            }
+            continue;
+          }
+
+          await this.safeClick(shareRepostBtn, 500);
+          await this.sleep(500);
+
+          this._deletedRepostUrls.push(currentUrl);
+          await this._saveDeletedRepostUrls();
+
+          this.processedCount++;
+          lastProgressTime = Date.now();
+          this.progress('Repost');
+          this.log(t('repostDeleted', {count: this.processedCount}));
+
+          if (this.processedCount >= maxItems) {
+            this.log(t('repostDeleteComplete', {count: this.processedCount}));
+            break;
+          }
+
+          const nextBtn = await this.waitForElement(nextVideoSelectors, 2000);
+          if (nextBtn && nextBtn.disabled !== true) {
+            await this.safeClick(nextBtn, 1000);
+          } else {
+            break;
+          }
+
+        } catch (e) {
+          this.error(t('repostDeleteFailed', {error: e.message}));
+          this.errorCount++;
+          const nextBtn = this.findElement(nextVideoSelectors);
+          if (nextBtn && nextBtn.disabled !== true) {
+            await this.safeClick(nextBtn, 1000);
+          } else {
+            break;
+          }
+        }
+      }
+
+      return (this.processedCount >= maxItems) ? 'complete' : 'end';
+    }
+
+    _buildNextVideoSelectors() {
+      const selectors = ["[data-e2e='arrow-right']"];
+      if (this._i18n && Array.isArray(this._i18n.nextVideoKeywords)) {
+        this._i18n.nextVideoKeywords.forEach(keyword => {
+          selectors.push("button[aria-label*='" + keyword + "']");
+        });
+      }
+      return selectors;
+    }
+
+    async processLikes(maxItems) {
+      if (maxItems === undefined) maxItems = 50;
+      this.processedCount = 0;
+
+      let emptyScrolls = 0;
+      const maxEmptyScrolls = 3;
+
+      await this.waitForContentStable(["[data-e2e='user-liked-item']", "[data-e2e='like-icon']"]);
+
+      var cardSelectors = (this.config.like && Array.isArray(this.config.like.likedItem))
+        ? this.config.like.likedItem : [];
+
+      var anchorSelectors = (this.config.common && Array.isArray(this.config.common.videoAnchor))
+        ? this.config.common.videoAnchor : [];
+
+      var browseLikeSelectors = (this.config.like && Array.isArray(this.config.like.videoBrowseLikeIcon))
+        ? this.config.like.videoBrowseLikeIcon : [];
+
+      this.log(t('startingLikesCleanup'));
+
+      await this._loadDeletedLikesUrls();
+
+      await this._activateProfileTab('Likes');
+
+      await this.sleep(1000);
+
+      if (emptyScrolls === 0) {
+        this._diagnosePage();
+      }
+
+      var lastProgressTime = Date.now();
+      var STUCK_TIMEOUT_MS = 30000;
+
+      while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
+        if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) {
+          this.log(t('cleanupStuck'));
+          break;
+        }
+        if (this.isPaused) {
+          await this.sleep(500);
+          continue;
+        }
+
+        let cards = [];
+        let matchedSelector = null;
+        for (let s = 0; s < cardSelectors.length; s++) {
+          cards = this.findElements(cardSelectors[s]);
+          if (cards.length > 0) {
+            matchedSelector = cardSelectors[s];
+            break;
+          }
+        }
+
+        const pending = cards.filter(function(card) {
+          var p = card.dataset.socialEraserProcessed;
+          return !p || (p !== 'true' && p !== 'skipped');
+        });
+
+        if (pending.length === 0) {
+          if (cards.length === 0 && emptyScrolls === 1) {
+            this.log(t('noMoreLikes'));
+            console.log('[TikTok Eraser] Tried selectors:', cardSelectors);
+          }
+          emptyScrolls++;
+          if (emptyScrolls > maxEmptyScrolls) {
+            this.log(t('endOfLikes'));
+            break;
+          }
+          const hasMore = await this.scrollToBottom();
+          if (!hasMore) {
+            this.log(t('endOfLikes'));
+            break;
+          }
+          continue;
+        }
+
+        emptyScrolls = 0;
+
+        if (matchedSelector && emptyScrolls === 0) {
+          this.log(t('foundButtonsCount', {count: cards.length}));
+        }
+
+        const card = pending[0];
+
+        if (this.shouldFilter('likes')) {
+          var meta = this.extractMeta(card, 'likes');
+          if (!this.matchesFilter(meta, this.filters)) {
+            card.dataset.socialEraserProcessed = 'skipped';
+            if ((this.filters.fromDate || this.filters.toDate) && !meta.dateISO
+                && !this._dateMissingWarned.has('likes')) {
+              this._dateMissingWarned.add('likes');
+              this.log(t('dateFilterSkipped', {type: 'likes'}));
+            }
+            await this.sleep(50);
+            continue;
+          }
+        }
+
+        try {
+          // likedItem (data-e2e=user-liked-item) 是 DivContainer wrapper div，
+          // 内部嵌 a[href*=/video/] 指向 video page。MCP 实证。
+          var anchor = this.findElement(anchorSelectors, card);
+          if (!anchor) {
+            this.errorCount++;
+            this.error(t('unlikeFailed', {error: 'Video anchor not found'}));
+            await this.sleep(500);
+            continue;
+          }
+
+          const videoUrl = anchor.getAttribute('href');
+          if (videoUrl && this._deletedLikesUrls.indexOf(videoUrl) >= 0) {
+            card.dataset.socialEraserProcessed = 'true';
+            await this.sleep(50);
+            continue;
+          }
+
+          await this.safeClick(anchor, 1500);
+
+          const exitReason = await this._processLikesBatch(videoUrl, browseLikeSelectors, maxItems, lastProgressTime);
+
+          lastProgressTime = Date.now();
+
+          if (exitReason === 'complete' || exitReason === 'end') {
+            break;
+          }
+
+          card.dataset.socialEraserProcessed = 'true';
+          await this.sleep(50);
+
+        } catch (e) {
+          this.error(t('unlikeFailed', {error: e.message}));
+          this.errorCount++;
+          lastProgressTime = Date.now();
+          await this.sleep(500);
+        }
+      }
+
+      if (this.processedCount === 0 && this.filters) {
+        this.log(t('noItemsMatched'));
+      }
+    }
+
+    async _processLikesBatch(startUrl, browseLikeSelectors, maxItems, lastProgressTime) {
+      const nextVideoSelectors = this._buildNextVideoSelectors();
+
+      while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
+        if (Date.now() - lastProgressTime > 30000) {
+          this.log(t('cleanupStuck'));
+          break;
+        }
+        if (this.isPaused) {
+          await this.sleep(500);
+          continue;
+        }
+
+        try {
+          this._dismissOverlays();
+
+          const currentUrl = window.location.href;
+          if (this._deletedLikesUrls.indexOf(currentUrl) >= 0) {
+            const nextBtn = await this.waitForElement(nextVideoSelectors, 2000);
+            if (nextBtn && nextBtn.disabled !== true) {
+              await this.safeClick(nextBtn, 1000);
+            } else {
+              break;
+            }
+            continue;
+          }
+
+          const browseLikeBtn = await this.waitForElement(browseLikeSelectors, 3000);
+          if (!browseLikeBtn) {
+            this.errorCount++;
+            this.error(t('unlikeFailed', {error: 'browse-like-icon not found on video page'}));
+            const nextBtn = await this.waitForElement(nextVideoSelectors, 2000);
+            if (nextBtn && nextBtn.disabled !== true) {
+              await this.safeClick(nextBtn, 1000);
+            } else {
+              break;
+            }
+            continue;
+          }
+
+          await this.safeClick(browseLikeBtn, 500);
+          await this.sleep(500);
+
+          this._deletedLikesUrls.push(currentUrl);
+          await this._saveDeletedLikesUrls();
+
+          this.processedCount++;
+          lastProgressTime = Date.now();
+          this.progress('Unlike');
+          this.log(t('clickedUnlike', {count: this.processedCount}));
+
+          if (this.processedCount >= maxItems) {
+            this.log(t('likesDeleteComplete', {count: this.processedCount}));
+            break;
+          }
+
+          const nextBtn = await this.waitForElement(nextVideoSelectors, 2000);
+          if (nextBtn && nextBtn.disabled !== true) {
+            await this.safeClick(nextBtn, 1000);
+          } else {
+            break;
+          }
+
+        } catch (e) {
+          this.error(t('unlikeFailed', {error: e.message}));
+          this.errorCount++;
+          const nextBtn = this.findElement(nextVideoSelectors);
+          if (nextBtn && nextBtn.disabled !== true) {
+            await this.safeClick(nextBtn, 1000);
+          } else {
+            break;
+          }
+        }
+      }
+
+      return (this.processedCount >= maxItems) ? 'complete' : 'end';
+    }
+
     async processFavorites(maxItems) {
       if (maxItems === undefined) maxItems = 50;
 
       let emptyScrolls = 0;
       const maxEmptyScrolls = 3;
 
-      await this.waitForContentStable(['[data-e2e="user-favorite-item"]', 'article', "[data-testid='cellInnerDiv']"]);
+      await this._activateProfileTab('Favorites');
+      await this.waitForContentStable(["[data-e2e='favorite-icon']", "[data-e2e='user-favorite-item']"]);
 
-      var remoteUnfavorite = (this.config && this.config.favorite && Array.isArray(this.config.favorite.unfavoriteButtons))
+      var unfavoriteSelectors = (this.config.favorite && Array.isArray(this.config.favorite.unfavoriteButtons))
         ? this.config.favorite.unfavoriteButtons : [];
-      const unfavoriteSelectors = remoteUnfavorite;
 
       this.log(t('startingFavoritesCleanup'));
 
-      if (emptyScrolls === 0) this._diagnosePage();
+      if (emptyScrolls === 0) {
+        this._diagnosePage();
+      }
 
       var lastProgressTime = Date.now();
       var STUCK_TIMEOUT_MS = 30000;
 
       while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
-        if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) { this.log(t('cleanupStuck')); break; }
-        if (this.isPaused) { await this.sleep(500); continue; }
+        if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) {
+          this.log(t('cleanupStuck'));
+          break;
+        }
+        if (this.isPaused) {
+          await this.sleep(500);
+          continue;
+        }
 
         let unfavoriteButtons = [];
+        let matchedSelector = null;
         for (let s = 0; s < unfavoriteSelectors.length; s++) {
           unfavoriteButtons = this.findElements(unfavoriteSelectors[s]);
-          if (unfavoriteButtons.length > 0) break;
+          if (unfavoriteButtons.length > 0) {
+            matchedSelector = unfavoriteSelectors[s];
+            break;
+          }
         }
 
         const pending = unfavoriteButtons.filter(function(btn) {
@@ -1287,13 +1462,28 @@
         });
 
         if (pending.length === 0) {
+          if (unfavoriteButtons.length === 0 && emptyScrolls === 1) {
+            this.log(t('noUnfavoriteButtons'));
+            console.log('[TikTok Eraser] Tried selectors:', unfavoriteSelectors);
+          }
           emptyScrolls++;
-          if (emptyScrolls > maxEmptyScrolls) { this.log(t('noMoreFavorites')); break; }
-          var hasMore = await this.scrollToBottom();
-          if (!hasMore) { this.log(t('endOfFavorites')); break; }
+          if (emptyScrolls > maxEmptyScrolls) {
+            this.log(t('noMoreFavorites'));
+            break;
+          }
+          const hasMore = await this.scrollToBottom();
+          if (!hasMore) {
+            this.log(t('endOfFavorites'));
+            break;
+          }
           continue;
         }
+
         emptyScrolls = 0;
+
+        if (matchedSelector && emptyScrolls === 0) {
+          this.log(t('foundButtonsCount', {count: unfavoriteButtons.length}));
+        }
 
         const btn = pending[0];
 
@@ -1302,6 +1492,11 @@
           var meta = this.extractMeta(article, 'favorites');
           if (!this.matchesFilter(meta, this.filters)) {
             btn.dataset.socialEraserProcessed = 'skipped';
+            if ((this.filters.fromDate || this.filters.toDate) && !meta.dateISO
+                && !this._dateMissingWarned.has('favorites')) {
+              this._dateMissingWarned.add('favorites');
+              this.log(t('dateFilterSkipped', {type: 'favorites'}));
+            }
             await this.sleep(50);
             continue;
           }
@@ -1313,7 +1508,7 @@
             btn.dataset.socialEraserProcessed = 'true';
             this.processedCount++;
             lastProgressTime = Date.now();
-            this.progress('Unfavorite #' + this.processedCount);
+            this.progress('Unfavorite');
             this.log(t('clickedUnfavorite', {count: this.processedCount}));
           } else {
             this.errorCount++;
@@ -1327,40 +1522,53 @@
         await this.sleep(500);
       }
 
-      if (this.processedCount === 0 && this.filters) this.log(t('noItemsMatched'));
+      if (this.processedCount === 0 && this.filters) {
+        this.log(t('noItemsMatched'));
+      }
     }
 
-    // 取关（following 列表页）
     async processFollowing(maxItems) {
       if (maxItems === undefined) maxItems = 50;
 
       let emptyScrolls = 0;
       const maxEmptyScrolls = 3;
 
-      await this.waitForContentStable(['[data-e2e="user-following-item"]', "[data-testid='cellInnerDiv']"]);
+      await this._activateProfileTab('Following');
+      await this.waitForContentStable(["[data-e2e='follow-button']", "[data-e2e='user-following-item']"]);
 
-      var remoteUnfollow = (this.config && this.config.following && Array.isArray(this.config.following.unfollowButtons))
+      var unfollowSelectors = (this.config.following && Array.isArray(this.config.following.unfollowButtons))
         ? this.config.following.unfollowButtons : [];
-      const unfollowSelectors = remoteUnfollow;
 
       const confirmSel = (this.config && this.config.following && this.config.following.confirmButton)
         || (this.config && this.config.common && this.config.common.confirmButton && this.config.common.confirmButton[0]);
 
       this.log(t('startingFollowingCleanup'));
 
-      if (emptyScrolls === 0) this._diagnosePage();
+      if (emptyScrolls === 0) {
+        this._diagnosePage();
+      }
 
       var lastProgressTime = Date.now();
       var STUCK_TIMEOUT_MS = 30000;
 
       while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
-        if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) { this.log(t('cleanupStuck')); break; }
-        if (this.isPaused) { await this.sleep(500); continue; }
+        if (Date.now() - lastProgressTime > STUCK_TIMEOUT_MS) {
+          this.log(t('cleanupStuck'));
+          break;
+        }
+        if (this.isPaused) {
+          await this.sleep(500);
+          continue;
+        }
 
         let unfollowButtons = [];
+        let matchedSelector = null;
         for (let s = 0; s < unfollowSelectors.length; s++) {
           unfollowButtons = this.findElements(unfollowSelectors[s]);
-          if (unfollowButtons.length > 0) break;
+          if (unfollowButtons.length > 0) {
+            matchedSelector = unfollowSelectors[s];
+            break;
+          }
         }
 
         const pending = unfollowButtons.filter(function(btn) {
@@ -1369,21 +1577,41 @@
         });
 
         if (pending.length === 0) {
+          if (unfollowButtons.length === 0 && emptyScrolls === 1) {
+            this.log(t('noUnfollowButtons'));
+            console.log('[TikTok Eraser] Tried selectors:', unfollowSelectors);
+          }
           emptyScrolls++;
-          if (emptyScrolls > maxEmptyScrolls) { this.log(t('noMoreFollowing')); break; }
-          var hasMore = await this.scrollToBottom();
-          if (!hasMore) { this.log(t('endOfFollowing')); break; }
+          if (emptyScrolls > maxEmptyScrolls) {
+            this.log(t('noMoreFollowing'));
+            break;
+          }
+          const hasMore = await this.scrollToBottom();
+          if (!hasMore) {
+            this.log(t('endOfFollowing'));
+            break;
+          }
           continue;
         }
+
         emptyScrolls = 0;
+
+        if (matchedSelector && emptyScrolls === 0) {
+          this.log(t('foundButtonsCount', {count: unfollowButtons.length}));
+        }
 
         const btn = pending[0];
 
-        if (this.filters) {
+        if (this.shouldFilter('following')) {
           var cell = this.findClosest(this.config.common && this.config.common.articleContainers, btn) || btn.parentElement;
           var meta = this.extractMeta(cell, 'following');
           if (!this.matchesFilter(meta, this.filters)) {
             btn.dataset.socialEraserProcessed = 'skipped';
+            if ((this.filters.fromDate || this.filters.toDate) && !meta.dateISO
+                && !this._dateMissingWarned.has('following')) {
+              this._dateMissingWarned.add('following');
+              this.log(t('dateFilterSkipped', {type: 'following'}));
+            }
             await this.sleep(50);
             continue;
           }
@@ -1397,19 +1625,21 @@
             await this.sleep(500);
             continue;
           }
+
           btn.dataset.socialEraserProcessed = 'true';
 
           const [confirmByTestid, confirmByText] = await Promise.all([
             this.waitForElement(confirmSel, 100),
-            this._findButtonByText(this._i18n.unfollowKeywords, 1500)
+            this.findButtonByText(this._i18n.unfollowKeywords, 1500)
           ]);
           const confirmButton = confirmByTestid || confirmByText;
+
           if (confirmButton) {
             const ok2 = await this.safeClick(confirmButton, 500);
             if (ok2) {
               this.processedCount++;
               lastProgressTime = Date.now();
-              this.progress('Unfollow #' + this.processedCount);
+              this.progress('Unfollow');
               this.log(t('clickedUnfollow', {count: this.processedCount}));
             } else {
               this.errorCount++;
@@ -1418,7 +1648,7 @@
           } else {
             this.processedCount++;
             lastProgressTime = Date.now();
-            this.progress('Unfollow #' + this.processedCount);
+            this.progress('Unfollow');
             this.log(t('unfollowedNoConfirm', {count: this.processedCount}));
           }
         } catch (e) {
@@ -1429,187 +1659,16 @@
         await this.sleep(500);
       }
 
-      if (this.processedCount === 0 && this.filters) this.log(t('noItemsMatched'));
-    }
-
-    // 找 role="button" / <button> / <a role="button"> 文字匹配
-    async _findButtonByText(keywords, timeout) {
-      if (!Array.isArray(keywords) || keywords.length === 0) return null;
-      const startTime = Date.now();
-      const allButtons = document.querySelectorAll('[role="button"], button, a[role="button"]');
-      while (Date.now() - startTime < timeout) {
-        for (let i = 0; i < allButtons.length; i++) {
-          const b = allButtons[i];
-          const r = b.getBoundingClientRect();
-          if (r.width === 0 || r.height === 0) continue;
-          const text = (b.textContent || '').trim();
-          const aria = (b.getAttribute('aria-label') || '').trim();
-          for (let j = 0; j < keywords.length; j++) {
-            const k = keywords[j];
-            if (text.indexOf(k) !== -1 || aria.indexOf(k) !== -1) {
-              return b;
-            }
-          }
-        }
-        await this.sleep(150);
+      if (this.processedCount === 0 && this.filters) {
+        this.log(t('noItemsMatched'));
       }
-      console.log('[TikTok Eraser] _findButtonByText timeout ' + timeout + 'ms, keywords=' + JSON.stringify(keywords));
-      return null;
     }
 
     _diagnosePage() {
-      try {
-        const allWithTestId = document.querySelectorAll('[data-testid]');
-        const testIdCounts = {};
-        for (let i = 0; i < allWithTestId.length; i++) {
-          const id = allWithTestId[i].getAttribute('data-testid');
-          testIdCounts[id] = (testIdCounts[id] || 0) + 1;
-        }
-        const sorted = Object.keys(testIdCounts).sort(function(a, b) {
-          return testIdCounts[b] - testIdCounts[a];
-        });
-        console.log('[TikTok Eraser Diagnostics] === Page Diagnostics ===');
-        console.log('Total data-testid elements:', allWithTestId.length);
-        console.log('Top data-testids:', sorted.slice(0, 20).map(function(k) {
-          return k + '(' + testIdCounts[k] + ')';
-        }).join(', '));
-
-        const allWithE2E = document.querySelectorAll('[data-e2e]');
-        const e2eCounts = {};
-        for (let i = 0; i < allWithE2E.length; i++) {
-          const id = allWithE2E[i].getAttribute('data-e2e');
-          e2eCounts[id] = (e2eCounts[id] || 0) + 1;
-        }
-        const sortedE2E = Object.keys(e2eCounts).sort(function(a, b) {
-          return e2eCounts[b] - e2eCounts[a];
-        });
-        console.log('Total data-e2e elements:', allWithE2E.length);
-        console.log('Top data-e2e:', sortedE2E.slice(0, 20).map(function(k) {
-          return k + '(' + e2eCounts[k] + ')';
-        }).join(', '));
-
-        const labeledButtons = document.querySelectorAll('button[aria-label]');
-        console.log('Total labeled buttons:', labeledButtons.length);
-        const uniqueLabels = {};
-        for (let i = 0; i < Math.min(labeledButtons.length, 50); i++) {
-          const lbl = labeledButtons[i].getAttribute('aria-label');
-          uniqueLabels[lbl] = (uniqueLabels[lbl] || 0) + 1;
-        }
-        const topLabels = Object.keys(uniqueLabels).slice(0, 15);
-        console.log('Top aria-labels:', topLabels.map(function(k) {
-          return '"' + k + '"(' + uniqueLabels[k] + ')';
-        }).join(', '));
-        console.log('[TikTok Eraser Diagnostics] === End Diagnostics ===');
-      } catch (e) {
-        console.warn('[TikTok Eraser Diagnostics] failed:', e.message);
-      }
-    }
-
-    _logPageState(selectorGroups, label) {
-      const diag = {};
-      diag.articles = document.querySelectorAll('article').length;
-      for (const name in selectorGroups) {
-        let total = 0;
-        for (let i = 0; i < selectorGroups[name].length; i++) {
-          total += this.findElements(selectorGroups[name][i]).length;
-        }
-        diag[name] = total;
-      }
-      diag.username = this._currentUsername || '(unset)';
-      console.log('[TikTok Eraser] ' + label + ' 0 candidates, page state: ' + JSON.stringify(diag));
-    }
-
-    async startCleanup(options) {
-      options = options || {};
-      const types = options.types || [];
-      const maxPerType = options.maxPerType || 50;
-      this.filters = options.filters || null;
-
-      if (types.length === 0) {
-        this.error('No types selected');
-        return;
-      }
-
-      this.isRunning = true;
-      this.isPaused = false;
-      this.processedCount = 0;
-      this.errorCount = 0;
-      this._dateMissingWarned.clear();
-
-      // maxPerType 是总预算（侧边栏传的是 remaining = FREE_LIMIT_PER_DAY - used）
-      const totalBudget = maxPerType;
-      for (let i = 0; i < types.length; i++) {
-        const type = types[i];
-        if (!this.isRunning) break;
-        const remainingForType = Math.max(0, totalBudget - this.processedCount);
-        if (remainingForType <= 0) {
-          this.log(t('dailyBudgetExhausted', {type: t(type), remaining: 0}));
-          break;
-        }
-        if (this.onTypeStart) this.onTypeStart(type);
-        const beforeTypeCount = this.processedCount;
-        await this.processItems(type, remainingForType);
-        const typeProcessed = this.processedCount - beforeTypeCount;
-        if (this.onTypeComplete) this.onTypeComplete(type, typeProcessed);
-      }
-
-      this.isRunning = false;
-
-      if (this.onComplete) {
-        this.onComplete({
-          processed: this.processedCount,
-          errors: this.errorCount
-        });
-      }
-    }
-
-    pause() { this.isPaused = true; }
-    resume() { this.isPaused = false; }
-    stop() {
-      this.isRunning = false;
-      this.isPaused = false;
-      this._closeAnyOpenConfirmDialog();
-    }
-
-    _closeAnyOpenConfirmDialog() {
-      var self = this;
-      this.findButtonByText(this._i18n.cancelKeywords, 300).then(function(btn) {
-        if (btn) return self.safeClick(btn, 200);
-        return false;
-      }).catch(function() {});
-    }
-
-    getStatus() {
-      return {
-        isRunning: this.isRunning,
-        isPaused: this.isPaused,
-        processed: this.processedCount,
-        errors: this.errorCount
-      };
-    }
-
-    sleep(ms) {
-      return new Promise(function(resolve) {
-        setTimeout(resolve, ms);
-      });
-    }
-
-    log(message) {
-      console.log('[TikTok Eraser] ' + message);
-      if (this.onLog) this.onLog(message, 'info');
-    }
-
-    debug(message) {
-      console.log('[TikTok Eraser] ' + message);
-    }
-
-    progress(message) {
-      if (this.onProgress) this.onProgress(this.processedCount, message);
-    }
-
-    error(message) {
-      console.error('[TikTok Eraser] ' + message);
-      if (this.onError) this.onError(message);
+      var testidCount = document.querySelectorAll('[data-e2e]').length;
+      var labeledButtons = document.querySelectorAll('[aria-label]').length;
+      this.debug('[diagnostic] data-e2e elements: ' + testidCount);
+      this.debug('[diagnostic] aria-label elements: ' + labeledButtons);
     }
   }
 

@@ -310,7 +310,9 @@ public class SocialEraserWebViewPlugin extends Plugin {
                         event.put("type", type);
                         event.put("message", message);
                         if (payload != null) {
-                            for (String key : payload.keys()) {
+                            java.util.Iterator<String> keys = payload.keys();
+                            while (keys.hasNext()) {
+                                String key = keys.next();
                                 event.put(key, payload.opt(key));
                             }
                         }

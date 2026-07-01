@@ -1,5 +1,7 @@
 package com.socialeraser.app;
 
+import android.os.Bundle;
+
 import com.getcapacitor.BridgeActivity;
 import com.getcapacitor.Plugin;
 

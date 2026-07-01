@@ -7,7 +7,7 @@
 //   - DOMAIN 标签：TikTok 站点（videos / reposts / likes / favorites / following）
 //   - DEFAULT_I18N 5 key：cancelKeywords / confirmKeywords / deleteKeywords
 //     unfollowKeywords / repostKeywords
-//   - 备份提示：videosBackupTip / repostsBackupTip（含 TikTok archive 链接）
+//   - 备份提示：videosBackupTip（含 TikTok archive 链接）—— Reposts 备份提示已删除
 //   - 过滤器：新增 minViewCount / maxViewCount
 //   - 不含 x 特有的 pinnedKeywords / replyKeywords / unretweetKeywords
 //
@@ -48,10 +48,9 @@
       notLoggedInHint: 'Please login first',
       selectOptions: 'Select items to delete',
       videos: 'Your Videos',
-      videosBackupTip: 'Videos are permanently deleted and cannot be recovered. We recommend downloading your {link} first.',
-      archiveLinkText: 'TikTok data archive',
+      videosBackupTip: 'Videos are permanently deleted and cannot be recovered. We recommend requesting your {link} or saving important videos manually first.',
+      archiveLinkText: 'TikTok Data Archive',
       reposts: 'Reposts',
-      repostsBackupTip: 'Reposts cannot be undone separately. Deleting a repost will also remove the original video from your profile.',
       likes: 'Likes',
       favorites: 'Favorites',
       following: 'Following',
@@ -107,9 +106,7 @@
       cleanupAutoResumed: 'Cleanup auto-resumed',
       pageTypeMismatch: 'Page type mismatch, aborting',
       startingVideosCleanup: 'Starting videos cleanup',
-      repostWarning: 'WARNING: Deleting a Repost will also remove the original video from your profile.',
-      repostDeleteWarning: 'Repost cannot be undone separately — the original video will be deleted too.',
-      unrepostImpossible: 'TikTok does not support undoing reposts separately. Deletion is the only option.',
+      startingRepostsCleanup: 'Starting reposts cleanup',
       startingLikesCleanup: 'Starting likes cleanup',
       noUnlikeButtons: 'No processable content found',
       noMoreLikes: 'No more likes',
@@ -139,6 +136,8 @@
       videoSkipped: 'Video skipped',
       repostDeleted: 'Deleted repost #{count}',
       repostDeleteFailed: 'Repost delete failed: {error}',
+      repostDeleteComplete: 'Repost cleanup complete: {count} deleted',
+      likesDeleteComplete: 'Likes cleanup complete: {count} deleted',
       noMoreReposts: 'No more reposts',
       endOfReposts: 'End of reposts list',
       typeRequiresNav: '{type} requires a different page. Open it manually and try again.',
@@ -167,6 +166,8 @@
 
       // 过滤
       invalidDateRange: 'Start date cannot be later than end date',
+      invalidViewCount: 'Please enter a valid {field}',
+      invalidViewCountRange: 'Min view count cannot exceed max view count',
       noItemsMatched: 'No items matched the filter',
       dateFilterSkipped: 'Date filter skipped for {type}: no timestamp found on some items',
       cleanupStuck: 'No progress for 30s, stopping (TikTok UI may have changed)',
@@ -211,10 +212,9 @@
       notLoggedInHint: '请先登录',
       selectOptions: '选择要删除的内容',
       videos: '你的视频',
-      videosBackupTip: '视频一旦删除无法恢复，建议先下载 {link} 再清理。',
+      videosBackupTip: '视频一旦删除无法恢复，建议先去 {link} 申请归档下载再清理。',
       archiveLinkText: 'TikTok 数据归档',
       reposts: '转发',
-      repostsBackupTip: '转发不能单独撤销，删除转发会同时删除原视频。',
       likes: '点赞',
       favorites: '收藏',
       following: '关注',
@@ -268,9 +268,7 @@
       cleanupAutoResumed: '清理已自动恢复',
       pageTypeMismatch: '页面类型不匹配，中止',
       startingVideosCleanup: '开始清理视频',
-      repostWarning: '警告：删除转发会同时删除该原视频。',
-      repostDeleteWarning: '转发无法单独撤销 —— 原视频会一起被删除。',
-      unrepostImpossible: 'TikTok 不支持单独撤销转发，删除是唯一选项。',
+      startingRepostsCleanup: '开始清理转发',
       startingLikesCleanup: '开始清理点赞',
       noUnlikeButtons: '未找到可处理的内容',
       noMoreLikes: '没有更多点赞了',
@@ -300,6 +298,8 @@
       videoSkipped: '已跳过视频',
       repostDeleted: '已删除转发 #{count}',
       repostDeleteFailed: '删除转发失败: {error}',
+      repostDeleteComplete: '转发清理完成：已删除 {count} 条',
+      likesDeleteComplete: '点赞清理完成：已取消 {count} 个点赞',
       noMoreReposts: '没有更多转发了',
       endOfReposts: '转发清理完成',
       typeRequiresNav: '{type} 需要在不同的页面，请手动打开后重试。',
@@ -327,6 +327,8 @@
 
       // 过滤
       invalidDateRange: '开始日期不能晚于结束日期',
+      invalidViewCount: '请输入有效的{field}',
+      invalidViewCountRange: '最小播放量不能超过最大播放量',
       noItemsMatched: '没有匹配筛选条件的内容',
       dateFilterSkipped: '{type} 日期过滤已跳过：部分内容未找到时间戳',
       cleanupStuck: '30 秒无进展，已停止（TikTok 改版或选择器可能失效）',
@@ -370,10 +372,9 @@
       notLoggedInHint: '先にログインしてください',
       selectOptions: '削除する項目を選択',
       videos: 'あなたの動画',
-      videosBackupTip: '動画は削除すると復元できません。クリーンアップの前に {link} をダウンロードすることをおすすめします。',
+      videosBackupTip: '動画は削除後に復元できません。クリーンアップの前に {link} をダウンロードすることをおすすめします。',
       archiveLinkText: 'TikTok データアーカイブ',
       reposts: 'リポスト',
-      repostsBackupTip: 'リポストを個別に取り消すことはできません。リポストを削除すると、元の動画もプロフィールから削除されます。',
       likes: 'いいね',
       favorites: 'お気に入り',
       following: 'フォロー',
@@ -427,9 +428,7 @@
       cleanupAutoResumed: 'クリーンアップを自動再開',
       pageTypeMismatch: 'ページタイプ不一致、中止',
       startingVideosCleanup: '動画のクリーンアップを開始',
-      repostWarning: '警告：リポストを削除すると、元の動画もプロフィールから削除されます。',
-      repostDeleteWarning: 'リポストは個別に取り消せません — 元の動画も削除されます。',
-      unrepostImpossible: 'TikTok はリポストの個別取り消しをサポートしていません。削除のみが選択肢です。',
+      startingRepostsCleanup: 'リポストのクリーンアップを開始',
       startingLikesCleanup: 'いいねのクリーンアップを開始',
       noUnlikeButtons: '処理対象が見つかりません',
       noMoreLikes: 'もういいねはありません',
@@ -459,6 +458,8 @@
       videoSkipped: '動画をスキップしました',
       repostDeleted: 'リポスト #{count} を削除しました',
       repostDeleteFailed: 'リポスト削除失敗: {error}',
+      repostDeleteComplete: 'リポストのクリーンアップ完了: {count} 件削除',
+      likesDeleteComplete: 'いいねのクリーンアップ完了: {count} 件解除',
       noMoreReposts: 'これ以上のリポストはありません',
       endOfReposts: 'リポストのクリーンアップが完了',
       typeRequiresNav: '{type} には別のページが必要です。手動で開いて再試行してください。',
@@ -485,6 +486,8 @@
       summaryStats: '{types} 種類 · {duration}',
 
       invalidDateRange: '開始日は終了日より後にできません',
+      invalidViewCount: '{field}を正しく入力してください',
+      invalidViewCountRange: '最小再生回数は最大再生回数を超えることはできません',
       noItemsMatched: 'フィルター条件に一致する項目がありません',
       dateFilterSkipped: '{type} の日付フィルターをスキップ：一部の項目にタイムスタンプがありません',
       cleanupStuck: '30秒間進展なし、停止しました（TikTokの仕様変更またはセレクタ無効の可能性）',
@@ -527,10 +530,9 @@
       notLoggedInHint: '먼저 로그인하세요',
       selectOptions: '삭제할 항목 선택',
       videos: '내 동영상',
-      videosBackupTip: '동영상은 삭제되면 복구할 수 없습니다. 정리하기 전에 먼저 {link} 신청을 권장합니다.',
+      videosBackupTip: '동영상은 삭제하면 복구할 수 없습니다. 정리하기 전에 먼저 {link} 신청을 권장합니다.',
       archiveLinkText: 'TikTok 데이터 아카이브',
       reposts: '리포스트',
-      repostsBackupTip: '리포스트는 개별 취소가 불가능합니다. 리포스트를 삭제하면 원본 동영상도 프로필에서 제거됩니다.',
       likes: '좋아요',
       favorites: '즐겨찾기',
       following: '팔로잉',
@@ -584,9 +586,7 @@
       cleanupAutoResumed: '정리 자동 재개됨',
       pageTypeMismatch: '페이지 유형 불일치, 중단',
       startingVideosCleanup: '동영상 정리 시작',
-      repostWarning: '경고: 리포스트를 삭제하면 원본 동영상도 프로필에서 제거됩니다.',
-      repostDeleteWarning: '리포스트는 개별 취소 불가 — 원본 동영상도 삭제됩니다.',
-      unrepostImpossible: 'TikTok는 리포스트 개별 취소를 지원하지 않습니다. 삭제만 가능합니다.',
+      startingRepostsCleanup: '리포스트 정리 시작',
       startingLikesCleanup: '좋아요 정리 시작',
       noUnlikeButtons: '처리할 내용을 찾을 수 없음',
       noMoreLikes: '더 이상 좋아요 없음',
@@ -616,6 +616,8 @@
       videoSkipped: '동영상 건너뜀',
       repostDeleted: '리포스트 #{count} 삭제됨',
       repostDeleteFailed: '리포스트 삭제 실패: {error}',
+      repostDeleteComplete: '리포스트 정리 완료: {count}개 삭제됨',
+      likesDeleteComplete: '좋아요 정리 완료: {count}개 취소됨',
       noMoreReposts: '더 이상 리포스트 없음',
       endOfReposts: '리포스트 정리 완료',
       typeRequiresNav: '{type}은(는) 다른 페이지가 필요합니다. 수동으로 열고 다시 시도하세요.',
@@ -641,6 +643,8 @@
       summaryStats: '{types}종 · {duration}',
 
       invalidDateRange: '시작 날짜는 종료 날짜보다 늦을 수 없습니다',
+      invalidViewCount: '유효한 {field}을(를) 입력하세요',
+      invalidViewCountRange: '최소 조회수는 최대 조회수를 초과할 수 없습니다',
       noItemsMatched: '필터 조건과 일치하는 항목이 없습니다',
       dateFilterSkipped: '{type} 날짜 필터 건너뜀: 일부 항목에 타임스탬프가 없습니다',
       cleanupStuck: '30초간 진행 없음, 중지 (TikTok UI 변경 또는 선택기 실패 가능성)',
@@ -686,7 +690,6 @@
       videosBackupTip: 'Os vídeos são excluídos permanentemente e não podem ser recuperados. Recomendamos baixar seu {link} antes de limpar.',
       archiveLinkText: 'arquivo de dados do TikTok',
       reposts: 'Reposts',
-      repostsBackupTip: 'Reposts não podem ser desfeitos separadamente. Excluir um repost também removerá o vídeo original do seu perfil.',
       likes: 'Curtidas',
       favorites: 'Favoritos',
       following: 'Seguindo',
@@ -740,9 +743,7 @@
       cleanupAutoResumed: 'Limpeza retomada automaticamente',
       pageTypeMismatch: 'Tipo de página incorreto, abortando',
       startingVideosCleanup: 'Iniciando limpeza de vídeos',
-      repostWarning: 'AVISO: Excluir um Repost também removerá o vídeo original do seu perfil.',
-      repostDeleteWarning: 'Repost não pode ser desfeito separadamente — o vídeo original também será excluído.',
-      unrepostImpossible: 'TikTok não suporta desfazer reposts separadamente. Excluir é a única opção.',
+      startingRepostsCleanup: 'Iniciando limpeza de reposts',
       startingLikesCleanup: 'Iniciando limpeza de curtidas',
       noUnlikeButtons: 'Nenhum conteúdo processável encontrado',
       noMoreLikes: 'Não há mais curtidas',
@@ -772,6 +773,8 @@
       videoSkipped: 'Vídeo pulado',
       repostDeleted: 'Repost #{count} excluído',
       repostDeleteFailed: 'Falha ao excluir repost: {error}',
+      repostDeleteComplete: 'Limpeza de reposts concluída: {count} excluídos',
+      likesDeleteComplete: 'Limpeza de curtidas concluída: {count} removidas',
       noMoreReposts: 'Não há mais reposts',
       endOfReposts: 'Fim dos reposts',
       typeRequiresNav: '{type} requer uma página diferente. Abra manualmente e tente novamente.',
@@ -797,6 +800,8 @@
       summaryStats: '{types} tipos · {duration}',
 
       invalidDateRange: 'A data inicial não pode ser posterior à data final',
+      invalidViewCount: 'Insira um {field} válido',
+      invalidViewCountRange: 'O mínimo de visualizações não pode exceder o máximo',
       noItemsMatched: 'Nenhum item corresponde ao filtro',
       dateFilterSkipped: 'Filtro de data pulado para {type}: timestamp não encontrado em alguns itens',
       cleanupStuck: 'Sem progresso por 30s, parando (a interface do TikTok pode ter mudado)',
@@ -842,7 +847,6 @@
       videosBackupTip: 'Los videos eliminados no se pueden recuperar. Te recomendamos descargar tu {link} antes de limpiar.',
       archiveLinkText: 'archivo de datos de TikTok',
       reposts: 'Reposts',
-      repostsBackupTip: 'Los reposts no se pueden deshacer por separado. Eliminar un repost también eliminará el video original de tu perfil.',
       likes: 'Me gusta',
       favorites: 'Favoritos',
       following: 'Siguiendo',
@@ -896,9 +900,7 @@
       cleanupAutoResumed: 'Limpieza auto-reanudada',
       pageTypeMismatch: 'Tipo de página no coincide, abortando',
       startingVideosCleanup: 'Iniciando limpieza de videos',
-      repostWarning: 'ADVERTENCIA: Eliminar un Repost también eliminará el video original de tu perfil.',
-      repostDeleteWarning: 'El Repost no se puede deshacer por separado — el video original también se eliminará.',
-      unrepostImpossible: 'TikTok no permite deshacer reposts por separado. Eliminar es la única opción.',
+      startingRepostsCleanup: 'Iniciando limpieza de reposts',
       startingLikesCleanup: 'Iniciando limpieza de likes',
       noUnlikeButtons: 'No se encontró contenido procesable',
       noMoreLikes: 'No hay más likes',
@@ -928,6 +930,8 @@
       videoSkipped: 'Video omitido',
       repostDeleted: 'Repost #{count} eliminado',
       repostDeleteFailed: 'Error al eliminar repost: {error}',
+      repostDeleteComplete: 'Limpieza de reposts completada: {count} eliminados',
+      likesDeleteComplete: 'Limpieza de likes completada: {count} eliminados',
       noMoreReposts: 'No hay más reposts',
       endOfReposts: 'Limpieza de reposts completada',
       typeRequiresNav: '{type} requiere una página diferente. Ábrela manualmente e inténtalo de nuevo.',
@@ -953,6 +957,8 @@
       summaryStats: '{types} tipos · {duration}',
 
       invalidDateRange: 'La fecha de inicio no puede ser posterior a la fecha de fin',
+      invalidViewCount: 'Introduce un {field} válido',
+      invalidViewCountRange: 'El mínimo de reproducciones no puede superar el máximo',
       noItemsMatched: 'Ningún elemento coincide con el filtro',
       dateFilterSkipped: 'Filtro de fecha omitido para {type}: no se encontró marca temporal en algunos elementos',
       cleanupStuck: 'Sin progreso en 30s, deteniendo (posible cambio de UI o selector inválido)',
@@ -998,7 +1004,6 @@
       videosBackupTip: 'Videos sind nach dem Löschen nicht wiederherstellbar. Wir empfehlen, vorher dein {link} herunterzuladen.',
       archiveLinkText: 'TikTok-Datenarchiv',
       reposts: 'Reposts',
-      repostsBackupTip: 'Reposts können nicht separat rückgängig gemacht werden. Das Löschen eines Reposts entfernt auch das Originalvideo aus deinem Profil.',
       likes: 'Likes',
       favorites: 'Favoriten',
       following: 'Gefolgte',
@@ -1052,9 +1057,7 @@
       cleanupAutoResumed: 'Bereinigung automatisch fortgesetzt',
       pageTypeMismatch: 'Seitentyp stimmt nicht, abgebrochen',
       startingVideosCleanup: 'Starte Video-Bereinigung',
-      repostWarning: 'WARNUNG: Das Löschen eines Reposts entfernt auch das Originalvideo aus deinem Profil.',
-      repostDeleteWarning: 'Repost kann nicht separat rückgängig gemacht werden — das Originalvideo wird ebenfalls gelöscht.',
-      unrepostImpossible: 'TikTok unterstützt kein separates Rückgängigmachen von Reposts. Löschen ist die einzige Option.',
+      startingRepostsCleanup: 'Starte Reposts-Bereinigung',
       startingLikesCleanup: 'Starte Likes-Bereinigung',
       noUnlikeButtons: 'Kein verarbeitbarer Inhalt gefunden',
       noMoreLikes: 'Keine weiteren Likes',
@@ -1084,6 +1087,8 @@
       videoSkipped: 'Video übersprungen',
       repostDeleted: 'Repost #{count} gelöscht',
       repostDeleteFailed: 'Repost-Löschung fehlgeschlagen: {error}',
+      repostDeleteComplete: 'Repost-Bereinigung abgeschlossen: {count} gelöscht',
+      likesDeleteComplete: 'Like-Bereinigung abgeschlossen: {count} entfernt',
       noMoreReposts: 'Keine weiteren Reposts',
       endOfReposts: 'Repost-Bereinigung abgeschlossen',
       typeRequiresNav: '{type} benötigt eine andere Seite. Bitte manuell öffnen und erneut versuchen.',
@@ -1109,6 +1114,8 @@
       summaryStats: '{types} Typen · {duration}',
 
       invalidDateRange: 'Das Startdatum darf nicht nach dem Enddatum liegen',
+      invalidViewCount: 'Bitte gib ein gültiges {field} ein',
+      invalidViewCountRange: 'Die minimale Anzahl an Aufrufen darf die maximale nicht überschreiten',
       noItemsMatched: 'Keine Elemente entsprechen dem Filter',
       dateFilterSkipped: 'Datumsfilter für {type} übersprungen: bei einigen Elementen wurde kein Zeitstempel gefunden',
       cleanupStuck: 'Keine Fortschritte seit 30s, wird beendet (UI-Änderung oder Selektor-Fehler möglich)',
@@ -1151,10 +1158,9 @@
       notLoggedInHint: 'Veuillez vous connecter d\'abord',
       selectOptions: 'Sélectionner les éléments à supprimer',
       videos: 'Vos vidéos',
-      videosBackupTip: 'Les vidéos supprimées ne peuvent pas être récupérées. Nous vous recommandons de télécharger votre {link} avant le nettoyage.',
+      videosBackupTip: 'Les vidéos supprimés ne peuvent pas être récupérés. Nous vous recommandons de télécharger votre {link} avant le nettoyage.',
       archiveLinkText: 'archive de données TikTok',
       reposts: 'Reposts',
-      repostsBackupTip: 'Les reposts ne peuvent pas être annulés séparément. Supprimer un repost supprimera également la vidéo originale de votre profil.',
       likes: 'J\'aime',
       favorites: 'Favoris',
       following: 'Abonnements',
@@ -1208,9 +1214,7 @@
       cleanupAutoResumed: 'Nettoyage auto-repris',
       pageTypeMismatch: 'Type de page incorrect, annulé',
       startingVideosCleanup: 'Démarrage nettoyage des vidéos',
-      repostWarning: 'AVERTISSEMENT : Supprimer un Repost supprimera aussi la vidéo originale de votre profil.',
-      repostDeleteWarning: 'Le Repost ne peut pas être annulé séparément — la vidéo originale sera aussi supprimée.',
-      unrepostImpossible: 'TikTok ne permet pas d\'annuler les reposts séparément. La suppression est la seule option.',
+      startingRepostsCleanup: 'Démarrage nettoyage des reposts',
       startingLikesCleanup: 'Démarrage nettoyage des j\'aime',
       noUnlikeButtons: 'Aucun contenu traitable trouvé',
       noMoreLikes: 'Plus de j\'aime',
@@ -1240,6 +1244,8 @@
       videoSkipped: 'Vidéo ignorée',
       repostDeleted: 'Repost #{count} supprimé',
       repostDeleteFailed: 'Échec de la suppression du repost: {error}',
+      repostDeleteComplete: 'Nettoyage des reposts terminé: {count} supprimés',
+      likesDeleteComplete: 'Nettoyage des likes terminé: {count} retirés',
       noMoreReposts: 'Plus de reposts',
       endOfReposts: 'Nettoyage des reposts terminé',
       typeRequiresNav: '{type} nécessite une autre page. Ouvrez-la manuellement et réessayez.',
@@ -1265,6 +1271,8 @@
       summaryStats: '{types} types · {duration}',
 
       invalidDateRange: 'La date de début ne peut pas être postérieure à la date de fin',
+      invalidViewCount: 'Veuillez saisir un {field} valide',
+      invalidViewCountRange: 'Le nombre minimum de vues ne peut pas dépasser le maximum',
       noItemsMatched: 'Aucun élément ne correspond au filtre',
       dateFilterSkipped: 'Filtre de date ignoré pour {type} : aucun horodatage trouvé sur certains éléments',
       cleanupStuck: 'Aucun progrès depuis 30s, arrêt (changement d\'UI ou sélecteur invalide possible)',
@@ -1370,6 +1378,17 @@
       'Quitar repost',             // es
       'Repost entfernen',          // de
       'Annuler le repost'          // fr
+    ],
+    // 视频播放页 "下一条" 按钮的 aria-label（[data-e2e="arrow-right"] 的备用选择器）
+    nextVideoKeywords: [
+      'Go to next video',          // en
+      '下一个视频',                // zh-CN
+      '次の動画へ',                // ja
+      '다음 동영상 보기',           // ko
+      'Ir para o próximo vídeo',   // pt
+      'Ir al siguiente video',     // es
+      'Nächstes Video',            // de
+      'Vidéo suivante'             // fr
     ]
   };
 

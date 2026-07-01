@@ -123,6 +123,24 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
       message.type === 'resumeCleanup' ||
       message.type === 'stopCleanup' ||
       message.type === 'getCleanupStatus') {
+
+    // 2026-06-29 修复（用户反馈"Stop 不生效"）:
+    //   跨页跳转时 content script 被销毁，新 content script 启动时 checkAndResumePendingCleanup
+    //   仍能从 session.pendingCleanup 读到 pending 状态开新一轮。stopCleanup 进来时同步：
+    //     1) 清掉 session.pendingCleanup（新 content script 看不到 → 不 resume）
+    //     2) 写 session.userStoppedAt=now（auto-resume 启动时再保险读一次）
+    if (message.type === 'stopCleanup') {
+      try {
+        chrome.storage.session.set({ userStoppedAt: Date.now() });
+      } catch (e) { /* 兜底 */ }
+      chrome.storage.session.remove('pendingCleanup').catch(function() {});
+    }
+    if (message.type === 'startCleanup') {
+      try {
+        chrome.storage.session.remove('userStoppedAt');
+      } catch (e) {}
+    }
+
     getTikTokTab().then(function(tab) {
       if (tab) {
         activeTabId = tab.id;
@@ -151,6 +169,10 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
       message.type === 'cleanupResumed' ||
       message.type === 'cleanupStopped' ||
       message.type === 'statusUpdate')) {
+    if (message.type === 'cleanupComplete') {
+      chrome.storage.session.remove('pendingCleanup').catch(function() {});
+      chrome.storage.session.remove('deletedRepostUrls').catch(function() {});
+    }
     sendResponse({ received: true });
     return false;
   }
@@ -174,6 +196,14 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     return true;
   }
 
+  // 2026-06-29 新增（userStoppedAt 防线）
+  if (message.target === 'readUserStopped') {
+    chrome.storage.session.get('userStoppedAt').then(function(result) {
+      sendResponse({ userStoppedAt: (result && result.userStoppedAt) ? result.userStoppedAt : null });
+    });
+    return true;
+  }
+
   if (message.target === 'updatePendingCleanup') {
     chrome.storage.session.set({ pendingCleanup: message.pending }).then(function() {
       sendResponse({ success: true });
@@ -183,6 +213,35 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
 
   if (message.target === 'clearPendingCleanup') {
     chrome.storage.session.remove('pendingCleanup').then(function() {
+      sendResponse({ success: true });
+    });
+    return true;
+  }
+
+  // 2026-06-29 新增：repost forcePageLoad fallback 用
+  if (message.target === 'writeRepostsTargetUrl') {
+    chrome.storage.session.set({ repostsTargetUrl: message.url }).then(function() {
+      sendResponse({ success: true });
+    });
+    return true;
+  }
+
+  if (message.target === 'readRepostsTargetUrl') {
+    chrome.storage.session.get(['repostsTargetUrl']).then(function(resp) {
+      sendResponse({ url: (resp && resp.repostsTargetUrl) || null });
+    });
+    return true;
+  }
+
+  if (message.target === 'readDeletedRepostUrls') {
+    chrome.storage.session.get(['deletedRepostUrls']).then(function(resp) {
+      sendResponse({ urls: (resp && resp.deletedRepostUrls) || [] });
+    });
+    return true;
+  }
+
+  if (message.target === 'writeDeletedRepostUrls') {
+    chrome.storage.session.set({ deletedRepostUrls: message.urls }).then(function() {
       sendResponse({ success: true });
     });
     return true;

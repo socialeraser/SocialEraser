@@ -35,15 +35,22 @@ function assert(cond, label) {
 }
 
 // 递归按 key 字母排序（用于忽略 JSON key 顺序对字符串比较的影响）
+// 排除 _comment 字段（元数据，非 selector —— 跟 check-schema.js 行为一致）
 function sortKeysDeep(obj) {
   if (Array.isArray(obj)) return obj.map(sortKeysDeep);
   if (obj && typeof obj === 'object') {
     return Object.keys(obj).sort().reduce((acc, k) => {
+      if (k.startsWith('_')) return acc;
       acc[k] = sortKeysDeep(obj[k]);
       return acc;
     }, {});
   }
   return obj;
+}
+
+// 剥除 _comment 字段后的纯 JSON 文本（用于字节级比较）
+function stripComments(s) {
+  return s.replace(/"_[A-Za-z_]+"\s*:\s*"[^"]*"\s*,?\s*/g, '').replace(/,(\s*[}\]])/g, '$1');
 }
 
 console.log('=== verify-tiktok-config-sync.js ===');
@@ -91,12 +98,12 @@ assert(
   'selectors 内容语义一致（排序后 stringify 比对）'
 );
 
-// 7. 字节级一致
-const defaultBytes = fs.readFileSync(DEFAULT_CFG_PATH, 'utf8');
-const remoteBytes = fs.readFileSync(REMOTE_CFG_PATH, 'utf8');
+// 7. 字节级一致（剥除 _comment 字段后）
+const defaultBytes = stripComments(fs.readFileSync(DEFAULT_CFG_PATH, 'utf8'));
+const remoteBytes = stripComments(fs.readFileSync(REMOTE_CFG_PATH, 'utf8'));
 assert(
   defaultBytes === remoteBytes,
-  '两个文件字节级完全一致（' + defaultBytes.length + ' bytes / ' + remoteBytes.length + ' bytes）'
+  '两个文件 _comment 字段剥除后内容一致（' + defaultBytes.length + ' bytes / ' + remoteBytes.length + ' bytes）'
 );
 
 // 8. tiktokWebsite.patterns 必含 tiktok.com + www.tiktok.com

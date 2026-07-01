@@ -73,12 +73,21 @@
       ]
     },
     "common": {
+      "_comment_navProfile": "导航栏 profile 链接（任何登录页都有），点击后 TikTok SPA 跳到当前用户的 /@user 主页。repost cleanup 用来从任意页面导航到 profile。",
+      "navProfile": [
+        "[data-e2e='nav-profile']"
+      ],
       "articleContainers": [
         "[data-e2e='user-post-item']",
         "[data-e2e='user-liked-item']",
         "[data-e2e='user-favorite-item']",
         "[data-e2e='user-following-item']",
-        "article"
+        "article",
+        "[data-testid='cellInnerDiv']"
+      ],
+      "_comment_videoAnchor": "repost card 内指向原视频的 <a> 链接。",
+      "videoAnchor": [
+        "a[href*='/video/']"
       ],
       "_comment_videoMoreButtons": "DEPRECATED for videos (TikTok 2026 hides 'More' on profile cards). Kept as fallback for reposts when DOM still has them. Video deletion now uses videoActionButton + videoStudioUrl.",
       "videoMoreButtons": [
@@ -128,6 +137,10 @@
       "videoConfirmButton": [
         "button[data-tt='components_Modal_TUXButton']"
       ],
+      "_comment_videoPostInfoCell": "Studio row 内帖子信息容器（含视频标题/日期），用于排除 header 行（header 也有 RowLayout_FlexRow 但没有 PostInfoCell）。",
+      "videoPostInfoCell": [
+        "[data-tt='components_PostInfoCell_Container']"
+      ],
       "_comment_confirmButton": "Generic confirmButton (legacy); for TikTok Studio prefer videoConfirmButton + i18n deleteKeywords text match (primary button has class css-y1m958; cancel has css-35jbna).",
       "confirmButton": [
         "button[data-tt='confirm']",
@@ -138,6 +151,12 @@
         "[data-tt='components_PublishStageLabel_TUXText']",
         "[data-e2e='social-context']",
         "[data-testid='socialContext']"
+      ],
+      "_comment_dismissOverlays": "系统级遮挡弹窗 selector，click share button 前/后会 .remove()。2026-06-29 实测：Notifications dialog 会拦截 share dialog 内的 click 事件。安全检查会排除 data-e2e 以 'share-' 开头的元素（share dialog 自身）。",
+      "dismissOverlays": [
+        "[role=\"dialog\"][aria-label=\"Notifications\"]",
+        "[role=\"dialog\"][aria-label=\"Messages\"]",
+        "[role=\"dialog\"][aria-label=\"Inbox\"]"
       ],
       "_comment_timeElement": "TikTok Studio 帖子时间在 PublishStageLabel_TUXText（中文格式 '6月29日 14:13'，需要 parseStudioDateText 解析），不是 HTML5 <time>。",
       "timeElement": [
@@ -175,18 +194,38 @@
       }
     },
     "like": {
+      "_comment_likedItem": "Profile Liked tab 列表上的 video card 容器（点击进入 video page）。\n      MCP 实证（@ping.xiang1 登录态 Liked tab，13 个 video cards，data-e2e=user-liked-item）：\n      每个 card 是 DivContainer-StyledDivContainerV2 class 的 wrapper div，\n      内部嵌 a[href*=/video/] 指向 video page，img 是缩略图，button 是'全屏观看'。\n      跟 Reposts 流程一致：进 video page 直接点 [data-e2e='browse-like-icon'] 取消点赞，\n      不要在 list 列表上点 [data-e2e='like-icon']（那是点单条 video 的 like，不是取消已点赞的）。",
+    "likedItem": [
+      "[data-e2e='user-liked-item']"
+    ],
+      "_comment_likedTab": "Profile 主页的 Liked tab。",
+      "likedTab": [
+        "[data-e2e='liked-tab']",
+        "[class*='PLiked']"
+      ],
+      "_comment_videoBrowseLikeIcon": "视频播放页上**直接**的「取消点赞」心形 button。\n      2026-07-01 用户实测：<button type='button' aria-label='1M Likes' aria-pressed='true'>\n                          <span data-e2e='browse-like-icon'><svg fill='rgba(255,59,92,1)' ...>heart</svg></span>\n                          <strong data-e2e='browse-like-count'>1M</strong>\n                        </button>\n      跟 Reposts 流程一致：进 video page 直接点这个心形就行，不走 unlike dialog。\n      8 语言 aria-label 备选（基于 2026-07-01 MCP 切语言实证 foryou 未点赞 + 用户给 en 已点赞例子推断）：\n        en: Like video X likes / 已点赞 X Likes\n        de: Video einen Like geben X Likes / 已点赞 X Likes（de 保留英语 Likes）\n        ja: 動画に「いいね」する X件の「いいね」/ 已点赞 X件の「いいね」\n        ko: 동영상에 좋아요 누르기 X개의 좋아요 / 已点赞 X개의 좋아요\n        zh-Hans: 点赞视频 X 个赞 / 已点赞 X 个赞\n        es: Dar me gusta a un video X me gusta / 已点赞 X me gusta\n        fr: Laisser un j'aime sur la vidéo X j'aime / 已点赞 X j'aime\n        pt-BR: Curtir vídeo X curtidas / 已点赞 X curtidas",
+      "videoBrowseLikeIcon": [
+        "[data-e2e='browse-like-icon']",
+        "button[aria-pressed='true'] [data-e2e='browse-like-icon']",
+        "button[aria-label*='Likes'] [data-e2e='browse-like-icon']",
+        "button[aria-label*='いいね'] [data-e2e='browse-like-icon']",
+        "button[aria-label*='좋아요'] [data-e2e='browse-like-icon']",
+        "button[aria-label*='赞'] [data-e2e='browse-like-icon']",
+        "button[aria-label*='me gusta'] [data-e2e='browse-like-icon']",
+        "button[aria-label*=\"j'aime\"] [data-e2e='browse-like-icon']",
+        "button[aria-label*='curtidas'] [data-e2e='browse-like-icon']"
+      ],
       "unlikeButtons": [
         "[data-e2e='like-icon']",
         "[data-e2e='browse-like']",
-        "button[aria-label*='Liked']",
-        "button[aria-label*='Unlike']",
-        "button[aria-label*='已点赞']",
-        "button[aria-label*='いいね済み']",
-        "button[aria-label*='마음에 들어함']",
-        "button[aria-label*='Curtiu']",
-        "button[aria-label*='Me gusta']",
-        "button[aria-label*='Gefällt mir']",
-        "button[aria-label*=\"J'aime\"]"
+        "button[aria-pressed='true'] [data-e2e='browse-like-icon']",
+        "button[aria-label*='Likes'] [data-e2e='browse-like-icon']",
+        "button[aria-label*='いいね'] [data-e2e='browse-like-icon']",
+        "button[aria-label*='좋아요'] [data-e2e='browse-like-icon']",
+        "button[aria-label*='赞'] [data-e2e='browse-like-icon']",
+        "button[aria-label*='me gusta'] [data-e2e='browse-like-icon']",
+        "button[aria-label*=\"j'aime\"] [data-e2e='browse-like-icon']",
+        "button[aria-label*='curtidas'] [data-e2e='browse-like-icon']"
       ]
     },
     "favorite": {
@@ -221,19 +260,36 @@
       ]
     },
     "repost": {
+      "_comment_cardMarker": "Profile Reposts tab 上的 repost card 容器。",
       "cardMarker": [
         "[data-e2e='repost']",
         "[data-e2e='repost-card']"
       ],
+      "_comment_repostTab": "Profile 主页 Reposts tab。",
       "repostTab": [
         "[data-e2e='repost-tab']"
       ],
+      "_comment_repostItem": "Reposts tab 中的每条 repost item。",
       "repostItem": [
         "[data-e2e='user-repost-item']"
       ],
+      "_comment_shareRepost": "DEPRECATED：share dialog 里的 [data-e2e='share-repost']。TikTok 2026 改成走 video-share-repost 直接在视频页取消（见下）。保留以备回退。",
       "shareRepost": [
         "[data-e2e='share-repost']"
       ],
+      "_comment_videoShareRepost": "视频播放页上**直接**的「取消转发」按钮（不是 share dialog 里的）。\n      2026-06-29 实测（看了用户给的 html.txt）: <a id='icon-element-repost' mode='0' data-e2e='video-share-repost' aria-label='Remove repost' href='#' class='css-1m97dup-...--AShareLink'>\n      整个 share dialog 流程是错的！直接点这个 <a> 元素就取消转发。\n      增加 aria-label 备选：跨语言兼容",
+      "videoShareRepost": [
+        "[data-e2e='video-share-repost']",
+        "a[aria-label*='Remove repost']",
+        "a[aria-label*='取消转发']",
+        "a[aria-label*='リポストを取り消す']",
+        "a[aria-label*='리포스트 취소']",
+        "button[aria-label*='Remove repost']",
+        "button[aria-label*='取消转发']",
+        "button[aria-label*='リポストを取り消す']",
+        "button[aria-label*='리포스트 취소']"
+      ],
+      "_comment_actionBar": "DEPRECATED：原版用 [class*='SectionActionBarContainer'] 找 action bar 来定位 share 按钮。\n      新版 _removeRepostFromVideoPage 不走 action bar 也不走 share dialog，直接找 videoShareRepost。保留以备回退。",
       "actionBar": [
         "[class*='SectionActionBarContainer']"
       ]
@@ -298,9 +354,19 @@
         "Quitar repost",
         "Repost entfernen",
         "Annuler le repost"
+      ],
+      "nextVideoKeywords": [
+        "Go to next video",
+        "下一个视频",
+        "次の動画へ",
+        "다음 동영상 보기",
+        "Ir para o próximo vídeo",
+        "Ir al siguiente video",
+        "Nächstes Video",
+        "Vidéo suivante"
       ]
     }
   },
-  "updated": "2026-06-29",
-  "version": "1.0.0"
+  "updated": "2026-06-30",
+  "version": "1.0.1"
 }

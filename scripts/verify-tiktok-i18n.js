@@ -136,7 +136,7 @@ const requiredKeys = [
   // 状态
   'loggedIn', 'notLoggedIn', 'checking', 'tiktokWebsiteDetected',
   // 备份提示
-  'videosBackupTip', 'repostsBackupTip',
+  'videosBackupTip',
   // 弹窗
   'dailyLimitReachedHint', 'dailyLimitReached', 'noItemsSelected',
   // 日志

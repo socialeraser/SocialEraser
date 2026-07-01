@@ -45,6 +45,7 @@ const ALL_SCRIPTS = [
   'verify-tiktok-i18n.js',
   'verify-actual-tiktok-selectors.js',
   'verify-tiktok-config-sync.js',
+  'verify-tiktok-keys-coverage.js',
 ];
 
 function parseArgs(argv) {
