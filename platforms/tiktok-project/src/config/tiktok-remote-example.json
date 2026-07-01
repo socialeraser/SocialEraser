@@ -194,13 +194,16 @@
       }
     },
     "like": {
-      "likedItem": [
+      "_comment_likedItem": "Profile Liked tab 列表上的 video card 容器（点击进入 video page）。\n      MCP 实证（@ping.xiang1 登录态 Liked tab，13 个 video cards，data-e2e=user-liked-item）：\n      每个 card 是 DivContainer-StyledDivContainerV2 class 的 wrapper div，\n      内部嵌 a[href*=/video/] 指向 video page，img 是缩略图，button 是'全屏观看'。\n      跟 Reposts 流程一致：进 video page 直接点 [data-e2e='browse-like-icon'] 取消点赞，\n      不要在 list 列表上点 [data-e2e='like-icon']（那是点单条 video 的 like，不是取消已点赞的）。",
+    "likedItem": [
       "[data-e2e='user-liked-item']"
     ],
+      "_comment_likedTab": "Profile 主页的 Liked tab。",
       "likedTab": [
         "[data-e2e='liked-tab']",
         "[class*='PLiked']"
       ],
+      "_comment_videoBrowseLikeIcon": "视频播放页上**直接**的「取消点赞」心形 button。\n      2026-07-01 用户实测：<button type='button' aria-label='1M Likes' aria-pressed='true'>\n                          <span data-e2e='browse-like-icon'><svg fill='rgba(255,59,92,1)' ...>heart</svg></span>\n                          <strong data-e2e='browse-like-count'>1M</strong>\n                        </button>\n      跟 Reposts 流程一致：进 video page 直接点这个心形就行，不走 unlike dialog。\n      8 语言 aria-label 备选（基于 2026-07-01 MCP 切语言实证 foryou 未点赞 + 用户给 en 已点赞例子推断）：\n        en: Like video X likes / 已点赞 X Likes\n        de: Video einen Like geben X Likes / 已点赞 X Likes（de 保留英语 Likes）\n        ja: 動画に「いいね」する X件の「いいね」/ 已点赞 X件の「いいね」\n        ko: 동영상에 좋아요 누르기 X개의 좋아요 / 已点赞 X개의 좋아요\n        zh-Hans: 点赞视频 X 个赞 / 已点赞 X 个赞\n        es: Dar me gusta a un video X me gusta / 已点赞 X me gusta\n        fr: Laisser un j'aime sur la vidéo X j'aime / 已点赞 X j'aime\n        pt-BR: Curtir vídeo X curtidas / 已点赞 X curtidas",
       "videoBrowseLikeIcon": [
         "[data-e2e='browse-like-icon']",
         "button[aria-pressed='true'] [data-e2e='browse-like-icon']",
@@ -274,18 +277,18 @@
       "shareRepost": [
         "[data-e2e='share-repost']"
       ],
-      "_comment_videoShareRepost": "视频播放页上**直接**的「取消转发」按钮（不是 share dialog 里的）。\n      2026-06-29 实测（看了用户给的 html.txt）: <a id='icon-element-repost' mode='0' data-e2e='video-share-repost' aria-label='Remove repost' href='#' class='css-1m97dup-...--AShareLink'>\n      整个 share dialog 流程是错的！直接点这个 <a> 元素就取消转发。\n      增加 aria-label 备选：跨语言兼容",
       "videoShareRepost": [
-        "[data-e2e='video-share-repost']",
-        "a[aria-label*='Remove repost']",
-        "a[aria-label*='取消转发']",
-        "a[aria-label*='リポストを取り消す']",
-        "a[aria-label*='리포스트 취소']",
-        "button[aria-label*='Remove repost']",
-        "button[aria-label*='取消转发']",
-        "button[aria-label*='リポストを取り消す']",
-        "button[aria-label*='리포스트 취소']"
+        "a#icon-element-repost[data-e2e='video-share-repost']",
+        "a#icon-element-repost[aria-label='Remove repost']",
+        "a#icon-element-repost[aria-label='移除转发']",
+        "a#icon-element-repost[aria-label='再投稿を削除']",
+        "a#icon-element-repost[aria-label='리포스트 삭제']",
+        "a#icon-element-repost[aria-label='Remover republicação']",
+        "a#icon-element-repost[aria-label='Eliminar la publicación compartida']",
+        "a#icon-element-repost[aria-label='Erneute Veröffentlichung entfernen']",
+        "a#icon-element-repost[aria-label='Supprimer la republication']"
       ],
+      "_comment_videoShareRepostAria": "8 语言 aria-label **实测**值（2026-07-02 MCP 浏览器对 l702362 视频切 8 语言读取 DOM）。\n      **注意：之前猜的多项错误**，例如：\n        - pt-BR 真实是 \"Remover republicação\"（不是 \"Remover repost\"）\n        - es-ES 真实是 \"Eliminar la publicación compartida\"（不是 \"Quitar repost\"）\n        - de-DE 真实是 \"Erneute Veröffentlichung entfernen\"（不是 \"Repost entfernen\"）\n        - fr-FR 真实是 \"Supprimer la republication\"（不是 \"Annuler le repost\"）\n      8 语言 aria-label 都是 8 种不同表达，**绝不能用 substring 模糊匹配**（'Remove' 在 ja/ko/zh/de/fr/pt/es 中都不存在）。\n      用等值匹配 [aria-label='xxx']：\n        - 已转发状态：aria-label = 8 种 'Remove' 变体之一\n        - 未转发状态：aria-label = 8 种 'Repost' 变体之一（不能点，会变 'Repost'，触发重复点击问题）\n      automation.js 先用 aria-label 等值匹配判定状态再点。",
       "_comment_actionBar": "DEPRECATED：原版用 [class*='SectionActionBarContainer'] 找 action bar 来定位 share 按钮。\n      新版 _removeRepostFromVideoPage 不走 action bar 也不走 share dialog，直接找 videoShareRepost。保留以备回退。",
       "actionBar": [
         "[class*='SectionActionBarContainer']"

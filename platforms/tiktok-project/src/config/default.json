@@ -277,18 +277,18 @@
       "shareRepost": [
         "[data-e2e='share-repost']"
       ],
-      "_comment_videoShareRepost": "视频播放页上**直接**的「取消转发」按钮（不是 share dialog 里的）。\n      2026-06-29 实测（看了用户给的 html.txt）: <a id='icon-element-repost' mode='0' data-e2e='video-share-repost' aria-label='Remove repost' href='#' class='css-1m97dup-...--AShareLink'>\n      整个 share dialog 流程是错的！直接点这个 <a> 元素就取消转发。\n      增加 aria-label 备选：跨语言兼容",
       "videoShareRepost": [
-        "[data-e2e='video-share-repost']",
-        "a[aria-label*='Remove repost']",
-        "a[aria-label*='取消转发']",
-        "a[aria-label*='リポストを取り消す']",
-        "a[aria-label*='리포스트 취소']",
-        "button[aria-label*='Remove repost']",
-        "button[aria-label*='取消转发']",
-        "button[aria-label*='リポストを取り消す']",
-        "button[aria-label*='리포스트 취소']"
+        "a#icon-element-repost[data-e2e='video-share-repost']",
+        "a#icon-element-repost[aria-label='Remove repost']",
+        "a#icon-element-repost[aria-label='移除转发']",
+        "a#icon-element-repost[aria-label='再投稿を削除']",
+        "a#icon-element-repost[aria-label='리포스트 삭제']",
+        "a#icon-element-repost[aria-label='Remover republicação']",
+        "a#icon-element-repost[aria-label='Eliminar la publicación compartida']",
+        "a#icon-element-repost[aria-label='Erneute Veröffentlichung entfernen']",
+        "a#icon-element-repost[aria-label='Supprimer la republication']"
       ],
+      "_comment_videoShareRepostAria": "8 语言 aria-label **实测**值（2026-07-02 MCP 浏览器对 l702362 视频切 8 语言读取 DOM）。\n      **注意：之前猜的多项错误**，例如：\n        - pt-BR 真实是 \"Remover republicação\"（不是 \"Remover repost\"）\n        - es-ES 真实是 \"Eliminar la publicación compartida\"（不是 \"Quitar repost\"）\n        - de-DE 真实是 \"Erneute Veröffentlichung entfernen\"（不是 \"Repost entfernen\"）\n        - fr-FR 真实是 \"Supprimer la republication\"（不是 \"Annuler le repost\"）\n      8 语言 aria-label 都是 8 种不同表达，**绝不能用 substring 模糊匹配**（'Remove' 在 ja/ko/zh/de/fr/pt/es 中都不存在）。\n      用等值匹配 [aria-label='xxx']：\n        - 已转发状态：aria-label = 8 种 'Remove' 变体之一\n        - 未转发状态：aria-label = 8 种 'Repost' 变体之一（不能点，会变 'Repost'，触发重复点击问题）\n      automation.js 先用 aria-label 等值匹配判定状态再点。",
       "_comment_actionBar": "DEPRECATED：原版用 [class*='SectionActionBarContainer'] 找 action bar 来定位 share 按钮。\n      新版 _removeRepostFromVideoPage 不走 action bar 也不走 share dialog，直接找 videoShareRepost。保留以备回退。",
       "actionBar": [
         "[class*='SectionActionBarContainer']"

@@ -1110,6 +1110,33 @@
     async _processRepostBatch(startUrl, shareRepostSelectors, maxItems, lastProgressTime) {
       const nextVideoSelectors = this._buildNextVideoSelectors();
 
+      // 8 语言"已转发"状态 aria-label 实测值（2026-07-02 MCP 浏览器对 l702362 视频实测）
+      // 之前我猜的多项错误：pt-BR/es-ES/de-DE/fr-FR 真实 aria-label 跟我猜的完全不一样
+      // 8 种都是独特的措辞，**绝不能用 substring 模糊匹配**（'Remove' 在 7 种非英语里都不存在）
+      const repostedAriaLabels = new Set([
+        'Remove repost',          // en
+        '移除转发',                // zh-Hans
+        '再投稿を削除',             // ja-JP
+        '리포스트 삭제',             // ko-KR
+        'Remover republicação',   // pt-BR
+        'Eliminar la publicación compartida', // es-ES
+        'Erneute Veröffentlichung entfernen',  // de-DE
+        'Supprimer la republication' // fr-FR
+      ]);
+
+      // 检测"已转发"状态：a#icon-element-repost 元素存在 + aria-label 匹配 8 语言任一变体
+      // 关键修复：之前 `[data-e2e='video-share-repost']` selector 不带 aria-label 过滤，
+      // 同一元素在「Repost」/「Remove repost」状态都会匹配，会重复点击导致 reposts 反向重新添加
+      function isRepostedState() {
+        const el = document.querySelector('a#icon-element-repost');
+        if (!el) return false;
+        return repostedAriaLabels.has(el.getAttribute('aria-label'));
+      }
+
+      function getRepostElement() {
+        return document.querySelector('a#icon-element-repost');
+      }
+
       while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
         if (Date.now() - lastProgressTime > 30000) {
           this.log(t('cleanupStuck'));
@@ -1134,10 +1161,15 @@
             continue;
           }
 
-          const shareRepostBtn = await this.waitForElement(shareRepostSelectors, 3000);
-          if (!shareRepostBtn) {
-            this.errorCount++;
-            this.error(t('repostDeleteFailed', {error: 'video-share-repost not found on video page'}));
+          // 2026-07-02 关键修复：必须先用 aria-label 等值匹配判断「已转发」状态
+          // 不再用 shareRepostSelectors 模糊匹配（该列表在「Repost」/「Remove repost」状态都命中）
+          if (!isRepostedState()) {
+            // 元素不存在 或 aria-label 是「Repost」类（未转发状态）→ 跳过
+            // 注意：未转发状态下 a#icon-element-repost 也存在（aria-label='Repost' 类变体），
+            // 不能盲目点，否则会反向 re-repost。
+            const el = getRepostElement();
+            const aria = el ? el.getAttribute('aria-label') : null;
+            this.log('[Repost] Skip: not in reposted state. element exists=' + !!el + ' aria=' + JSON.stringify(aria));
             const nextBtn = await this.waitForElement(nextVideoSelectors, 2000);
             if (nextBtn && nextBtn.disabled !== true) {
               await this.safeClick(nextBtn, 1000);
@@ -1147,8 +1179,45 @@
             continue;
           }
 
-          await this.safeClick(shareRepostBtn, 500);
+          // 二次确认：在 isRepostedState() 返回 true 之后立刻再查一次，防止 race
+          const cancelBtn = getRepostElement();
+          if (!cancelBtn) {
+            this.errorCount++;
+            this.error(t('repostDeleteFailed', {error: 'a#icon-element-repost disappeared'}));
+            const nextBtn = await this.waitForElement(nextVideoSelectors, 2000);
+            if (nextBtn && nextBtn.disabled !== true) {
+              await this.safeClick(nextBtn, 1000);
+            } else {
+              break;
+            }
+            continue;
+          }
+
+          const beforeAria = cancelBtn.getAttribute('aria-label');
+          await this.safeClick(cancelBtn, 500);
           await this.sleep(500);
+
+          // 验证：取消后 aria-label 应该变成「Repost」类（未转发状态）
+          // 如果还是「Remove repost」类说明 click 没生效
+          if (isRepostedState()) {
+            // retry 一次
+            const retryBtn = getRepostElement();
+            if (retryBtn) {
+              await this.safeClick(retryBtn, 500);
+              await this.sleep(500);
+            }
+            if (isRepostedState()) {
+              this.errorCount++;
+              this.error(t('repostDeleteFailed', {error: 'aria-label not flipped after click (before=' + beforeAria + ' after=' + (getRepostElement() || {}).getAttribute('aria-label') + ')'}));
+              const nextBtn = await this.waitForElement(nextVideoSelectors, 2000);
+              if (nextBtn && nextBtn.disabled !== true) {
+                await this.safeClick(nextBtn, 1000);
+              } else {
+                break;
+              }
+              continue;
+            }
+          }
 
           this._deletedRepostUrls.push(currentUrl);
           await this._saveDeletedRepostUrls();
