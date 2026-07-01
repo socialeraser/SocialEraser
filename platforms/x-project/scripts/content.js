@@ -59,13 +59,43 @@
   const RESERVED_PATHS = ['home', 'explore', 'notifications', 'bookmarks', 'i', 'search', 'settings', 'compose', 'login', 'messages'];
 
   // 登录态 sticky 缓存：
-  // - null = 尚未检测（初始 / 跨页面 reload）
-  // - true = 已确认登录（一旦置 true，只在用户登出时才会翻转为 false）
+  // - null = 尚未检测（hydrate 还没回来 / 首次启动）
+  // - true = 已确认登录
   // - false = 已确认未登录
-  // 设计动机：X 改版 + SPA 跳转 / 侧栏 lazy load 都会让 querySelector 偶发抓空，
-  //   之前每 3s 重检一次导致侧栏在 /home→/likes 闪一下 "Not logged in"。
-  // 现在只做一次正向检测，缓存结果，唯一翻转信号 = checkIsLoginPage()（URL 进登录页）。
+  //
+  // 设计原则（2026-07-01 修正）：
+  //   1. 首次 hydrate 完成后，正向检测（checkLoginStatus）只跑一次，结果锁死
+  //   2. 之后唯一能翻转状态的信号：用户在登录页 / 主动登出（isLoggedOut 严格判断）
+  //   3. 不再在每次轮询时跑正向检测 —— 任何模糊匹配（"Sign in" 出现在 button/menu 里）
+  //      都可能让 cachedIsLoggedIn 翻转到错误状态
+  //   4. 不再用 document.body.innerText.includes() 判登录页 —— "Sign in" /
+  //      "Log in" 文字在 X 任何页面都可能短暂出现（account switcher、share dialog、tooltip）
   let cachedIsLoggedIn = null;
+
+  // 把登录态持久化到 session storage（fire-and-forget）。
+  // 只在 sticky 状态真正翻转时调用，避免每 3s 轮询都打 IPC。
+  // status: true = logged_in / false = logged_out
+  function persistLoginStatus(status) {
+    const value = status === true ? 'logged_in' : 'logged_out';
+    chrome.runtime.sendMessage({
+      target: 'writeLoginStatus',
+      status: value
+    }).catch(function() { /* background 不可用：忽略，不影响主流程 */ });
+  }
+
+  // 启动时从 session storage 恢复 sticky 状态（fire-and-forget）。
+  // hydrate 完成前 cachedIsLoggedIn 仍是 null，hydrate 后用真值。
+  // 期间 getEffectiveLoginStatus 走首次检测路径。
+  function hydrateLoginStatus() {
+    chrome.runtime.sendMessage({ target: 'readLoginStatus' }).then(function(resp) {
+      if (!resp || !resp.status) return;
+      if (resp.status === 'logged_in' || resp.status === 'logged_out') {
+        cachedIsLoggedIn = (resp.status === 'logged_in');
+        console.log('[X Eraser] Hydrated login status from session storage:', resp.status);
+      }
+    }).catch(function() { /* background 不可用时跳过 */ });
+  }
+  hydrateLoginStatus();
 
   // 直接从 storage 读远程配置（中间不再经过 background）
   // 设计：background service worker 启动时已预拉远程配置 → 存 chrome.storage.local
@@ -654,24 +684,39 @@
     return checkLoginStatusWithConfig();
   }
 
-  function checkIsLoginPage() {
-    const loginConfig = window.XEraserConfig.getLoginConfig();
-    const checkElementsByLang = loginConfig.checkElements || {};
+  // 严格判断「用户在登录页 / 已登出」
+  // 2026-07-01 替换原 checkIsLoginPage()：
+  //   原版用 document.body.innerText.includes('Sign in') 等模糊匹配，
+  //   会在 account switcher / share dialog / tooltip 含 "Sign in" 文字的页面误判，
+  //   导致 cachedIsLoggedIn 错误翻转到 false。
+  // 新版只查两类硬信号：
+  //   1. URL 路径明确是登录页（X SPA 登出后会重定向到这几个路径）
+  //   2. 登录表单 input 是页面**主区域**可见元素（不查孤立 button）
+  // 返回: true = 用户在登录页 / 已登出，false = 在任何其他页面（可能已登录）
+  function isLoggedOut() {
+    const path = window.location.pathname.toLowerCase();
+    // 1. URL 是 X 的登录/登出/账号恢复相关路径
+    if (path === '/login'
+        || path === '/i/flow/login'
+        || path === '/i/flow/logout'
+        || path === '/account/suspended'
+        || path === '/account/locked') {
+      return true;
+    }
 
-    const pageLang = detectPageLanguage();
-    const langKeys = [pageLang, pageLang.split('-')[0], 'en'];
-
-    for (let i = 0; i < langKeys.length; i++) {
-      const elements = checkElementsByLang[langKeys[i]];
-      if (elements) {
-        for (let j = 0; j < elements.length; j++) {
-          const element = elements[j];
-          if (element.type === 'selector') {
-            if (document.querySelector(element.value)) return true;
-          } else if (element.type === 'text') {
-            if (document.body.innerText.includes(element.value)) return true;
-          }
-        }
+    // 2. 登录表单 input 是页面主区域可见元素
+    //    X 登录页有 [autocomplete="username"] 输入框（在 main 区域）
+    //    account switcher 下拉菜单里也可能有 input，但 offsetParent 检查会过滤掉 display:none
+    //    再用 closest('main') / closest('[role="main"]') 限定必须在主区域
+    const loginInputs = document.querySelectorAll(
+      'input[autocomplete="username"], input[name="text"][autocomplete="username"], input[name="password"]'
+    );
+    for (let i = 0; i < loginInputs.length; i++) {
+      const el = loginInputs[i];
+      if (!el.offsetParent) continue;  // 不可见
+      // 必须在 main 区域（role="main" 或 <main> 标签），避免下拉菜单误判
+      if (el.closest('main, [role="main"]')) {
+        return true;
       }
     }
     return false;
@@ -812,39 +857,42 @@
     return 'https://x.com/home';
   }
 
-  // sticky 状态机：
-  // - cachedIsLoggedIn === true 时：只 checkIsLoginPage() 能翻转为 false
-  // - cachedIsLoggedIn === null/false 时：正向检测一次，命中就锁 true
-  // - 返回值可能是 null（仍在检测），让侧栏显示 "checking" 而非误报 "not logged in"
+  // sticky 状态机（2026-07-01 重写）：
+  //   1. cachedIsLoggedIn === null（首次启动 / hydrate 还没回来）：
+  //      跑一次 checkLoginStatus() 正向检测，命中锁 true / persist
+  //   2. cachedIsLoggedIn 已有值（true 或 false）：
+  //      唯一能翻转的信号是 isLoggedOut() 命中（用户在登录页 / 主动登出）
+  //      检测到登出 → flip 到 false / persist
+  //   3. 不再每次轮询跑正向检测 —— DOM 偶发抓空 / 模糊匹配都让状态稳定
+  //
+  // 返回: true / false / null（仍在首次检测，hydrate 还没回来）
   function getEffectiveLoginStatus() {
     if (!isTargetWebsite()) return false;
 
-    // 唯一能翻转 true → false 的信号：用户进了登录页
-    if (cachedIsLoggedIn === true) {
-      if (checkIsLoginPage()) {
-        cachedIsLoggedIn = false;
-        console.log('[X Eraser] Login page detected, flipping cached state to false');
-        return false;
-      }
-      return true;
-    }
-
-    // 检测到登录页：直接 false
-    if (checkIsLoginPage()) {
+    // 唯一翻转信号：用户在登录页 / 已登出
+    if (isLoggedOut()) {
       if (cachedIsLoggedIn !== false) {
         cachedIsLoggedIn = false;
+        persistLoginStatus(false);
+        console.log('[X Eraser] Logout detected, flipping to false');
       }
       return false;
     }
 
-    // 首次 / 重置后：跑一次正向 selector 检测
+    // 已确认过状态：直接返回缓存值（不重检）
+    if (cachedIsLoggedIn !== null) {
+      return cachedIsLoggedIn;
+    }
+
+    // 首次检测：跑一次正向 selector 检测
     if (checkLoginStatus()) {
       cachedIsLoggedIn = true;
+      persistLoginStatus(true);
       console.log('[X Eraser] Login confirmed (sticky cached)');
       return true;
     }
 
-    // 还没确认：返回 null 让侧栏显示"检测中"，而非误报"未登录"
+    // 还没确认：返回 null 让侧栏显示"检测中"
     return null;
   }
 
@@ -854,7 +902,7 @@
   function checkXStatus() {
     const isX = isTargetWebsite();
     const isLoggedIn = isX ? getEffectiveLoginStatus() : false;
-    const isLoginPage = isX ? checkIsLoginPage() : false;
+    const isLoginPage = isX ? isLoggedOut() : false;
     const pageType = isX ? detectPageType() : null;
 
     return {

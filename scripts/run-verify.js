@@ -35,6 +35,7 @@ const ALL_SCRIPTS = [
   'verify-login-detection.js',
   'verify-no-retry.js',
   'verify-processed-count-cumulative.js',
+  'verify-rating-prompt-threshold.js',
   'verify-scroll-to-bottom.js',
   'verify-setconfig.js',
   'verify-sidepanel-bindings.js',

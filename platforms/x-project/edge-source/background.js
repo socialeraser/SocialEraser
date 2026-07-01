@@ -273,6 +273,35 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
     return true;
   }
 
+  // 5b. 登录态 sticky 持久化（修复 forcePageLoad 跳页后侧栏闪 "Not logged in"）
+  //   设计：cachedIsLoggedIn 是 content.js IIFE 闭包变量，完整页面重载会被销毁。
+  //   forcePageLoad（chrome.tabs.update）触发完整重载 → 新 content script 注入
+  //   → cachedIsLoggedIn 又是 null → 新页面 indicator 还没渲染完时侧栏闪未登录。
+  //   解决：登录态确认后写入 chrome.storage.session，跨 content script 生命周期。
+  //   chrome.storage.session 跨 tab 关闭/重启会清空，符合"会话内粘性"的语义。
+  //   唯一翻转信号仍是 checkIsLoginPage() 命中（用户在登录页/登出）→ storage 同步清。
+  if (message.target === 'readLoginStatus') {
+    chrome.storage.session.get('loginStatus').then(function(result) {
+      // 可能是 'logged_in' / 'logged_out' / null（从未确认过）
+      sendResponse({ status: (result && result.loginStatus) ? result.loginStatus : null });
+    });
+    return true;
+  }
+
+  if (message.target === 'writeLoginStatus') {
+    chrome.storage.session.set({ loginStatus: message.status }).then(function() {
+      sendResponse({ success: true });
+    });
+    return true;
+  }
+
+  if (message.target === 'clearLoginStatus') {
+    chrome.storage.session.remove('loginStatus').then(function() {
+      sendResponse({ success: true });
+    });
+    return true;
+  }
+
   // 6. Content script 跳页（绕过 X SPA 拦截）：用 chrome.tabs.update 在 Chrome 层改 URL
   //    X SPA 的 history.pushState 拦截会导致 location.href 改不了；用 tabs.update 强制改
   if (message.target === 'forceNavigation') {

@@ -1008,15 +1008,9 @@
   }
   function maybeShowRatingPrompt() {
     getRatingState(function(s) {
-      if (s.hasRated || s.neverAsk) {
-        return;
-      }
-      if (s.skipCount >= RATING_MAX_SKIPS) {
-        var ageMs = Date.now() - s.lastShown;
-        if (ageMs < RATING_COOLDOWN_MS) {
-          return;
-        }
-      }
+      // 2026-07-02 修改：去掉冷却 + neverAsk 限制（每次 cleanup 都弹）
+      // hasRated 检查保留：评过分的用户不再骚扰
+      if (s.hasRated) return;
       showRatingPrompt(s);
     });
   }
@@ -1253,6 +1247,8 @@
     if (state.processedItems > 0 && !state.summaryDismissed) {
       showSummaryCard();
     }
+    // 评分提示：>0 项就弹（>0 项 + hasRated=false，由 maybeShowRatingPrompt 检查）
+    //   2026-07-02 修改：阈值 >0，去掉 30 天冷却 + neverAsk 限制，与 x-project 对齐。
     if (state.processedItems > 0) {
       setTimeout(maybeShowRatingPrompt, 2500);
     }

@@ -1064,15 +1064,16 @@
   // ============================================================================
   // Rating prompt (post-cleanup feedback)
   // 触发条件:
-  //   - cleanup 成功（processedItems > 10，由 caller 检查）
-  //   - 未永禁（neverAsk=false）
+  //   - cleanup 成功（processedItems > 0，由 caller 检查）
   //   - 未评过分（hasRated=false）
-  //   - (skipCount < RATING_MAX_SKIP) OR (距 lastShown > 30天)
+  //   - 2026-07-02 修改：去掉 30 天冷却 + 未永禁（neverAsk）限制
+  //     旧版还有 skipCount 冷却：跳过 N 次后强制 30 天冷却期；现在每次 cleanup 都弹
+  //     "Don't ask again" 按钮保留：点了之后 neverAsk=true（持久化）但本函数忽略此状态
   // 行为:
   //   - 4-5 星：跳 CWS 评分页（hasRated=true）
   //   - 1-3 星：打开内联反馈表单，存到 storage.local，不跳 CWS
-  //   - Skip：skipCount++，lastShown=now
-  //   - Never：neverAsk=true
+  //   - Skip：更新 lastShown/skipCount（但不再用作冷却）
+  //   - Never：neverAsk=true（保留语义，但本函数不再读取此字段）
   //   - 点击遮罩：等同 Skip
   // ============================================================================
   function getRatingState(cb) {
@@ -1101,16 +1102,12 @@
   }
   function maybeShowRatingPrompt() {
     getRatingState(function(s) {
-      if (s.hasRated || s.neverAsk) {
-        console.log('[X Eraser] rating prompt suppressed: hasRated=' + s.hasRated + ' neverAsk=' + s.neverAsk);
+      // 2026-07-02 修改：去掉冷却 + neverAsk 限制
+      //   旧版有 skipCount 冷却 + neverAsk 永禁，现在每次 cleanup 都弹
+      //   hasRated 检查保留：评过分的用户不再骚扰（CWS 已跳转或反馈已存）
+      if (s.hasRated) {
+        console.log('[X Eraser] rating prompt suppressed: user has rated');
         return;
-      }
-      if (s.skipCount >= RATING_MAX_SKIPS) {
-        var ageMs = Date.now() - s.lastShown;
-        if (ageMs < RATING_COOLDOWN_MS) {
-          console.log('[X Eraser] rating prompt suppressed: in cooldown (skipCount=' + s.skipCount + ', ageMs=' + Math.round(ageMs/86400000) + 'd)');
-          return;
-        }
       }
       console.log('[X Eraser] showing rating prompt');
       showRatingPrompt(s);
@@ -1385,9 +1382,9 @@
     if (state.processedItems > 0 && !state.summaryDismissed) {
       showSummaryCard();
     }
-    // 评分提示：清理体验好的时机钩入（>0 项 + 30 天冷却 + 未永禁）
-    //   原本门槛是 >10，结果小批量清理（删几条赞/推文）永远触发不了。
-    //   30 天冷却 + 3 次跳过永禁已经能防骚扰，不需要再叠数量门槛。
+    // 评分提示：>0 项就弹（>0 项 + hasRated=false，由 maybeShowRatingPrompt 检查）
+    //   2026-07-02 修改：阈值从 >1 回到 >0，并去掉 30 天冷却 + neverAsk 限制。
+    //   用户希望每次清理完成都让用户有机会投票，"Don't ask again" 不再生效。
     if (state.processedItems > 0) {
       // 延迟 2.5s 弹，让用户先看完成总结卡（summary-card 自动 scroll 到中心）
       setTimeout(maybeShowRatingPrompt, 2500);

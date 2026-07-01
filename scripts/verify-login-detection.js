@@ -136,10 +136,13 @@ check('content.js 有 cachedIsLoggedIn sticky 变量',
 check('content.js 有 getEffectiveLoginStatus 函数',
   /function\s+getEffectiveLoginStatus\s*\(/.test(contentJs));
 check('content.js 状态机：cached=true 时不重检 selector',
-  /cachedIsLoggedIn\s*===\s*true[\s\S]{0,200}checkIsLoginPage/.test(contentJs));
+  // 2026-07-01 重写：先用 isLoggedOut() 检查登出（唯一翻转信号），
+  //   然后 cachedIsLoggedIn !== null 时直接 return，不跑 checkLoginStatus()
+  /isLoggedOut\(\)[\s\S]{0,400}cachedIsLoggedIn\s*!==\s*null/.test(contentJs));
 check('content.js 状态机：返回 null 表示仍在检测',
   // 简化匹配：只要 getEffectiveLoginStatus 函数体内有"return null" 即可
-  /function\s+getEffectiveLoginStatus[\s\S]{0,800}return\s+null/.test(contentJs));
+  // 2026-07-01: 函数体因 persistLoginStatus 插入变长，扩大窗口到 1500 字符
+  /function\s+getEffectiveLoginStatus[\s\S]{0,1500}return\s+null/.test(contentJs));
 
 // 9.3 sidepanel.js 必须 init state.isLoggedIn 为 null（不要预设 false）
 check('sidepanel.js state.isLoggedIn 初始为 null（显示"检测中"，不预判"未登录"）',
@@ -160,6 +163,62 @@ check('sidepanel.js 有 applyStatusFromContent 函数',
 // 9.6 content.js checkXStatus 必须用 getEffectiveLoginStatus
 check('content.js checkXStatus 走 sticky 状态机',
   /isX\s*\?\s*getEffectiveLoginStatus/.test(contentJs));
+
+// 9.7 content.js 必须有 isLoggedOut 严格登出检测（替代原 checkIsLoginPage）
+//    2026-07-01：原 checkIsLoginPage 用 innerText.includes() 模糊匹配，
+//    在 account switcher / share dialog / tooltip 含 "Sign in" 文字的页面会误判。
+//    新版只查 URL 路径 + 登录表单 input 在主区域。
+check('content.js 有 isLoggedOut 函数',
+  /function\s+isLoggedOut\s*\(/.test(contentJs));
+check('content.js isLoggedOut 检查 URL pathname 是 /login',
+  /isLoggedOut[\s\S]{0,800}['"]\/login['"]/.test(contentJs));
+check('content.js isLoggedOut 检查 login form input 在 main 区域',
+  /isLoggedOut[\s\S]{0,1500}closest\s*\(\s*['"]main,\s*\[role=['"]main['"]\]\s*['"]\s*\)/.test(contentJs));
+check('content.js 已删除 checkIsLoginPage 模糊 innerText 匹配',
+  // 旧的 innerText.includes 误判源头必须被删除（注释里的提及允许）
+  // 检查函数体：function checkIsLoginPage 之后到函数结束不应有 innerText.includes
+  !/function\s+checkIsLoginPage[\s\S]{0,2000}innerText\.includes/.test(contentJs));
+check('content.js getEffectiveLoginStatus 调 isLoggedOut（替代 checkIsLoginPage）',
+  /getEffectiveLoginStatus[\s\S]{0,1500}isLoggedOut\(\)/.test(contentJs));
+
+// ============================================================
+// 10. sticky 持久化（修复 forcePageLoad 跳页后侧栏闪 "Not logged in"）
+//    cachedIsLoggedIn 是 IIFE 闭包变量，完整页面重载被销毁。
+//    必须经 chrome.storage.session 持久化才能跨 content script 生命周期。
+// ============================================================
+const backgroundJs = fs.readFileSync(path.join(ROOT, 'platforms/x-project/chrome-source/background.js'), 'utf8');
+
+// 10.1 background.js 必须处理 readLoginStatus / writeLoginStatus / clearLoginStatus
+check('background.js 处理 readLoginStatus message',
+  /message\.target\s*===\s*['"]readLoginStatus['"]/.test(backgroundJs));
+check('background.js 处理 writeLoginStatus message',
+  /message\.target\s*===\s*['"]writeLoginStatus['"]/.test(backgroundJs));
+check('background.js 处理 clearLoginStatus message',
+  /message\.target\s*===\s*['"]clearLoginStatus['"]/.test(backgroundJs));
+check('background.js readLoginStatus 走 chrome.storage.session',
+  /['"]readLoginStatus['"][\s\S]{0,300}chrome\.storage\.session/.test(backgroundJs));
+check('background.js writeLoginStatus 走 chrome.storage.session',
+  /['"]writeLoginStatus['"][\s\S]{0,300}chrome\.storage\.session/.test(backgroundJs));
+
+// 10.2 content.js 启动时必须 hydrate（从 storage 读回 cachedIsLoggedIn）
+check('content.js 有 hydrateLoginStatus 函数',
+  /function\s+hydrateLoginStatus\s*\(/.test(contentJs));
+check('content.js hydrate 走 readLoginStatus message',
+  /hydrateLoginStatus[\s\S]{0,400}readLoginStatus/.test(contentJs));
+check('content.js hydrate 把 storage 值赋给 cachedIsLoggedIn',
+  /cachedIsLoggedIn\s*=\s*\(\s*resp\.status\s*===\s*['"]logged_in['"]\s*\)/.test(contentJs));
+check('content.js 启动时立即调 hydrateLoginStatus()',
+  /^\s*hydrateLoginStatus\(\);?\s*$/m.test(contentJs));
+
+// 10.3 content.js 状态翻转时必须 persist
+check('content.js 有 persistLoginStatus 函数',
+  /function\s+persistLoginStatus\s*\(/.test(contentJs));
+check('content.js persist 走 writeLoginStatus message',
+  /persistLoginStatus[\s\S]{0,400}writeLoginStatus/.test(contentJs));
+check('content.js 登录态 → 登录页翻转时 persist false',
+  /cachedIsLoggedIn\s*=\s*false;[\s\S]{0,100}persistLoginStatus\s*\(\s*false\s*\)/.test(contentJs));
+check('content.js 确认登录时 persist true',
+  /cachedIsLoggedIn\s*=\s*true;[\s\S]{0,100}persistLoginStatus\s*\(\s*true\s*\)/.test(contentJs));
 
 // 输出
 console.log('');
