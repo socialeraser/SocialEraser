@@ -7,9 +7,27 @@ For the X Eraser format reference, see [X Eraser CHANGELOG](../x-project/CHANGEL
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning follows [Semantic Versioning](https://semver.org/).
 
-## [Unreleased]
+## [Unreleased] - 2026-07-04
+
+### Fixed
+- **Multi-type 流程卡死 bug**：选中 ≥ 2 个 Type 时，处理完第 1 个 Type 后停在了最后一个视频播放那，没有开始第 2 个 Type。根因：`__TikTokEraserForcePageLoad` 用 `chrome.runtime.sendMessage({target:'forceNavigation'})` 让 background 调 `chrome.tabs.update` 触发跳转，但 MV3 service worker 必须被事件唤醒才能处理消息，IPC + 唤醒延迟几秒，期间 content script 继续跑、sidepanel 已经 addLog "Type 1 of 3 done, loading next..."，但 tab 实际上没跳走 → 用户看到"停在了最后一个视频播放那"。修法：`__TikTokEraserForcePageLoad` 内部**优先 `window.location.href = url`**（同步触发 page 销毁，不依赖 IPC、不依赖 service worker 是否在线），`chrome.tabs.update` 路径保留为兜底。MCP 实证：`/@ping.xiang1` 页设 `window.location.href = 'https://www.tiktok.com/'` 后 page 真的销毁，location.pathname 真的变成 `/`。TikTok SPA 路由只拦截 `pushState`/`replaceState`，不拦截 `window.location.href =` 触发的整页加载。
+- **Following 空状态假成功 bug**：用户 0 关注时，选 Following 类型会报"Unfollowed #1 (no confirm dialog)"。根因：`unfollowButtons` selector `button[aria-label*='Following']` 在英文 UI 下会误匹配**侧边栏 Following 导航按钮**本身（aria-label='Following'），点击无 confirm dialog → `processedCount++` → 假成功。修法：①所有 unfollowButtons selector 限定到 `[data-e2e='user-following-item']` 容器内（深度防御）②`processFollowing` 在 `waitForContentStable` 之后加 0 following item 早退检查 + 触发 `onTypeComplete`（让多 type 流程继续）。MCP 实证 2026-07-04 @ping.xiang1（0 following）: user-following-item=0, card-followbutton=20 (suggested), button[aria-label*='Following']=1 (sidebar nav)。
+- **翻页守门**：4 个 processXxx（Reposts / Likes / Favorites / Following）都必须有 scrollToBottom 翻页调用，防止"删完第 1 页就停"。
 
 ### Added
+- 新增 verify 脚本 `scripts/verify-tiktok-multi-type-fix.js`（守住 force page load 同步路径）。
+- 新增 verify 脚本 `scripts/verify-tiktok-daily-limit-hint.js`（守住 8 语言 dailyLimitReachedHint 含 tip/support developer/come back tomorrow 关键词）。
+- 新增 verify 脚本 `scripts/verify-extensions-sync.js`（守住 platforms/* ↔ extensions/* 字节级一致，防 sync 漏掉）。
+- 新增 CHANGELOG 日期戳（`[Unreleased] - YYYY-MM-DD`）。
+
+## [Unreleased] - 2026-07-03
+
+### Fixed
+- **Favorites 流程重写**：原"1 步点已收藏图标"在 Profile Favorites tab 上的 card 不可点，改为镜像 Likes 的 2 步流程（Favorites tab 卡片 anchor click → video 详情页 → 点 `span[data-e2e="favorite-icon"]` 取消）。添加 `_loadDeletedFavoritesUrls` / `_saveDeletedFavoritesUrls` 持久化跨页 resume。实证依据：2026-07-02 MCP 浏览器对 ping.xiang1 For You 页读取 DOM，实际 `data-e2e="favorite-icon"`（不是之前猜的 `browse-favorite-icon`），parent button 本身无 data-e2e。
+- **Edge `background.js` 同步**：补上 7/1 漏掉的 `readDeletedLikesUrls` / `writeDeletedLikesUrls` handler（之前 Edge extension 会因为 handler 缺失导致 likes 流程跨页 resume 失败），同时加上 `readDeletedFavoritesUrls` / `writeDeletedFavoritesUrls`。
+
+### Added
+- 新增 verify 脚本 `scripts/verify-tiktok-favorites-flow.js`（46 项断言），守住 Favorites 新流程的 selector / 流程顺序 / session 持久化 / 8 语言 i18n。
 - i18n engine (`scripts/i18n.js`, 1450 lines) — 8 languages, `window.TikTokEraseri18n` namespace, `tiktokPreferredLang` storage isolation, top-of-file comment documenting the `zh-CN` (hyphen) ↔ `zh_CN` (underscore) `langAliases` mapping that bridges the i18n.js canonical form with Chrome MV3's required `_locales/zh_CN/` directory name
 - side panel logic (`src/sidepanel.js`, 1326 lines) — 5-type checkboxes, view count filter, backup tip linkage, daily limit, rating prompt
 - 8 locale manifest files (`src/_locales/<lang>/messages.json`) — ext_name + ext_description per language

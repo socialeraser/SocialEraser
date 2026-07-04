@@ -20,6 +20,10 @@
     processedItems: 0,
     // 跨 type + 跨页累计基线（必须初始化为 0）
     typeStartCumulative: 0,
+    // multi-type 已完成 type 计数（必须初始化为 0）
+    // cleanupComplete handler 累加：< totalTypes 时 return（不调 onCleanupComplete），
+    // >= totalTypes 时才走 onCleanupComplete。防多 type 中间步骤误判为"全部完成"。
+    completedTypesCount: 0,
     currentType: null,
     statusHideTimer: null,
     totalItems: 0,
@@ -328,6 +332,17 @@
       } else if (msg.type === 'cleanupLog') {
         addLog(msg.message, msg.level);
       } else if (msg.type === 'cleanupComplete') {
+        // multi-type 状态机：累加已完成 type 数。
+        // 如果还有剩余 type：addLog("已完成 X/Y 种类型") + return（不调 onCleanupComplete，
+        //   避免多 type 拆分中间步骤 sidepanel 误判为"全部完成"）。
+        // 最后一个 type 完成时才走 onCleanupComplete（设 isRunning=false + summary）。
+        state.completedTypesCount = (state.completedTypesCount || 0) + 1;
+        var totalTypes = (state.cleanupOptions && Array.isArray(state.cleanupOptions.types))
+          ? state.cleanupOptions.types.length : 1;
+        if (state.completedTypesCount < totalTypes) {
+          addLog(t('typeProgressUpdate', {done: state.completedTypesCount, total: totalTypes}), 'info');
+          return;
+        }
         onCleanupComplete();
       } else if (msg.type === 'cleanupError') {
         addLog(msg.message, 'error');
@@ -858,7 +873,16 @@
     getDailyUsage(function(used) {
       var remaining = FREE_LIMIT_PER_DAY - used;
       if (remaining <= 0) {
+        // 2026-07-03 daily limit "0/0" 修复（memory line 17）：
+        // 1) 显式 state.totalItems=0 + progress card 设为默认 'progress-card'（重置 active 态，
+        //    避免下次进入时显示 stale "X/5000"）
+        // 2) addLog 之前 state.isRunning=true（addLog 内部 !isRunning 检查 → 抑制重新激活 progress card）
+        // 3) addLog 之后 state.isRunning=false 恢复
+        state.totalItems = 0;
+        if (els.progressCard) els.progressCard.className = 'progress-card';
+        state.isRunning = true;
         addLog(t('dailyLimitReached', {used: used, limit: FREE_LIMIT_PER_DAY}), 'warn');
+        state.isRunning = false;
         showTipModal(used);
         return;
       }
@@ -874,6 +898,8 @@
       state.cleanupStartTime = Date.now();
       state.summaryDismissed = false;
       state.limitReached = false;
+      // multi-type counter 重置（startCleanup 入口）
+      state.completedTypesCount = 0;
 
       resetAllOptionStates();
       options.forEach(function(type) {

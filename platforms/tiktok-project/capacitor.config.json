@@ -3,8 +3,8 @@
   "appName": "TikTok Eraser",
   "webDir": "www",
   "android": {
-    "allowMixedContent": true,
-    "webContentsDebuggingEnabled": true,
+    "allowMixedContent": false,
+    "webContentsDebuggingEnabled": false,
     "backgroundColor": "#0F0F0F"
   },
   "ios": {

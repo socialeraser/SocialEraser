@@ -169,10 +169,14 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
       message.type === 'cleanupResumed' ||
       message.type === 'cleanupStopped' ||
       message.type === 'statusUpdate')) {
-    if (message.type === 'cleanupComplete') {
-      chrome.storage.session.remove('pendingCleanup').catch(function() {});
-      chrome.storage.session.remove('deletedRepostUrls').catch(function() {});
-    }
+    // 2026-07-02 修复：cleanupComplete 不再自动清 pendingCleanup。
+    // 原因：手动 startCleanup 走 multi-type state machine，automation.js
+    //   startCleanup({types: [matchedType]}) 跑完一个 type 就触发 onComplete →
+    //   cleanupComplete。如果这里 remove pendingCleanup，会清掉 content.js
+    //   在 startCleanup 之前为剩余 types 写的 pending，导致 force page load
+    //   后新 content script 读不到 pending → multi-type 真的停止。
+    // 由 content.js 的多 type state machine 显式管理 pendingCleanup 生命周期
+    // （在所有 type 跑完后调 clearPendingCleanup）。
     sendResponse({ received: true });
     return false;
   }
@@ -229,20 +233,6 @@ chrome.runtime.onMessage.addListener(function(message, sender, sendResponse) {
   if (message.target === 'readRepostsTargetUrl') {
     chrome.storage.session.get(['repostsTargetUrl']).then(function(resp) {
       sendResponse({ url: (resp && resp.repostsTargetUrl) || null });
-    });
-    return true;
-  }
-
-  if (message.target === 'readDeletedRepostUrls') {
-    chrome.storage.session.get(['deletedRepostUrls']).then(function(resp) {
-      sendResponse({ urls: (resp && resp.deletedRepostUrls) || [] });
-    });
-    return true;
-  }
-
-  if (message.target === 'writeDeletedRepostUrls') {
-    chrome.storage.session.set({ deletedRepostUrls: message.urls }).then(function() {
-      sendResponse({ success: true });
     });
     return true;
   }

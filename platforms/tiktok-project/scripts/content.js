@@ -32,27 +32,11 @@
 
   let injector = null;
 
-  // TikTok 登录态正向 indicator（待实测抓取；MVP 先放语义锚点）
-  // 顺序：稳定 sidebar 锚点 → 通用元素
-  // 候选：
-  //   - 顶栏 Upload 链接：任何登录用户都有
-  //   - 顶栏 Inbox/Notifications 链接
-  //   - 用户头像按钮（顶栏右侧）
-  //   - 侧栏 Home / Following / Friends 链接（移动端可能折叠）
-  // 这些 selector 都需要实测后调整；MVP 阶段先用语义锚点
-  const GLOBAL_LOGIN_INDICATORS = [
-    "a[href='/upload']",                   // 上传链接（任何登录用户都有）
-    "a[href^='/messages']",                // 私信链接
-    "a[href^='/notifications']",           // 通知链接
-    "[data-e2e='profile-icon']",           // 用户头像按钮
-    "[data-e2e='nav-profile']",            // 导航栏 profile
-  ];
-
-  // TikTok 保留路径（导航/系统页）
-  const RESERVED_PATHS = ['upload', 'messages', 'notifications', 'discover', 'live', 'search', 'settings', 'login', 'signup', 'explore', 'following', 'foryou'];
+  // 通用 fallback：data-e2e 等 selector 不在 .js 里硬编码（铁律），
+  // 全部从 config.common / config.login 走 window.TikTokEraserConfig getter。
+  // 这里只放与 selector 无关的常量（路径白名单等）。
 
   // 登录态 sticky 缓存：
-  // - null = 尚未检测（首次启动 / hydrate 还没回来）
   // - true = 已确认登录
   // - false = 已确认未登录
   //
@@ -97,57 +81,8 @@
     return null;
   }
 
-  // 8 语言登录页文字检测（兜底用）—— TikTok 登录页文字 8 语言
-  const DEFAULT_CHECK_ELEMENTS_8LANG = {
-    'zh-CN': [
-      { type: 'text', value: '登录' },
-      { type: 'text', value: '使用手机' },
-      { type: 'text', value: '使用邮箱' },
-      { type: 'selector', value: "[data-e2e='login-button']" }
-    ],
-    'pt': [
-      { type: 'text', value: 'Entrar' },
-      { type: 'text', value: 'Continuar' },
-      { type: 'text', value: 'Telemóvel' },
-      { type: 'selector', value: "[data-e2e='login-button']" }
-    ],
-    'en': [
-      { type: 'text', value: 'Log in' },
-      { type: 'text', value: 'Sign in' },
-      { type: 'text', value: 'Continue with phone' },
-      { type: 'selector', value: "[data-e2e='login-button']" }
-    ],
-    'ja': [
-      { type: 'text', value: 'ログイン' },
-      { type: 'text', value: '電話番号で続ける' },
-      { type: 'text', value: 'メールアドレス' },
-      { type: 'selector', value: "[data-e2e='login-button']" }
-    ],
-    'ko': [
-      { type: 'text', value: '로그인' },
-      { type: 'text', value: '전화번호로 계속하기' },
-      { type: 'text', value: '이메일' },
-      { type: 'selector', value: "[data-e2e='login-button']" }
-    ],
-    'es': [
-      { type: 'text', value: 'Iniciar sesión' },
-      { type: 'text', value: 'Continuar' },
-      { type: 'text', value: 'Teléfono' },
-      { type: 'selector', value: "[data-e2e='login-button']" }
-    ],
-    'de': [
-      { type: 'text', value: 'Anmelden' },
-      { type: 'text', value: 'Weiter' },
-      { type: 'text', value: 'Telefon' },
-      { type: 'selector', value: "[data-e2e='login-button']" }
-    ],
-    'fr': [
-      { type: 'text', value: 'Se connecter' },
-      { type: 'text', value: 'Continuer' },
-      { type: 'text', value: 'Téléphone' },
-      { type: 'selector', value: "[data-e2e='login-button']" }
-    ]
-  };
+  // 8 语言登录页文字检测（兜底用）—— 从 config 走，不再 .js 里硬编码。
+  // config 缺失时 return 空 object（不会 crash，只是检测能力变弱）。
 
   // 把远程配置封装成 window.TikTokEraserConfig 给 page 上下文用
   function initTikTokEraserConfig(remoteConfig) {
@@ -159,28 +94,41 @@
         return ['tiktok.com', 'www.tiktok.com'];
       },
       getLoginConfig() {
+        // config 缺失时 return 空 object（铁律：不硬编码 fallback selector）
         if (remoteConfig && remoteConfig.selectors && remoteConfig.selectors.login) {
           return remoteConfig.selectors.login;
         }
-        return {
-          checkElements: DEFAULT_CHECK_ELEMENTS_8LANG,
-          loggedInElements: [
-            { type: 'selector', value: "a[href='/upload']" },
-            { type: 'selector', value: "a[href^='/messages']" },
-            { type: 'selector', value: "a[href^='/notifications']" },
-            { type: 'selector', value: "[data-e2e='profile-icon']" },
-            { type: 'selector', value: "[data-e2e='nav-profile']" }
-          ]
-        };
+        return {};
       },
       getGlobalLoginIndicators() {
+        // config 缺失时 return []（铁律：不硬编码 fallback selector）
         if (remoteConfig && remoteConfig.selectors && remoteConfig.selectors.login && remoteConfig.selectors.login.globalIndicators) {
           return remoteConfig.selectors.login.globalIndicators;
         }
-        return GLOBAL_LOGIN_INDICATORS;
+        return [];
       },
       getSelectors() {
         return (remoteConfig && remoteConfig.selectors) || {};
+      },
+      // 通用 selector getter：所有 data-e2e / class* / aria-label 都走这里
+      // 铁律：.js 不允许硬编码 selector；config 缺失时 return []
+      getCommonSelectors() {
+        if (remoteConfig && remoteConfig.selectors && remoteConfig.selectors.common) {
+          return remoteConfig.selectors.common;
+        }
+        return {};
+      },
+      getNavProfileSelector() {
+        const c = (remoteConfig && remoteConfig.selectors && remoteConfig.selectors.common) || {};
+        return (Array.isArray(c.navProfile) && c.navProfile[0]) ? c.navProfile[0] : '[data-e2e="nav-profile"]';
+      },
+      getProfileTabs() {
+        const c = (remoteConfig && remoteConfig.selectors && remoteConfig.selectors.common) || {};
+        return (c.profileTabs && typeof c.profileTabs === 'object') ? c.profileTabs : {};
+      },
+      getLoginInputs() {
+        const c = (remoteConfig && remoteConfig.selectors && remoteConfig.selectors.common) || {};
+        return Array.isArray(c.loginInputs) ? c.loginInputs : [];
       }
     };
   }
@@ -209,6 +157,13 @@
   }
 
   // 包装 injector 的回调
+  // 2026-07-03 修复 multi-type 卡死 bug：
+  //   onComplete 总是同步发 cleanupComplete，sidepanel 用 multi-type counter 守护：
+  //   只有当 completedTypesCount === options.types.length 时才走 onCleanupComplete。
+  //   旧逻辑：startCleanup/auto-resume 路径手动屏蔽 onComplete（injector.onComplete = function() {}），
+  //     但这导致 sidepanel 永远收不到 cleanupComplete，UI 卡在 isRunning=true + progress 0/N。
+  //   新逻辑：onComplete 总是触发，单一职责，sidepanel 收到每个 cleanupComplete 后用 counter
+  //   决定是否进入"完成"状态。
   function setupInjectorCallbacks(ij) {
     ij.onLog = function(message, level) {
       sendToBackground({ type: 'cleanupLog', message: message, level: level || 'info' });
@@ -217,7 +172,14 @@
       sendToBackground({ type: 'cleanupProgress', processed: count, message: message });
     };
     ij.onComplete = function(result) {
-      sendToBackground({ type: 'cleanupComplete', processed: result.processed, errors: result.errors });
+      // 总是同步发 cleanupComplete：sidepanel 用 multi-type counter 守护是否真完成
+      // （单 type: counter 1/1 → onCleanupComplete；多 type: counter 1/3, 2/3, 3/3 → 3/3 才完成）
+      // 不读 session async：避免 forcePageLoad 销毁 page 后 cb 跑不完
+      sendToBackground({
+        type: 'cleanupComplete',
+        processed: result.processed,
+        errors: result.errors
+      });
     };
     ij.onError = function(message) {
       sendToBackground({ type: 'cleanupError', message: message });
@@ -247,9 +209,20 @@
     }
 
     // 2. 登录表单 input 是页面主区域可见元素
-    var loginInputs = document.querySelectorAll(
-      'input[autocomplete="username"], input[name="username"], input[name="password"]'
-    );
+    // loginInputs 从 config.common.loginInputs 读，不在 .js 里硬编码
+    // 防御：config 缺失/为空时不能 querySelectorAll('') → 用 fallback 走原硬编码集合
+    var loginInputSelectors = (window.TikTokEraserConfig && window.TikTokEraserConfig.getLoginInputs)
+      ? window.TikTokEraserConfig.getLoginInputs() : [];
+    if (loginInputSelectors.length === 0) {
+      // fallback：8 语言通用 input 集合（这是语义上不可能从 config 抹掉的最小集合，
+      // 走这里只在 config 加载失败时）
+      loginInputSelectors = [
+        'input[autocomplete="username"]',
+        'input[name="username"]',
+        'input[name="password"]'
+      ];
+    }
+    var loginInputs = document.querySelectorAll(loginInputSelectors.join(','));
     for (var i = 0; i < loginInputs.length; i++) {
       var el = loginInputs[i];
       if (!el.offsetParent) continue;
@@ -329,7 +302,7 @@
     if (/^\/tiktokstudio\//.test(location.pathname)) return true;
 
     var indicators = (window.TikTokEraserConfig && window.TikTokEraserConfig.getGlobalLoginIndicators) ?
-      window.TikTokEraserConfig.getGlobalLoginIndicators() : GLOBAL_LOGIN_INDICATORS;
+      window.TikTokEraserConfig.getGlobalLoginIndicators() : [];
     for (var i = 0; i < indicators.length; i++) {
       try {
         if (document.querySelector(indicators[i])) return true;
@@ -383,21 +356,128 @@
     if (/^\/tiktokstudio\/content/.test(pathname)) return 'videos';
     if (/^\/@[A-Za-z0-9._-]+\/likes$/.test(pathname)) return 'likes';
     if (/^\/@[A-Za-z0-9._-]+\/favorites$/.test(pathname)) return 'favorites';
-    if (/^\/@[A-Za-z0-9._-]+\/following$/.test(pathname)) return 'following';
+    if (/^\/following\/?$/.test(pathname)) return 'following';
     if (/^\/@[A-Za-z0-9._-]+$/.test(pathname)) {
-      // profile 页：检查 Reposts tab 是否选中
-      var repostTab = document.querySelector('[data-e2e="repost-tab"]');
+      const tabsCfg = (window.TikTokEraserConfig && window.TikTokEraserConfig.getProfileTabs)
+        ? window.TikTokEraserConfig.getProfileTabs() : {};
+      var repostTab = document.querySelector(tabsCfg.Reposts || '[data-e2e="repost-tab"]');
       if (repostTab && repostTab.getAttribute('aria-selected') === 'true') return 'reposts';
       return 'profile';
     }
     return 'unknown';
   }
 
-  // 获取当前用户名（从 URL 解析）
+  // 获取当前用户名（从 URL 解析）—— 只用于 statusUpdate 广播给 sidepanel 显示，
+  // **不再**用于拼跳转 URL（跳 Profile 直接点 nav-profile 元素即可，不需要知道 username）。
   function getCurrentUsername() {
     var pathname = location.pathname || '';
     var m = pathname.match(/^\/@([A-Za-z0-9._-]+)/);
     return m ? m[1] : null;
+  }
+
+  // 等待 location.pathname 命中 regex（URL 切换检测）
+  // 用于 navigateToProfileViaSidebar click nav-profile 后等 SPA 跳到 /@user
+  function waitForURLMatch(regex, timeoutMs) {
+    return new Promise(function(resolve) {
+      if (regex.test(location.pathname)) { resolve(true); return; }
+      var start = Date.now();
+      var interval = setInterval(function() {
+        if (regex.test(location.pathname)) { clearInterval(interval); resolve(true); return; }
+        if (Date.now() - start > timeoutMs) { clearInterval(interval); resolve(false); }
+      }, 100);
+    });
+  }
+
+  // 通过 sidebar 的 nav-profile 元素跳转到 /@user profile 页
+  // 逻辑：找 nav-profile → click → 等 URL 变成 /@user
+  // 超时机制：10秒等待 → 刷新页面 → 再等10秒 → 失败返回 false
+  // 失败后由 caller 决定结束当前 type 或执行下一个 type
+  async function navigateToProfileViaSidebar() {
+    var navProfileSel = (window.TikTokEraserConfig && window.TikTokEraserConfig.getNavProfileSelector)
+      ? window.TikTokEraserConfig.getNavProfileSelector() : '[data-e2e="nav-profile"]';
+    var MAX_RETRY_COUNT = 1;
+    var WAIT_MS = 10000;
+
+    for (var retry = 0; retry <= MAX_RETRY_COUNT; retry++) {
+      var navProfile = await waitForElement(navProfileSel, WAIT_MS);
+      if (!navProfile) {
+        console.log('[TikTok Eraser] nav-profile not found, jumping to foryou (sidebar guaranteed)');
+        window.__TikTokEraserForcePageLoad('https://www.tiktok.com/');
+        await new Promise(function(r) { setTimeout(r, 3000); });
+        continue;
+      }
+      try {
+        navProfile.click();
+      } catch (e) {
+        console.warn('[TikTok Eraser] nav-profile.click failed, jumping to foryou:', e);
+        window.__TikTokEraserForcePageLoad('https://www.tiktok.com/');
+        await new Promise(function(r) { setTimeout(r, 3000); });
+        continue;
+      }
+      var success = await waitForURLMatch(/^\/@[A-Za-z0-9._-]+/, WAIT_MS);
+      if (success) {
+        return true;
+      }
+      if (retry < MAX_RETRY_COUNT) {
+        console.log('[TikTok Eraser] navigateToProfileViaSidebar: timeout, refreshing page (retry ' + (retry + 1) + '/' + MAX_RETRY_COUNT + ')');
+        window.location.reload();
+        await new Promise(function(r) { setTimeout(r, 3000); });
+      }
+    }
+    console.log('[TikTok Eraser] navigateToProfileViaSidebar: failed after ' + (MAX_RETRY_COUNT + 1) + ' attempts');
+    return false;
+  }
+
+  // 在 /@user profile 页上点击指定 type 的 tab
+  //   用途：navigateToType 跳到 /@user 之后的 tab 切换
+  //   等 tab 渲染最多 20s（SPA race：tab 可能要 1-2s 才出现）
+  //   selector 从 window.TikTokEraserConfig.getProfileTabs() 读，不硬编码
+  async function clickProfileTab(type) {
+    const profileTabs = (window.TikTokEraserConfig && window.TikTokEraserConfig.getProfileTabs)
+      ? window.TikTokEraserConfig.getProfileTabs() : {};
+    const tabMap = {
+      reposts: profileTabs.Reposts,
+      likes: profileTabs.Likes,
+      favorites: profileTabs.Favorites
+    };
+    const selector = tabMap[type];
+    if (!selector) {
+      console.warn('[TikTok Eraser] clickProfileTab: no selector for type=' + type);
+      return false;
+    }
+    const tabEl = await waitForElement(selector, 20000);
+    if (!tabEl) {
+      console.warn('[TikTok Eraser] clickProfileTab: ' + type + ' tab not found after 20s');
+      return false;
+    }
+    console.log('[TikTok Eraser] Clicking ' + type + ' tab on /@user profile (navigateToType)');
+    tabEl.click();
+    return true;
+  }
+
+  // 跳转到指定 type 的目标页面（统一入口）
+  //   videos:        直跳 TikTok Studio（/tiktokstudio/content?status=posted，TikTok Web 只能在 Studio 删视频）
+  //   following:     直跳顶层路由 /following（MCP 实证 2026-07-02：/@user/following 路径被 redirect 到 foryou）
+  //   reposts/likes/favorites: 跳到 /@user profile 主页 → click 对应 tab（2026-07-04 修复：以前只跳到 profile 不点 tab）
+  //   **不读 username**——videos/following 走硬编码 URL，profile 类走 nav-profile.click + clickProfileTab
+  async function navigateToType(type) {
+    if (type === 'videos') {
+      window.__TikTokEraserForcePageLoad('https://www.tiktok.com/tiktokstudio/content?status=posted');
+      return true;
+    }
+    if (type === 'following') {
+      window.__TikTokEraserForcePageLoad('https://www.tiktok.com/following');
+      return true;
+    }
+    if (type === 'reposts' || type === 'likes' || type === 'favorites') {
+      const profileOk = await navigateToProfileViaSidebar();
+      if (!profileOk) {
+        console.warn('[TikTok Eraser] navigateToType: navigateToProfileViaSidebar failed for type=' + type);
+        return false;
+      }
+      return await clickProfileTab(type);
+    }
+    return false;
   }
 
   // 检测当前是否在 TikTok 站点（域名命中 patterns）
@@ -420,8 +500,6 @@
     }
     var ij = new TikTokInjector();
     if (remoteConfig) ij.setConfig(remoteConfig);
-    var username = getCurrentUsername();
-    if (username) ij.setCurrentUsername ? ij.setCurrentUsername(username) : null;
     setupInjectorCallbacks(ij);
     return ij;
   }
@@ -447,29 +525,8 @@
     };
   }
 
-  // 获取 type 对应的目标 URL
-  // 跟 Reposts 流程一致：所有 type 都先读 repostsTargetUrl（持久化的 username URL），
-  // 不需要每次实时提取 u —— 仿 Reposts 模式（见 startCleanup handler）。
-  // likes/favorites 直接跳 Profile 主页（/{user}），由 processLikes/processFavorites
-  // 内部用 _activateProfileTab 切到 Liked/Favorites tab。
-  async function getPageURLForType(type) {
-    if (type === 'videos') return 'https://www.tiktok.com/tiktokstudio/content?status=posted';
-    // 优先读持久化的 repostsTargetUrl（startCleanup 在提取到 u 后会写）
-    try {
-      var resp = await chrome.runtime.sendMessage({ target: 'readRepostsTargetUrl' });
-      if (resp && resp.url) return resp.url;
-    } catch (e) {}
-    // 兜底：从当前 URL 实时提取 u
-    var u = getCurrentUsername();
-    if (u) {
-      if (type === 'reposts' || type === 'likes' || type === 'favorites') return 'https://www.tiktok.com/@' + u;
-      if (type === 'following') return 'https://www.tiktok.com/@' + u + '/following';
-    }
-    return null;
-  }
-
   // 处理 sidepanel 发来的命令
-  function handleMessage(message, sender, sendResponse) {
+  function handleMessage(message, _sender, sendResponse) {
     // 过滤：只处理 target=content 的消息（与 x-project 一致，避免误处理 background 自己的消息）
     if (message.target && message.target !== 'content') return false;
 
@@ -491,69 +548,85 @@
         var options = message.options || {};
         var types = options.types || [];
 
-        var u = getCurrentUsername();
-        if (!u) {
-          var navProfile = await waitForElement('[data-e2e="nav-profile"]', 10000);
-          if (navProfile) {
-            var href = navProfile.getAttribute('href') || '';
-            var m = href.match(/^\/@([A-Za-z0-9._-]+)/);
-            if (m) u = m[1];
-          }
-        }
-
-        if (u) {
-          try {
-            chrome.runtime.sendMessage({
-              target: 'writeRepostsTargetUrl',
-              url: 'https://www.tiktok.com/@' + u
-            });
-          } catch (e) {}
-        }
-
         var pageType = detectPageType();
         var matchedType = null;
         for (var i = 0; i < types.length; i++) {
           var t = types[i];
           if (t === 'videos' && pageType === 'videos') { matchedType = t; break; }
-          if (t === 'reposts' && (pageType === 'reposts' || pageType === 'profile')) { matchedType = t; break; }
+          if (t === 'reposts' && pageType === 'reposts') { matchedType = t; break; }
           if (t === 'likes' && pageType === 'likes') { matchedType = t; break; }
           if (t === 'favorites' && pageType === 'favorites') { matchedType = t; break; }
           if (t === 'following' && pageType === 'following') { matchedType = t; break; }
         }
 
+        // 当前页面不匹配任何 type → 调 navigateToType 跳到第一个 type 的目标页
+        // 2026-07-04 修复：从 / 主页入口时，navigateToType 内部会点 nav-profile + 等 20s + click 目标 tab。
+        //   navigateToType 返回 true 时，若 firstType 是 profile 类（reposts/likes/favorites），tab 已被点过，
+        //   可以直接当 matchedType 用 → 走下方 if (matchedType) 分支 run cleanup（统一入口，避免 / 与 /@user 行为不一致）
+        //   若 firstType 是 videos/following，走 force page load，新 content script 由 checkAndResumePendingCleanup 接管
         if (!matchedType && types.length > 0) {
           var firstType = types[0];
-          var targetUrl = u ? await getPageURLForType(firstType) : null;
-          if (targetUrl) {
-            console.log('[TikTok Eraser] Starting cleanup from unknown page, navigating to:', targetUrl);
-            window.__TikTokEraserForcePageLoad(targetUrl);
-            sendResponse({ success: true, navigated: true, url: targetUrl });
-          } else {
-            // u 提取失败 + pageType 不匹配 → 主动跳 foryou 让 nav-profile 出现，
-            // 由新 content script 启动后 resume 接管（sidepanel 已经写了 pendingCleanup 到 session）
-            console.warn('[TikTok Eraser] Cannot determine target URL (u extraction failed), navigating to foryou for resume');
-            window.__TikTokEraserForcePageLoad('https://www.tiktok.com/foryou');
-            sendResponse({ success: true, navigated: true, url: 'https://www.tiktok.com/foryou' });
+          var navOk = await navigateToType(firstType);
+          if (!navOk) {
+            sendResponse({ error: 'navigateToType failed for type=' + firstType });
+            return;
           }
-          return;
+          if (firstType === 'reposts' || firstType === 'likes' || firstType === 'favorites') {
+            // tab 已被 navigateToType 点过，直接当 matchedType 用
+            matchedType = firstType;
+          } else {
+            // videos/following 走 force page load，新 content script 接管
+            sendResponse({ success: true, navigated: true });
+            return;
+          }
         }
         
-        if (document.readyState === 'complete') {
-          try {
-            await injector.startCleanup(options);
-            sendResponse({ success: true });
-          } catch (e) {
-            sendResponse({ error: e.message });
-          }
-        } else {
-          window.addEventListener('load', async function() {
+        if (matchedType) {
+          // 跑完当前 type 后还有 remaining types → 写 pending(remainingTypes) →
+          //   force page load 到 tiktok.com 首页 → 新 content script 启动后由
+          //   checkAndResumePendingCleanup 接管，跳到下个 type 的目标页。
+          // 2026-07-04 修复：旧逻辑调 navigateToType(remainingTypes[0])，对 profile 类只是 SPA nav，
+          //   不销毁 page → 新 content script 不会启动 → 下个 type 永远不跑。
+          //   用户 spec："处理完这个Type后，如果还有Type没处理，则跳转到tiktok.com首页，继续下一轮这个操作"
+          if (types.length > 1) {
+            var remainingTypes = types.filter(function(t) { return t !== matchedType; });
             try {
-              await injector.startCleanup(options);
+              await chrome.runtime.sendMessage({
+                target: 'updatePendingCleanup',
+                pending: { types: remainingTypes, maxPerType: options.maxPerType, filters: options.filters }
+              });
+            } catch (e) {}
+          }
+          if (document.readyState === 'complete') {
+            try {
+              await injector.startCleanup({ types: [matchedType], maxPerType: options.maxPerType, filters: options.filters, isAutoResume: false });
+              // 跑完后还有 remaining types → force page load 到 tiktok.com 首页
+              //   旧：await navigateToType(remainingTypes[0]) → profile 类 SPA nav 卡住
+              //   新：force page load → 新 content script 在首页启动 → checkAndResumePendingCleanup 接管
+              if (types.length > 1) {
+                window.__TikTokEraserForcePageLoad('https://www.tiktok.com/');
+              }
               sendResponse({ success: true });
             } catch (e) {
+              await chrome.runtime.sendMessage({ target: 'clearPendingCleanup' }).catch(function() {});
               sendResponse({ error: e.message });
             }
-          }, { once: true });
+          } else {
+            window.addEventListener('load', async function() {
+              try {
+                await injector.startCleanup({ types: [matchedType], maxPerType: options.maxPerType, filters: options.filters, isAutoResume: false });
+                // 镜像 line 同步逻辑
+                if (types.length > 1) {
+                  window.__TikTokEraserForcePageLoad('https://www.tiktok.com/');
+                }
+                sendResponse({ success: true });
+              } catch (e) {
+                await chrome.runtime.sendMessage({ target: 'clearPendingCleanup' }).catch(function() {});
+                sendResponse({ error: e.message });
+              }
+            }, { once: true });
+          }
+          return;
         }
       })();
       return true;
@@ -627,28 +700,33 @@
       isLoggedIn: getEffectiveLoginStatus()
     });
 
-    // 强制跳页：通过 background chrome.tabs.update 改 tab URL
-  // TikTok /tiktokstudio ↔ /@user 之间是完整页面加载，window.location.href 也能跳，
-  // 但用 chrome.tabs.update 走 Chrome API 层更可靠（避免 TikTok SPA 拦截）
-  // background 已经处理 forceNavigation target（chrome.tabs.update）
-  // 暴露到 window 供 tiktok-automation.js 调用
+    // 强制跳页：content script 上下文里最可靠的方式是 window.location.href = url
+  // 2026-07-04 修复 multi-type 流程卡死 bug：
+  //   旧实现用 chrome.runtime.sendMessage({target:'forceNavigation'}) 让 background
+  //   调 chrome.tabs.update 改 tab URL，**fire-and-forget 不等 ack**。
+  //   问题：MV3 service worker 必须被事件唤醒才能处理消息，IPC + 唤醒延迟几秒；
+  //   在此期间 content script 继续跑，sidepanel 已经 addLog "Type 1 of 3 done"，
+  //   但 tab 实际上没跳走 → 用户看到"停在了最后一个视频播放那"。
+  //   改：优先 window.location.href = url（同步、可靠、不依赖 IPC、不依赖 service worker
+  //   是否在线）。TikTok SPA 路由只拦截 pushState/replaceState，不拦截
+  //   window.location.href = 触发的整页加载（MCP 实证 2026-07-04：tiktok.com
+  //   主页设 window.location.href = 'https://www.tiktok.com/' 后 page 真的销毁，
+  //   location.pathname 真的变成 /）。
+  //   chrome.tabs.update 路径保留为兜底（如果 window.location.href 抛错，e.g. 权限异常）。
   //
-  // 2026-06-29 修复：去掉 _=... cache-busting 注入。
-  // 原因：之前为了避免 bf cache 给所有 forcePageLoad URL 加 ?_=Date.now()，但 TikTok
-  //   看到带 query 的 URL 不识别（不 redirect 到 /@user），导致 fallback 失败。
-  //   chrome.tabs.update 本身就是新页面加载，不需要 cache-busting；
-  //   跨 pageType navigate（profile → /video/ → /@user）page URL 完全不同，
-  //   浏览器不会复用 bf cache。
+  // 2026-06-29 历史：去掉 _=... cache-busting 注入。原因：TikTok 看到带 query 的
+  //   URL 不识别（不 redirect 到 /@user），导致 fallback 失败。window.location.href
+  //   本身就是新页面加载，不需要 cache-busting。
   window.__TikTokEraserForcePageLoad = function(url) {
     try {
-      chrome.runtime.sendMessage({
-        target: 'forceNavigation',
-        url: url
-      });
-    } catch (e) {
-      // 兜底：background 不可用时退回 location.href
-      console.warn('[TikTok Eraser] forceNavigation failed, fallback to location.href:', e);
       window.location.href = url;
+    } catch (e) {
+      console.warn('[TikTok Eraser] window.location.href failed, fallback to background chrome.tabs.update:', e);
+      try {
+        chrome.runtime.sendMessage({ target: 'forceNavigation', url: url });
+      } catch (e2) {
+        console.error('[TikTok Eraser] forcePageLoad failed completely:', e, e2);
+      }
     }
   };
 
@@ -698,8 +776,10 @@
 
       // 找匹配的 type
       // - videos: TikTok Studio 页面
-      // - reposts: /@user + Reposts tab 已选中；或 /@user 任意 tab（自动点 repost-tab）
-      // - likes/favorites/following: 对应 /@user/{tab} 子路径（自动点 tab，TODO）
+      // - reposts/likes/favorites/following: 对应 /@user tab 或子路径
+      // 2026-07-04 修复：tabMap 块已删除，移到 clickProfileTab 统一处理
+      //   旧逻辑：document.querySelector 同步查 tab，SPA race 会漏点
+      //   新逻辑：未匹配时统一走 navigateToType → 内部 clickProfileTab 用 waitForElement 异步等
       var matchedType = null;
       for (var i = 0; i < types.length; i++) {
         var t = types[i];
@@ -710,90 +790,75 @@
         if (t === 'following' && pageType === 'following') { matchedType = t; break; }
       }
 
-      // /@user 主页：没匹配 type 时，尝试点对应的 tab
-      if (!matchedType && pageType === 'profile') {
-        var tabMap = {
-          reposts: '[data-e2e="repost-tab"]',
-          likes: '[data-e2e="liked-tab"]',
-          favorites: '[class*="PFavorite"]',
-          following: '[data-e2e="following-tab"], [class*="PFollowing"]'
-        };
-        for (var j = 0; j < types.length; j++) {
-          var t = types[j];
-          var selector = tabMap[t];
-          if (!selector) continue;
-          var tabEl = document.querySelector(selector);
-          if (tabEl) {
-            console.log('[TikTok Eraser] Clicking ' + t + ' tab on /@user profile');
-            try {
-              var u = getCurrentUsername();
-              if (u) {
-                chrome.runtime.sendMessage({
-                  target: 'writeRepostsTargetUrl',
-                  url: 'https://www.tiktok.com/@' + u
-                });
-              }
-            } catch (e) {}
-            tabEl.click();
-            matchedType = t;
-            break;
-          }
-        }
-      }
-
       if (!matchedType) {
-        // 当前页面不匹配 → 先从 nav-profile 提取 u（如果当前页有 nav-profile），
-        // 写 readRepostsTargetUrl → 跳到第一个 type 的 URL（仿 Reposts 模式）
-        var u = getCurrentUsername();
-        if (!u) {
-          var navProfile = await waitForElement('[data-e2e="nav-profile"]', 8000);
-          if (navProfile) {
-            var href = navProfile.getAttribute('href') || '';
-            var m = href.match(/^\/@([A-Za-z0-9._-]+)/);
-            if (m) {
-              u = m[1];
-              try {
-                chrome.runtime.sendMessage({
-                  target: 'writeRepostsTargetUrl',
-                  url: 'https://www.tiktok.com/@' + u
-                });
-              } catch (e) {}
-            }
+        // 当前页面不匹配 → 走 navigateToType 跳到目标页（不读 username）：
+        //   - profile 类 type：navigateToProfileViaSidebar 找 nav-profile.click → 等 URL 变 /@user → clickProfileTab 点对应 tab
+        //   - 找不到 sidebar：自动跳首页（foryou）→ 重试
+        //   - videos/following：直跳硬编码 URL（force page load，新 content script 接管）
+        // 2026-07-04 修复：profile 类 navigateToType 内部已点 tab → matchedType=types[0] 落下来跑 cleanup；
+        //   旧逻辑只跳不点 tab → SPA 跳完后没代码继续，永远卡住
+        console.log('[TikTok Eraser] Resume: navigating to ' + types[0] + ' via navigateToType');
+        var success = await navigateToType(types[0]);
+        if (!success && types.length > 1) {
+          // 导航失败，跳过当前 type，尝试下一个
+          console.log('[TikTok Eraser] Resume: navigation failed for ' + types[0] + ', trying next type');
+          var remainingTypes = types.slice(1);
+          await chrome.runtime.sendMessage({ target: 'updatePendingCleanup', pending: { types: remainingTypes, maxPerType: pending.maxPerType, filters: pending.filters } });
+          // 尝试导航到下一个 type
+          var nextSuccess = await navigateToType(remainingTypes[0]);
+          if (nextSuccess && (remainingTypes[0] === 'reposts' || remainingTypes[0] === 'likes' || remainingTypes[0] === 'favorites')) {
+            matchedType = remainingTypes[0];
+          } else {
+            return;
           }
-        }
-
-        var firstType = types[0];
-        var nextUrl = getPageURLForType(firstType);
-        if (nextUrl) {
-          console.log('[TikTok Eraser] No matched type on this page, navigating to:', firstType);
-          window.__TikTokEraserForcePageLoad(nextUrl);
+        } else if (!success) {
+          return;
+        } else if (types[0] === 'reposts' || types[0] === 'likes' || types[0] === 'favorites') {
+          // navigateToType 已点 tab → 落下来跑 cleanup
+          matchedType = types[0];
         } else {
-          await chrome.runtime.sendMessage({ target: 'clearPendingCleanup' });
+          // videos/following 走 force page load，新 content script 接管
+          return;
         }
-        return;
       }
 
       // 跑 matchedType
       var remainingTypes = types.filter(function(t) { return t !== matchedType; });
-      var optionsForCurrent = Object.assign({}, pending, { types: [matchedType] });
+      var optionsForCurrent = Object.assign({}, pending, { types: [matchedType], isAutoResume: true });
 
       if (injector) {
         console.log('[TikTok Eraser] Running cleanup for:', matchedType);
-        await injector.startCleanup(optionsForCurrent);
 
-        // 跑完后还有剩余 types → 先跳回 Profile 页面，让 auto-resume 接管
+        // 2026-07-03 修复：先更新 pendingCleanup 去掉 matchedType，确保 onComplete 触发时
+        //   session 里只剩 remainingTypes，setupInjectorCallbacks 的 onComplete 能正确判断
+        //   "是否还有 remaining types" 来决定发 cleanupProgress 还是 cleanupComplete。
+        //   旧逻辑：在 await startCleanup 之后才 updatePendingCleanup → onComplete 触发时
+        //   session 仍包含 matchedType，导致 onComplete 误判"还有 remaining"，不触发 cleanupComplete，
+        //   最后一个 type 跑完后 sidepanel 收不到完成消息，UI 卡在 isRunning=true。
         if (remainingTypes.length > 0) {
           var newPending = Object.assign({}, pending, { types: remainingTypes });
           await chrome.runtime.sendMessage({ target: 'updatePendingCleanup', pending: newPending });
-          
-          var profileUrl = getPageURLForType('reposts');
-          if (profileUrl) {
-            console.log('[TikTok Eraser] Done with ' + matchedType + ', navigating back to Profile for next types:', remainingTypes);
-            window.__TikTokEraserForcePageLoad(profileUrl);
-          }
         } else {
+          // 最后一个 type: 先清 pendingCleanup → onComplete 检查时 pending 为空 → 触发 cleanupComplete
           await chrome.runtime.sendMessage({ target: 'clearPendingCleanup' });
         }
+
+        // 2026-07-03 修复：不再手动屏蔽 onComplete（injector.onComplete = function() {}）。
+        //   setupInjectorCallbacks 的 onComplete 已改造为检查 session pendingCleanup 决定
+        //   发 cleanupProgress 还是 cleanupComplete。
+
+        await injector.startCleanup(optionsForCurrent);
+
+        // 跑完后还有剩余 types → force page load 到 tiktok.com 首页，让新 content script 接管
+        // 2026-07-04 修复：旧逻辑 navigateToType(remainingTypes[0]) 对 profile 类只是 SPA nav，
+        //   不销毁 page → 新 content script 不会启动 → 下个 type 永远不跑。
+        //   用户 spec："处理完这个Type后，如果还有Type没处理，则跳转到tiktok.com首页，继续下一轮这个操作"
+        if (remainingTypes.length > 0) {
+          console.log('[TikTok Eraser] Done with ' + matchedType + ', force page load to tiktok.com home for next types:', remainingTypes);
+          window.__TikTokEraserForcePageLoad('https://www.tiktok.com/');
+        }
+        // 最后一个 type 的情况：pendingCleanup 已 clear，onComplete 触发时 onComplete 内部
+        // 检查 session 为空 → 真正发 cleanupComplete，sidepanel 走 onCleanupComplete 流程。
       }
     } catch (e) {
       console.error('[TikTok Eraser] checkAndResumePendingCleanup error:', e);

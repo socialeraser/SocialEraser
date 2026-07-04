@@ -45,7 +45,6 @@
       pleaseOpenTikTok: 'Please open TikTok website',
       loggedIn: 'Logged in',
       notLoggedIn: 'Not logged in',
-      notLoggedInHint: 'Please login first',
       selectOptions: 'Select items to delete',
       videos: 'Your Videos',
       videosBackupTip: 'Videos are permanently deleted and cannot be recovered. We recommend requesting your {link} or saving important videos manually first.',
@@ -115,7 +114,6 @@
       unlikeFailed: 'Unlike failed: {error}',
       clickReturnedFalse: 'Click returned false for unlike button',
       startingFavoritesCleanup: 'Starting favorites cleanup',
-      noUnfavoriteButtons: 'No processable content found',
       noMoreFavorites: 'No more favorites',
       endOfFavorites: 'End of favorites',
       clickedUnfavorite: 'Clicked unfavorite button #{count}',
@@ -138,11 +136,13 @@
       repostDeleteFailed: 'Repost delete failed: {error}',
       repostDeleteComplete: 'Repost cleanup complete: {count} deleted',
       likesDeleteComplete: 'Likes cleanup complete: {count} deleted',
+      favoritesDeleteComplete: 'Favorites cleanup complete: {count} deleted',
       noMoreReposts: 'No more reposts',
       endOfReposts: 'End of reposts list',
       typeRequiresNav: '{type} requires a different page. Open it manually and try again.',
 
       // 诊断
+      repostSkipNotReposted: '[Repost] Skip: not in reposted state. element exists={exists} aria={aria}',
       pageDiagnostics: '=== Page Diagnostics ===',
       endDiagnostics: '=== End Diagnostics ===',
       totalTestIdElements: 'Total data-testid elements: {count}',
@@ -161,6 +161,8 @@
       gotIt: 'Got it',
       supportProject: '☕ Support',
       feedbackTooltip: 'Send feedback',
+      // 2026-07-03: multi-type cleanup 中间步骤进度（"Type 1 of 3 done, loading next..."）
+      typeProgressUpdate: 'Type {done} of {total} done, loading next...',
       summaryDone: 'Done! {count} items cleaned',
       summaryStats: '{types} types · {duration}',
 
@@ -209,7 +211,6 @@
       pleaseOpenTikTok: '请打开 TikTok 网站',
       loggedIn: '已登录',
       notLoggedIn: '未登录',
-      notLoggedInHint: '请先登录',
       selectOptions: '选择要删除的内容',
       videos: '你的视频',
       videosBackupTip: '视频一旦删除无法恢复，建议先去 {link} 申请归档下载再清理。',
@@ -277,7 +278,6 @@
       unlikeFailed: '取消点赞失败: {error}',
       clickReturnedFalse: 'unlike 按钮点击返回 false',
       startingFavoritesCleanup: '开始清理收藏',
-      noUnfavoriteButtons: '未找到可处理的内容',
       noMoreFavorites: '没有更多收藏了',
       endOfFavorites: '收藏清理完成',
       clickedUnfavorite: '已点击取消收藏按钮 #{count}',
@@ -300,9 +300,12 @@
       repostDeleteFailed: '删除转发失败: {error}',
       repostDeleteComplete: '转发清理完成：已删除 {count} 条',
       likesDeleteComplete: '点赞清理完成：已取消 {count} 个点赞',
+      favoritesDeleteComplete: '收藏清理完成：已取消 {count} 个收藏',
       noMoreReposts: '没有更多转发了',
       endOfReposts: '转发清理完成',
       typeRequiresNav: '{type} 需要在不同的页面，请手动打开后重试。',
+
+      repostSkipNotReposted: '[Repost] 跳过：当前不是已转发状态。元素存在={exists}，aria={aria}',
 
       pageDiagnostics: '=== 页面诊断 ===',
       endDiagnostics: '=== 诊断结束 ===',
@@ -322,6 +325,8 @@
       gotIt: '我知道了',
       supportProject: '☕ 打赏支持',
       feedbackTooltip: '发送反馈',
+      // 2026-07-03: multi-type cleanup 中间步骤进度
+      typeProgressUpdate: '已完成 {done}/{total} 种类型，正在加载下一种…',
       summaryDone: '完成！共删除 {count} 项',
       summaryStats: '{types} 种 · {duration}',
 
@@ -369,7 +374,6 @@
       pleaseOpenTikTok: 'TikTok ウェブサイトを開いてください',
       loggedIn: 'ログイン済み',
       notLoggedIn: '未ログイン',
-      notLoggedInHint: '先にログインしてください',
       selectOptions: '削除する項目を選択',
       videos: 'あなたの動画',
       videosBackupTip: '動画は削除後に復元できません。クリーンアップの前に {link} をダウンロードすることをおすすめします。',
@@ -437,7 +441,6 @@
       unlikeFailed: 'いいね解除失敗: {error}',
       clickReturnedFalse: 'unlike ボタンクリックが false を返しました',
       startingFavoritesCleanup: 'お気に入りのクリーンアップを開始',
-      noUnfavoriteButtons: '処理対象が見つかりません',
       noMoreFavorites: 'もうお気に入りはありません',
       endOfFavorites: 'お気に入りの処理完了',
       clickedUnfavorite: 'お気に入り解除ボタン #{count} をクリック',
@@ -460,9 +463,12 @@
       repostDeleteFailed: 'リポスト削除失敗: {error}',
       repostDeleteComplete: 'リポストのクリーンアップ完了: {count} 件削除',
       likesDeleteComplete: 'いいねのクリーンアップ完了: {count} 件解除',
+      favoritesDeleteComplete: 'お気に入りのクリーンアップ完了: {count} 件解除',
       noMoreReposts: 'これ以上のリポストはありません',
       endOfReposts: 'リポストのクリーンアップが完了',
       typeRequiresNav: '{type} には別のページが必要です。手動で開いて再試行してください。',
+
+      repostSkipNotReposted: '[Repost] スキップ：リポスト済み状態ではありません。要素存在={exists}、aria={aria}',
 
       pageDiagnostics: '=== ページ診断 ===',
       endDiagnostics: '=== 診断終了 ===',
@@ -482,6 +488,7 @@
       gotIt: '了解',
       supportProject: '☕ サポート',
       feedbackTooltip: 'フィードバックを送信',
+      typeProgressUpdate: '{total} 種類中 {done} 種類完了、次の種類を読み込み中…',
       summaryDone: '完了！{count} 件削除しました',
       summaryStats: '{types} 種類 · {duration}',
 
@@ -527,7 +534,6 @@
       pleaseOpenTikTok: 'TikTok 웹사이트를 열어주세요',
       loggedIn: '로그인됨',
       notLoggedIn: '로그인 안됨',
-      notLoggedInHint: '먼저 로그인하세요',
       selectOptions: '삭제할 항목 선택',
       videos: '내 동영상',
       videosBackupTip: '동영상은 삭제하면 복구할 수 없습니다. 정리하기 전에 먼저 {link} 신청을 권장합니다.',
@@ -595,7 +601,6 @@
       unlikeFailed: '좋아요 취소 실패: {error}',
       clickReturnedFalse: 'unlike 버튼 클릭이 false 반환',
       startingFavoritesCleanup: '즐겨찾기 정리 시작',
-      noUnfavoriteButtons: '처리할 내용을 찾을 수 없음',
       noMoreFavorites: '더 이상 즐겨찾기 없음',
       endOfFavorites: '즐겨찾기 처리 완료',
       clickedUnfavorite: '즐겨찾기 취소 버튼 #{count} 클릭함',
@@ -618,9 +623,12 @@
       repostDeleteFailed: '리포스트 삭제 실패: {error}',
       repostDeleteComplete: '리포스트 정리 완료: {count}개 삭제됨',
       likesDeleteComplete: '좋아요 정리 완료: {count}개 취소됨',
+      favoritesDeleteComplete: '즐겨찾기 정리 완료: {count}개 제거됨',
       noMoreReposts: '더 이상 리포스트 없음',
       endOfReposts: '리포스트 정리 완료',
       typeRequiresNav: '{type}은(는) 다른 페이지가 필요합니다. 수동으로 열고 다시 시도하세요.',
+
+      repostSkipNotReposted: '[Repost] 건너뜀: 리포스트된 상태가 아닙니다. 요소 존재={exists}, aria={aria}',
 
       pageDiagnostics: '=== 페이지 진단 ===',
       endDiagnostics: '=== 진단 종료 ===',
@@ -639,6 +647,7 @@
       gotIt: '알겠습니다',
       supportProject: '☕ 후원',
       feedbackTooltip: '피드백 보내기',
+      typeProgressUpdate: '{total}종 중 {done}종 완료, 다음 항목 로드 중…',
       summaryDone: '완료! {count}개 정리됨',
       summaryStats: '{types}종 · {duration}',
 
@@ -655,7 +664,6 @@
       copiedToClipboard: '진단 로그가 클립보드에 복사됨',
       copyFailed: '복사 실패: {error}',
       sessionWriteFailed: '경고: 정리 상태 저장 실패',
-
       cleanupAbortedPageNotFound: '정리 중단: 3회 재시도 후에도 대상 페이지에 도달할 수 없습니다. 수동으로 이동 후 다시 시도하세요.',
 
       ratePromptTitle: '정리 경험은 어떠셨나요?',
@@ -684,7 +692,6 @@
       pleaseOpenTikTok: 'Abra o site do TikTok',
       loggedIn: 'Conectado',
       notLoggedIn: 'Não conectado',
-      notLoggedInHint: 'Faça login primeiro',
       selectOptions: 'Selecione o que deseja excluir',
       videos: 'Seus vídeos',
       videosBackupTip: 'Os vídeos são excluídos permanentemente e não podem ser recuperados. Recomendamos baixar seu {link} antes de limpar.',
@@ -752,7 +759,6 @@
       unlikeFailed: 'Falha ao desfazer curtida: {error}',
       clickReturnedFalse: 'Clique no botão unlike retornou false',
       startingFavoritesCleanup: 'Iniciando limpeza de favoritos',
-      noUnfavoriteButtons: 'Nenhum conteúdo processável encontrado',
       noMoreFavorites: 'Não há mais favoritos',
       endOfFavorites: 'Fim dos favoritos',
       clickedUnfavorite: 'Clicou em desfavoritar botão #{count}',
@@ -775,8 +781,11 @@
       repostDeleteFailed: 'Falha ao excluir repost: {error}',
       repostDeleteComplete: 'Limpeza de reposts concluída: {count} excluídos',
       likesDeleteComplete: 'Limpeza de curtidas concluída: {count} removidas',
+      favoritesDeleteComplete: 'Limpeza de favoritos concluída: {count} removidos',
       noMoreReposts: 'Não há mais reposts',
       endOfReposts: 'Fim dos reposts',
+      repostSkipNotReposted: '[Repost] Pular: não está em estado repostado. elemento existe={exists}, aria={aria}',
+
       typeRequiresNav: '{type} requer uma página diferente. Abra manualmente e tente novamente.',
 
       pageDiagnostics: '=== Diagnóstico da página ===',
@@ -796,6 +805,7 @@
       gotIt: 'Entendi',
       supportProject: '☕ Apoiar',
       feedbackTooltip: 'Enviar feedback',
+      typeProgressUpdate: 'Tipo {done} de {total} concluído, carregando o próximo…',
       summaryDone: 'Concluído! {count} itens limpos',
       summaryStats: '{types} tipos · {duration}',
 
@@ -841,7 +851,6 @@
       pleaseOpenTikTok: 'Por favor abre el sitio web de TikTok',
       loggedIn: 'Conectado',
       notLoggedIn: 'No conectado',
-      notLoggedInHint: 'Por favor inicia sesión primero',
       selectOptions: 'Seleccionar elementos para eliminar',
       videos: 'Tus videos',
       videosBackupTip: 'Los videos eliminados no se pueden recuperar. Te recomendamos descargar tu {link} antes de limpiar.',
@@ -909,7 +918,6 @@
       unlikeFailed: 'Error al quitar like: {error}',
       clickReturnedFalse: 'El clic en unlike devolvió false',
       startingFavoritesCleanup: 'Iniciando limpieza de favoritos',
-      noUnfavoriteButtons: 'No se encontró contenido procesable',
       noMoreFavorites: 'No hay más favoritos',
       endOfFavorites: 'Favoritos terminados',
       clickedUnfavorite: 'Clic en botón desfavoritar #{count}',
@@ -932,9 +940,12 @@
       repostDeleteFailed: 'Error al eliminar repost: {error}',
       repostDeleteComplete: 'Limpieza de reposts completada: {count} eliminados',
       likesDeleteComplete: 'Limpieza de likes completada: {count} eliminados',
+      favoritesDeleteComplete: 'Limpieza de favoritos completada: {count} eliminados',
       noMoreReposts: 'No hay más reposts',
       endOfReposts: 'Limpieza de reposts completada',
       typeRequiresNav: '{type} requiere una página diferente. Ábrela manualmente e inténtalo de nuevo.',
+
+      repostSkipNotReposted: '[Repost] Omitir: no está en estado de reposteado. elemento existe={exists}, aria={aria}',
 
       pageDiagnostics: '=== Diagnóstico de Página ===',
       endDiagnostics: '=== Fin del Diagnóstico ===',
@@ -953,6 +964,8 @@
       gotIt: 'Entendido',
       supportProject: '☕ Apoyar',
       feedbackTooltip: 'Enviar comentarios',
+      // 2026-07-03: progreso de tipos múltiples
+      typeProgressUpdate: 'Tipo {done} de {total} completado, cargando el siguiente…',
       summaryDone: '¡Listo! {count} elementos limpiados',
       summaryStats: '{types} tipos · {duration}',
 
@@ -969,7 +982,6 @@
       copiedToClipboard: 'Registro de diagnóstico copiado al portapapeles',
       copyFailed: 'Error al copiar: {error}',
       sessionWriteFailed: 'Advertencia: fallo al guardar el estado de limpieza',
-
       cleanupAbortedPageNotFound: 'Limpieza abortada: no se pudo llegar a la página objetivo después de 3 reintentos. Navega manualmente y vuelve a intentarlo.',
 
       ratePromptTitle: '¿Cómo fue tu limpieza?',
@@ -998,7 +1010,6 @@
       pleaseOpenTikTok: 'Bitte öffne die TikTok-Website',
       loggedIn: 'Angemeldet',
       notLoggedIn: 'Nicht angemeldet',
-      notLoggedInHint: 'Bitte zuerst anmelden',
       selectOptions: 'Zu löschende Elemente auswählen',
       videos: 'Deine Videos',
       videosBackupTip: 'Videos sind nach dem Löschen nicht wiederherstellbar. Wir empfehlen, vorher dein {link} herunterzuladen.',
@@ -1066,7 +1077,6 @@
       unlikeFailed: 'Unlike fehlgeschlagen: {error}',
       clickReturnedFalse: 'unlike-Klick gab false zurück',
       startingFavoritesCleanup: 'Starte Favoriten-Bereinigung',
-      noUnfavoriteButtons: 'Kein verarbeitbarer Inhalt gefunden',
       noMoreFavorites: 'Keine weiteren Favoriten',
       endOfFavorites: 'Favoriten beendet',
       clickedUnfavorite: 'Favorit-entfernen-Button #{count} geklickt',
@@ -1089,10 +1099,14 @@
       repostDeleteFailed: 'Repost-Löschung fehlgeschlagen: {error}',
       repostDeleteComplete: 'Repost-Bereinigung abgeschlossen: {count} gelöscht',
       likesDeleteComplete: 'Like-Bereinigung abgeschlossen: {count} entfernt',
+      favoritesDeleteComplete: 'Favoriten-Bereinigung abgeschlossen: {count} entfernt',
       noMoreReposts: 'Keine weiteren Reposts',
       endOfReposts: 'Repost-Bereinigung abgeschlossen',
       typeRequiresNav: '{type} benötigt eine andere Seite. Bitte manuell öffnen und erneut versuchen.',
 
+      repostSkipNotReposted: '[Repost] Überspringen: Nicht im reposteten Zustand. Element vorhanden={exists}, aria={aria}',
+
+      // 诊断
       pageDiagnostics: '=== Seiten-Diagnose ===',
       endDiagnostics: '=== Diagnose Ende ===',
       totalTestIdElements: 'data-testid Elemente gesamt: {count}',
@@ -1100,6 +1114,7 @@
       totalLabeledButtons: 'Buttons mit aria-label gesamt: {count}',
       topAriaLabels: 'Top aria-labels: {list}',
 
+      // 每日额度
       dailyLimitReached: 'Tägliches Sicherheitslimit erreicht ({used}/{limit})',
       dailyLimitReachedHint: 'Um dein Konto vor Ratenbegrenzung zu schützen, pausieren wir die Bereinigung bei {limit}/Tag.\n\nKomme morgen wieder — oder unterstütze den Entwickler, damit dieses kostenlose Tool weiterhin gepflegt wird.',
       upgradeToPremium: '☕ Entwickler unterstützen',
@@ -1110,6 +1125,7 @@
       gotIt: 'Verstanden',
       supportProject: '☕ Unterstützen',
       feedbackTooltip: 'Feedback senden',
+      typeProgressUpdate: 'Typ {done} von {total} abgeschlossen, lade nächsten…',
       summaryDone: 'Fertig! {count} Elemente bereinigt',
       summaryStats: '{types} Typen · {duration}',
 
@@ -1126,7 +1142,6 @@
       copiedToClipboard: 'Diagnoseprotokoll in Zwischenablage kopiert',
       copyFailed: 'Kopieren fehlgeschlagen: {error}',
       sessionWriteFailed: 'Warnung: Bereinigungsstatus konnte nicht gespeichert werden',
-
       cleanupAbortedPageNotFound: 'Bereinigung abgebrochen: Zielseite nach 3 Versuchen nicht erreichbar. Bitte manuell navigieren und erneut versuchen.',
 
       ratePromptTitle: 'Wie war deine Bereinigung?',
@@ -1155,7 +1170,6 @@
       pleaseOpenTikTok: 'Veuillez ouvrir le site TikTok',
       loggedIn: 'Connecté',
       notLoggedIn: 'Non connecté',
-      notLoggedInHint: 'Veuillez vous connecter d\'abord',
       selectOptions: 'Sélectionner les éléments à supprimer',
       videos: 'Vos vidéos',
       videosBackupTip: 'Les vidéos supprimés ne peuvent pas être récupérés. Nous vous recommandons de télécharger votre {link} avant le nettoyage.',
@@ -1222,8 +1236,7 @@
       clickedUnlike: 'Clic sur bouton unlike #{count}',
       unlikeFailed: 'Échec unlike: {error}',
       clickReturnedFalse: 'Le clic unlike a renvoyé false',
-      startingFavoritesCleanup: 'Démarrage nettoyage des favoris',
-      noUnfavoriteButtons: 'Aucun contenu traitable trouvé',
+      startingFavoritesCleanup: 'Démarrage nettoyage favoris',
       noMoreFavorites: 'Plus de favoris',
       endOfFavorites: 'Favoris terminés',
       clickedUnfavorite: 'Clic sur bouton retirer favori #{count}',
@@ -1246,9 +1259,12 @@
       repostDeleteFailed: 'Échec de la suppression du repost: {error}',
       repostDeleteComplete: 'Nettoyage des reposts terminé: {count} supprimés',
       likesDeleteComplete: 'Nettoyage des likes terminé: {count} retirés',
+      favoritesDeleteComplete: 'Nettoyage des favoris terminé: {count} retirés',
       noMoreReposts: 'Plus de reposts',
       endOfReposts: 'Nettoyage des reposts terminé',
       typeRequiresNav: '{type} nécessite une autre page. Ouvrez-la manuellement et réessayez.',
+
+      repostSkipNotReposted: '[Repost] Ignorer : pas dans l\u2019état reposté. élément existe={exists}, aria={aria}',
 
       pageDiagnostics: '=== Diagnostic de Page ===',
       endDiagnostics: '=== Fin Diagnostic ===',
@@ -1267,6 +1283,7 @@
       gotIt: 'Compris',
       supportProject: '☕ Soutenir',
       feedbackTooltip: 'Envoyer des commentaires',
+      typeProgressUpdate: 'Type {done} sur {total} terminé, chargement du suivant…',
       summaryDone: 'Terminé ! {count} éléments supprimés',
       summaryStats: '{types} types · {duration}',
 

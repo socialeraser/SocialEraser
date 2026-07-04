@@ -49,6 +49,8 @@ const ALL_SCRIPTS = [
   'verify-tiktok-keys-coverage.js',
   'verify-tiktok-login-detection.js',
   'verify-tiktok-repost-cancel-fix.js',
+  'verify-tiktok-favorites-flow.js',
+  'verify-extensions-sync.js',
 ];
 
 function parseArgs(argv) {

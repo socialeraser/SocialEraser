@@ -251,6 +251,15 @@
       display: none;
     }
     .progress-card.active { display: block; }
+    /* 2026-07-03 新增：daily limit 已达时 progress card 用 warning 色（amber 边 + 100% 进度条） */
+    .progress-card.limit-reached {
+      display: block;
+      border-color: #f59e0b;
+      background: #1f1611;
+    }
+    .progress-card.limit-reached #progress-text {
+      color: #f59e0b;
+    }
     .progress-header {
       display: flex;
       justify-content: space-between;
@@ -541,7 +550,7 @@
           <span class="option-count">0</span>
           <div class="backup-tip">
             <span class="backup-tip-icon" aria-hidden="true">⚠️</span>
-            <span class="backup-tip-text" data-i18n-html="videosBackupTip">Videos are permanently deleted and cannot be recovered. We recommend downloading your <a href="https://www.tiktok.com/setting/download-your-data" target="_blank" rel="noopener">TikTok data archive</a> or saving important videos manually first.</span>
+            <span class="backup-tip-text" data-i18n-html="videosBackupTip">Videos are permanently deleted and cannot be recovered. We recommend downloading your <a href="https://www.tiktok.com/setting/download-your-data" target="_blank" rel="noopener noreferrer">TikTok data archive</a> or saving important videos manually first.</span>
           </div>
         </div>
         <div class="option-item">

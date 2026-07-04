@@ -11,9 +11,7 @@
       this.maxErrors = 10;
       this.filters = null;
       this._dateMissingWarned = new Set();
-      this._currentUsername = null;
-      this._deletedRepostUrls = [];
-      this._deletedLikesUrls = [];
+      this._isAutoResume = false;
       this.onProgress = null;
       this.onLog = null;
       this.onComplete = null;
@@ -62,46 +60,21 @@
       }
     }
 
-    setCurrentUsername(username) {
-      this._currentUsername = (username && typeof username === 'string') ? username : null;
-    }
+    // "At most once" 取消按钮保证：依靠 selector [data-e2e='browse-favorite-icon'] /
+    // [data-e2e='browse-like-icon'] 等只匹配 favorited/liked 状态的 button。
+    // 按钮已经是 unfavorited/unliked 状态时，selector 不匹配，wait timeout 后 click next，
+    // 整段逻辑天然不会重复点同一视频的 cancel 按钮 — 不需要 session storage 也不需要 in-memory Set。
+    // 旧的 _loadDeleted*Urls / _saveDeleted*Urls / _resetDeletedUrlsIfNotResume 整套机制已移除。
+    // project memory 铁律：所有 selector 走 config，不写死；URL 列表机制本身不健壮、且对几千个收藏效率差。
 
-    async _loadDeletedRepostUrls() {
-      try {
-        var resp = await chrome.runtime.sendMessage({ target: 'readDeletedRepostUrls' });
-        if (resp && Array.isArray(resp.urls)) {
-          this._deletedRepostUrls = resp.urls.slice();
-          this.debug('[TikTok Eraser] Loaded ' + this._deletedRepostUrls.length + ' deleted repost URLs');
-        }
-      } catch (e) {}
-    }
-
-    async _saveDeletedRepostUrls() {
-      try {
-        await chrome.runtime.sendMessage({
-          target: 'writeDeletedRepostUrls',
-          urls: this._deletedRepostUrls
-        });
-      } catch (e) {}
-    }
-
-    async _loadDeletedLikesUrls() {
-      try {
-        var resp = await chrome.runtime.sendMessage({ target: 'readDeletedLikesUrls' });
-        if (resp && Array.isArray(resp.urls)) {
-          this._deletedLikesUrls = resp.urls.slice();
-          this.debug('[TikTok Eraser] Loaded ' + this._deletedLikesUrls.length + ' deleted likes URLs');
-        }
-      } catch (e) {}
-    }
-
-    async _saveDeletedLikesUrls() {
-      try {
-        await chrome.runtime.sendMessage({
-          target: 'writeDeletedLikesUrls',
-          urls: this._deletedLikesUrls
-        });
-      } catch (e) {}
+    // 读 config.common.waitForContentStableByType[type] 拿 processXxx 用的 stable selector 数组。
+    // 不在 .js 里硬编码 data-e2e，所有 processXxx 都走这个 helper → 单一来源。
+    _stableSelectorsFor(type) {
+      const map = (this.config && this.config.common
+        && this.config.common.waitForContentStableByType
+        && typeof this.config.common.waitForContentStableByType === 'object')
+        ? this.config.common.waitForContentStableByType : {};
+      return (map[type] && Array.isArray(map[type])) ? map[type].slice() : [];
     }
 
     findElement(selectors, context) {
@@ -199,14 +172,17 @@
     async scrollToBottom() {
       const MAX_FRAMES = 300;
       const STABLE_FRAMES = 30;
+      const inst = this;
 
       function getContainerSelector() {
+        // 'article' 优先：通用 HTML 元素，所有 SPA 渲染都会保留
         if (document.querySelectorAll('article').length > 0) return 'article';
-        if (document.querySelectorAll("[data-e2e='user-post-item']").length > 0) return "[data-e2e='user-post-item']";
-        if (document.querySelectorAll("[data-e2e='user-repost-item']").length > 0) return "[data-e2e='user-repost-item']";
-        if (document.querySelectorAll("[data-e2e='user-liked-item']").length > 0) return "[data-e2e='user-liked-item']";
-        if (document.querySelectorAll("[data-e2e='user-favorite-item']").length > 0) return "[data-e2e='user-favorite-item']";
-        if (document.querySelectorAll("[data-e2e='user-following-item']").length > 0) return "[data-e2e='user-following-item']";
+        // 其余探针读 config，避免在 .js 里硬编码 data-e2e
+        const probes = (inst.config && inst.config.common && Array.isArray(inst.config.common.contentContainerProbes))
+          ? inst.config.common.contentContainerProbes : [];
+        for (let i = 0; i < probes.length; i++) {
+          if (document.querySelectorAll(probes[i]).length > 0) return probes[i];
+        }
         return null;
       }
 
@@ -368,51 +344,82 @@
     }
 
     async _activateProfileTab(tabName) {
-      // 优先用 data-e2e 匹配（MCP 实证，永不翻译，8 语言通用）：
-      //   'Liked' → [data-e2e='liked-tab']
-      //   'Reposts' → [data-e2e='repost-tab']
-      //   'Favorites' → [class*='PFavorite']（TikTok 组件 class，跨语言稳定）
-      //   'Following' → [data-e2e='following-tab']
-      const e2eMap = {
-        'Likes': '[data-e2e="liked-tab"]',
-        'Liked': '[data-e2e="liked-tab"]',
-        'Reposts': '[data-e2e="repost-tab"]',
-        'Repost': '[data-e2e="repost-tab"]',
-        'Videos': '[data-e2e="video-tab"]',
-        'Video': '[data-e2e="video-tab"]',
-        'Favorites': '[class*="PFavorite"]',
-        'Favorite': '[class*="PFavorite"]',
-        'Following': '[data-e2e="following-tab"]'
-      };
+      const e2eMap = (this.config && this.config.common && this.config.common.profileTabs
+        && typeof this.config.common.profileTabs === 'object')
+        ? this.config.common.profileTabs : {};
       const e2eSelector = e2eMap[tabName];
-      if (e2eSelector) {
-        try {
-          const tab = document.querySelector(e2eSelector);
-          if (tab) {
-            const selected = tab.getAttribute('aria-selected');
-            if (selected !== 'true') {
-              await this.safeClick(tab, 500);
-            }
-            return true;
-          }
-        } catch (e) {}
+      if (!e2eSelector) {
+        this.debug('[TikTok Eraser] _activateProfileTab: unknown tabName "' + tabName + '", falling back to text match');
       }
-      // 兜底：text 匹配（注意：8 语言下 text 不同，严格相等会失败）
-      try {
-        const tabs = document.querySelectorAll('[role="tab"]');
-        for (let i = 0; i < tabs.length; i++) {
-          const text = (tabs[i].textContent || '').trim();
-          if (text === tabName) {
-            const selected = tabs[i].getAttribute('aria-selected');
-            if (selected !== 'true') {
-              await this.safeClick(tabs[i], 500);
+
+      const MAX_WAIT_MS = 10000;
+      const POLL_INTERVAL_MS = 100;
+      const startTime = Date.now();
+
+      while (Date.now() - startTime < MAX_WAIT_MS) {
+        if (!this.isRunning) return false;
+
+        if (e2eSelector) {
+          try {
+            const tab = document.querySelector(e2eSelector);
+            if (tab) {
+              if (tab.tagName === 'A') {
+                await this.safeClick(tab, 500);
+                return true;
+              }
+              const selected = tab.getAttribute('aria-selected');
+              if (selected !== 'true') {
+                await this.safeClick(tab, 500);
+              }
               return true;
             }
-            break;
-          }
+          } catch (e) {}
         }
-      } catch (e) {}
+
+        try {
+          const tabs = document.querySelectorAll('[role="tab"]');
+          for (let i = 0; i < tabs.length; i++) {
+            const text = (tabs[i].textContent || '').trim();
+            if (text === tabName) {
+              const selected = tabs[i].getAttribute('aria-selected');
+              if (selected !== 'true') {
+                await this.safeClick(tabs[i], 500);
+              }
+              return true;
+            }
+          }
+        } catch (e) {}
+
+        await new Promise(function(r) { setTimeout(r, POLL_INTERVAL_MS); });
+      }
+
+      this.debug('[TikTok Eraser] _activateProfileTab: timed out waiting for tab "' + tabName + '"');
       return false;
+    }
+
+    async _refreshPageAndWait() {
+      return new Promise(function(resolve) {
+        const MAX_WAIT_MS = 15000;
+        const startTime = Date.now();
+
+        function onPageReady() {
+          window.removeEventListener('load', onPageReady);
+          resolve();
+        }
+
+        if (document.readyState === 'complete') {
+          window.addEventListener('load', onPageReady);
+          window.location.reload();
+        } else {
+          window.location.reload();
+          window.addEventListener('load', onPageReady);
+        }
+
+        setTimeout(function() {
+          window.removeEventListener('load', onPageReady);
+          resolve();
+        }, MAX_WAIT_MS);
+      });
     }
 
     waitForContentStable(selectors) {
@@ -683,6 +690,7 @@
       this.filters = options.filters || null;
       this._keywordLower = (this.filters && this.filters.keyword)
         ? this.filters.keyword.toLowerCase() : '';
+      this._isAutoResume = options.isAutoResume === true;
 
       const types = options.types || [];
       const maxPerType = options.maxPerType || 50;
@@ -974,8 +982,6 @@
       let emptyScrolls = 0;
       const maxEmptyScrolls = 3;
 
-      await this.waitForContentStable(["[data-e2e='user-repost-item']", "[data-e2e='repost']"]);
-
       var cardSelectors = (this.config.repost && Array.isArray(this.config.repost.repostItem))
         ? this.config.repost.repostItem : [];
 
@@ -987,11 +993,13 @@
 
       this.log(t('startingRepostsCleanup'));
 
-      await this._loadDeletedRepostUrls();
+      const activated = await this._activateProfileTab('Reposts');
+      if (!activated) {
+        this.log(t('noMoreReposts'));
+        return;
+      }
 
-      await this._activateProfileTab('转发');
-
-      await this.sleep(1000);
+      await this.waitForContentStable(this._stableSelectorsFor('reposts'));
 
       if (emptyScrolls === 0) {
         this._diagnosePage();
@@ -1074,16 +1082,9 @@
             continue;
           }
 
-          const videoUrl = anchor.getAttribute('href');
-          if (videoUrl && this._deletedRepostUrls.indexOf(videoUrl) >= 0) {
-            card.dataset.socialEraserProcessed = 'true';
-            await this.sleep(50);
-            continue;
-          }
-
           await this.safeClick(anchor, 1500);
 
-          const exitReason = await this._processRepostBatch(videoUrl, shareRepostSelectors, maxItems, lastProgressTime);
+          const exitReason = await this._processRepostBatch(maxItems, lastProgressTime);
 
           lastProgressTime = Date.now();
 
@@ -1107,7 +1108,7 @@
       }
     }
 
-    async _processRepostBatch(startUrl, shareRepostSelectors, maxItems, lastProgressTime) {
+    async _processRepostBatch(maxItems, lastProgressTime) {
       const nextVideoSelectors = this._buildNextVideoSelectors();
 
       // 8 语言"已转发"状态 aria-label 实测值（2026-07-02 MCP 浏览器对 l702362 视频实测）
@@ -1150,26 +1151,15 @@
         try {
           this._dismissOverlays();
 
-          const currentUrl = window.location.href;
-          if (this._deletedRepostUrls.indexOf(currentUrl) >= 0) {
-            const nextBtn = await this.waitForElement(nextVideoSelectors, 2000);
-            if (nextBtn && nextBtn.disabled !== true) {
-              await this.safeClick(nextBtn, 1000);
-            } else {
-              break;
-            }
-            continue;
-          }
-
           // 2026-07-02 关键修复：必须先用 aria-label 等值匹配判断「已转发」状态
-          // 不再用 shareRepostSelectors 模糊匹配（该列表在「Repost」/「Remove repost」状态都命中）
+          // 不再用模糊 selector 匹配（同一元素在「Repost」/「Remove repost」状态都命中）
           if (!isRepostedState()) {
             // 元素不存在 或 aria-label 是「Repost」类（未转发状态）→ 跳过
             // 注意：未转发状态下 a#icon-element-repost 也存在（aria-label='Repost' 类变体），
             // 不能盲目点，否则会反向 re-repost。
             const el = getRepostElement();
             const aria = el ? el.getAttribute('aria-label') : null;
-            this.log('[Repost] Skip: not in reposted state. element exists=' + !!el + ' aria=' + JSON.stringify(aria));
+            this.log(t('repostSkipNotReposted', {exists: !!el, aria: JSON.stringify(aria)}));
             const nextBtn = await this.waitForElement(nextVideoSelectors, 2000);
             if (nextBtn && nextBtn.disabled !== true) {
               await this.safeClick(nextBtn, 1000);
@@ -1219,9 +1209,6 @@
             }
           }
 
-          this._deletedRepostUrls.push(currentUrl);
-          await this._saveDeletedRepostUrls();
-
           this.processedCount++;
           lastProgressTime = Date.now();
           this.progress('Repost');
@@ -1255,7 +1242,8 @@
     }
 
     _buildNextVideoSelectors() {
-      const selectors = ["[data-e2e='arrow-right']"];
+      const selectors = (this.config && this.config.common && Array.isArray(this.config.common.nextVideoArrow))
+        ? this.config.common.nextVideoArrow.slice() : [];
       if (this._i18n && Array.isArray(this._i18n.nextVideoKeywords)) {
         this._i18n.nextVideoKeywords.forEach(keyword => {
           selectors.push("button[aria-label*='" + keyword + "']");
@@ -1271,24 +1259,24 @@
       let emptyScrolls = 0;
       const maxEmptyScrolls = 3;
 
-      await this.waitForContentStable(["[data-e2e='user-liked-item']", "[data-e2e='like-icon']"]);
-
       var cardSelectors = (this.config.like && Array.isArray(this.config.like.likedItem))
         ? this.config.like.likedItem : [];
 
       var anchorSelectors = (this.config.common && Array.isArray(this.config.common.videoAnchor))
         ? this.config.common.videoAnchor : [];
 
-      var browseLikeSelectors = (this.config.like && Array.isArray(this.config.like.videoBrowseLikeIcon))
-        ? this.config.like.videoBrowseLikeIcon : [];
+      const browseLikeSelectors = (this.config.like && Array.isArray(this.config.like.videoBrowseLikeIcon))
+            ? this.config.like.videoBrowseLikeIcon : [];
 
       this.log(t('startingLikesCleanup'));
 
-      await this._loadDeletedLikesUrls();
+      const activated = await this._activateProfileTab('Liked');
+      if (!activated) {
+        this.log(t('noMoreLikes'));
+        return;
+      }
 
-      await this._activateProfileTab('Likes');
-
-      await this.sleep(1000);
+      await this.waitForContentStable(this._stableSelectorsFor('likes'));
 
       if (emptyScrolls === 0) {
         this._diagnosePage();
@@ -1373,16 +1361,9 @@
             continue;
           }
 
-          const videoUrl = anchor.getAttribute('href');
-          if (videoUrl && this._deletedLikesUrls.indexOf(videoUrl) >= 0) {
-            card.dataset.socialEraserProcessed = 'true';
-            await this.sleep(50);
-            continue;
-          }
-
           await this.safeClick(anchor, 1500);
 
-          const exitReason = await this._processLikesBatch(videoUrl, browseLikeSelectors, maxItems, lastProgressTime);
+          const exitReason = await this._processLikesBatch(maxItems, lastProgressTime);
 
           lastProgressTime = Date.now();
 
@@ -1406,8 +1387,10 @@
       }
     }
 
-    async _processLikesBatch(startUrl, browseLikeSelectors, maxItems, lastProgressTime) {
+    async _processLikesBatch(maxItems, lastProgressTime) {
       const nextVideoSelectors = this._buildNextVideoSelectors();
+      const browseLikeSelectors = (this.config.like && Array.isArray(this.config.like.videoBrowseLikeIcon))
+        ? this.config.like.videoBrowseLikeIcon : [];
 
       while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
         if (Date.now() - lastProgressTime > 30000) {
@@ -1422,17 +1405,6 @@
         try {
           this._dismissOverlays();
 
-          const currentUrl = window.location.href;
-          if (this._deletedLikesUrls.indexOf(currentUrl) >= 0) {
-            const nextBtn = await this.waitForElement(nextVideoSelectors, 2000);
-            if (nextBtn && nextBtn.disabled !== true) {
-              await this.safeClick(nextBtn, 1000);
-            } else {
-              break;
-            }
-            continue;
-          }
-
           const browseLikeBtn = await this.waitForElement(browseLikeSelectors, 3000);
           if (!browseLikeBtn) {
             this.errorCount++;
@@ -1446,11 +1418,26 @@
             continue;
           }
 
-          await this.safeClick(browseLikeBtn, 500);
-          await this.sleep(500);
+          // browse-like-icon 是 SPAN，React onClick 绑在 parent button 上。
+          // 直接点 SPAN 在 React 17+ event delegation 下也能冒泡触发，但保险起见显式点 button。
+          const likeClickTarget = (browseLikeBtn && browseLikeBtn.tagName === 'BUTTON')
+            ? browseLikeBtn
+            : (browseLikeBtn && browseLikeBtn.closest && browseLikeBtn.closest('button')) || browseLikeBtn;
 
-          this._deletedLikesUrls.push(currentUrl);
-          await this._saveDeletedLikesUrls();
+          // 2026-07-03 修复 P1-4 重复点赞漏洞（实测修订 - 彻底删 retry）：
+          //   关键教训：实测发现 TikTok unfavorite 后的 DOM 状态翻得很慢（500ms-2s），
+          //   第一次 click 后 `browse-favorite-icon` 仍匹配，**如果 retry 再点一次就会把刚取消的重新 favorite 回去**
+          //   （= 点两次 = 净 0 操作，遗留 1 条 = 用户报的 bug）。
+          //   之前 P1-4 用 aria-pressed 守门是错的（TikTok button 不设 aria-pressed），
+          //   改用 selector 重查 + retry 是更糟的方案（触发了"点两次还原"的 bug）。
+          //   **正确做法：完全删除 retry / sanity-check click**。"at most once" 保证靠：
+          //     1. 入口 selector `browse-like-icon` 只匹配"已点赞"状态（project memory 铁律）
+          //     2. processLikes 顶层 `card.dataset.socialEraserProcessed = 'true'`
+          //        防止同一 card 被重新选中
+          //     3. video detail 页 next 按钮推进到下一视频，不会回退
+          //   第一次 click 后立即推进 processedCount，不做任何 selector 重查或 retry。
+          await this.safeClick(likeClickTarget, 500);
+          await this.sleep(500);
 
           this.processedCount++;
           lastProgressTime = Date.now();
@@ -1486,17 +1473,26 @@
 
     async processFavorites(maxItems) {
       if (maxItems === undefined) maxItems = 50;
+      this.processedCount = 0;
 
       let emptyScrolls = 0;
       const maxEmptyScrolls = 3;
 
-      await this._activateProfileTab('Favorites');
-      await this.waitForContentStable(["[data-e2e='favorite-icon']", "[data-e2e='user-favorite-item']"]);
+      var cardSelectors = (this.config.favorite && Array.isArray(this.config.favorite.favoriteItem))
+        ? this.config.favorite.favoriteItem : [];
 
-      var unfavoriteSelectors = (this.config.favorite && Array.isArray(this.config.favorite.unfavoriteButtons))
-        ? this.config.favorite.unfavoriteButtons : [];
+      var anchorSelectors = (this.config.common && Array.isArray(this.config.common.videoAnchor))
+        ? this.config.common.videoAnchor : [];
 
       this.log(t('startingFavoritesCleanup'));
+
+      const activated = await this._activateProfileTab('Favorites');
+      if (!activated) {
+        this.log(t('noMoreFavorites'));
+        return;
+      }
+
+      await this.waitForContentStable(this._stableSelectorsFor('favorites'));
 
       if (emptyScrolls === 0) {
         this._diagnosePage();
@@ -1515,29 +1511,29 @@
           continue;
         }
 
-        let unfavoriteButtons = [];
+        let cards = [];
         let matchedSelector = null;
-        for (let s = 0; s < unfavoriteSelectors.length; s++) {
-          unfavoriteButtons = this.findElements(unfavoriteSelectors[s]);
-          if (unfavoriteButtons.length > 0) {
-            matchedSelector = unfavoriteSelectors[s];
+        for (let s = 0; s < cardSelectors.length; s++) {
+          cards = this.findElements(cardSelectors[s]);
+          if (cards.length > 0) {
+            matchedSelector = cardSelectors[s];
             break;
           }
         }
 
-        const pending = unfavoriteButtons.filter(function(btn) {
-          var p = btn.dataset.socialEraserProcessed;
+        const pending = cards.filter(function(card) {
+          var p = card.dataset.socialEraserProcessed;
           return !p || (p !== 'true' && p !== 'skipped');
         });
 
         if (pending.length === 0) {
-          if (unfavoriteButtons.length === 0 && emptyScrolls === 1) {
-            this.log(t('noUnfavoriteButtons'));
-            console.log('[TikTok Eraser] Tried selectors:', unfavoriteSelectors);
+          if (cards.length === 0 && emptyScrolls === 1) {
+            this.log(t('noMoreFavorites'));
+            console.log('[TikTok Eraser] Tried selectors:', cardSelectors);
           }
           emptyScrolls++;
           if (emptyScrolls > maxEmptyScrolls) {
-            this.log(t('noMoreFavorites'));
+            this.log(t('endOfFavorites'));
             break;
           }
           const hasMore = await this.scrollToBottom();
@@ -1551,16 +1547,15 @@
         emptyScrolls = 0;
 
         if (matchedSelector && emptyScrolls === 0) {
-          this.log(t('foundButtonsCount', {count: unfavoriteButtons.length}));
+          this.log(t('foundButtonsCount', {count: cards.length}));
         }
 
-        const btn = pending[0];
+        const card = pending[0];
 
         if (this.shouldFilter('favorites')) {
-          var article = this.findClosest(this.config.common && this.config.common.articleContainers, btn) || btn.parentElement;
-          var meta = this.extractMeta(article, 'favorites');
+          var meta = this.extractMeta(card, 'favorites');
           if (!this.matchesFilter(meta, this.filters)) {
-            btn.dataset.socialEraserProcessed = 'skipped';
+            card.dataset.socialEraserProcessed = 'skipped';
             if ((this.filters.fromDate || this.filters.toDate) && !meta.dateISO
                 && !this._dateMissingWarned.has('favorites')) {
               this._dateMissingWarned.add('favorites');
@@ -1572,28 +1567,120 @@
         }
 
         try {
-          const ok = await this.safeClick(btn, 800);
-          if (ok) {
-            btn.dataset.socialEraserProcessed = 'true';
-            this.processedCount++;
-            lastProgressTime = Date.now();
-            this.progress('Unfavorite');
-            this.log(t('clickedUnfavorite', {count: this.processedCount}));
-          } else {
+          var anchor = this.findElement(anchorSelectors, card);
+          if (!anchor) {
             this.errorCount++;
-            this.error(t('clickReturnedFalseUnfavorite'));
+            this.error(t('unfavoriteFailed', {error: 'Video anchor not found'}));
+            await this.sleep(500);
+            continue;
           }
+
+          await this.safeClick(anchor, 1500);
+
+          const exitReason = await this._processFavoritesBatch(maxItems, lastProgressTime);
+
+          lastProgressTime = Date.now();
+
+          if (exitReason === 'complete' || exitReason === 'end') {
+            break;
+          }
+
+          card.dataset.socialEraserProcessed = 'true';
+          await this.sleep(50);
+
         } catch (e) {
           this.error(t('unfavoriteFailed', {error: e.message}));
           this.errorCount++;
+          lastProgressTime = Date.now();
+          await this.sleep(500);
         }
-
-        await this.sleep(500);
       }
 
       if (this.processedCount === 0 && this.filters) {
         this.log(t('noItemsMatched'));
       }
+    }
+
+    async _processFavoritesBatch(maxItems, lastProgressTime) {
+      const nextVideoSelectors = this._buildNextVideoSelectors();
+      const browseFavoriteSelectors = (this.config.favorite && Array.isArray(this.config.favorite.videoBrowseFavoriteIcon))
+        ? this.config.favorite.videoBrowseFavoriteIcon : [];
+
+      while (this.isRunning && this.processedCount < maxItems && this.errorCount < this.maxErrors) {
+        if (Date.now() - lastProgressTime > 30000) {
+          this.log(t('cleanupStuck'));
+          break;
+        }
+        if (this.isPaused) {
+          await this.sleep(500);
+          continue;
+        }
+
+        try {
+          this._dismissOverlays();
+
+          const browseFavoriteBtn = await this.waitForElement(browseFavoriteSelectors, 3000);
+          if (!browseFavoriteBtn) {
+            this.errorCount++;
+            this.error(t('unfavoriteFailed', {error: 'browse-favorite-icon not found on video page'}));
+            const nextBtn = await this.waitForElement(nextVideoSelectors, 2000);
+            if (nextBtn && nextBtn.disabled !== true) {
+              await this.safeClick(nextBtn, 1000);
+            } else {
+              break;
+            }
+            continue;
+          }
+
+          // browse-favorite-icon 是 SPAN，React onClick 绑在 parent button 上。
+          // 直接点 SPAN 在 React 17+ event delegation 下也能冒泡触发，但保险起见显式点 button。
+          const favoriteClickTarget = (browseFavoriteBtn && browseFavoriteBtn.tagName === 'BUTTON')
+            ? browseFavoriteBtn
+            : (browseFavoriteBtn && browseFavoriteBtn.closest && browseFavoriteBtn.closest('button')) || browseFavoriteBtn;
+
+          // 2026-07-03 修复 P1-5 重复收藏漏洞（镜像 P1-4 点赞修复，**彻底删 retry**）：
+          //   实测日志时序：
+          //     12:04:03 [Favorites] Retry: selector still matches after click, trying again
+          //     12:04:04 Clicked unfavorite button #1
+          //     12:04:06 [Favorites] Skip: selector still matches after retry (...)
+          //   即：第一次 click → 等 500ms+500ms → 重查 selector 仍匹配（DOM 翻状态有延迟）
+          //     → retry 又点一次（**重新 favorite 回去**）→ 用户报"遗留 1 条没删干净"
+          //   **彻底删 retry 块**，不重查 selector，直接推进 processedCount。
+          //   "at most once" 保证靠 processFavorites 顶层 card.dataset.socialEraserProcessed
+          //   + video detail 不会回退到同一 video。
+          await this.safeClick(favoriteClickTarget, 500);
+          await this.sleep(500);
+
+          this.processedCount++;
+          lastProgressTime = Date.now();
+          this.progress('Unfavorite');
+          this.log(t('clickedUnfavorite', {count: this.processedCount}));
+
+          if (this.processedCount >= maxItems) {
+            this.log(t('favoritesDeleteComplete', {count: this.processedCount}));
+            break;
+          }
+
+          const nextBtn = await this.waitForElement(nextVideoSelectors, 2000);
+          if (nextBtn && nextBtn.disabled !== true) {
+            await this.safeClick(nextBtn, 1000);
+          } else {
+            break;
+          }
+
+        } catch (e) {
+          this.error(t('unfavoriteFailed', {error: e.message}));
+          this.errorCount++;
+          const nextBtn = this.findElement(nextVideoSelectors);
+          if (nextBtn && nextBtn.disabled !== true) {
+            await this.safeClick(nextBtn, 1000);
+          } else {
+            break;
+          }
+        }
+      }
+
+      return (this.processedCount >= maxItems) ? 'complete' : 'end';
     }
 
     async processFollowing(maxItems) {
@@ -1603,7 +1690,7 @@
       const maxEmptyScrolls = 3;
 
       await this._activateProfileTab('Following');
-      await this.waitForContentStable(["[data-e2e='follow-button']", "[data-e2e='user-following-item']"]);
+      await this.waitForContentStable(this._stableSelectorsFor('following'));
 
       var unfollowSelectors = (this.config.following && Array.isArray(this.config.following.unfollowButtons))
         ? this.config.following.unfollowButtons : [];
@@ -1612,6 +1699,24 @@
         || (this.config && this.config.common && this.config.common.confirmButton && this.config.common.confirmButton[0]);
 
       this.log(t('startingFollowingCleanup'));
+
+      // 2026-07-04 空状态早退：未登录或用户 0 关注时，following item 容器不存在，
+      // 默认 config 的 unfollowButtons 可能会误匹配侧边栏 nav 按钮 (aria-label='Following'/'已关注')
+      // 或"建议关注"卡片的 Follow 按钮 (data-e2e='card-followbutton')，导致脚本假成功 processedCount++。
+      // 守门：必须在 [data-e2e='user-following-item'] 容器内才算真正的 unfollow 按钮。
+      const followingItemSelectors = (this.config.following && Array.isArray(this.config.following.followingItem)
+        && this.config.following.followingItem.length > 0)
+        ? this.config.following.followingItem : [];
+      var followingItemCount = 0;
+      for (let fi = 0; fi < followingItemSelectors.length; fi++) {
+        followingItemCount += this.findElements(followingItemSelectors[fi]).length;
+      }
+      if (followingItemCount === 0) {
+        this.log(t('noMoreFollowing'));
+        console.log('[TikTok Eraser] Following: 0 following item (' + JSON.stringify(followingItemSelectors) + '), skip (empty state / suggested accounts)');
+        if (this.onTypeComplete) this.onTypeComplete('following', this.processedCount);
+        return;
+      }
 
       if (emptyScrolls === 0) {
         this._diagnosePage();
@@ -1734,8 +1839,15 @@
     }
 
     _diagnosePage() {
-      var testidCount = document.querySelectorAll('[data-e2e]').length;
-      var labeledButtons = document.querySelectorAll('[aria-label]').length;
+      const diag = (this.config && this.config.common && this.config.common.diagnostic
+        && typeof this.config.common.diagnostic === 'object')
+        ? this.config.common.diagnostic : {};
+      const e2eSel = (Array.isArray(diag.dataE2eElements) && diag.dataE2eElements[0])
+        ? diag.dataE2eElements[0] : '[data-e2e]';
+      const ariaSel = (Array.isArray(diag.ariaLabelElements) && diag.ariaLabelElements[0])
+        ? diag.ariaLabelElements[0] : '[aria-label]';
+      var testidCount = document.querySelectorAll(e2eSel).length;
+      var labeledButtons = document.querySelectorAll(ariaSel).length;
       this.debug('[diagnostic] data-e2e elements: ' + testidCount);
       this.debug('[diagnostic] aria-label elements: ' + labeledButtons);
     }

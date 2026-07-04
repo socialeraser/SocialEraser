@@ -77,10 +77,85 @@
       "navProfile": [
         "[data-e2e='nav-profile']"
       ],
+      "_comment_profileIcon": "顶栏右侧用户头像按钮。content.js 用来检测登录态，automation.js 备用。",
+      "profileIcon": [
+        "[data-e2e='profile-icon']"
+      ],
+      "_comment_loginButton": "TikTok 全屏登录弹窗的 Log in / 登录 按钮（data-e2e 不翻译，8 语言通用）。\n      content.js 8 语言 checkElements 数组里都引用此值，不再硬编码。",
+      "loginButton": [
+        "[data-e2e='login-button']"
+      ],
+      "_comment_loginInputs": "TikTok 登录表单的输入框（用户名 / 密码 / 手机 / 邮箱），用于在 main area 检测登录 form 来触发 isLoggedOut。",
+      "loginInputs": [
+        "input[name='username']",
+        "input[type='password']",
+        "input[autocomplete='username']",
+        "input[placeholder*='phone' i]",
+        "input[placeholder*='邮箱' i]",
+        "input[placeholder*='メール' i]"
+      ],
+      "_comment_loggedOutIndicators": "未登录 indicators：登录 form 输入框 + login/signup URL 路径。isLoggedOut 严格检查这些。",
+      "loggedOutIndicators": [
+        "input[name='username']",
+        "input[type='password']"
+      ],
+      "_comment_nextVideoArrow": "Video page 上的「下一个视频」箭头 button。automation.js _buildNextVideoSelectors 用。",
+      "nextVideoArrow": [
+        "[data-e2e='arrow-right']"
+      ],
+      "_comment_contentContainerProbes": "isContentContainer 用 5 个 data-e2e 探针判断当前 profile tab 是 Videos / Reposts / Likes / Favorites / Following 哪种。\n      automation.js 直接读 this.config.common.contentContainerProbes 一次，避免硬编码。",
+      "contentContainerProbes": [
+        "[data-e2e='user-post-item']",
+        "[data-e2e='user-repost-item']",
+        "[data-e2e='user-liked-item']",
+        "[data-e2e='favorites-item']",
+        "[data-e2e='user-following-item']"
+      ],
+      "_comment_diagnostic": "diagnostic log 用的两类 selector：data-e2e 元素总数 + 带 aria-label 的 button 总数。",
+      "diagnostic": {
+        "dataE2eElements": [
+          "[data-e2e]"
+        ],
+        "ariaLabelElements": [
+          "[aria-label]"
+        ]
+      },
+      "_comment_profileTabs": "Profile 主页的 tab selector 映射表（English key → CSS selector）。\n      data-e2e / class 永不翻译，8 语言通用。**English key 必填**（如 'Reposts'），硬编码中文/日文等本地化文字会导致 8 语言下大量 silent failure。\n      _activateProfileTab 必须用本表的 English key。",
+      "profileTabs": {
+        "Likes": "[data-e2e='liked-tab']",
+        "Liked": "[data-e2e='liked-tab']",
+        "Reposts": "[data-e2e='repost-tab']",
+        "Repost": "[data-e2e='repost-tab']",
+        "Videos": "[data-e2e='videos-tab']",
+        "Video": "[data-e2e='videos-tab']",
+        "Favorites": "[class*='PFavorite']",
+        "Favorite": "[class*='PFavorite']",
+        "Following": "[data-e2e='nav-following']"
+      },
+      "_comment_waitForContentStableByType": "各 processXxx 在 profile tab 上 waitForContentStable 用的 selector 数组。\n      一个数组的 selector 出现 ≥ 1 个即可（waitForContentStable 已实现「任一命中」逻辑）。",
+      "waitForContentStableByType": {
+        "reposts": [
+          "[data-e2e='user-repost-item']",
+          "[data-e2e='repost']"
+        ],
+        "likes": [
+          "[data-e2e='user-liked-item']",
+          "[data-e2e='like-icon']"
+        ],
+        "favorites": [
+          "[data-e2e='favorites-item']",
+          "[data-e2e='favorites-item-list']",
+          "[data-e2e='favorite-icon']"
+        ],
+        "following": [
+          "[data-e2e='follow-button']",
+          "[data-e2e='user-following-item']"
+        ]
+      },
       "articleContainers": [
         "[data-e2e='user-post-item']",
         "[data-e2e='user-liked-item']",
-        "[data-e2e='user-favorite-item']",
+        "[data-e2e='favorites-item']",
         "[data-e2e='user-following-item']",
         "article",
         "[data-testid='cellInnerDiv']"
@@ -88,19 +163,6 @@
       "_comment_videoAnchor": "repost card 内指向原视频的 <a> 链接。",
       "videoAnchor": [
         "a[href*='/video/']"
-      ],
-      "_comment_videoMoreButtons": "DEPRECATED for videos (TikTok 2026 hides 'More' on profile cards). Kept as fallback for reposts when DOM still has them. Video deletion now uses videoActionButton + videoStudioUrl.",
-      "videoMoreButtons": [
-        "[data-e2e='video-more']",
-        "button[aria-label='More']",
-        "button[aria-label*='More']",
-        "button[aria-label*='更多']",
-        "button[aria-label*='詳細']",
-        "button[aria-label*='더 보기']",
-        "button[aria-label*='Mais']",
-        "button[aria-label*='Más']",
-        "button[aria-label*='Mehr']",
-        "button[aria-label*='Plus']"
       ],
       "_comment_videoStudioUrl": "TikTok Web does NOT expose video deletion on /@user profile. Must navigate to TikTok Studio to delete posted/draft videos.",
       "videoStudioUrl": "https://www.tiktok.com/tiktokstudio/content?status=posted",
@@ -152,7 +214,7 @@
         "[data-e2e='social-context']",
         "[data-testid='socialContext']"
       ],
-      "_comment_dismissOverlays": "系统级遮挡弹窗 selector，click share button 前/后会 .remove()。2026-06-29 实测：Notifications dialog 会拦截 share dialog 内的 click 事件。安全检查会排除 data-e2e 以 'share-' 开头的元素（share dialog 自身）。",
+      "_comment_dismissOverlays": "系统级遮挡弹窗 selector，click share button 前/后会 .remove()。2026-06-29 实测：Notifications dialog 会拦截 share dialog 内的 click 事件。当前 selector 已限定为 Notifications/Messages/Inbox 三个具体 aria-label dialog，不会误删 share dialog 自身（share dialog 的 aria-label 是 'Share to'/'Compartir'/...，与 dismiss 列表无交集）。",
       "dismissOverlays": [
         "[role=\"dialog\"][aria-label=\"Notifications\"]",
         "[role=\"dialog\"][aria-label=\"Messages\"]",
@@ -205,20 +267,8 @@
       ],
       "_comment_videoBrowseLikeIcon": "视频播放页上**直接**的「取消点赞」心形 button。\n      2026-07-01 用户实测：<button type='button' aria-label='1M Likes' aria-pressed='true'>\n                          <span data-e2e='browse-like-icon'><svg fill='rgba(255,59,92,1)' ...>heart</svg></span>\n                          <strong data-e2e='browse-like-count'>1M</strong>\n                        </button>\n      跟 Reposts 流程一致：进 video page 直接点这个心形就行，不走 unlike dialog。\n      8 语言 aria-label 备选（基于 2026-07-01 MCP 切语言实证 foryou 未点赞 + 用户给 en 已点赞例子推断）：\n        en: Like video X likes / 已点赞 X Likes\n        de: Video einen Like geben X Likes / 已点赞 X Likes（de 保留英语 Likes）\n        ja: 動画に「いいね」する X件の「いいね」/ 已点赞 X件の「いいね」\n        ko: 동영상에 좋아요 누르기 X개의 좋아요 / 已点赞 X개의 좋아요\n        zh-Hans: 点赞视频 X 个赞 / 已点赞 X 个赞\n        es: Dar me gusta a un video X me gusta / 已点赞 X me gusta\n        fr: Laisser un j'aime sur la vidéo X j'aime / 已点赞 X j'aime\n        pt-BR: Curtir vídeo X curtidas / 已点赞 X curtidas",
       "videoBrowseLikeIcon": [
+        "button[aria-pressed='true'] [data-e2e='browse-like-icon']",
         "[data-e2e='browse-like-icon']",
-        "button[aria-pressed='true'] [data-e2e='browse-like-icon']",
-        "button[aria-label*='Likes'] [data-e2e='browse-like-icon']",
-        "button[aria-label*='いいね'] [data-e2e='browse-like-icon']",
-        "button[aria-label*='좋아요'] [data-e2e='browse-like-icon']",
-        "button[aria-label*='赞'] [data-e2e='browse-like-icon']",
-        "button[aria-label*='me gusta'] [data-e2e='browse-like-icon']",
-        "button[aria-label*=\"j'aime\"] [data-e2e='browse-like-icon']",
-        "button[aria-label*='curtidas'] [data-e2e='browse-like-icon']"
-      ],
-      "unlikeButtons": [
-        "[data-e2e='like-icon']",
-        "[data-e2e='browse-like']",
-        "button[aria-pressed='true'] [data-e2e='browse-like-icon']",
         "button[aria-label*='Likes'] [data-e2e='browse-like-icon']",
         "button[aria-label*='いいね'] [data-e2e='browse-like-icon']",
         "button[aria-label*='좋아요'] [data-e2e='browse-like-icon']",
@@ -229,29 +279,38 @@
       ]
     },
     "favorite": {
-      "unfavoriteButtons": [
-        "[data-e2e='favorite-icon']",
-        "[data-e2e='browse-favorite']",
-        "button[aria-label*='Favorited']",
-        "button[aria-label*='Favorites']",
-        "button[aria-label*='已收藏']",
-        "button[aria-label*='お気に入り']",
-        "button[aria-label*='즐겨찾기']",
-        "button[aria-label*='Favorito']",
-        "button[aria-label*='Favoris']"
+      "_comment_favoriteItem": "Profile 主页的 Favorites tab 中的每条 favorite item card 容器。MCP 实证 2026-07-02 (ping.xiang1 登录态 Favorites tab): <div data-e2e='favorites-item'> → 内部 <a href='/video/...'>。注意：真实 data-e2e 是 'favorites-item'（**不是** 'user-favorite-item'，无 'user-' 前缀）。Favorites tab 的列表容器是 [data-e2e='favorites-item-list']，item 是 [data-e2e='favorites-item']。",
+      "favoriteItem": [
+        "[data-e2e='favorites-item']"
+      ],
+      "_comment_videoBrowseFavoriteIcon": "视频播放页上**直接**的「取消收藏」书签 button。\n      2026-07-02 MCP 实证 ping.xiang1 登录态已收藏 video page：\n        <span data-e2e='browse-favorite-icon'>[SVG bookmark]</span>\n        → parent <button> (无 data-e2E，aria-label 在切换时变化)\n      **关键**：video page 上**已收藏状态**的 data-e2E 是 'browse-favorite-icon'（不是 'favorite-icon'）。\n      'favorite-icon' 是 nav bar / profile 区等其他地方的收藏入口，不是 video action bar 的按钮。\n      进 video page 直接点 [data-e2e='browse-favorite-icon'] → 找 closest('button') → safeClick。\n      注：data-e2E 是 SPAN 元素，React click handler 绑在 parent button 上，必须点 button 才生效。\n      8 语言 aria-label 备选：基于 2026-07-02 MCP 切语言实证 + 推断：\n        en: 'Add to Favorites' / 'Remove from Favorites' 或 'Favorited'\n        de: 'Zu Favoriten hinzufügen' / 'Aus Favoriten entfernen' (de 用英语 'Favorited')\n        ja: 'お気に入りに追加' / 'お気に入りから削除'\n        ko: '즐겨찾기에 추가' / '즐겨찾기에서 제거'\n        zh-Hans: '添加到收藏' / '从收藏中移除' 或 '已收藏'\n        es: 'Añadir a Favoritos' / 'Quitar de Favoritos'\n        fr: 'Ajouter aux Favoris' / 'Retirer des Favoris'\n        pt-BR: 'Adicionar aos Favoritos' / 'Remover dos Favoritos'",
+      "videoBrowseFavoriteIcon": [
+        "[data-e2e='browse-favorite-icon']",
+        "button[aria-pressed='true'] [data-e2e='browse-favorite-icon']",
+        "button[aria-label*='Favorited'] [data-e2e='browse-favorite-icon']",
+        "button[aria-label*='Favorites'] [data-e2e='browse-favorite-icon']",
+        "button[aria-label*='已收藏'] [data-e2e='browse-favorite-icon']",
+        "button[aria-label*='お気に入り'] [data-e2e='browse-favorite-icon']",
+        "button[aria-label*='즐겨찾기'] [data-e2e='browse-favorite-icon']",
+        "button[aria-label*='Favorito'] [data-e2e='browse-favorite-icon']",
+        "button[aria-label*='Favoris'] [data-e2e='browse-favorite-icon']"
       ]
     },
     "following": {
+      "_comment_unfollowButtons": "**2026-07-04 bug fix** 全部 selector 限定到 [data-e2e='user-following-item'] 容器内。\n      原配置 button[aria-label*='Following'] 在英文 UI 下会误匹配侧边栏 Following 导航按钮（aria-label='Following'）\n      和 data-e2e='card-followbutton' 误匹配「建议关注」卡片的 Follow 按钮（应该 follow 不是 unfollow）。\n      用户 0 关注时：sidebar nav 被误点 → 没有 confirm dialog → processedCount++ → 假成功 Unfollowed #1 (no confirm dialog)。\n      修法：所有 unfollow selector 必须以 [data-e2e='user-following-item'] 开头，强制只在真正的 following 列表项内查找。\n      MCP 实证 2026-07-04 @ping.xiang1（0 following）: user-following-item=0, card-followbutton=20 (suggested), button[aria-label*='Following']=1 (sidebar nav)。",
+      "followingItem": [
+        "[data-e2e='user-following-item']"
+      ],
       "unfollowButtons": [
-        "button[data-e2e='follow-button']",
-        "button[aria-label*='Following']",
-        "button[aria-label*='Unfollow']",
-        "button[aria-label*='フォロー中']",
-        "button[aria-label*='팔로잉']",
-        "button[aria-label*='Seguindo']",
-        "button[aria-label*='Siguiendo']",
-        "button[aria-label*='Abonné']",
-        "button[aria-label*='Folge ich']"
+        "[data-e2e='user-following-item'] button[data-e2e='follow-button']",
+        "[data-e2e='user-following-item'] button[aria-label*='Following']",
+        "[data-e2e='user-following-item'] button[aria-label*='Unfollow']",
+        "[data-e2e='user-following-item'] button[aria-label*='フォロー中']",
+        "[data-e2e='user-following-item'] button[aria-label*='팔로잉']",
+        "[data-e2e='user-following-item'] button[aria-label*='Seguindo']",
+        "[data-e2e='user-following-item'] button[aria-label*='Siguiendo']",
+        "[data-e2e='user-following-item'] button[aria-label*='Abonné']",
+        "[data-e2e='user-following-item'] button[aria-label*='Folge ich']"
       ],
       "confirmButton": [
         "button[data-e2e='unfollow-button']",
@@ -273,10 +332,6 @@
       "repostItem": [
         "[data-e2e='user-repost-item']"
       ],
-      "_comment_shareRepost": "DEPRECATED：share dialog 里的 [data-e2e='share-repost']。TikTok 2026 改成走 video-share-repost 直接在视频页取消（见下）。保留以备回退。",
-      "shareRepost": [
-        "[data-e2e='share-repost']"
-      ],
       "videoShareRepost": [
         "a#icon-element-repost[data-e2e='video-share-repost']",
         "a#icon-element-repost[aria-label='Remove repost']",
@@ -288,11 +343,7 @@
         "a#icon-element-repost[aria-label='Erneute Veröffentlichung entfernen']",
         "a#icon-element-repost[aria-label='Supprimer la republication']"
       ],
-      "_comment_videoShareRepostAria": "8 语言 aria-label **实测**值（2026-07-02 MCP 浏览器对 l702362 视频切 8 语言读取 DOM）。\n      **注意：之前猜的多项错误**，例如：\n        - pt-BR 真实是 \"Remover republicação\"（不是 \"Remover repost\"）\n        - es-ES 真实是 \"Eliminar la publicación compartida\"（不是 \"Quitar repost\"）\n        - de-DE 真实是 \"Erneute Veröffentlichung entfernen\"（不是 \"Repost entfernen\"）\n        - fr-FR 真实是 \"Supprimer la republication\"（不是 \"Annuler le repost\"）\n      8 语言 aria-label 都是 8 种不同表达，**绝不能用 substring 模糊匹配**（'Remove' 在 ja/ko/zh/de/fr/pt/es 中都不存在）。\n      用等值匹配 [aria-label='xxx']：\n        - 已转发状态：aria-label = 8 种 'Remove' 变体之一\n        - 未转发状态：aria-label = 8 种 'Repost' 变体之一（不能点，会变 'Repost'，触发重复点击问题）\n      automation.js 先用 aria-label 等值匹配判定状态再点。",
-      "_comment_actionBar": "DEPRECATED：原版用 [class*='SectionActionBarContainer'] 找 action bar 来定位 share 按钮。\n      新版 _removeRepostFromVideoPage 不走 action bar 也不走 share dialog，直接找 videoShareRepost。保留以备回退。",
-      "actionBar": [
-        "[class*='SectionActionBarContainer']"
-      ]
+      "_comment_videoShareRepostAria": "8 语言 aria-label **实测**值（2026-07-02 MCP 浏览器对 l702362 视频切 8 语言读取 DOM）。\n      **注意：之前猜的多项错误**，例如：\n        - pt-BR 真实是 \"Remover republicação\"（不是 \"Remover repost\"）\n        - es-ES 真实是 \"Eliminar la publicación compartida\"（不是 \"Quitar repost\"）\n        - de-DE 真实是 \"Erneute Veröffentlichung entfernen\"（不是 \"Repost entfernen\"）\n        - fr-FR 真实是 \"Supprimer la republication\"（不是 \"Annuler le repost\"）\n      8 语言 aria-label 都是 8 种不同表达，**绝不能用 substring 模糊匹配**（'Remove' 在 ja/ko/zh/de/fr/pt/es 中都不存在）。\n      用等值匹配 [aria-label='xxx']：\n        - 已转发状态：aria-label = 8 种 'Remove' 变体之一\n        - 未转发状态：aria-label = 8 种 'Repost' 变体之一（不能点，会变 'Repost'，触发重复点击问题）\n      automation.js 先用 aria-label 等值匹配判定状态再点。\n      原 [class*='SectionActionBarContainer'] 找 action bar 路径已删除 — 新版 _removeRepostFromVideoPage 不走 action bar 也不走 share dialog，直接找 videoShareRepost。\n      原 share dialog 里的 [data-e2e='share-repost'] 已删除 — TikTok 2026 改成走 video-share-repost 直接在视频页取消。"
     },
     "i18n": {
       "cancelKeywords": [

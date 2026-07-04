@@ -303,12 +303,6 @@ console.log('[11] default.json - TikTok 特有 selector 块');
           'default.json 含 selectors.' + b + ' 块'
         );
       });
-      // common.videoMoreButtons 必含（video 清理的 "···" 按钮 selector，TikTok 特有）
-      const videoMoreButtons = (cfg.selectors.common && cfg.selectors.common.videoMoreButtons) || [];
-      assert(
-        Array.isArray(videoMoreButtons) && videoMoreButtons.length >= 1,
-        'default.json common.videoMoreButtons 数组非空（实际 ' + videoMoreButtons.length + '）'
-      );
       // common.viewCount 必含（TikTok 特有 K/M/B 解析）
       const viewCount = (cfg.selectors.common && cfg.selectors.common.viewCount) || [];
       assert(

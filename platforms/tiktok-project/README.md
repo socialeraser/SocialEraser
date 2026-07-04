@@ -9,9 +9,9 @@ TikTok 批量删除 / 取关 / 取消点赞 / 取消收藏 平台 — 复用 x-p
   | Type | 路径 | 操作 |
   |---|---|---|
   | Videos | `tiktok.com/@username` | 3 步：点 "···" → Delete → Confirm |
-  | Reposts | `tiktok.com/@username` | 识别 repost 标记 → 走 Videos 删除流程（**含提示**） |
-  | Likes | `tiktok.com/@username/likes` | 1 步：点已点赞 ❤ 取消 |
-  | Favorites | `tiktok.com/@username/favorites` | 1 步：点已收藏 🔖 取消 |
+  | Reposts | `tiktok.com/@username` | 8 语言 aria-label 等值匹配 `a#icon-element-repost`（防 re-click） |
+  | Likes | `tiktok.com/@username/likes` | 2 步：点 Liked tab 卡片 → 进 video 详情页 → 点 ❤ 取消 |
+  | Favorites | `tiktok.com/@username/favorites` | 2 步：点 Favorites tab 卡片 → 进 video 详情页 → 点 🔖 取消 |
   | Following | `tiktok.com/@username/following` | 2 步：点 Following 按钮 → Confirm |
 - **不支持**（V2 路线图）：Watch History（TikTok settings 内置）、Comments（与 Reposts 高重叠）
 - **首发平台**：Chrome MV3 + Edge MV3

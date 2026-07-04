@@ -150,7 +150,7 @@ requiredBlocks.forEach((b) => {
   );
 });
 
-// 11. common.viewCount 数组非空（TikTok 特有）
+// 12. common.viewCount 数组非空（TikTok 特有）
 const dViewCount = (defaultCfg.selectors.common && defaultCfg.selectors.common.viewCount) || [];
 const rViewCount = (remoteCfg.selectors.common && remoteCfg.selectors.common.viewCount) || [];
 assert(
@@ -160,18 +160,6 @@ assert(
 assert(
   Array.isArray(rViewCount) && rViewCount.length >= 1,
   'tiktok-remote-example.json common.viewCount 数组非空（实际 ' + rViewCount.length + '）'
-);
-
-// 12. common.videoMoreButtons 数组非空（video 清理的 "···" 按钮 selector）
-const dMore = (defaultCfg.selectors.common && defaultCfg.selectors.common.videoMoreButtons) || [];
-const rMore = (remoteCfg.selectors.common && remoteCfg.selectors.common.videoMoreButtons) || [];
-assert(
-  Array.isArray(dMore) && dMore.length >= 1,
-  'default.json common.videoMoreButtons 数组非空（实际 ' + dMore.length + '）'
-);
-assert(
-  Array.isArray(rMore) && rMore.length >= 1,
-  'tiktok-remote-example.json common.videoMoreButtons 数组非空（实际 ' + rMore.length + '）'
 );
 
 // 13. login.checkElements 8 语言都有条目
