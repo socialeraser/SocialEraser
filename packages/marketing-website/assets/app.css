@@ -1704,7 +1704,7 @@ lite-youtube > iframe {
   color: #0a0a0a;
   font-weight: 600;
   font-size: var(--text-sm);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius);
   text-decoration: none;
   transition: transform var(--duration) var(--ease), box-shadow var(--duration) var(--ease);
   width: 100%;
