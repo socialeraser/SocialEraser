@@ -1,12 +1,21 @@
-# X Eraser Changelog
+# Eraser for X Changelog
 
-All notable changes to **X Eraser** (SocialEraser for X / Twitter) are documented in this file.
+All notable changes to **Eraser for X** (SocialEraser for X / Twitter, formerly X Eraser) are documented in this file.
 For the umbrella index across all platforms, see [SocialEraser CHANGELOG](../../CHANGELOG.md).
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning follows [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
+
+## [1.0.2] — 2026-07-06
+
+### Changed
+- **Extension renamed** from "X Eraser" to **"Eraser for X"** across all 8 locales (`en`, `zh_CN`, `ja`, `ko`, `de`, `es`, `fr`, `pt`) — brand alignment with the SocialEraser family naming (Eraser for X / Eraser for TikTok)
+- **Side panel brand refreshed** — `<title>` and header `<h1>` in `src/sidepanel.html` now display "Eraser for X"; visible version bumped to `v1.0.2` in the header
+- **Mobile app name updated** — `appName` in `capacitor.config.json` set to "Eraser for X" (propagates to Android `strings.xml` and iOS `Info.plist` on next Capacitor sync)
+- **Post-cleanup rating prompt** — all 8 locale `ratePromptBody` strings in `scripts/i18n.js` updated to reference the new product name
+- Bumped version `1.0.1 → 1.0.2` in both `chrome-source/manifest.json` and `edge-source/manifest.json` to reflect the rename
 
 ## [1.0.1] — 2026-06-28
 
@@ -23,7 +32,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 ### Changed
 - Renamed local + remote config file from `remote-example.json` to `x-remote-example.json` (platform-prefix consistency; aligned with TikTok). CDN URL `https://storage.googleapis.com/social-tool-bucket/x-remote-example.json` updated; `CONFIG_URL` in `chrome-source/background.js` + `edge-source/background.js` updated; all 6 verify scripts + 3 docs updated. Old `remote-example.json` removed from CDN.
 
-## [1.1.0] — 2026-06-XX
+## [1.0.0] — 2026-06-XX
 
 ### Added
 - 5-tier tip model: $1 Coffee / $3 Pizza (Most Popular) / $5 Lunch / $10 Generous / Custom, via Creem Static Payment Links
@@ -35,7 +44,7 @@ Versioning follows [Semantic Versioning](https://semver.org/).
 - `verify-tip-model.js` regression suite locks the tip-only model invariant
 - `verify-i18n-completeness.js` checks all keys × 8 languages
 
-## [1.0.0] — 2026-04-XX
+## [0.9.1] — 2026-04-XX
 
 ### Added
 - Bulk cleanup for X (Twitter):

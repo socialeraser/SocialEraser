@@ -1,10 +1,10 @@
-// X Eraser i18n - Multi-language Support
+// Eraser for X i18n - Multi-language Support
 // 8 languages: en, zh-CN, ja, ko, pt, es, de, fr
 
 (function() {
   'use strict';
 
-  console.log('[X Eraser] i18n.js loading...');
+    console.log('[Eraser for X] i18n.js loading...');
 
   // 中文文案需要更细粒度的处理
   // 使用 {var} 作为占位符
@@ -153,7 +153,7 @@
 
       // Rating prompt (post-cleanup feedback)
       ratePromptTitle: 'How was your cleanup?',
-      ratePromptBody: 'Your feedback helps me keep X Eraser free and open source.',
+      ratePromptBody: 'Your feedback helps me keep Eraser for X free and open source.',
       ratePromptLabel1: 'It didn\'t work',
       ratePromptLabel2: 'Has issues',
       ratePromptLabel3: 'Could be better',
@@ -305,7 +305,7 @@
 
       // Rating prompt (post-cleanup feedback)
       ratePromptTitle: '清理体验如何？',
-      ratePromptBody: '你的反馈帮助我保持 X Eraser 免费开源。',
+      ratePromptBody: '你的反馈帮助我保持 Eraser for X 免费开源。',
       ratePromptLabel1: '不太好用',
       ratePromptLabel2: '有些问题',
       ratePromptLabel3: '还行',
@@ -455,7 +455,7 @@
 
       // Rating prompt (post-cleanup feedback)
       ratePromptTitle: 'Como foi sua limpeza?',
-      ratePromptBody: 'Seu feedback me ajuda a manter o X Eraser gratuito e de código aberto.',
+      ratePromptBody: 'Seu feedback me ajuda a manter o Eraser for X gratuito e de código aberto.',
       ratePromptLabel1: 'Não funcionou',
       ratePromptLabel2: 'Tem problemas',
       ratePromptLabel3: 'Pode melhorar',
@@ -612,7 +612,7 @@
 
       // Rating prompt (post-cleanup feedback)
       ratePromptTitle: 'クリーンアップはいかがでしたか？',
-      ratePromptBody: 'あなたのフィードバックが X Eraser を無料でオープンソースに保ち続ける助けになります。',
+      ratePromptBody: 'あなたのフィードバックが Eraser for X を無料でオープンソースに保ち続ける助けになります。',
       ratePromptLabel1: '動かなかった',
       ratePromptLabel2: '問題がある',
       ratePromptLabel3: '改善できる',
@@ -765,7 +765,7 @@
 
       // Rating prompt (post-cleanup feedback)
       ratePromptTitle: '정리 경험은 어떠셨나요?',
-      ratePromptBody: '피드백이 X Eraser를 무료 오픈소스로 유지하는 데 도움이 됩니다.',
+      ratePromptBody: '피드백이 Eraser for X를 무료 오픈소스로 유지하는 데 도움이 됩니다.',
       ratePromptLabel1: '작동하지 않음',
       ratePromptLabel2: '문제 있음',
       ratePromptLabel3: '개선 가능',
@@ -916,7 +916,7 @@
 
       // Rating prompt (post-cleanup feedback)
       ratePromptTitle: '¿Cómo fue tu limpieza?',
-      ratePromptBody: 'Tus comentarios me ayudan a mantener X Eraser gratuito y de código abierto.',
+      ratePromptBody: 'Tus comentarios me ayudan a mantener Eraser for X gratuito y de código abierto.',
       ratePromptLabel1: 'No funcionó',
       ratePromptLabel2: 'Tiene problemas',
       ratePromptLabel3: 'Podría mejorar',
@@ -1067,7 +1067,7 @@
 
       // Rating prompt (post-cleanup feedback)
       ratePromptTitle: 'Wie war deine Bereinigung?',
-      ratePromptBody: 'Dein Feedback hilft mir, X Eraser kostenlos und Open Source zu halten.',
+      ratePromptBody: 'Dein Feedback hilft mir, Eraser for X kostenlos und Open Source zu halten.',
       ratePromptLabel1: 'Hat nicht funktioniert',
       ratePromptLabel2: 'Hat Probleme',
       ratePromptLabel3: 'Könnte besser sein',
@@ -1222,7 +1222,7 @@
 
       // Rating prompt (post-cleanup feedback)
       ratePromptTitle: 'Comment s\'est passé votre nettoyage ?',
-      ratePromptBody: 'Vos commentaires m\'aident à garder X Eraser gratuit et open source.',
+      ratePromptBody: 'Vos commentaires m\'aident à garder Eraser for X gratuit et open source.',
       ratePromptLabel1: 'N\'a pas fonctionné',
       ratePromptLabel2: 'A des problèmes',
       ratePromptLabel3: 'Peut être amélioré',
@@ -1367,7 +1367,7 @@
   var SUPPORTED_LANGS = ['en', 'zh-CN', 'ja', 'ko', 'pt', 'es', 'de', 'fr'];
 
   var currentLang = detectLanguage();
-  console.log('[X Eraser] Detected language:', currentLang);
+  console.log('[Eraser for X] Detected language:', currentLang);
 
   // 翻译函数 - 支持 {var} 占位符
   function t(key, vars) {
@@ -1397,7 +1397,7 @@
   // 兼容老代码：content.js 直接调 t()，挂到 window.t
   window.t = t;
 
-  console.log('[X Eraser] i18n.js ready, language:', currentLang);
+  console.log('[Eraser for X] i18n.js ready, language:', currentLang);
 
   // 关键修复：用户保存的 preferredLang 必须覆盖 navigator.language 自动检测
   // 否则用户选了 English，但 content.js / injector.js 跑在 X 页面上下文，
@@ -1415,7 +1415,7 @@
       if (result && result.preferredLang && TRANSLATIONS[result.preferredLang]) {
         if (result.preferredLang !== currentLang) {
           currentLang = result.preferredLang;
-          console.log('[X Eraser] Applied preferred language:', currentLang);
+          console.log('[Eraser for X] Applied preferred language:', currentLang);
         }
       }
     });
@@ -1425,7 +1425,7 @@
           var newLang = changes.preferredLang.newValue;
           if (newLang && TRANSLATIONS[newLang]) {
             currentLang = newLang;
-            console.log('[X Eraser] Language changed to:', currentLang);
+            console.log('[Eraser for X] Language changed to:', currentLang);
           }
         }
       });
