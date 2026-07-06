@@ -6,8 +6,8 @@
 //   - TYPE_ID_MAP: videos / reposts / likes / favorites / following
 //   - 过滤器新增: minViewCount / maxViewCount
 //   - 备份提示: 2 个 .backup-tip（videos + reposts）
-//   - 日志前缀: [TikTok Eraser]
-//   - CWS 评审：MVP 阶段 TikTok Eraser 暂未上 CWS，rating prompt 复用模板但跳 socialeraser.app 主页
+//   - 日志前缀: [Eraser for TikTok]
+//   - CWS 评审：MVP 阶段 Eraser for TikTok 暂未上 CWS，rating prompt 复用模板但跳 socialeraser.app 主页
 (function() {
   'use strict';
 
@@ -39,7 +39,7 @@
   // 每日额度配置
   var FREE_LIMIT_PER_DAY = 5000;
 
-  // MVP 阶段 TikTok Eraser 暂未上 Chrome Web Store；
+  // MVP 阶段 Eraser for TikTok 暂未上 Chrome Web Store；
   // rating prompt 4-5 星跳 socialeraser.app 主页（用户从那进 CWS 评分入口）
   var CWS_REVIEW_URL = 'https://socialeraser.app/';
 
@@ -770,7 +770,7 @@
         var text = entry.textContent || '';
         return (time ? time.textContent : '') + ' ' + text;
       }).join('\n');
-      var diagText = '=== TikTok Eraser Diagnostic Log ===\n' +
+      var diagText = '=== Eraser for TikTok Diagnostic Log ===\n' +
         'Timestamp: ' + new Date().toISOString() + '\n' +
         'TikTok website: ' + (state.isTikTok ? 'yes' : 'no') + '\n' +
         'Logged in: ' + (state.isLoggedIn ? 'yes' : 'no') + '\n' +

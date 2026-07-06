@@ -186,7 +186,7 @@
 
       // Rating prompt (post-cleanup feedback)
       ratePromptTitle: 'How was your cleanup?',
-      ratePromptBody: 'Your feedback helps me keep TikTok Eraser free and open source.',
+      ratePromptBody: 'Your feedback helps me keep Eraser for TikTok free and open source.',
       ratePromptLabel1: 'It didn\'t work',
       ratePromptLabel2: 'Has issues',
       ratePromptLabel3: 'Could be better',
@@ -349,7 +349,7 @@
 
       // Rating prompt
       ratePromptTitle: '清理体验如何？',
-      ratePromptBody: '你的反馈帮助我保持 TikTok Eraser 免费开源。',
+      ratePromptBody: '你的反馈帮助我保持 Eraser for TikTok 免费开源。',
       ratePromptLabel1: '不太好用',
       ratePromptLabel2: '有些问题',
       ratePromptLabel3: '还行',
@@ -509,7 +509,7 @@
       cleanupAbortedPageNotFound: 'クリーンアップ中止：3 回再試行しても対象ページに到達できません。手動で移動して再試行してください。',
 
       ratePromptTitle: 'クリーンアップはいかがでしたか？',
-      ratePromptBody: 'あなたのフィードバックが TikTok Eraser を無料でオープンソースに保ち続ける助けになります。',
+      ratePromptBody: 'あなたのフィードバックが Eraser for TikTok を無料でオープンソースに保ち続ける助けになります。',
       ratePromptLabel1: '動かなかった',
       ratePromptLabel2: '問題がある',
       ratePromptLabel3: '改善できる',
@@ -667,7 +667,7 @@
       cleanupAbortedPageNotFound: '정리 중단: 3회 재시도 후에도 대상 페이지에 도달할 수 없습니다. 수동으로 이동 후 다시 시도하세요.',
 
       ratePromptTitle: '정리 경험은 어떠셨나요?',
-      ratePromptBody: '피드백이 TikTok Eraser를 무료 오픈소스로 유지하는 데 도움이 됩니다.',
+      ratePromptBody: '피드백이 Eraser for TikTok를 무료 오픈소스로 유지하는 데 도움이 됩니다.',
       ratePromptLabel1: '작동하지 않음',
       ratePromptLabel2: '문제 있음',
       ratePromptLabel3: '개선 가능',
@@ -826,7 +826,7 @@
       cleanupAbortedPageNotFound: 'Limpeza abortada: não foi possível chegar à página alvo após 3 tentativas. Navegue manualmente e tente novamente.',
 
       ratePromptTitle: 'Como foi sua limpeza?',
-      ratePromptBody: 'Seu feedback me ajuda a manter o TikTok Eraser gratuito e de código aberto.',
+      ratePromptBody: 'Seu feedback me ajuda a manter o Eraser for TikTok gratuito e de código aberto.',
       ratePromptLabel1: 'Não funcionou',
       ratePromptLabel2: 'Tem problemas',
       ratePromptLabel3: 'Pode melhorar',
@@ -985,7 +985,7 @@
       cleanupAbortedPageNotFound: 'Limpieza abortada: no se pudo llegar a la página objetivo después de 3 reintentos. Navega manualmente y vuelve a intentarlo.',
 
       ratePromptTitle: '¿Cómo fue tu limpieza?',
-      ratePromptBody: 'Tus comentarios me ayudan a mantener TikTok Eraser gratuito y de código abierto.',
+      ratePromptBody: 'Tus comentarios me ayudan a mantener Eraser for TikTok gratuito y de código abierto.',
       ratePromptLabel1: 'No funcionó',
       ratePromptLabel2: 'Tiene problemas',
       ratePromptLabel3: 'Podría mejorar',
@@ -1145,7 +1145,7 @@
       cleanupAbortedPageNotFound: 'Bereinigung abgebrochen: Zielseite nach 3 Versuchen nicht erreichbar. Bitte manuell navigieren und erneut versuchen.',
 
       ratePromptTitle: 'Wie war deine Bereinigung?',
-      ratePromptBody: 'Dein Feedback hilft mir, TikTok Eraser kostenlos und Open Source zu halten.',
+      ratePromptBody: 'Dein Feedback hilft mir, Eraser for TikTok kostenlos und Open Source zu halten.',
       ratePromptLabel1: 'Hat nicht funktioniert',
       ratePromptLabel2: 'Hat Probleme',
       ratePromptLabel3: 'Könnte besser sein',
@@ -1304,7 +1304,7 @@
       cleanupAbortedPageNotFound: 'Nettoyage annulé : impossible d\'atteindre la page cible après 3 tentatives. Naviguez manuellement et réessayez.',
 
       ratePromptTitle: 'Comment s\'est passé votre nettoyage ?',
-      ratePromptBody: 'Vos commentaires m\'aident à garder TikTok Eraser gratuit et open source.',
+      ratePromptBody: 'Vos commentaires m\'aident à garder Eraser for TikTok gratuit et open source.',
       ratePromptLabel1: 'N\'a pas fonctionné',
       ratePromptLabel2: 'A des problèmes',
       ratePromptLabel3: 'Peut être amélioré',

@@ -1,13 +1,18 @@
-# TikTok Eraser Changelog
+# Eraser for TikTok Changelog
 
-All notable changes to **TikTok Eraser** (SocialEraser for TikTok) are documented in this file.
+All notable changes to **Eraser for TikTok** (SocialEraser for TikTok, formerly TikTok Eraser) are documented in this file.
 For the umbrella index across all platforms, see [SocialEraser CHANGELOG](../../CHANGELOG.md).
-For the X Eraser format reference, see [X Eraser CHANGELOG](../x-project/CHANGELOG.md).
+For the X Eraser format reference, see [Eraser for X CHANGELOG](../x-project/CHANGELOG.md).
 
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 Versioning follows [Semantic Versioning](https://semver.org/).
 
-## [Unreleased] - 2026-07-04
+## [1.0.0] - 2026-07-04
+
+### Changed
+- **Extension renamed** from "TikTok Eraser" to **"Eraser for TikTok"** across all 8 locales (`en`, `zh_CN`, `ja`, `ko`, `de`, `es`, `fr`, `pt`), side panel `<title>` / `<h1>`, mobile `appName`, diagnostic log header, and 8 locale rating-prompt body strings — brand alignment with SocialEraser family naming (Eraser for X / Eraser for TikTok)
+- **Version bumped** `0.1.0 → 1.0.0` in both `chrome-source/manifest.json` and `edge-source/manifest.json` (first stable release; same as visible `v1.0.0` in side panel header)
+- Updated cross-link to `Eraser for X CHANGELOG` (was `X Eraser CHANGELOG`)
 
 ### Fixed
 - **Multi-type 流程卡死 bug**：选中 ≥ 2 个 Type 时，处理完第 1 个 Type 后停在了最后一个视频播放那，没有开始第 2 个 Type。根因：`__TikTokEraserForcePageLoad` 用 `chrome.runtime.sendMessage({target:'forceNavigation'})` 让 background 调 `chrome.tabs.update` 触发跳转，但 MV3 service worker 必须被事件唤醒才能处理消息，IPC + 唤醒延迟几秒，期间 content script 继续跑、sidepanel 已经 addLog "Type 1 of 3 done, loading next..."，但 tab 实际上没跳走 → 用户看到"停在了最后一个视频播放那"。修法：`__TikTokEraserForcePageLoad` 内部**优先 `window.location.href = url`**（同步触发 page 销毁，不依赖 IPC、不依赖 service worker 是否在线），`chrome.tabs.update` 路径保留为兜底。MCP 实证：`/@ping.xiang1` 页设 `window.location.href = 'https://www.tiktok.com/'` 后 page 真的销毁，location.pathname 真的变成 `/`。TikTok SPA 路由只拦截 `pushState`/`replaceState`，不拦截 `window.location.href =` 触发的整页加载。

@@ -1,6 +1,6 @@
 {
   "appId": "com.socialeraser.tiktok",
-  "appName": "TikTok Eraser",
+  "appName": "Eraser for TikTok",
   "webDir": "www",
   "android": {
     "allowMixedContent": false,
