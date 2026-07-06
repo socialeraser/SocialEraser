@@ -4,35 +4,84 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0a0a0b">
-  <title>SocialEraser for TikTok — Bulk Delete Videos, Reposts & Likes (Free)</title>
-  <meta name="description" content="Bulk delete TikTok videos, reposts, likes, favorites, and unfollow accounts. Filter by date and view count. 100% local, no password. Free during launch.">
-  <meta name="keywords" content="delete tiktok videos, bulk delete tiktok, tiktok cleaner, tiktok unfollow, remove tiktok likes, tiktok repost remover, mass delete tiktok videos">
+  <title>SocialEraser for TikTok — Bulk Delete Videos, Reposts & Likes</title>
+  <meta name="description" content="Free Chrome extension to bulk delete TikTok videos, reposts, likes, favorites, and unfollow accounts. Filter by date and view count. 100% local, no password.">
+  <meta name="keywords" content="delete tiktok videos, bulk delete tiktok, tiktok cleaner, tiktok unfollow, remove tiktok likes, tiktok repost remover, mass delete tiktok videos, tiktok bulk delete, delete old tiktok videos, tiktok account cleanup, tiktok history cleaner, delete tiktok favorites, tiktok follower cleanup, mass unfollow tiktok">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://socialeraser.app/platforms/tiktok/">
   <link rel="alternate" hreflang="en" href="https://socialeraser.app/platforms/tiktok/">
+  <link rel="alternate" hreflang="zh" href="https://socialeraser.app/zh/">
+  <link rel="alternate" hreflang="ja" href="https://socialeraser.app/ja/">
   <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/platforms/tiktok/">
   <link rel="sitemap" type="application/xml" href="/sitemap.xml">
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SocialEraser">
   <meta property="og:url" content="https://socialeraser.app/platforms/tiktok/">
   <meta property="og:title" content="SocialEraser for TikTok — Bulk Delete Videos, Reposts & Likes">
-  <meta property="og:description" content="Bulk delete TikTok videos, reposts, likes, favorites, and unfollow on TikTok. 100% local, no password. Free during launch.">
-  <meta property="og:image" content="https://socialeraser.app/assets/icons/socialeraser-mark.png">
+  <meta property="og:description" content="Free Chrome extension to bulk delete TikTok videos, reposts, likes, favorites, and unfollow. Filter by date and view count. 100% local, no password.">
+  <meta property="og:image" content="https://socialeraser.app/assets/icons/og-tiktok.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="SocialEraser for TikTok — Bulk delete videos, reposts, and likes with a free Chrome extension">
   <meta property="og:locale" content="en_US">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="TikTok">
-  <meta name="twitter:description" content="Bulk delete on TikTok. 100% local, no password, free during launch.">
-  <meta name="twitter:image" content="https://socialeraser.app/assets/icons/socialeraser-mark.png">
+  <meta name="twitter:title" content="SocialEraser for TikTok — Bulk Delete Videos, Reposts & Likes">
+  <meta name="twitter:description" content="Free Chrome extension to bulk delete TikTok videos, reposts, likes, favorites, and unfollow accounts. 100% local, no password.">
+  <meta name="twitter:image" content="https://socialeraser.app/assets/icons/og-tiktok.png">
+  <meta name="twitter:image:alt" content="SocialEraser for TikTok — Bulk delete videos, reposts, and likes with a free Chrome extension">
   <link rel="icon" type="image/png" href="/assets/icons/socialeraser-mark.png">
   <link rel="stylesheet" href="/assets/styles.css">
   <link rel="stylesheet" href="/assets/app.css">
+  <style>
+    /* TikTok page — override shared brand tokens to match the extension plugin
+       (linear-gradient 135deg #FE2C55 → #25F4EE). Other platform pages keep the
+       default orange theme; only this page is scoped. */
+    :root {
+      /* Solid-color accent → cyan. Pure pink (#FE2C55) on a dark background reads
+         as red/error when used for text (eyebrows, comparison cells, FAQ links).
+         Brand pink stays for major elements via --gradient-brand below. */
+      --accent:         #25F4EE;
+      --accent-soft:    rgba(37, 244, 238, 0.12);
+      --accent-glow:    rgba(37, 244, 238, 0.35);
+      --border-accent:  rgba(37, 244, 238, 0.4);
+      --gradient-brand:      linear-gradient(135deg, #FE2C55, #25F4EE);
+      --gradient-brand-soft: linear-gradient(135deg, rgba(254, 44, 85, 0.18) 0%, rgba(37, 244, 238, 0.06) 100%);
+      --gradient-hero-glow:  radial-gradient(ellipse 80% 50% at 50% 0%, rgba(254, 44, 85, 0.18) 0%, transparent 70%);
+    }
+    /* Replace "✗ negative" red with neutral blue — red on a marketing page
+       reads as an error/warning, not a "competitor doesn't have this feature". */
+    .comparison .cross { color: var(--blue); }
+  </style>
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"SocialEraser for TikTok","applicationCategory":"BrowserApplication","operatingSystem":"Chrome, Edge","description":"Bulk delete TikTok videos, reposts, likes, favorites, and following. 100% local processing.","url":"https://socialeraser.app/platforms/tiktok/","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"SocialEraser for TikTok","applicationCategory":"BrowserApplication","applicationSubCategory":"BrowserExtension","operatingSystem":"Chrome 120+, Edge 120+","description":"Bulk delete TikTok videos, reposts, likes, favorites, and following. 100% local processing in your browser — no password, no server.","url":"https://socialeraser.app/platforms/tiktok/","image":"https://socialeraser.app/assets/icons/og-tiktok.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://socialeraser.app/platforms/tiktok/"},"featureList":["Bulk delete your own TikTok videos","Bulk unlike videos from your Likes tab","Bulk remove reposts","Bulk clear private Favorites","Bulk unfollow accounts","Filter by date range","Filter by minimum view count","Filter by caption keyword","Filter by content type (original / repost / duet / stitch)","Pause and resume across sessions"],"offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"}}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Home","item":"https://socialeraser.app/"},
+    {"@type":"ListItem","position":2,"name":"Platforms","item":"https://socialeraser.app/#platforms"},
+    {"@type":"ListItem","position":3,"name":"SocialEraser for TikTok","item":"https://socialeraser.app/platforms/tiktok/"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"HowTo","name":"How to Bulk Delete TikTok Videos with SocialEraser","description":"Install the SocialEraser Chrome extension, open tiktok.com, pick what to clean, and click Start. SocialEraser simulates normal clicks at human speed to delete every matching video, repost, like, favorite, or follow.","totalTime":"PT15M","estimatedCost":{"@type":"MonetaryAmount","value":"0","currency":"USD"},"tool":[{"@type":"HowToTool","name":"Google Chrome or Microsoft Edge (version 120 or later)"},{"@type":"HowToTool","name":"SocialEraser for TikTok browser extension (free)"}],"step":[
+    {"@type":"HowToStep","position":1,"name":"Install SocialEraser for TikTok","text":"Add the free SocialEraser extension from the Chrome Web Store. No account, no signup, no payment. Two clicks and it is installed and pinned to your toolbar.","url":"https://socialeraser.app/platforms/tiktok/#download"},
+    {"@type":"HowToStep","position":2,"name":"Open tiktok.com and log in","text":"Go to tiktok.com in Chrome and log in to your account as usual. Click the SocialEraser side panel icon. The extension will auto-detect that you are logged in and show your account status.","url":"https://socialeraser.app/platforms/tiktok/#main"},
+    {"@type":"HowToStep","position":3,"name":"Pick what to clean and set your filters","text":"In the side panel, tick the boxes for what you want to delete: Your Videos, Reposts, Likes, Favorites, or Following. Optionally set a date range (delete videos before or after a date), a minimum view count (keep your viral hits), a caption keyword (target a specific topic), or a content type (originals, reposts, duets).","url":"https://socialeraser.app/platforms/tiktok/#main"},
+    {"@type":"HowToStep","position":4,"name":"Click Start and walk away","text":"Click the Start Cleanup button. SocialEraser will open each matching item, click the delete / unlike / unfollow button at human speed, and show a live progress counter. You can close the laptop and come back tomorrow — state persists across browser restarts. The average run is about 0.9 seconds per item.","url":"https://socialeraser.app/platforms/tiktok/#main"}
+  ]}
   </script>
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
-    {"@type":"Question","name":"Can I bulk delete old TikTok videos?","acceptedAnswer":{"@type":"Answer","text":"Yes. Set a date filter or view-count floor and SocialEraser will delete every matching video. Runs at ~0.9s per item."}},
-    {"@type":"Question","name":"Will my account get banned?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser simulates normal clicks at human speed and respects rate limits. The same caveat applies as with any third-party tool — we are not affiliated with ByteDance or TikTok."}},
-    {"@type":"Question","name":"Can I save my TikTok videos before deleting?","acceptedAnswer":{"@type":"Answer","text":"Yes. Use the official TikTok 'Download your data' archive first, or right-click save individual videos. SocialEraser focuses on the deletion step."}}
+    {"@type":"Question","name":"Can I bulk delete old TikTok videos?","acceptedAnswer":{"@type":"Answer","text":"Yes. Set a date filter (e.g. before Jan 1, 2023) or a view-count floor and SocialEraser will delete every matching video. Runs at about 0.9 seconds per item — roughly 15 minutes for 1,000 videos."}},
+    {"@type":"Question","name":"Can I delete only my reposts?","acceptedAnswer":{"@type":"Answer","text":"Yes. Use the Content type filter to target only reposts, only duets, or only original uploads. The filter combines with date and view-count filters for precision."}},
+    {"@type":"Question","name":"Can I keep videos that went viral?","acceptedAnswer":{"@type":"Answer","text":"Yes. Use the View count floor filter to set a minimum view count. Videos above the floor are kept; below are deleted. Many users set 1,000 to preserve breakout moments while clearing the rest."}},
+    {"@type":"Question","name":"What about duets and stitches?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser deletes videos individually. If your video was a duet or stitch, the original creator's video remains intact — only your side of the chain is removed."}},
+    {"@type":"Question","name":"Will my account get banned for using SocialEraser?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser simulates normal clicks at human speed and respects rate limits. The same caveat applies as with any third-party tool — we are not affiliated with ByteDance Ltd., and using bulk tools is at your own discretion."}},
+    {"@type":"Question","name":"Can I undo a delete?","acceptedAnswer":{"@type":"Answer","text":"No. Once a video is deleted, it is gone from TikTok's public view within seconds. We strongly recommend requesting TikTok's official 'Download your data' archive before any bulk run for the first time."}},
+    {"@type":"Question","name":"What if TikTok changes their UI?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser fetches its DOM selector schema from a remote CDN. When TikTok ships UI changes, we push an update — no extension reinstall needed. The update is automatic and silent."}},
+    {"@type":"Question","name":"Does it work on the new tiktok.com layout?","acceptedAnswer":{"@type":"Answer","text":"Yes. SocialEraser supports both tiktok.com web and the legacy desktop layout. The selector schema is updated weekly to match TikTok's latest UI changes."}},
+    {"@type":"Question","name":"Does it work on the TikTok mobile app?","acceptedAnswer":{"@type":"Answer","text":"No. TikTok's mobile app does not allow browser extensions. SocialEraser runs in Chrome on desktop. A dedicated mobile companion is on the 2027 roadmap."}},
+    {"@type":"Question","name":"Can I run it on multiple TikTok accounts?","acceptedAnswer":{"@type":"Answer","text":"Yes — use separate browser profiles for each account. Multi-account within a single profile is on the roadmap."}}
   ]}
   </script>
 </head>
@@ -44,7 +93,7 @@
     <div class="site-header__inner container-lg">
       <a href="/" class="site-logo">
 <span class="site-logo__mark" aria-hidden="true">
-          <img src="/assets/icons/socialeraser-mark.png" alt="">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
         </span>
         <span>SocialEraser</span>
       </a>
@@ -89,6 +138,13 @@
   </header>
 
   <main id="main">
+    <div class="breadcrumbs-wrap container-lg">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span class="breadcrumbs__sep">›</span>
+        <span class="breadcrumbs__current">SocialEraser for TikTok</span>
+      </nav>
+    </div>
     <section class="container-lg">
       <div class="hero">
         <span class="muted-eyebrow">SocialEraser for TikTok · Free During Launch</span>
@@ -114,10 +170,10 @@
     </section>
 
     <!-- WHAT YOU CAN DELETE -->
-    <section class="container-lg section">
+    <section class="container-lg section" aria-labelledby="section-cleanup">
       <div class="section-head">
         <span class="muted-eyebrow">What You Can Clean</span>
-        <h2 class="section-head__h2">Five Kinds of TikTok Cleanup, One Extension</h2>
+        <h2 class="section-head__h2" id="section-cleanup">Five Kinds of TikTok Cleanup, One Extension</h2>
         <p class="section-head__lede">From old cringe to quiet rebrands — pick one, mix them, or run them all back-to-back.</p>
       </div>
       <div class="grid grid-auto">
@@ -130,10 +186,10 @@
     </section>
 
     <!-- TIME ESTIMATOR -->
-    <section class="container-md section">
+    <section class="container-md section" aria-labelledby="section-estimator">
       <div class="section-head">
         <span class="muted-eyebrow">Time Calculator</span>
-        <h2 class="section-head__h2">How Long Will Your TikTok Cleanup Take?</h2>
+        <h2 class="section-head__h2" id="section-estimator">How Long Will Your TikTok Cleanup Take?</h2>
       </div>
       <div class="estimator" data-estimator>
         <div class="estimator__input-block">
@@ -165,10 +221,10 @@
     </section>
 
     <!-- 3 STEPS -->
-    <section class="container-lg section">
+    <section class="container-lg section" aria-labelledby="section-how">
       <div class="section-head">
         <span class="muted-eyebrow">How It Works</span>
-        <h2 class="section-head__h2">Three Steps. Then It's Done.</h2>
+        <h2 class="section-head__h2" id="section-how">Three Steps. Then It's Done.</h2>
       </div>
       <div class="steps">
         <div class="steps__item">
@@ -187,10 +243,10 @@
     </section>
 
     <!-- FILTERS DEEP-DIVE -->
-    <section class="container-lg section">
+    <section class="container-lg section" aria-labelledby="section-filters">
       <div class="section-head">
         <span class="muted-eyebrow">Filters</span>
-        <h2 class="section-head__h2">Wipe Precisely — Not Blindly</h2>
+        <h2 class="section-head__h2" id="section-filters">Wipe Precisely — Not Blindly</h2>
         <p class="section-head__lede">The whole point of bulk is to clean fast. But precision matters too. Combine filters to delete exactly the wrong things.</p>
       </div>
       <div class="grid grid-2">
@@ -214,10 +270,10 @@
     </section>
 
     <!-- COMPARISON -->
-    <section class="container-lg section">
+    <section class="container-lg section" aria-labelledby="section-comparison">
       <div class="section-head">
         <span class="muted-eyebrow">vs. The Alternatives</span>
-        <h2 class="section-head__h2">How SocialEraser for TikTok Compares</h2>
+        <h2 class="section-head__h2" id="section-comparison">How SocialEraser for TikTok Compares</h2>
       </div>
       <div class="comparison">
         <table>
@@ -236,10 +292,10 @@
     </section>
 
     <!-- FAQ -->
-    <section class="container-lg section">
+    <section class="container-lg section" aria-labelledby="section-faq">
       <div class="section-head">
         <span class="muted-eyebrow">FAQ</span>
-        <h2 class="section-head__h2">TikTok-Specific Questions</h2>
+        <h2 class="section-head__h2" id="section-faq">TikTok-Specific Questions</h2>
       </div>
       <div class="faq">
         <div class="faq__category">
@@ -264,11 +320,23 @@
       </div>
     </section>
 
+    <!-- GUIDE -->
+    <section class="container-md section" aria-labelledby="section-guide">
+      <div class="cta-box" style="text-align:center;">
+        <span class="muted-eyebrow">Deep Dive</span>
+        <h2 class="hero__h1" id="section-guide" style="font-size: var(--text-3xl);">Want the full walkthrough?</h2>
+        <p class="hero__lede">Our step-by-step guide covers the date, view count, and keyword filters in detail, with screenshots and edge cases.</p>
+        <div class="btn-row btn-row--center">
+          <a href="/guides/tiktok.html" class="btn btn--primary btn--xl">Read the full guide →</a>
+        </div>
+      </div>
+    </section>
+
     <!-- DOWNLOAD -->
-    <section id="download" class="container-md section">
+    <section id="download" class="container-md section" aria-labelledby="section-download">
       <div class="cta-box">
         <span class="muted-eyebrow">Free During Launch · No Signup</span>
-        <h2 class="hero__h1">Clean Your TikTok. Today.</h2>
+        <h2 class="hero__h1" id="section-download">Clean Your TikTok. Today.</h2>
         <p class="hero__lede">Install SocialEraser for TikTok. Start deleting in under 60 seconds.</p>
         <div class="btn-row btn-row--center">
           <a href="mailto:support@socialeraser.app?subject=Join%20TikTok%20Waitlist" class="btn btn--primary btn--xl">Join TikTok Waitlist</a>
@@ -285,7 +353,7 @@
         <div class="site-footer__brand">
           <a href="/" class="site-logo">
 <span class="site-logo__mark" aria-hidden="true">
-          <img src="/assets/icons/socialeraser-mark.png" alt="">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
         </span>
             <span>SocialEraser</span>
           </a>

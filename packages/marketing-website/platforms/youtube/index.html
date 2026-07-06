@@ -4,35 +4,80 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0a0a0b">
-  <title>SocialEraser for YouTube — Bulk Clear Watch History, Likes & Subs (Free)</title>
-  <meta name="description" content="Bulk clear YouTube watch history, search history, liked videos, saved playlists, subscriptions, and comments. 100% local, no password. Free during launch.">
-  <meta name="keywords" content="clear youtube history, delete youtube watch history, youtube cleaner, mass unlike youtube, remove youtube subscriptions, youtube bulk delete, clear youtube likes">
+  <title>SocialEraser for YouTube — Bulk Clear History, Likes & Subscriptions</title>
+  <meta name="description" content="Free Chrome extension to bulk clear YouTube watch history, search history, liked videos, saved playlists, subscriptions, and comments. Filter by date and channel inactivity. 100% local, no password, no API key.">
+  <meta name="keywords" content="clear youtube history, delete youtube watch history, youtube cleaner, mass unlike youtube, remove youtube subscriptions, youtube bulk delete, clear youtube likes, youtube search history, youtube account cleanup, mass delete youtube, delete youtube videos, youtube watch later, youtube comment cleaner, mass unsubscribe youtube, youtube playlist remover">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://socialeraser.app/platforms/youtube/">
   <link rel="alternate" hreflang="en" href="https://socialeraser.app/platforms/youtube/">
+  <link rel="alternate" hreflang="zh" href="https://socialeraser.app/zh/">
+  <link rel="alternate" hreflang="ja" href="https://socialeraser.app/ja/">
   <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/platforms/youtube/">
   <link rel="sitemap" type="application/xml" href="/sitemap.xml">
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SocialEraser">
   <meta property="og:url" content="https://socialeraser.app/platforms/youtube/">
-  <meta property="og:title" content="SocialEraser for YouTube — Bulk Clear History, Likes & Subscriptions">
-  <meta property="og:description" content="Bulk clear YouTube watch history, search history, liked videos, subscriptions, and comments. 100% local, no password. Free during launch.">
+  <meta property="og:title" content="SocialEraser for YouTube — Bulk Clear History, Likes &amp; Subscriptions">
+  <meta property="og:description" content="Free Chrome extension to bulk clear YouTube watch history, search history, liked videos, saved playlists, subscriptions, and comments. Filter by date and channel inactivity. 100% local, no password.">
   <meta property="og:image" content="https://socialeraser.app/assets/icons/socialeraser-mark.png">
+  <meta property="og:image:width" content="400">
+  <meta property="og:image:height" content="400">
+  <meta property="og:image:alt" content="SocialEraser for YouTube — bulk clear watch history, likes, subscriptions, comments, and playlists with a free Chrome extension. 100% local, no password.">
   <meta property="og:locale" content="en_US">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="YouTube">
-  <meta name="twitter:description" content="Bulk delete on YouTube. 100% local, no password. Free during launch.">
+  <meta name="twitter:title" content="SocialEraser for YouTube — Bulk Clear History, Likes & Subscriptions">
+  <meta name="twitter:description" content="Free Chrome extension to bulk clear YouTube watch history, search history, liked videos, subscriptions, and comments. 100% local, no password.">
   <meta name="twitter:image" content="https://socialeraser.app/assets/icons/socialeraser-mark.png">
+  <meta name="twitter:image:alt" content="SocialEraser for YouTube — Bulk clear watch history, likes, and subscriptions with a free Chrome extension">
   <link rel="icon" type="image/png" href="/assets/icons/socialeraser-mark.png">
   <link rel="stylesheet" href="/assets/styles.css">
   <link rel="stylesheet" href="/assets/app.css">
+  <style>
+    /* YouTube page — YouTube brand is red. Override shared brand tokens with
+       YouTube-red accents and gradient. Use #FF3B3B (slightly desaturated) for
+       text instead of pure #FF0000, which reads as error/danger on dark bg. */
+    :root {
+      --accent:         #FF3B3B;
+      --accent-soft:    rgba(255, 59, 59, 0.12);
+      --accent-glow:    rgba(255, 59, 59, 0.35);
+      --border-accent:  rgba(255, 59, 59, 0.4);
+      --gradient-brand:      linear-gradient(135deg, #FF5A5A 0%, #C71F1F 100%);
+      --gradient-brand-soft: linear-gradient(135deg, rgba(255, 90, 90, 0.18) 0%, rgba(199, 31, 31, 0.06) 100%);
+      --gradient-hero-glow:  radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 59, 59, 0.18) 0%, transparent 70%);
+    }
+    /* Comparison row ✗ stays blue — neutral, not red. */
+    .comparison .cross { color: var(--blue); }
+  </style>
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"SocialEraser for YouTube","applicationCategory":"BrowserApplication","operatingSystem":"Chrome, Edge","description":"Bulk clear YouTube watch history, search history, liked videos, and subscriptions. 100% local processing.","url":"https://socialeraser.app/platforms/youtube/","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"SocialEraser for YouTube","applicationCategory":"BrowserApplication","applicationSubCategory":"BrowserExtension","operatingSystem":"Chrome 120+, Edge 120+","description":"Bulk clear YouTube watch history, search history, liked videos, saved playlists, subscriptions, and comments. 100% local processing in your browser — no password, no server.","url":"https://socialeraser.app/platforms/youtube/","image":"https://socialeraser.app/assets/icons/socialeraser-mark.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://socialeraser.app/platforms/youtube/"},"featureList":["Bulk clear watch history","Bulk clear search history","Bulk unlike videos from your Liked playlist","Bulk delete saved playlists (Watch Later, custom)","Bulk unsubscribe from inactive channels","Bulk delete your own comments on any video","Bulk delete community posts","Bulk delete your uploaded videos","Filter by date range","Filter by channel inactivity (6+ months, 1+ year)","Filter by title keyword","Filter by video length","Pause and resume across sessions"],"offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"}}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Home","item":"https://socialeraser.app/"},
+    {"@type":"ListItem","position":2,"name":"Platforms","item":"https://socialeraser.app/#platforms"},
+    {"@type":"ListItem","position":3,"name":"SocialEraser for YouTube","item":"https://socialeraser.app/platforms/youtube/"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"HowTo","name":"How to Bulk Clear YouTube History with SocialEraser","description":"Install the SocialEraser Chrome extension, open youtube.com, pick what to clean, and click Start. SocialEraser simulates normal clicks at human speed to clear every matching watch history entry, liked video, subscription, or comment.","totalTime":"PT20M","estimatedCost":{"@type":"MonetaryAmount","value":"0","currency":"USD"},"tool":[{"@type":"HowToTool","name":"Google Chrome or Microsoft Edge (version 120 or later)"},{"@type":"HowToTool","name":"SocialEraser for YouTube browser extension (free)"}],"step":[
+    {"@type":"HowToStep","position":1,"name":"Install SocialEraser for YouTube","text":"Add the free SocialEraser extension from the Chrome Web Store. No account, no signup, no payment. Two clicks and it is installed and pinned to your toolbar.","url":"https://socialeraser.app/platforms/youtube/#download"},
+    {"@type":"HowToStep","position":2,"name":"Open youtube.com and log in","text":"Go to youtube.com in Chrome and log in to your Google account as usual. Click the SocialEraser side panel icon. The extension will auto-detect that you are logged in and show your account status.","url":"https://socialeraser.app/platforms/youtube/#main"},
+    {"@type":"HowToStep","position":3,"name":"Pick what to clean and set your filters","text":"In the side panel, tick the boxes for what you want to clear: Watch History, Search History, Liked Videos, Playlists, Subscriptions, Comments, or Community Posts. Optionally set a date range, a channel inactivity window, a title keyword, or a video length filter.","url":"https://socialeraser.app/platforms/youtube/#main"},
+    {"@type":"HowToStep","position":4,"name":"Click Start and walk away","text":"Click the Start Cleanup button. SocialEraser will open each matching item, click the clear / unlike / unsubscribe button at human speed, and show a live progress counter. You can close the laptop and come back tomorrow — state persists across browser restarts.","url":"https://socialeraser.app/platforms/youtube/#main"}
+  ]}
   </script>
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
-    {"@type":"Question","name":"Can I bulk clear my YouTube watch history?","acceptedAnswer":{"@type":"Answer","text":"Yes. SocialEraser clears your entire YouTube watch history with one click, or filter by date range. Runs at ~0.9s per item."}},
-    {"@type":"Question","name":"Will clearing history affect my recommendations?","acceptedAnswer":{"@type":"Answer","text":"Yes — that's usually the point. Clearing your watch history gives the YouTube algorithm a fresh slate, so your recommendations reset to your current interests."}},
-    {"@type":"Question","name":"Can I bulk unsubscribe from inactive channels?","acceptedAnswer":{"@type":"Answer","text":"Yes. SocialEraser can find channels you follow that haven't posted in 6+ months and unsubscribe from them in bulk. Useful for cleaning up old subs."}}
+    {"@type":"Question","name":"Can I bulk clear my YouTube watch history?","acceptedAnswer":{"@type":"Answer","text":"Yes. SocialEraser clears your entire YouTube watch history with one click, or filter by date range. Runs at about 0.9 seconds per item — roughly 15 minutes for 1,000 entries."}},
+    {"@type":"Question","name":"Will clearing history affect my recommendations?","acceptedAnswer":{"@type":"Answer","text":"Yes — that's usually the point. Clearing your watch history gives the YouTube algorithm a fresh slate, so your recommendations reset to your current interests instead of the things you watched years ago."}},
+    {"@type":"Question","name":"Can I bulk unsubscribe from inactive channels?","acceptedAnswer":{"@type":"Answer","text":"Yes. SocialEraser can find channels you follow that haven't posted in 6+ months and unsubscribe from them in bulk. Adjustable to taste."}},
+    {"@type":"Question","name":"What about playlists?","acceptedAnswer":{"@type":"Answer","text":"You can delete entire playlists or remove individual videos from any playlist you own. SocialEraser cannot edit other people's playlists."}},
+    {"@type":"Question","name":"Will my channel get affected?","acceptedAnswer":{"@type":"Answer","text":"Clearing watch history, likes, and subscriptions only affects your personal account — your channel, uploads, and subscriber count stay untouched. The same caveat applies as with any third-party tool — we are not affiliated with Google LLC."}},
+    {"@type":"Question","name":"Can I undo a clear?","acceptedAnswer":{"@type":"Answer","text":"YouTube does not keep a backup of your watch or search history once cleared. We strongly recommend requesting Google Takeout for your YouTube data before any bulk clear, so you have a personal archive."}},
+    {"@type":"Question","name":"What if YouTube changes their UI?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser fetches its DOM selector schema from a remote CDN. When YouTube ships UI changes, we push an update — no extension reinstall needed. The update is automatic and silent."}},
+    {"@type":"Question","name":"Does it work on the new YouTube layout?","acceptedAnswer":{"@type":"Answer","text":"Yes. SocialEraser supports both the new YouTube Material Design and the legacy layout. The selector schema is updated weekly to match YouTube's latest UI changes."}},
+    {"@type":"Question","name":"Does it work on the YouTube mobile app?","acceptedAnswer":{"@type":"Answer","text":"No. YouTube's mobile app does not allow browser extensions. SocialEraser runs in Chrome on desktop. A dedicated mobile companion is on the 2027 roadmap."}},
+    {"@type":"Question","name":"Can I run it on multiple Google accounts?","acceptedAnswer":{"@type":"Answer","text":"Yes — use separate browser profiles for each Google account. Multi-account within a single profile is on the roadmap."}}
   ]}
   </script>
 </head>
@@ -44,7 +89,7 @@
     <div class="site-header__inner container-lg">
       <a href="/" class="site-logo">
 <span class="site-logo__mark" aria-hidden="true">
-          <img src="/assets/icons/socialeraser-mark.png" alt="">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
         </span>
         <span>SocialEraser</span>
       </a>
@@ -89,6 +134,13 @@
   </header>
 
   <main id="main">
+    <div class="breadcrumbs-wrap container-lg">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span class="breadcrumbs__sep">›</span>
+        <span class="breadcrumbs__current">SocialEraser for YouTube</span>
+      </nav>
+    </div>
     <section class="container-lg">
       <div class="hero">
         <span class="muted-eyebrow">SocialEraser for YouTube · Free During Launch</span>
@@ -168,10 +220,10 @@
     </section>
 
     <!-- 3 STEPS -->
-    <section class="container-lg section">
+    <section class="container-lg section" aria-labelledby="section-how">
       <div class="section-head">
         <span class="muted-eyebrow">How It Works</span>
-        <h2 class="section-head__h2">Three Steps. Then It's Done.</h2>
+        <h2 class="section-head__h2" id="section-how">Three Steps. Then It's Done.</h2>
       </div>
       <div class="steps">
         <div class="steps__item">
@@ -239,10 +291,10 @@
     </section>
 
     <!-- FAQ -->
-    <section class="container-lg section">
+    <section class="container-lg section" aria-labelledby="section-faq">
       <div class="section-head">
         <span class="muted-eyebrow">FAQ</span>
-        <h2 class="section-head__h2">YouTube-Specific Questions</h2>
+        <h2 class="section-head__h2" id="section-faq">YouTube-Specific Questions</h2>
       </div>
       <div class="faq">
         <div class="faq__category">
@@ -267,11 +319,23 @@
       </div>
     </section>
 
+    <!-- GUIDE -->
+    <section class="container-md section" aria-labelledby="section-guide">
+      <div class="cta-box" style="text-align:center;">
+        <span class="muted-eyebrow">Deep Dive</span>
+        <h2 class="hero__h1" id="section-guide" style="font-size: var(--text-3xl);">Want the full walkthrough?</h2>
+        <p class="hero__lede">Our step-by-step guide covers the date, channel inactivity, and keyword filters in detail, with screenshots and edge cases.</p>
+        <div class="btn-row btn-row--center">
+          <a href="/guides/youtube.html" class="btn btn--primary btn--xl">Read the full guide →</a>
+        </div>
+      </div>
+    </section>
+
     <!-- DOWNLOAD -->
-    <section id="download" class="container-md section">
+    <section id="download" class="container-md section" aria-labelledby="section-download">
       <div class="cta-box">
         <span class="muted-eyebrow">Free During Launch · No Signup</span>
-        <h2 class="hero__h1">Clean Your YouTube. Today.</h2>
+        <h2 class="hero__h1" id="section-download">Clean Your YouTube. Today.</h2>
         <p class="hero__lede">Install SocialEraser for YouTube. Start clearing in under 60 seconds.</p>
         <div class="btn-row btn-row--center">
           <a href="mailto:support@socialeraser.app?subject=Join%20YouTube%20Waitlist" class="btn btn--primary btn--xl">Join YouTube Waitlist</a>
@@ -288,7 +352,7 @@
         <div class="site-footer__brand">
           <a href="/" class="site-logo">
 <span class="site-logo__mark" aria-hidden="true">
-          <img src="/assets/icons/socialeraser-mark.png" alt="">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
         </span>
             <span>SocialEraser</span>
           </a>

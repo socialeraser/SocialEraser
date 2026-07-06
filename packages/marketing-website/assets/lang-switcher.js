@@ -115,14 +115,25 @@
     </div>
   `;
 
-  // Insert before the "Install Free" button
+  // Insertion strategy:
+  // 1. If a primary "Install" CTA lives inside .site-nav (e.g. some platform
+  //    subpages), the lang switcher sits between nav links and that CTA.
+  // 2. Otherwise, inject *before* .site-nav--mobile (which is display:none on
+  //    PC and the menu trigger on mobile). The .site-nav's margin-left:auto
+  //    then pulls both .site-nav and .lang-switcher to the right edge. Injecting
+  //    before .site-nav instead would strand the lang pill right of the logo.
+  // 3. Legal pages without a nav fall back to the end of the header inner.
   const installBtn = document.querySelector('.site-nav .btn--primary');
   if (installBtn) {
     installBtn.insertAdjacentHTML('beforebegin', html);
   } else {
-    // Legal pages might not have nav — inject into header inner if exists
-    const inner = document.querySelector('.site-header__inner');
-    if (inner) inner.insertAdjacentHTML('beforeend', html);
+    const mobile = document.querySelector('.site-nav--mobile');
+    if (mobile) {
+      mobile.insertAdjacentHTML('beforebegin', html);
+    } else {
+      const inner = document.querySelector('.site-header__inner');
+      if (inner) inner.insertAdjacentHTML('beforeend', html);
+    }
   }
 
   // Mobile menu language picker: fill any [data-lang-list] placeholder.

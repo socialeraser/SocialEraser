@@ -4,35 +4,82 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#0a0a0b">
-  <title>SocialEraser for Facebook — Bulk Delete Posts, Photos, Likes & Friends (Free)</title>
-  <meta name="description" content="Bulk delete Facebook posts, photos, likes, reactions, comments, and unfriend accounts. Filter by date and keyword. 100% local, no password. Free during launch.">
-  <meta name="keywords" content="delete facebook posts, bulk delete facebook, facebook cleaner, mass unlike facebook, remove facebook friends, facebook timeline cleaner, facebook post remover">
+  <title>SocialEraser for Facebook — Bulk Delete Posts, Photos, Likes & Friends</title>
+  <meta name="description" content="Free Chrome extension to bulk delete or archive Facebook posts, photos, likes, comments, and unfriend accounts. Filter by date and keyword. 100% local, no password, no API key.">
+  <meta name="keywords" content="delete facebook posts, bulk delete facebook, facebook cleaner, mass unlike facebook, remove facebook friends, facebook timeline cleaner, facebook post remover, delete old facebook posts, facebook bulk delete, unfriend everyone, facebook account cleanup, delete facebook photos, facebook unfriend tool, facebook unlike all, delete facebook comments in bulk, facebook page post remover">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://socialeraser.app/platforms/facebook/">
   <link rel="alternate" hreflang="en" href="https://socialeraser.app/platforms/facebook/">
+  <link rel="alternate" hreflang="zh" href="https://socialeraser.app/zh/">
+  <link rel="alternate" hreflang="ja" href="https://socialeraser.app/ja/">
   <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/platforms/facebook/">
   <link rel="sitemap" type="application/xml" href="/sitemap.xml">
   <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SocialEraser">
   <meta property="og:url" content="https://socialeraser.app/platforms/facebook/">
-  <meta property="og:title" content="SocialEraser for Facebook — Bulk Delete Posts, Photos & Likes">
-  <meta property="og:description" content="Bulk delete Facebook posts, photos, likes, comments, and unfriend accounts. 100% local, no password. Free during launch.">
+  <meta property="og:title" content="SocialEraser for Facebook — Bulk Delete Posts, Photos &amp; Likes">
+  <meta property="og:description" content="Free Chrome extension to bulk delete or archive Facebook posts, photos, likes, comments, and unfriend accounts. Filter by date and keyword. 100% local, no password.">
   <meta property="og:image" content="https://socialeraser.app/assets/icons/socialeraser-mark.png">
+  <meta property="og:image:width" content="400">
+  <meta property="og:image:height" content="400">
+  <meta property="og:image:alt" content="SocialEraser for Facebook — bulk delete or archive posts, photos, likes, comments, and unfriend accounts with a free Chrome extension. 100% local, no password.">
   <meta property="og:locale" content="en_US">
   <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Facebook">
-  <meta name="twitter:description" content="Bulk delete on Facebook. 100% local, no password. Free during launch.">
+  <meta name="twitter:title" content="SocialEraser for Facebook — Bulk Delete Posts, Photos & Likes">
+  <meta name="twitter:description" content="Free Chrome extension to bulk delete or archive Facebook posts, photos, likes, comments, and unfriend accounts. Filter by date and keyword. 100% local, no password.">
   <meta name="twitter:image" content="https://socialeraser.app/assets/icons/socialeraser-mark.png">
+  <meta name="twitter:image:alt" content="SocialEraser for Facebook — Bulk delete posts, photos, and likes with a free Chrome extension">
   <link rel="icon" type="image/png" href="/assets/icons/socialeraser-mark.png">
   <link rel="stylesheet" href="/assets/styles.css">
   <link rel="stylesheet" href="/assets/app.css">
+  <style>
+    /* Facebook page — Facebook brand is #1877F2 blue. Override shared brand
+       tokens with Facebook-blue accents and gradient. */
+    :root {
+      --accent:         #1877F2;
+      --accent-bright:  #4596F5;
+      --accent-dark:    #0E5FC0;
+      --accent-deep:    #0A4D9E;
+      --accent-soft:    rgba(24, 119, 242, 0.12);
+      --accent-glow:    rgba(24, 119, 242, 0.35);
+      --border-accent:  rgba(24, 119, 242, 0.4);
+      --gradient-brand:      linear-gradient(135deg, #4596F5 0%, #1877F2 50%, #0E5FC0 100%);
+      --gradient-brand-soft: linear-gradient(135deg, rgba(69, 150, 245, 0.18) 0%, rgba(24, 119, 242, 0.12) 50%, rgba(14, 95, 192, 0.06) 100%);
+      --gradient-hero-glow:  radial-gradient(ellipse 80% 50% at 50% 0%, rgba(24, 119, 242, 0.18) 0%, transparent 70%);
+    }
+    /* Comparison row ✗ stays blue — neutral, not red. */
+    .comparison .cross { color: var(--blue); }
+  </style>
   <script type="application/ld+json">
-  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"SocialEraser for Facebook","applicationCategory":"BrowserApplication","operatingSystem":"Chrome, Edge","description":"Bulk delete Facebook posts, photos, likes, comments, and friends. 100% local processing.","url":"https://socialeraser.app/platforms/facebook/","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"SocialEraser for Facebook","applicationCategory":"BrowserApplication","applicationSubCategory":"BrowserExtension","operatingSystem":"Chrome 120+, Edge 120+","description":"Bulk delete or archive Facebook timeline posts, photos, albums, likes, reactions, comments, saved items, friends, and Pages you manage. 100% local processing in your browser — no password, no server.","url":"https://socialeraser.app/platforms/facebook/","image":"https://socialeraser.app/assets/icons/socialeraser-mark.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://socialeraser.app/platforms/facebook/"},"featureList":["Bulk delete or archive timeline posts","Bulk delete photos and photo albums","Bulk unlike or undo reactions","Bulk clear saved items and links","Bulk unfriend accounts (by interaction frequency)","Bulk delete your own comments","Bulk delete Messenger threads","Bulk delete posts on Pages you manage","Filter by date range","Filter by keyword match","Filter by post type (status, photo, link, check-in)","Filter by friend inactivity (months/years)","Delete or archive mode (recoverable archive)","Pause and resume across sessions"],"offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"}}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Home","item":"https://socialeraser.app/"},
+    {"@type":"ListItem","position":2,"name":"Platforms","item":"https://socialeraser.app/#platforms"},
+    {"@type":"ListItem","position":3,"name":"SocialEraser for Facebook","item":"https://socialeraser.app/platforms/facebook/"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"HowTo","name":"How to Bulk Delete Facebook Posts with SocialEraser","description":"Install the SocialEraser Chrome extension, open facebook.com, pick what to clean, and click Start. SocialEraser simulates normal clicks at human speed to delete or archive every matching post, photo, like, comment, or friend.","totalTime":"PT20M","estimatedCost":{"@type":"MonetaryAmount","value":"0","currency":"USD"},"tool":[{"@type":"HowToTool","name":"Google Chrome or Microsoft Edge (version 120 or later)"},{"@type":"HowToTool","name":"SocialEraser for Facebook browser extension (free)"}],"step":[
+    {"@type":"HowToStep","position":1,"name":"Install SocialEraser for Facebook","text":"Add the free SocialEraser extension from the Chrome Web Store. No account, no signup, no payment. Two clicks and it is installed and pinned to your toolbar.","url":"https://socialeraser.app/platforms/facebook/#download"},
+    {"@type":"HowToStep","position":2,"name":"Open facebook.com and log in","text":"Go to facebook.com in Chrome and log in to your account as usual. Click the SocialEraser side panel icon. The extension will auto-detect that you are logged in and show your account status.","url":"https://socialeraser.app/platforms/facebook/#main"},
+    {"@type":"HowToStep","position":3,"name":"Pick what to clean and set your filters","text":"In the side panel, tick the boxes for what you want to delete: Timeline Posts, Photos, Likes, Saved Items, Friends, Comments, Messages, or Pages You Manage. Optionally set a date range, a keyword match, a post type filter, or a friend inactivity window. Choose delete mode (permanent) or archive mode (recoverable).","url":"https://socialeraser.app/platforms/facebook/#main"},
+    {"@type":"HowToStep","position":4,"name":"Click Start and walk away","text":"Click the Start Cleanup button. SocialEraser will open each matching item, click the delete / archive / unlike / unfriend button at human speed, and show a live progress counter. You can close the laptop and come back tomorrow — state persists across browser restarts.","url":"https://socialeraser.app/platforms/facebook/#main"}
+  ]}
   </script>
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
-    {"@type":"Question","name":"Can I bulk delete old Facebook posts?","acceptedAnswer":{"@type":"Answer","text":"Yes. Set a date filter or keyword match and SocialEraser will archive or delete every matching post. Runs at ~0.9s per item."}},
-    {"@type":"Question","name":"Does it delete or archive?","acceptedAnswer":{"@type":"Answer","text":"Both. SocialEraser supports two modes: permanent delete and archive (hidden from your timeline but recoverable from the Activity Log)."}},
-    {"@type":"Question","name":"Can I bulk unfriend accounts?","acceptedAnswer":{"@type":"Answer","text":"Yes. Filter your friends by interaction frequency and unfriend everyone you haven't spoken to in 6+ months. One click."}}
+    {"@type":"Question","name":"Can I bulk delete old Facebook posts?","acceptedAnswer":{"@type":"Answer","text":"Yes. Set a date filter (e.g. before Jan 1, 2015) or a keyword match and SocialEraser will delete or archive every matching post. Runs at about 0.9 seconds per item — roughly 15 minutes for 1,000 posts."}},
+    {"@type":"Question","name":"Does it delete or archive?","acceptedAnswer":{"@type":"Answer","text":"Both. SocialEraser supports two modes: permanent delete (the post is gone forever) and archive (hidden from your timeline but recoverable from the Activity Log). Archive is the safer default."}},
+    {"@type":"Question","name":"Can I bulk unfriend accounts?","acceptedAnswer":{"@type":"Answer","text":"Yes. Filter your friends by interaction frequency and unfriend everyone you haven't spoken to in 6+ months. Adjustable to taste. Recommended default: 24 months."}},
+    {"@type":"Question","name":"What about photos others posted of me?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser can hide photos you're tagged in from your timeline, but it cannot delete photos that other people have uploaded. For full removal, untag and ask the uploader to remove it."}},
+    {"@type":"Question","name":"Will my account get banned?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser simulates normal clicks at human speed and respects rate limits. The same caveat applies as with any third-party tool — we are not affiliated with Meta Platforms, Inc., and using bulk tools is at your own discretion."}},
+    {"@type":"Question","name":"Can I undo a delete?","acceptedAnswer":{"@type":"Answer","text":"Permanent deletes are not recoverable. We strongly recommend using archive mode for the first run, so you can review and recover anything you change your mind about from the Activity Log."}},
+    {"@type":"Question","name":"What if Facebook changes their UI?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser fetches its DOM selector schema from a remote CDN. When Facebook ships UI changes, we push an update — no extension reinstall needed. The update is automatic and silent."}},
+    {"@type":"Question","name":"Does it work on the new Facebook layout?","acceptedAnswer":{"@type":"Answer","text":"Yes. SocialEraser supports both the latest facebook.com layout and the older FB5 view. The selector schema is updated weekly to match Facebook's latest UI changes."}},
+    {"@type":"Question","name":"Does it work on the Facebook mobile app?","acceptedAnswer":{"@type":"Answer","text":"No. The Facebook mobile app does not allow browser extensions. SocialEraser runs in Chrome on desktop. A dedicated mobile companion is on the 2027 roadmap."}},
+    {"@type":"Question","name":"Can I run it on multiple Facebook accounts?","acceptedAnswer":{"@type":"Answer","text":"Yes — use separate browser profiles for each account. Multi-account within a single profile is on the roadmap."}}
   ]}
   </script>
 </head>
@@ -89,6 +136,13 @@
   </header>
 
   <main id="main">
+    <div class="breadcrumbs-wrap container-lg">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span class="breadcrumbs__sep">›</span>
+        <span class="breadcrumbs__current">SocialEraser for Facebook</span>
+      </nav>
+    </div>
     <section class="container-lg">
       <div class="hero">
         <span class="muted-eyebrow">SocialEraser for Facebook · Free During Launch</span>
@@ -114,10 +168,10 @@
     </section>
 
     <!-- WHAT YOU CAN DELETE -->
-    <section class="container-lg section">
+    <section class="container-lg section" aria-labelledby="section-cleanup">
       <div class="section-head">
         <span class="muted-eyebrow">What You Can Clean</span>
-        <h2 class="section-head__h2">Eight Kinds of Facebook Cleanup, One Extension</h2>
+        <h2 class="section-head__h2" id="section-cleanup">Eight Kinds of Facebook Cleanup, One Extension</h2>
         <p class="section-head__lede">From timeline posts to friend lists — pick one, mix them, or run them all back-to-back.</p>
       </div>
       <div class="grid grid-auto">
@@ -133,10 +187,10 @@
     </section>
 
     <!-- TIME ESTIMATOR -->
-    <section class="container-md section">
+    <section class="container-md section" aria-labelledby="section-estimator">
       <div class="section-head">
         <span class="muted-eyebrow">Time Calculator</span>
-        <h2 class="section-head__h2">How Long Will Your Facebook Cleanup Take?</h2>
+        <h2 class="section-head__h2" id="section-estimator">How Long Will Your Facebook Cleanup Take?</h2>
       </div>
       <div class="estimator" data-estimator>
         <div class="estimator__input-block">
@@ -267,11 +321,23 @@
       </div>
     </section>
 
+    <!-- GUIDE -->
+    <section class="container-md section" aria-labelledby="section-guide">
+      <div class="cta-box" style="text-align:center;">
+        <span class="muted-eyebrow">Deep Dive</span>
+        <h2 class="hero__h1" id="section-guide" style="font-size: var(--text-3xl);">Want the full walkthrough?</h2>
+        <p class="hero__lede">Our step-by-step guide covers the date, keyword, post type, and friend inactivity filters in detail, with screenshots and edge cases.</p>
+        <div class="btn-row btn-row--center">
+          <a href="/guides/facebook.html" class="btn btn--primary btn--xl">Read the full guide →</a>
+        </div>
+      </div>
+    </section>
+
     <!-- DOWNLOAD -->
-    <section id="download" class="container-md section">
+    <section id="download" class="container-md section" aria-labelledby="section-download">
       <div class="cta-box">
         <span class="muted-eyebrow">Free During Launch · No Signup</span>
-        <h2 class="hero__h1">Clean Your Facebook. Today.</h2>
+        <h2 class="hero__h1" id="section-download">Clean Your Facebook. Today.</h2>
         <p class="hero__lede">Install SocialEraser for Facebook. Start deleting in under 60 seconds.</p>
         <div class="btn-row btn-row--center">
           <a href="mailto:support@socialeraser.app?subject=Join%20Facebook%20Waitlist" class="btn btn--primary btn--xl">Join Facebook Waitlist</a>

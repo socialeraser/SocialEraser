@@ -264,3 +264,123 @@ class LiteYTEmbed extends HTMLElement {
 if (!customElements.get('lite-youtube')) {
   customElements.define('lite-youtube', LiteYTEmbed);
 }
+
+// Hero install: single CTA button + platform picker popover.
+// Smart-default label: shows "Get SocialEraser for X" when only one platform
+// is available, "Get SocialEraser" when multiple are, and falls back to a
+// generic label otherwise. Click trigger toggles the popover; click outside
+// or Esc closes it.
+(function () {
+  const install = document.querySelector('[data-install]');
+  if (!install) return;
+
+  const trigger = install.querySelector('[data-install-trigger]');
+  const popover = install.querySelector('[data-install-popover]');
+  const label = install.querySelector('[data-install-label]');
+  if (!trigger || !popover) return;
+
+  // Build smart-default label from the available options in the popover.
+  // Always show "Get SocialEraser" — the popover communicates per-platform
+  // availability, the trigger button itself stays platform-agnostic.
+  if (label) {
+    label.textContent = 'Get SocialEraser';
+  }
+
+  const setOpen = (open) => {
+    if (open) {
+      popover.setAttribute('data-open', '');
+      trigger.setAttribute('aria-expanded', 'true');
+    } else {
+      popover.removeAttribute('data-open');
+      trigger.setAttribute('aria-expanded', 'false');
+    }
+  };
+
+  trigger.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setOpen(!popover.hasAttribute('data-open'));
+  });
+  document.addEventListener('click', (e) => {
+    if (!install.contains(e.target)) setOpen(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') setOpen(false);
+  });
+})();
+
+// Header "Install Free" smart routing.
+// On the homepage (no body data-platform): point to /#download (the Platform
+// Hub). On platform subpages (data-platform="x" etc.): prefer the matching
+// store URL when we have one and the user is on a matching OS, otherwise
+// fall back to that platform's #download anchor (waitlist on the platform's
+// own page when the platform isn't shipped yet).
+(function () {
+  const installBtn = document.querySelector('[data-install-cta]');
+  if (!installBtn) return;
+
+  // Hardcoded store URLs per (platform, endpoint). Only X is shipped today;
+  // the rest get the waitlist fallback. When a new platform ships, add its
+  // URLs here and update the [data-newly-released] config to show a red dot.
+  const STORES = {
+    x: {
+      chrome: 'https://chromewebstore.google.com/detail/socialeraser-for-x/hmlbkkbflcdofngldhekoajeedgcjfch',
+      edge:   'https://microsoftedge.microsoft.com/addons/',
+    },
+    tiktok:    {},
+    youtube:   {},
+    instagram: {},
+    facebook:  {},
+  };
+
+  const platform = document.body.dataset.platform;
+  const ua = navigator.userAgent;
+  const isAndroid = /Android/i.test(ua);
+  const isIOS     = /iPhone|iPad|iPod/i.test(ua);
+
+  // Pick the best available store for the user's device when on a platform
+  // subpage. Falls back to that platform's own /platforms/{name}/#download
+  // (waitlist anchor) when no store is ready.
+  let href = '/#download';
+  if (platform) {
+    const stores = STORES[platform] || {};
+    if (isAndroid && stores.android) href = stores.android;
+    else if (isIOS && stores.ios) href = stores.ios;
+    else if (stores.chrome) href = stores.chrome;
+    else href = `/platforms/${platform}/#download`;
+  }
+  installBtn.setAttribute('href', href);
+})();
+
+// Install badge: red dot on Header Install Free for newly-released
+// endpoints. Driven by an inline JSON config in <script data-newly-released>
+// so the same page can declare "TikTok on Chrome shipped 3 days ago" and
+// the red dot appears on every page for 7 days, then auto-disappears.
+(function () {
+  const SEVEN_DAYS = 7 * 24 * 60 * 60 * 1000;
+  const config = document.querySelector('script[data-newly-released]');
+  if (!config) return;
+  let list;
+  try { list = JSON.parse(config.textContent || '[]'); } catch { return; }
+  if (!Array.isArray(list) || !list.length) return;
+
+  const now = Date.now();
+  const active = list.filter(item => now - item.releasedAt < SEVEN_DAYS);
+  if (!active.length) return;
+
+  const pagePlatform = document.body.dataset.platform || 'home';
+  const matches = active.filter(item => {
+    if (item.platform === pagePlatform) return true;
+    if (pagePlatform === 'home' && item.showOnHome) return true;
+    return false;
+  });
+  if (!matches.length) return;
+
+  const installBtn = document.querySelector('[data-install-cta]');
+  if (!installBtn) return;
+
+  const badge = document.createElement('span');
+  badge.className = 'install-badge';
+  badge.setAttribute('aria-label', 'Newly released');
+  badge.title = 'Newly available';
+  installBtn.appendChild(badge);
+})();
