@@ -23,7 +23,7 @@ SocialEraser is a browser extension for Chrome and Edge that lets you bulk-delet
 
 - 100% local processing — your data never leaves the browser.
 - No password, no API key, no account required.
-- Free during launch — no account, no limits. Tip jar welcome but never required.
+- Tip-supported — no account, no limits, no trial. The free tier is the version. A tip jar is welcome but never required.
 - Open source under the MIT license.
 - Chrome and Edge (Chromium-based) support on desktop.
 - Android and iOS native apps are on the 2027 roadmap.

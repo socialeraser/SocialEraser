@@ -51,6 +51,7 @@ const ALL_SCRIPTS = [
   'verify-tiktok-repost-cancel-fix.js',
   'verify-tiktok-favorites-flow.js',
   'verify-extensions-sync.js',
+  'verify-copy-uniformity.js',
 ];
 
 function parseArgs(argv) {

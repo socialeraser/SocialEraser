@@ -345,7 +345,7 @@ addLog(t('startingCleanup'), 'info');
 
 SocialEraser uses a **tip / donation model**, not subscriptions. Decision rationale and full plan: [docs/business-model.md](docs/business-model.md).
 
-**Core principle**: All features are free forever. A tip is gratitude, never payment for features.
+**Core principle**: All features are tip-supported. The free tier is the version — a tip is gratitude, never payment for features. Paid features, if added later, are an opt-in add-on, never an auto-charge.
 
 **Pieces in place**:
 - 5000/day **safety cap** (prevents X rate-limit / account ban — not a paywall)

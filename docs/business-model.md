@@ -1,6 +1,6 @@
 # Business Model — Tip / Donation (X+ Decision)
 
-> **TL;DR**: SocialEraser is free forever. A tip is welcome, never required. The 5000/day cap is a platform-safety limit, not a paywall. We do not gate features behind payment.
+> **TL;DR**: SocialEraser is tip-supported. The free tier is the version — no paywall, no quota, no trial. A tip is welcome, never required. The 5000/day cap is a platform-safety limit, not a paywall. We do not gate features behind payment.
 
 ## 1. Decision
 
