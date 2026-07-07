@@ -1,17 +1,17 @@
 // Shared language switcher HTML — injected into all pages
 // Uses circular flag SVGs (no emoji for cross-platform consistency)
 (function () {
-  // URL path prefix for each language (e.g. /zh/, /ja/). English stays at root.
-  // Languages without a dedicated path (es, fr, de, pt, ko) fall back to root + query.
+  // URL path prefix for each language (e.g. /zh/, /ja/, /es/). English stays at root.
+  // All 8 languages have a dedicated path; the homepage of each lives at /xx/index.html.
   const LANGS = [
     { code: 'en', label: 'English',     short: 'EN',  flag: 'us', path: '/' },
     { code: 'zh', label: '中文',         short: '中',  flag: 'cn', path: '/zh/' },
     { code: 'ja', label: '日本語',       short: '日',  flag: 'jp', path: '/ja/' },
-    { code: 'es', label: 'Español',     short: 'ES',  flag: 'es', path: '/?lang=es' },
-    { code: 'fr', label: 'Français',    short: 'FR',  flag: 'fr', path: '/?lang=fr' },
-    { code: 'de', label: 'Deutsch',     short: 'DE',  flag: 'de', path: '/?lang=de' },
-    { code: 'pt', label: 'Português',   short: 'PT',  flag: 'br', path: '/?lang=pt' },
-    { code: 'ko', label: '한국어',        short: '한',  flag: 'kr', path: '/?lang=ko' }
+    { code: 'es', label: 'Español',     short: 'ES',  flag: 'es', path: '/es/' },
+    { code: 'fr', label: 'Français',    short: 'FR',  flag: 'fr', path: '/fr/' },
+    { code: 'de', label: 'Deutsch',     short: 'DE',  flag: 'de', path: '/de/' },
+    { code: 'pt', label: 'Português',   short: 'PT',  flag: 'br', path: '/pt/' },
+    { code: 'ko', label: '한국어',        short: '한',  flag: 'kr', path: '/ko/' }
   ];
 
   // Detect current language from <html lang> or default to 'en'

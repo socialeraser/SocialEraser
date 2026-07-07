@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="fr-FR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0a0b">
+  <title>SocialEraser — Suppression en masse pour X, TikTok, YouTube, Instagram et Facebook</title>
+  <meta name="description" content="Supprimez des tweets en masse, effacez l'historique YouTube, retirez les likes Instagram, arrêtez de suivre des comptes et nettoyez votre TikTok — tout dans votre navigateur. 100% local, sans mot de passe, sans clé API. Soutenu par des pourboires, jamais payant.">
+  <meta name="keywords" content="supprimer tweets en masse, nettoyeur twitter, nettoyeur tiktok, retirer repartages tiktok, supprimer vidéos tiktok en masse, nettoyeur historique youtube, effacer historique youtube, nettoyeur instagram, supprimer posts instagram en masse, supprimer reels instagram, nettoyeur facebook, supprimer posts facebook, nettoyeur timeline facebook, suppression massive réseaux sociaux, nettoyage massif réseaux sociaux, nettoyage compte x, suppression en masse réseaux sociaux, se désabonner de tout le monde">
+  <meta name="robots" content="index, follow">
+      <link rel="canonical" href="https://socialeraser.app/fr/">
+  <link rel="alternate" hreflang="en" href="https://socialeraser.app/">
+  <link rel="alternate" hreflang="zh" href="https://socialeraser.app/zh/">
+  <link rel="alternate" hreflang="ja" href="https://socialeraser.app/ja/">
+  <link rel="alternate" hreflang="es" href="https://socialeraser.app/es/">
+  <link rel="alternate" hreflang="fr" href="https://socialeraser.app/fr/">
+  <link rel="alternate" hreflang="de" href="https://socialeraser.app/de/">
+  <link rel="alternate" hreflang="pt" href="https://socialeraser.app/pt/">
+  <link rel="alternate" hreflang="ko" href="https://socialeraser.app/ko/">
+  <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/fr/"><link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SocialEraser">
+  <meta property="og:url" content="https://socialeraser.app/fr/">
+  <meta property="og:title" content="SocialEraser — Suppression en masse pour X, TikTok, YouTube, Instagram et Facebook">
+  <meta property="og:description" content="Supprimez des tweets en masse, effacez l'historique YouTube, retirez les likes Instagram, arrêtez de suivre des comptes et nettoyez votre TikTok. 100% local, sans mot de passe. Gratuit · soutenu par des pourboires.">
+  <meta property="og:image" content="https://socialeraser.app/assets/icons/og-home.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="SocialEraser — suppression en masse pour X, TikTok, YouTube, Instagram et Facebook. 100% local, sans mot de passe.">
+  <meta property="og:locale" content="fr_FR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SocialEraser — Suppression en masse pour X, TikTok, YouTube, Instagram et Facebook">
+  <meta name="twitter:description" content="Supprimez des tweets en masse, effacez l'historique YouTube, retirez les likes Instagram, arrêtez de suivre des comptes et nettoyez votre TikTok. 100% local, sans mot de passe.">
+  <meta name="twitter:image" content="https://socialeraser.app/assets/icons/og-home.png">
+  <link rel="icon" type="image/png" href="/assets/icons/socialeraser-mark.png">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/app.css">
+  <style>
+    /* Guides — horizontal-scroll row of 5 tutorial cards. Each card uses a
+       per-platform accent (top bar + icon + arrow) so the row stays visually
+       consistent with PLATFORMS GRID above. */
+    .guides-row-wrap {
+      position: relative;
+      margin: 0 calc(-1 * var(--space-6));
+      padding: 0 var(--space-6);
+    }
+    .guides-row {
+      display: flex;
+      gap: var(--space-4);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding-left: var(--space-6);
+      padding-bottom: var(--space-3);
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .guides-row::-webkit-scrollbar { display: none; }
+
+    /* Right-edge fade hints scrollability. */
+    .guides-row-wrap::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: var(--space-3);
+      right: 0;
+      width: 64px;
+      background: linear-gradient(to right, rgba(10,10,11,0), var(--bg) 80%);
+      pointer-events: none;
+    }
+
+    .guide-card {
+      position: relative;
+      flex: 0 0 340px;
+      scroll-snap-align: start;
+      background: var(--bg-elev-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-10) var(--space-8) var(--space-8);
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      transition: transform var(--duration) var(--ease), border-color var(--duration) var(--ease), background var(--duration) var(--ease);
+      overflow: hidden;
+    }
+    .guide-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--guide-accent, #ffffff);
+    }
+    .guide-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--guide-accent, var(--border-accent));
+      background: var(--bg-elev-2);
+    }
+    .guide-card__eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: var(--text-xs);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--guide-accent, var(--text-dim));
+      font-weight: 700;
+    }
+    .guide-card__icon {
+      width: 28px;
+      height: 28px;
+      color: var(--guide-accent, var(--text));
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .guide-card__icon svg { width: 100%; height: 100%; }
+    .guide-card__title {
+      font-size: var(--text-xl);
+      font-weight: 700;
+      line-height: 1.3;
+      margin: 0;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .guide-card__hook {
+      font-size: var(--text-sm);
+      color: var(--text-dim);
+      line-height: 1.55;
+      margin: 0;
+      flex: 1;
+    }
+    .guide-card__cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--guide-accent, var(--text));
+      margin-top: var(--space-2);
+    }
+
+    @media (max-width: 640px) {
+      .guide-card { flex-basis: 84vw; }
+    }
+  </style>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"SocialEraser","applicationCategory":"BrowserApplication","operatingSystem":"Chrome, Edge, Android, iOS","description":"Supprimez en masse publications, likes, abonnements et éléments sauvegardés sur X, TikTok, YouTube, Instagram et Facebook. Traitement 100% local.","url":"https://socialeraser.app","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Organization","name":"SocialEraser","url":"https://socialeraser.app","logo":"https://socialeraser.app/assets/icons/socialeraser-mark.png","sameAs":["https://github.com/socialeraser/SocialEraser"]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"Que fait exactement SocialEraser ?","acceptedAnswer":{"@type":"Answer","text":"Il supprime en masse du contenu sur la plateforme de réseaux sociaux de votre choix — publications, likes, abonnements, éléments sauvegardés, et plus. Vous choisissez ce qu'il faut nettoyer, définissez des filtres, et il traite les éléments un par un dans votre navigateur."}},
+    {"@type":"Question","name":"SocialEraser est-il vraiment gratuit ?","acceptedAnswer":{"@type":"Answer","text":"Oui — SocialEraser est soutenu par des pourboires. La version gratuite est la version complète, sans limites, sans comptes, sans période d'essai. Un pourboire est le bienvenu mais jamais obligatoire."}},
+    {"@type":"Question","name":"Dois-je créer un compte ?","acceptedAnswer":{"@type":"Answer","text":"Non. Zéro compte, zéro inscription, zéro email. Installez, utilisez, terminé."}},
+    {"@type":"Question","name":"Dois-je garder mon navigateur ouvert pendant le nettoyage ?","acceptedAnswer":{"@type":"Answer","text":"L'onglet du navigateur où le nettoyage s'exécute doit rester ouvert, mais vous pouvez le minimiser. Fermer l'onglet met en pause l'exécution ; le rouvrir reprend depuis le dernier élément terminé."}},
+    {"@type":"Question","name":"Puis-je vérifier que l'extension ne parle pas à un serveur ?","acceptedAnswer":{"@type":"Answer","text":"Oui. Ouvrez Chrome DevTools → onglet Network pendant que l'extension fonctionne. Vous verrez zéro requête sortante vers un domaine tiers. Le seul trafic est entre votre navigateur et la plateforme que vous nettoyez."}},
+    {"@type":"Question","name":"Mon compte peut-il être banni ?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser simule des clics normaux à vitesse humaine et respecte les limites de débit. Nous ne sommes affiliés ni à X Corp. ni à aucune plateforme ; l'utilisation d'outils en masse reste à votre discrétion."}},
+    {"@type":"Question","name":"Quand arrivent YouTube / Instagram / Facebook ?","acceptedAnswer":{"@type":"Answer","text":"X et TikTok sont déjà disponibles. YouTube, Instagram et Facebook ont chacun des interfaces, des limites de débit et des mesures anti-bot uniques — nous lançons une plateforme à la fois et l'ajustons jusqu'à ce qu'elle soit fiable. <a href=\"/platforms/youtube/\" class=\"link-accent\">Rejoignez la liste d'attente YouTube</a> pour être prévenu lors de la sortie."}},
+    {"@type":"Question","name":"Mes données quittent-elles un jour mon navigateur ?","acceptedAnswer":{"@type":"Answer","text":"Non. SocialEraser fonctionne 100% en local dans votre navigateur. Pas de serveur, pas d'analyses, pas de pistage. Désinstaller supprime toutes les données stockées."}},
+    {"@type":"Question","name":"Puis-je mettre en pause et reprendre une exécution ?","acceptedAnswer":{"@type":"Answer","text":"Oui. Pause / reprise fonctionne à tout moment, même après la fermeture du navigateur. L'état est stocké dans chrome.storage.local, donc il survit à un redémarrage. Revenez le lendemain et continuez exactement où vous en étiez."}},
+    {"@type":"Question","name":"Que se passe-t-il si ma connexion Internet tombe pendant le nettoyage ?","acceptedAnswer":{"@type":"Answer","text":"L'extension détecte la déconnexion, met en pause l'exécution et affiche un indicateur de reconnexion. Une fois le réseau rétabli, elle reprend depuis le dernier élément terminé."}}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"ItemList","name":"SocialEraser — plateformes prises en charge","itemListOrder":"https://schema.org/ItemListUnordered","numberOfItems":5,"itemListElement":[
+    {"@type":"ListItem","position":1,"name":"SocialEraser pour X (Twitter)","url":"https://socialeraser.app/platforms/x/","description":"Supprimez en masse tweets, retweets, likes, signets et abonnements sur X."},
+    {"@type":"ListItem","position":2,"name":"SocialEraser pour TikTok","url":"https://socialeraser.app/platforms/tiktok/","description":"Supprimez en masse vidéos TikTok, repartages, likes, favoris et abonnements."},
+    {"@type":"ListItem","position":3,"name":"SocialEraser pour YouTube","url":"https://socialeraser.app/platforms/youtube/","description":"Effacez en masse l'historique de visionnage, l'historique de recherche, les likes et les abonnements YouTube."},
+    {"@type":"ListItem","position":4,"name":"SocialEraser pour Instagram","url":"https://socialeraser.app/platforms/instagram/","description":"Supprimez ou archivez en masse publications Instagram, Reels, likes et abonnements."},
+    {"@type":"ListItem","position":5,"name":"SocialEraser pour Facebook","url":"https://socialeraser.app/platforms/facebook/","description":"Supprimez ou archivez en masse publications Facebook, photos, likes et amis."}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"HowTo","name":"Comment supprimer en masse des publications sur les réseaux sociaux avec SocialEraser","description":"Installez l'extension gratuite SocialEraser, ouvrez la plateforme sociale que vous voulez nettoyer, choisissez ce qu'il faut supprimer et cliquez sur Démarrer. SocialEraser fonctionne 100% en local dans votre navigateur et simule des clics normaux pour supprimer chaque élément correspondant.","totalTime":"PT15M","estimatedCost":{"@type":"MonetaryAmount","value":"0","currency":"USD"},"step":[
+    {"@type":"HowToStep","position":1,"name":"Installer SocialEraser","text":"Ajoutez l'extension gratuite SocialEraser depuis le Chrome Web Store. Pas de compte, pas d'inscription, pas de paiement. Deux clics et elle est installée et épinglée à votre barre d'outils.","url":"https://socialeraser.app/#download"},
+    {"@type":"HowToStep","position":2,"name":"Ouvrir la plateforme et se connecter","text":"Allez sur x.com, tiktok.com, youtube.com, instagram.com ou facebook.com dans Chrome et connectez-vous à votre compte comme d'habitude. Cliquez sur l'icône du panneau latéral SocialEraser — l'extension détecte automatiquement votre session.","url":"https://socialeraser.app/"},
+    {"@type":"HowToStep","position":3,"name":"Choisir ce qu'il faut nettoyer et définir les filtres","text":"Dans le panneau latéral, cochez les cases pour ce que vous voulez supprimer : publications, likes, abonnements, éléments sauvegardés ou historique. Vous pouvez aussi définir une plage de dates, un mot-clé ou un seuil d'engagement. Chaque plateforme prend en charge son propre jeu de filtres.","url":"https://socialeraser.app/"},
+    {"@type":"HowToStep","position":4,"name":"Cliquer sur Démarrer et s'éloigner","text":"Cliquez sur le bouton Démarrer le nettoyage. SocialEraser ouvre chaque élément correspondant, clique sur le bouton de suppression à vitesse humaine et affiche un compteur de progression en direct. Vous pouvez fermer l'ordinateur portable et revenir demain — l'état persiste d'un redémarrage à l'autre du navigateur. Une exécution moyenne prend environ 0,9 seconde par élément.","url":"https://socialeraser.app/"}
+  ]}
+  </script>
+</head>
+<body data-platform="home">
+
+  <a href="#main" class="skip-to-content">Aller au contenu</a>
+
+  <header class="site-header">
+    <div class="site-header__inner container-lg">
+      <a href="/fr/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="">
+        </span>
+        <span>SocialEraser</span>
+      </a>
+      <nav class="site-nav" aria-label="Principal">
+        <details class="site-nav__platforms">
+          <summary class="site-nav__platforms-trigger">
+            Plateformes
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div class="site-nav__platforms-menu">
+            <a href="/fr/platforms/x/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> SocialEraser pour X</a>
+            <a href="/fr/platforms/tiktok/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg> SocialEraser pour TikTok</a>
+            <a href="/fr/platforms/youtube/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg> SocialEraser pour YouTube</a>
+            <a href="/fr/platforms/instagram/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg> SocialEraser pour Instagram</a>
+            <a href="/fr/platforms/facebook/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg> SocialEraser pour Facebook</a>
+          </div>
+        </details>
+        <a href="/fr/help.html" class="hide-mobile">Aide</a>
+      </nav>
+      <details class="site-nav--mobile">
+        <summary class="site-nav--mobile-trigger" aria-label="Afficher le menu">
+          <svg class="site-nav--mobile-icon-menu" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <svg class="site-nav--mobile-icon-close" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </summary>
+        <div class="site-nav--mobile-menu">
+          <a href="/fr/platforms/x/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>SocialEraser pour X</a>
+          <a href="/fr/platforms/tiktok/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg>SocialEraser pour TikTok</a>
+          <a href="/fr/platforms/youtube/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>SocialEraser pour YouTube</a>
+          <a href="/fr/platforms/instagram/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>SocialEraser pour Instagram</a>
+          <a href="/fr/platforms/facebook/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>SocialEraser pour Facebook</a>
+          <a href="/fr/help.html"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>Aide</a>
+          <details class="site-nav--mobile-lang">
+            <summary>
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+              <span class="site-nav--mobile-lang__current">Langue : <span data-lang-current>English</span></span>
+              <svg class="site-nav--mobile-lang__chev" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div data-lang-list></div>
+          </details>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main id="main">
+    <!-- HERO -->
+    <section class="container-lg">
+      <div class="hero">
+        <span class="muted-eyebrow">Nettoyeur en masse · 5 plateformes · Soutenu par des pourboires</span>
+        <h1 class="hero__h1">
+          Nettoyez en masse vos <span class="gradient-text">réseaux sociaux</span><br>
+          <span class="text-default">100% local · Sans mot de passe</span>
+        </h1>
+        <p class="hero__lede">
+          Effacez des années de publications, likes, abonnements et éléments sauvegardés — en minutes, pas en heures. Tout le traitement se fait dans votre navigateur. Vos données ne touchent jamais nos serveurs. <strong>Nous ne pouvons pas voir votre compte.</strong>
+        </p>
+        <div class="btn-row hero__cta btn-row--center">
+          <div class="hero-install" data-install>
+            <button type="button" class="btn btn--primary btn--xl" data-install-trigger aria-haspopup="true" aria-expanded="false">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+              <span data-install-label>Obtenir SocialEraser</span>
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="hero-install__popover" role="menu" data-install-popover aria-label="Choisissez votre plateforme">
+              <a class="hero-install__opt" role="menuitem" href="/fr/platforms/x/" data-platform-option="x" data-status="available" data-platform-name="X">
+                <span class="hero-install__opt-name">X (Twitter)</span>
+                <span class="hero-install__opt-status">Disponible</span>
+              </a>
+              <a class="hero-install__opt" role="menuitem" href="/fr/platforms/tiktok/" data-platform-option="tiktok" data-status="available" data-platform-name="TikTok">
+                <span class="hero-install__opt-name">TikTok</span>
+                <span class="hero-install__opt-status">Disponible</span>
+              </a>
+              <a class="hero-install__opt" role="menuitem" href="/fr/platforms/youtube/" data-platform-option="youtube" data-status="soon" data-platform-name="YouTube">
+                <span class="hero-install__opt-name">YouTube</span>
+                <span class="hero-install__opt-status">Q1 2027</span>
+              </a>
+              <a class="hero-install__opt" role="menuitem" href="/fr/platforms/instagram/" data-platform-option="instagram" data-status="soon" data-platform-name="Instagram">
+                <span class="hero-install__opt-name">Instagram</span>
+                <span class="hero-install__opt-status">Q1 2027</span>
+              </a>
+              <a class="hero-install__opt" role="menuitem" href="/fr/platforms/facebook/" data-platform-option="facebook" data-status="soon" data-platform-name="Facebook">
+                <span class="hero-install__opt-name">Facebook</span>
+                <span class="hero-install__opt-status">Q2 2027</span>
+              </a>
+            </div>
+          </div>
+          <a href="#download" class="hero-install__more">Choisir une autre plateforme ↓</a>
+        </div>
+        <p class="hero__micro">100% local · Sans compte · Installation en 2 min · Licence MIT</p>
+        <div class="hero-platforms">
+          <a href="/fr/platforms/x/" class="hero-platform hero-platform--available">
+            <span class="hero-platform__name">X (Twitter)</span>
+            <span class="hero-platform__action">Disponible</span>
+          </a>
+          <a href="/fr/platforms/tiktok/" class="hero-platform hero-platform--available">
+            <span class="hero-platform__name">TikTok</span>
+            <span class="hero-platform__action">Disponible</span>
+          </a>
+          <a href="/fr/platforms/youtube/" class="hero-platform hero-platform--soon">
+            <span class="hero-platform__name">YouTube</span>
+            <span class="hero-platform__action">Q1 2027</span>
+          </a>
+          <a href="/fr/platforms/instagram/" class="hero-platform hero-platform--soon">
+            <span class="hero-platform__name">Instagram</span>
+            <span class="hero-platform__action">Q1 2027</span>
+          </a>
+          <a href="/fr/platforms/facebook/" class="hero-platform hero-platform--soon">
+            <span class="hero-platform__name">Facebook</span>
+            <span class="hero-platform__action">Q2 2027</span>
+          </a>
+        </div>
+        <p class="hero__micro">Gratuit · Soutenu par des pourboires · Sans compte · 8 langues</p>
+      </div>
+    </section>
+
+    <!-- LEGAL -->
+    <section class="legal-strip">
+      <div class="container-md">
+        <strong>Outil indépendant.</strong> Non affilié, approuvé ou sponsorisé par X Corp., ByteDance, Google, Meta, ni aucun de leurs produits. Toutes les marques appartiennent à leurs propriétaires respectifs.
+      </div>
+    </section>
+
+    <!-- PLATFORM HUB -->
+    <section id="download" class="container-lg section" aria-labelledby="download-h">
+      <div class="section-head">
+        <span class="muted-eyebrow">5 plateformes · 3 points d'accès chacune</span>
+        <h2 class="section-head__h2" id="download-h">Choisissez votre plateforme et votre appareil</h2>
+        <p class="section-head__lede">Touchez une plateforme pour voir ce que vous pouvez nettoyer. Chaque carte liste tous les points d'accès disponibles — allez directement au store ou soyez prévenu le jour où un nouveau sort.</p>
+      </div>
+      <div class="grid platform-hub-grid">
+        <article class="platform-card platform-card--available">
+          <a href="/fr/platforms/x/" class="platform-card__head">
+            <div class="platform-card__logo" data-platform="x"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></div>
+            <h3 class="platform-card__name">SocialEraser pour X</h3>
+            <p class="platform-card__desc">Supprimez en masse tweets, retweets, likes, signets, abonnements et messages privés. Le SocialEraser original.</p>
+          </a>
+          <div class="platform-card__endpoints">
+            <a rel="noopener noreferrer" class="endpoint-btn endpoint-btn--available" href="https://chromewebstore.google.com/detail/socialeraser-for-x/hmlbkkbflcdofngldhekoajeedgcjfch">Chrome</a>
+            <a rel="noopener noreferrer" class="endpoint-btn endpoint-btn--available" href="https://microsoftedge.microsoft.com/addons/">Edge</a>
+            <a class="endpoint-btn endpoint-btn--soon" href="mailto:support@socialeraser.app?subject=Notify%20me%20when%20SocialEraser%20for%20X%20is%20ready%20on%20Android&amp;body=Hi%2C%20please%20notify%20me%20when%20the%20SocialEraser%20for%20X%20Android%20app%20is%20ready.%20Thanks%21">Me prévenir · Android</a>
+            <a class="endpoint-btn endpoint-btn--soon" href="mailto:support@socialeraser.app?subject=Notify%20me%20when%20SocialEraser%20for%20X%20is%20ready%20on%20iOS&amp;body=Hi%2C%20please%20notify%20me%20when%20the%20SocialEraser%20for%20X%20iOS%20app%20is%20ready.%20Thanks%21">Me prévenir · iOS</a>
+          </div>
+          <a class="platform-card__more" href="/fr/platforms/x/">Ouvrir la page X <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        </article>
+        <article class="platform-card platform-card--available">
+          <a href="/fr/platforms/tiktok/" class="platform-card__head">
+            <div class="platform-card__logo" data-platform="tiktok"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg></div>
+            <h3 class="platform-card__name">SocialEraser pour TikTok</h3>
+            <p class="platform-card__desc">Supprimez en masse vos propres vidéos, retirez les repartages, likes, favoris et abonnements. Gratuit · soutenu par des pourboires.</p>
+          </a>
+          <div class="platform-card__endpoints">
+            <a rel="noopener noreferrer" class="endpoint-btn endpoint-btn--available" href="https://chromewebstore.google.com/detail/socialeraser-for-tiktok/hbeccanmeoflhdgefmjifbolkhpmonni">Chrome</a>
+            <a class="endpoint-btn endpoint-btn--soon" href="mailto:support@socialeraser.app?subject=Notify%20me%20when%20SocialEraser%20for%20TikTok%20is%20ready%20on%20Edge&amp;body=Hi%2C%20please%20notify%20me%20when%20the%20SocialEraser%20for%20TikTok%20Edge%20add-on%20is%20ready.%20Thanks%21">Me prévenir · Edge</a>
+            <a class="endpoint-btn endpoint-btn--soon" href="mailto:support@socialeraser.app?subject=Notify%20me%20when%20SocialEraser%20for%20TikTok%20is%20ready%20on%20Android&amp;body=Hi%2C%20please%20notify%20me%20when%20the%20SocialEraser%20for%20TikTok%20Android%20app%20is%20ready.%20Thanks%21">Me prévenir · Android</a>
+            <a class="endpoint-btn endpoint-btn--soon" href="mailto:support@socialeraser.app?subject=Notify%20me%20when%20SocialEraser%20for%20TikTok%20is%20ready%20on%20iOS&amp;body=Hi%2C%20please%20notify%20me%20when%20the%20SocialEraser%20for%20TikTok%20iOS%20app%20is%20ready.%20Thanks%21">Me prévenir · iOS</a>
+          </div>
+          <a class="platform-card__more" href="/fr/platforms/tiktok/">Ouvrir la page TikTok <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        </article>
+        <article class="platform-card platform-card--coming">
+          <a href="/fr/platforms/youtube/" class="platform-card__head">
+            <div class="platform-card__logo" data-platform="youtube"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></div>
+            <h3 class="platform-card__name">SocialEraser pour YouTube</h3>
+            <p class="platform-card__desc">Supprimez en masse vos propres vidéos, effacez l'historique de visionnage et retirez les vidéos aimées. Bientôt Q1 2027.</p>
+          </a>
+          <div class="platform-card__endpoints">
+            <a class="endpoint-btn endpoint-btn--soon" href="mailto:support@socialeraser.app?subject=Notify%20me%20when%20SocialEraser%20for%20YouTube%20is%20ready%20on%20Chrome&amp;body=Hi%2C%20please%20notify%20me%20when%20the%20SocialEraser%20for%20YouTube%20Chrome%20extension%20is%20ready.%20Thanks%21">Me prévenir · Chrome</a>
+            <a class="endpoint-btn endpoint-btn--soon" href="mailto:support@socialeraser.app?subject=Notify%20me%20when%20SocialEraser%20for%20YouTube%20is%20ready%20on%20Edge&amp;body=Hi%2C%20please%20notify%20me%20when%20the%20SocialEraser%20for%20YouTube%20Edge%20add-on%20is%20ready.%20Thanks%21">Me prévenir · Edge</a>
+            <a class="endpoint-btn endpoint-btn--soon" href="mailto:support@socialeraser.app?subject=Notify%20me%20when%20SocialEraser%20for%20YouTube%20is%20ready%20on%20Android&amp;body=Hi%2C%20please%20notify%20me%20when%20the%20SocialEraser%20for%20YouTube%20Android%20app%20is%20ready.%20Thanks%21">Me prévenir · Android</a>
+            <a class="endpoint-btn endpoint-btn--soon" href="mailto:support@socialeraser.app?subject=Notify%20me%20when%20SocialEraser%20for%20YouTube%20is%20ready%20on%20iOS&amp;body=Hi%2C%20please%20notify%20me%20when%20the%20SocialEraser%20for%20YouTube%20iOS%20app%20is%20ready.%20Thanks%21">Me prévenir · iOS</a>
+          </div>
+          <a class="platform-card__more" href="/fr/platforms/youtube/">Rejoindre la liste d'attente <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        </article>
+        <article class="platform-card platform-card--coming">
+          <a href="/fr/platforms/instagram/" class="platform-card__head">
+            <div class="platform-card__logo" data-platform="instagram"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8z"/></svg></div>
+            <h3 class="platform-card__name">SocialEraser pour Instagram</h3>
+            <p class="platform-card__desc">Retirez les likes en masse, arrêtez de suivre des comptes, supprimez des stories et effacez l'historique de recherche. Bientôt Q1 2027.</p>
+          </a>
+          <div class="platform-card__endpoints">
+            <a class="endpoint-btn endpoint-btn--soon" href="mailto:support@socialeraser.app?subject=Notify%20me%20when%20SocialEraser%20for%20Instagram%20is%20ready%20on%20Chrome&amp;body=Hi%2C%20please%20notify%20me%20when%20the%20SocialEraser%20for%20Instagram%20Chrome%20extension%20is%20ready.%20Thanks%21">Me prévenir · Chrome</a>
+            <a class="endpoint-btn endpoint-btn--soon" href="mailto:support@socialeraser.app?subject=Notify%20me%20when%20SocialEraser%20for%20Instagram%20is%20ready%20on%20Edge&amp;body=Hi%2C%20please%20notify%20me%20when%20the%20SocialEraser%20for%20Instagram%20Edge%20add-on%20is%20ready.%20Thanks%21">Me prévenir · Edge</a>
+            <a class="endpoint-btn endpoint-btn--soon" href="mailto:support@socialeraser.app?subject=Notify%20me%20when%20SocialEraser%20for%20Instagram%20is%20ready%20on%20Android&amp;body=Hi%2C%20please%20notify%20me%20when%20the%20SocialEraser%20for%20Instagram%20Android%20app%20is%20ready.%20Thanks%21">Me prévenir · Android</a>
+            <a class="endpoint-btn endpoint-btn--soon" href="mailto:support@socialeraser.app?subject=Notify%20me%20when%20SocialEraser%20for%20Instagram%20is%20ready%20on%20iOS&amp;body=Hi%2C%20please%20notify%20me%20when%20the%20SocialEraser%20for%20Instagram%20iOS%20app%20is%20ready.%20Thanks%21">Me prévenir · iOS</a>
+          </div>
+          <a class="platform-card__more" href="/fr/platforms/instagram/">Rejoindre la liste d'attente <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        </article>
+        <article class="platform-card platform-card--coming">
+          <a href="/fr/platforms/facebook/" class="platform-card__head">
+            <div class="platform-card__logo" data-platform="facebook"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></div>
+            <h3 class="platform-card__name">SocialEraser pour Facebook</h3>
+            <p class="platform-card__desc">Retirez les likes en masse, supprimez les réactions, arrêtez de suivre des pages et effacez de vieilles photos. Bientôt Q2 2027.</p>
+          </a>
+          <div class="platform-card__endpoints">
+            <a class="endpoint-btn endpoint-btn--soon" href="mailto:support@socialeraser.app?subject=Notify%20me%20when%20SocialEraser%20for%20Facebook%20is%20ready%20on%20Chrome&amp;body=Hi%2C%20please%20notify%20me%20when%20the%20SocialEraser%20for%20Facebook%20Chrome%20extension%20is%20ready.%20Thanks%21">Me prévenir · Chrome</a>
+            <a class="endpoint-btn endpoint-btn--soon" href="mailto:support@socialeraser.app?subject=Notify%20me%20when%20SocialEraser%20for%20Facebook%20is%20ready%20on%20Edge&amp;body=Hi%2C%20please%20notify%20me%20when%20the%20SocialEraser%20for%20Facebook%20Edge%20add-on%20is%20ready.%20Thanks%21">Me prévenir · Edge</a>
+            <a class="endpoint-btn endpoint-btn--soon" href="mailto:support@socialeraser.app?subject=Notify%20me%20when%20SocialEraser%20for%20Facebook%20is%20ready%20on%20Android&amp;body=Hi%2C%20please%20notify%20me%20when%20the%20SocialEraser%20for%20Facebook%20Android%20app%20is%20ready.%20Thanks%21">Me prévenir · Android</a>
+            <a class="endpoint-btn endpoint-btn--soon" href="mailto:support@socialeraser.app?subject=Notify%20me%20when%20SocialEraser%20for%20Facebook%20is%20ready%20on%20iOS&amp;body=Hi%2C%20please%20notify%20me%20when%20the%20SocialEraser%20for%20Facebook%20iOS%20app%20is%20ready.%20Thanks%21">Me prévenir · iOS</a>
+          </div>
+          <a class="platform-card__more" href="/fr/platforms/facebook/">Rejoindre la liste d'attente <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+        </article>
+      </div>
+    </section>
+
+    <!-- TRUST STRIP -->
+    <section class="container-lg section-sm">
+      <div class="trust-strip">
+        <div class="trust-strip__item">
+          <div class="trust-strip__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+          <div class="trust-strip__label">100% local</div>
+          <div class="trust-strip__hint">Pas de serveur, pas de pistage</div>
+        </div>
+        <div class="trust-strip__item">
+          <div class="trust-strip__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+          <div class="trust-strip__label">En masse par défaut</div>
+          <div class="trust-strip__hint">1 000 éléments en ~15 min</div>
+        </div>
+        <div class="trust-strip__item">
+          <div class="trust-strip__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20M12 2a15 15 0 000 20"/></svg></div>
+          <div class="trust-strip__label">8 langues</div>
+          <div class="trust-strip__hint">EN · 中文 · 日本語 · 한국어 · PT · ES · DE · FR</div>
+        </div>
+        <div class="trust-strip__item">
+          <div class="trust-strip__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg></div>
+          <div class="trust-strip__label">Pause à tout moment</div>
+          <div class="trust-strip__hint">Contrôle total de l'état</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SUPPORT THE PROJECT -->
+    <section id="support" class="container-lg section" aria-labelledby="support-h">
+      <div class="section-head">
+        <span class="muted-eyebrow">Soutenir le projet</span>
+        <h2 class="section-head__h2" id="support-h">Gratuit. Soutenu par des pourboires. Une pourboire est bienvenue, jamais obligatoire.</h2>
+        <p class="section-head__lede">SocialEraser est gratuit pour tout le monde — pas de paywall, pas de quota, pas d'upgrade. Si ça vous a sauvé un week-end, la tirelire est juste là.</p>
+      </div>
+      <div class="tip-grid" role="list" aria-label="Montants de pourboire">
+        <div class="tip-tier tip-tier--secondary" role="listitem">
+          <div class="tip-tier__icon" aria-hidden="true">☕</div>
+          <div class="tip-tier__amount">$1</div>
+          <div class="tip-tier__label">Café</div>
+          <p class="tip-tier__desc">Couvre une journée de bande passante CDN pour la configuration publique des sélecteurs.</p>
+          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_3HVqQbK66LafUdCwR7sjXp" target="_blank" rel="noopener noreferrer">Donner $1</a>
+        </div>
+        <div class="tip-tier tip-tier--featured" role="listitem">
+          <div class="tip-tier__icon" aria-hidden="true">🍕</div>
+          <div class="tip-tier__amount">$3</div>
+          <div class="tip-tier__label">Part de pizza</div>
+          <p class="tip-tier__desc">Maintient actif le compte développeur du Chrome Web Store pendant un mois.</p>
+          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_7ASxApTnNUNsiUpAbSrYYc" target="_blank" rel="noopener noreferrer">Donner $3</a>
+        </div>
+        <div class="tip-tier tip-tier--secondary" role="listitem">
+          <div class="tip-tier__icon" aria-hidden="true">🍱</div>
+          <div class="tip-tier__amount">$5</div>
+          <div class="tip-tier__label">Déjeuner</div>
+          <p class="tip-tier__desc">Finance quelques heures de tests de régression multiplateformes sur de vrais comptes.</p>
+          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_2NxSAgacol9Jar7Q0EPQvI" target="_blank" rel="noopener noreferrer">Donner $5</a>
+        </div>
+        <div class="tip-tier tip-tier--secondary" role="listitem">
+          <div class="tip-tier__icon" aria-hidden="true">💖</div>
+          <div class="tip-tier__amount">$10</div>
+          <div class="tip-tier__label">Généreux</div>
+          <p class="tip-tier__desc">Paie une journée complète de chasse aux bugs et de maintenance des sélecteurs.</p>
+          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_6mCS0pbjMZ9pFLGOY6PmOy" target="_blank" rel="noopener noreferrer">Donner $10</a>
+        </div>
+        <div class="tip-tier tip-tier--secondary" role="listitem">
+          <div class="tip-tier__icon" aria-hidden="true">🎁</div>
+          <div class="tip-tier__amount">Personnalisé</div>
+          <div class="tip-tier__label">Ce qui vous semble juste</div>
+          <p class="tip-tier__desc">Choisissez votre propre montant — chaque dollar finance le mois prochain d'exploitation.</p>
+          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_4av6xu55UHRgVeEIEEQNUz" target="_blank" rel="noopener noreferrer">Ouvrir Creem</a>
+        </div>
+      </div>
+      <p class="tip-footnote">
+        Le pourboire est une marque de gratitude, pas un paiement pour des fonctionnalités. <a href="/fr/support.html" rel="noopener noreferrer">Voir où va l'argent et la politique de remboursement →</a>
+      </p>
+    </section>
+
+    <!-- TIME ESTIMATOR -->
+    <section class="container-md section">
+      <div class="section-head">
+        <span class="muted-eyebrow">Calculateur de temps</span>
+        <h2 class="section-head__h2">Quelle est la vitesse réelle du "en masse" ?</h2>
+        <p class="section-head__lede">Tapez n'importe quel nombre. Voyez exactement combien de temps <strong>SocialEraser</strong> vous fait gagner par rapport au faire à la main.</p>
+      </div>
+      <div class="estimator" data-estimator>
+        <div class="estimator__input-block">
+          <label for="est-input">Éléments à supprimer</label>
+          <input id="est-input" type="number" class="estimator__input" data-estimator-input value="500" min="1" max="100000">
+          <div class="estimator__quick">
+            <button class="estimator__quick-btn" data-estimator-quick data-value="100">100</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="500">500</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="1000">1 000</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="5000">5 000</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="10000">10 000</button>
+          </div>
+        </div>
+        <div class="estimator__result">
+          <div class="estimator__row">
+            <div class="estimator__row-icon">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+            </div>
+            <div class="estimator__row-text">
+              <span class="estimator__row-label">Nettoyage manuel</span>
+              <span class="estimator__row-value" data-estimator-manual>1h 23m</span>
+            </div>
+          </div>
+          <div class="estimator__row estimator__row--highlight">
+            <div class="estimator__row-icon">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </div>
+            <div class="estimator__row-text">
+              <span class="estimator__row-label">Avec SocialEraser</span>
+              <span class="estimator__row-value" data-estimator-auto>—</span>
+            </div>
+          </div>
+          <div class="estimator__row">
+            <div class="estimator__row-icon">
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg>
+            </div>
+            <div class="estimator__row-text">
+              <span class="estimator__row-label">Temps gagné</span>
+              <span class="estimator__row-value" data-estimator-saved>—</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FEATURES 6 + 2 USE CASES -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">Ce qu'il y a dedans</span>
+        <h2 class="section-head__h2">Tout ce dont vous avez besoin, rien de superflu</h2>
+      </div>
+      <div class="grid grid-auto">
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path d="M9 12l2 2 4-4"/></svg></div><h3 class="card__title">Suppression en masse</h3><p class="card__desc">Traitez des centaines ou des milliers d'éléments en une seule passe. Fixez une limite ou laissez filer.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg></div><h3 class="card__title">Filtres intelligents</h3><p class="card__desc">Filtrez par plage de dates, mot-clé ou type de média. Gardez ce qui compte, jetez le reste.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 6-6"/></svg></div><h3 class="card__title">Progression en temps réel</h3><p class="card__desc">Compteur et journal en direct. Voyez exactement ce qui est traité — pas de boîte noire.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg></div><h3 class="card__title">Pause / Reprise</h3><p class="card__desc">Lancez une passe de 5 000 éléments, fermez l'ordinateur, revenez demain. L'état persiste localement.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg></div><h3 class="card__title">Exporter avant de supprimer</h3><p class="card__desc">Archivez un archive.json de chaque élément avant sa suppression. Filet de sécurité intégré.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div><h3 class="card__title">Confidentialité du panneau latéral</h3><p class="card__desc">Tourne dans votre navigateur comme panneau latéral. Pas de serveur, pas de clé API, pas de mot de passe — jamais.</p></div>
+        <div class="card card--hover"><span class="card__eyebrow">Cas d'usage</span><h3 class="card__title">Effacez votre époque cringe</h3><p class="card__desc">Supprimez 4 000 publications de votre moi de 2017 — votre époque indie, vos prises de position politiques, vos mentions nocturnes — en 15 minutes.</p></div>
+        <div class="card card--hover"><span class="card__eyebrow">Cas d'usage</span><h3 class="card__title">Réinitialisez votre vie privée</h3><p class="card__desc">Effacez 8 ans d'historique YouTube, 1 200 likes Instagram, 600 abonnements TikTok. Recommencez à zéro, à votre manière.</p></div>
+      </div>
+    </section>
+
+    <!-- PRIVACY 3-COL -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">Pourquoi nous faire confiance</span>
+        <h2 class="section-head__h2">Trois raisons pour lesquelles nous ne pouvons pas voir votre compte</h2>
+      </div>
+      <div class="privacy-grid">
+        <div class="privacy-card">
+          <div class="privacy-card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+          <h3>Jamais de mot de passe demandé</h3>
+          <p>SocialEraser ne vous demande jamais votre mot de passe X, TikTok, YouTube, Instagram ou Facebook. Il se connecte au même navigateur dans lequel vous êtes déjà connecté — rien de plus.</p>
+        </div>
+        <div class="privacy-card">
+          <div class="privacy-card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 00-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0020 4.77 5.07 5.07 0 0019.91 1S18.73.65 16 2.48a13.38 13.38 0 00-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 005 4.77a5.44 5.44 0 00-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 009 18.13V22"/></svg></div>
+          <h3>Open source, licence MIT</h3>
+          <p>Chaque ligne de code est sur GitHub. Auditez le flux de données. Vérifiez qu'il n'y a aucune télémétrie. Compilez votre propre version si vous le souhaitez. <a rel="noopener noreferrer" href="https://github.com/socialeraser/SocialEraser" class="link-accent">Voir le code source →</a></p>
+        </div>
+        <div class="privacy-card">
+          <div class="privacy-card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64a9 9 0 11-12.73 0M12 2v10"/></svg></div>
+          <h3>Désinstaller = disparu</h3>
+          <p>Supprimez l'extension et toute trace de SocialEraser — réglages, file d'attente, journaux — disparaît avec. Nous n'avons rien côté serveur à supprimer, parce que nous n'avons jamais rien eu.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPARISON TABLE -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">Comparaison</span>
+        <h2 class="section-head__h2">SocialEraser vs TweetDelete, Semiphemeral et Redact</h2>
+      </div>
+      <div class="comparison">
+        <table>
+          <thead><tr><th>Fonctionnalité</th><th class="text-center">SocialEraser</th><th class="text-center">Nettoyage manuel</th><th class="text-center">Autres outils</th></tr></thead>
+          <tbody>
+            <tr class="us"><td>Demande de mot de passe</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Non</td><td>—</td><td>Généralement oui</td></tr>
+            <tr class="us"><td>Vitesse en masse (1 000 éléments)</td><td>~15 min</td><td>~3 heures</td><td>~20 min</td></tr>
+            <tr class="us"><td>Tous les points d'accès (Web + Android + iOS)</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 4 plateformes</td><td>—</td><td>Généralement 1</td></tr>
+            <tr class="us"><td>Traitement 100% local</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Oui</td><td>—</td><td>Côté serveur</td></tr>
+            <tr class="us"><td>Offre gratuite</td><td>Soutenu par des pourboires</td><td>—</td><td>Essai seulement</td></tr>
+            <tr class="us"><td>Open source</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> MIT</td><td>—</td><td>Code fermé</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">Questions fréquentes</span>
+        <h2 class="section-head__h2">Plus de 30 questions, avec réponse</h2>
+        <p class="section-head__lede">Encore des questions ? Consultez le <a href="/fr/help.html" style="color: var(--accent)">centre d'aide complet</a> ou écrivez-nous.</p>
+      </div>
+      <div class="faq">
+        <div class="faq__category">
+          <h3 class="faq__category-title">L'essentiel</h3>
+          <details class="faq__item"><summary>Que fait exactement SocialEraser ?</summary><div class="faq__answer"><p>Il supprime en masse du contenu sur la plateforme de réseaux sociaux de votre choix — publications, likes, abonnements, éléments sauvegardés, et plus. Vous choisissez ce qu'il faut nettoyer, vous définissez des filtres et il traite les éléments un par un dans votre navigateur, avec une machine à états pause / reprise.</p></div></details>
+          <details class="faq__item"><summary>SocialEraser est-il vraiment gratuit ?</summary><div class="faq__answer"><p>Oui — SocialEraser est soutenu par des pourboires. La version gratuite est la version complète, sans limites, sans comptes, sans période d'essai. Un pourboire est le bienvenu mais jamais obligatoire. Pas de paywall, pas de quota, pas d'invite d'upgrade.</p></div></details>
+          <details class="faq__item"><summary>Dois-je créer un compte ?</summary><div class="faq__answer"><p>Non. Zéro compte, zéro inscription, zéro email. Installez, utilisez, terminé.</p></div></details>
+          <details class="faq__item"><summary>Quels navigateurs sont supportés ?</summary><div class="faq__answer"><p>Chrome et Edge aujourd'hui. Firefox et Safari sont sur la feuille de route pour 2026.</p></div></details>
+          <details class="faq__item"><summary>Dois-je garder mon navigateur ouvert pendant le nettoyage ?</summary><div class="faq__answer"><p>L'onglet du navigateur où le nettoyage tourne doit rester ouvert, mais vous pouvez le minimiser. Si vous fermez Chrome, la passe se met en pause et reprend exactement où elle s'était arrêtée à la réouverture. Le panneau latéral peut être détaché de l'onglet pour rester visible.</p></div></details>
+        </div>
+        <div class="faq__category">
+          <h3 class="faq__category-title">Confidentialité et sécurité</h3>
+          <details class="faq__item"><summary>Me demandez-vous mon mot de passe ?</summary><div class="faq__answer"><p><strong>Jamais.</strong> SocialEraser ne vous demande jamais votre mot de passe de réseau social. Il s'exécute dans la session du navigateur dans laquelle vous êtes déjà connecté. Nous ne pouvons pas voir votre compte car nous n'avons pas d'identifiants pour le voir.</p></div></details>
+          <details class="faq__item"><summary>Collectez-vous mes données ?</summary><div class="faq__answer"><p>Non. Nous n'avons aucun serveur qui reçoit vos données. L'extension s'exécute entièrement côté client. La seule chose stockée dans <code>chrome.storage</code> sont vos préférences (langue, compteur quotidien) — et vous pouvez tout effacer d'un clic.</p></div></details>
+          <details class="faq__item"><summary>Est-ce sûr à installer ?</summary><div class="faq__answer"><p>L'extension est vérifiée par Google avant d'arriver sur le Chrome Web Store. Le code source est ouvert sur GitHub (licence MIT), donc n'importe qui peut l'auditer. Nous utilisons une Content Security Policy stricte qui bloque tous les scripts distants.</p></div></details>
+          <details class="faq__item"><summary>Mon compte peut-il être banni pour avoir utilisé ceci ?</summary><div class="faq__answer"><p>SocialEraser simule des clics normaux à une vitesse humaine. Les plateformes ont des limites de débit et nous les respectons. Cela dit, nous ne sommes affiliés à aucune plateforme — utiliser des outils en masse reste à votre discrétion. Il en va de même pour tout outil tiers.</p></div></details>
+          <details class="faq__item"><summary>Puis-je vérifier que l'extension ne parle pas à un serveur ?</summary><div class="faq__answer"><p>Oui. Ouvrez Chrome DevTools → onglet Network pendant que l'extension tourne et vous verrez zéro requête sortante vers un domaine tiers. La seule activité réseau est entre votre navigateur et la plateforme sociale que vous nettoyez — les mêmes requêtes que vous feriez à la main. Le code source complet est sur <a rel="noopener noreferrer" href="https://github.com/socialeraser/SocialEraser" class="link-accent">GitHub</a> pour que n'importe qui puisse l'auditer.</p></div></details>
+        </div>
+        <div class="faq__category">
+          <h3 class="faq__category-title">Comment ça marche</h3>
+          <details class="faq__item"><summary>Comment fonctionne la suppression en masse ?</summary><div class="faq__answer"><p>L'extension ouvre l'interface native de votre plateforme (par ex. x.com), trouve le menu d'action de chaque élément, clique sur supprimer et confirme. C'est exactement ce que vous feriez à la main — juste plus rapide et sans fatigue.</p></div></details>
+          <details class="faq__item"><summary>Quels filtres sont disponibles ?</summary><div class="faq__answer"><p>Plage de dates (supprimer les publications avant / après X), mot-clé (ne supprimer que les publications contenant "Y"), type de média (uniquement images, texte ou vidéos) et compte (ne supprimer que depuis ce handle). Les combinaisons de filtres fonctionnent en ET, pas en OU.</p></div></details>
+          <details class="faq__item"><summary>Puis-je mettre en pause et reprendre une passe ?</summary><div class="faq__answer"><p>Oui. Pause / reprise fonctionne à tout moment, même après la fermeture du navigateur. L'état est stocké dans <code>chrome.storage.local</code>, donc il survit à un redémarrage. Revenez le lendemain et continuez exactement où vous en étiez.</p></div></details>
+          <details class="faq__item"><summary>Quelle est la vitesse ?</summary><div class="faq__answer"><p>Moins d'1 seconde par élément en moyenne. Une passe de 1 000 éléments prend environ 15 minutes. Utilisez le <a href="#estimator" style="color: var(--accent)">calculateur de temps</a> ci-dessus pour une estimation exacte.</p></div></details>
+          <details class="faq__item"><summary>Puis-je exporter avant de supprimer ?</summary><div class="faq__answer"><p>Oui. L'extension X dispose d'une option « Exporter l'archive » qui enregistre un <code>archive.json</code> de chaque élément avant la suppression. Nous ajoutons la même option aux autres plateformes au fur et à mesure de leur sortie.</p></div></details>
+          <details class="faq__item"><summary>Que se passe-t-il si ma connexion Internet tombe pendant le nettoyage ?</summary><div class="faq__answer"><p>L'extension détecte la déconnexion, met en pause la passe et affiche un indicateur « Reconnexion… ». Une fois le réseau rétabli, elle reprend depuis le dernier élément terminé. Rien n'est envoyé ni stocké ailleurs — l'état de reprise vit uniquement dans le stockage local de votre navigateur.</p></div></details>
+          <details class="faq__item"><summary>Puis-je annuler un nettoyage ?</summary><div class="faq__answer"><p>Non — une fois qu'une publication est supprimée sur la plateforme, elle disparaît. Nous recommandons d'utiliser l'option « Exporter l'archive » (là où elle est disponible) pour sauvegarder un JSON avant le nettoyage, afin de garder une trace de ce qui a été retiré.</p></div></details>
+        </div>
+        <div class="faq__category">
+          <h3 class="faq__category-title">vs. les alternatives</h3>
+          <details class="faq__item"><summary>SocialEraser vs TweetDelete ?</summary><div class="faq__answer"><p>TweetDelete utilise l'API X et vous demande de vous authentifier avec OAuth. Il fonctionne côté serveur, donc vos données quittent votre machine. SocialEraser tourne dans le navigateur, ne demande jamais d'identifiants et fonctionne sur 5 plateformes — pas seulement X.</p></div></details>
+          <details class="faq__item"><summary>SocialEraser vs Semiphemeral ?</summary><div class="faq__answer"><p>Semiphemeral est de la suppression automatique basée sur l'ancienneté — il supprime les tweets vieux de plus de X mois selon un calendrier. SocialEraser est de la suppression en masse à la demande — vous choisissez quoi nettoyer, quand et combien. Des outils différents pour des usages différents.</p></div></details>
+          <details class="faq__item"><summary>SocialEraser vs Redact ?</summary><div class="faq__answer"><p>Redact est un outil développeur payant qui supprime des tweets en masse via l'API. Il nécessite des clés API et un compte développeur. SocialEraser est gratuit, ne demande aucun accès API et fonctionne au-delà de X.</p></div></details>
+          <details class="faq__item"><summary>SocialEraser vs le faire à la main ?</summary><div class="faq__answer"><p>Supprimer manuellement 1 000 éléments prend environ 3 heures de clics continus. SocialEraser fait le même travail en 15 minutes — et ne se fatigue jamais, ne rate jamais une boîte de confirmation et ne clique jamais sur le mauvais bouton à 2h du matin. Ce sont les mêmes actions, juste automatisées.</p></div></details>
+        </div>
+        <div class="faq__category">
+          <h3 class="faq__category-title">Par plateforme</h3>
+          <details class="faq__item"><summary>Quand arrivent YouTube / Instagram / Facebook ?</summary><div class="faq__answer"><p>X et TikTok sont déjà disponibles. YouTube, Instagram et Facebook ont chacun des interfaces, des limites de débit et des mesures anti-bot uniques — nous lançons une plateforme à la fois et l'ajustons jusqu'à ce qu'elle soit fiable. <a href="/fr/platforms/youtube/" class="link-accent">Rejoignez la liste d'attente YouTube</a> pour être prévenu lors de la sortie.</p></div></details>
+          <details class="faq__item"><summary>Les apps mobiles (iOS / Android) seront-elles gratuites aussi ?</summary><div class="faq__answer"><p>Oui — les apps Android et iOS seront aussi soutenues par des pourboires, avec le même modèle que la version bureau. Pas de limites, pas de comptes, pas de paywalls. La version gratuite est la version complète.</p></div></details>
+          <details class="faq__item"><summary>Puis-je utiliser SocialEraser sur plusieurs comptes ?</summary><div class="faq__answer"><p>Dans Chrome, vous pouvez utiliser des profils de navigateur séparés pour chaque compte. Le multi-compte dans un même profil est sur la feuille de route.</p></div></details>
+          <details class="faq__item"><summary>Dois-je me connecter à la plateforme d'abord ?</summary><div class="faq__answer"><p>Oui — SocialEraser fonctionne dans la session du navigateur dans laquelle vous êtes déjà connecté. Il ne se connecte pas pour vous, ne stocke pas de cookies et ne touche pas à vos jetons d'authentification. Si votre session expire, reconnectez-vous simplement et reprenez la passe.</p></div></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- GUIDES -->
+    <section id="guides" class="container-lg section" aria-labelledby="guides-h">
+      <div class="section-head">
+        <span class="muted-eyebrow">Guides</span>
+        <h2 class="section-head__h2" id="guides-h">Pas à pas, chaque plateforme</h2>
+        <p class="section-head__lede">Tutoriels détaillés avec captures d'écran, décryptage des filtres et conseils de sécurité. Pas de blabla, pas de remplissage — juste ce qui marche.</p>
+      </div>
+      <div class="guides-row-wrap">
+        <div class="guides-row" role="list">
+          <a href="/fr/guides/twitter.html" class="guide-card" role="listitem" style="--guide-accent: #ffffff;">
+            <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span>Guide · X</span>
+            <h3 class="guide-card__title">Comment supprimer en masse tweets, likes et signets</h3>
+            <p class="guide-card__hook">Filtres de date et de mot-clé, seuil d'engagement et l'étape « exporter l'archive avant de supprimer » que la plupart des gens oublient.</p>
+            <span class="guide-card__cta">Lire le guide →</span>
+          </a>
+          <a href="/fr/guides/tiktok.html" class="guide-card" role="listitem" style="--guide-accent: #25F4EE;">
+            <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg></span>Guide · TikTok</span>
+            <h3 class="guide-card__title">Comment supprimer en masse vidéos, repartages et likes TikTok</h3>
+            <p class="guide-card__hook">Conservez vos hits viraux grâce au filtre de seuil de vues. Effacez le reste — par date, par mot-clé, par type de contenu.</p>
+            <span class="guide-card__cta">Lire le guide →</span>
+          </a>
+          <a href="/fr/guides/youtube.html" class="guide-card" role="listitem" style="--guide-accent: #FF3B3B;">
+            <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></span>Guide · YouTube</span>
+            <h3 class="guide-card__title">Comment effacer en masse l'historique YouTube</h3>
+            <p class="guide-card__hook">Réinitialisez vos recommandations en un clic. Filtrez l'historique de visionnage par date, ou élaguez les abonnements morts par inactivité.</p>
+            <span class="guide-card__cta">Lire le guide →</span>
+          </a>
+          <a href="/fr/guides/instagram.html" class="guide-card" role="listitem" style="--guide-accent: #E1306C;">
+            <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></span>Guide · Instagram</span>
+            <h3 class="guide-card__title">Comment supprimer en masse publications et Reels Instagram</h3>
+            <p class="guide-card__hook">Mode suppression ou archivage, filtres de hashtag et de date, et comment garder vos publications les plus likées tout en nettoyant le reste.</p>
+            <span class="guide-card__cta">Lire le guide →</span>
+          </a>
+          <a href="/fr/guides/facebook.html" class="guide-card" role="listitem" style="--guide-accent: #1877F2;">
+            <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></span>Guide · Facebook</span>
+            <h3 class="guide-card__title">Comment supprimer en masse publications et photos Facebook</h3>
+            <p class="guide-card__hook">Le mode archivage est le réglage par défaut le plus sûr. Filtrez par date, mot-clé ou inactivité d'amis avant de vous lancer.</p>
+            <span class="guide-card__cta">Lire le guide →</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="site-footer">
+    <div class="container-lg">
+      <div class="site-footer__grid">
+        <div class="site-footer__brand">
+          <a href="/fr/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="">
+        </span>
+            <span>SocialEraser</span>
+          </a>
+          <p>Nettoyez en masse vos réseaux sociaux. 100% local, sans mot de passe, open source. Conçu pour ceux qui préfèrent ne pas passer leur week-end à retirer les likes de 2017.</p>
+        </div>
+        <div class="site-footer__col">
+          <h4>Plateformes</h4>
+          <ul>
+            <li><a href="/fr/platforms/x/">X (Twitter)</a></li>
+            <li><a href="/fr/platforms/tiktok/">TikTok</a></li>
+            <li><a href="/fr/platforms/youtube/">YouTube</a></li>
+            <li><a href="/fr/platforms/instagram/">Instagram</a></li>
+            <li><a href="/fr/platforms/facebook/">Facebook</a></li>
+          </ul>
+        </div>
+        <div class="site-footer__col">
+          <h4>Produit</h4>
+          <ul>
+            <li><a href="/fr/help.html">Centre d'aide</a></li>
+            <li><a href="#download">Installer</a></li>
+            <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/CHANGELOG.md" target="_blank" rel="noopener noreferrer">Changelog</a></li>
+            <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/ROADMAP.md" target="_blank" rel="noopener noreferrer">Feuille de route</a></li>
+            <li><a href="/fr/support.html">☕ Soutenir</a></li>
+            <li><a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">Code source</a></li>
+          </ul>
+        </div>
+        <div class="site-footer__col">
+          <h4>Société</h4>
+          <ul>
+            <li><a href="/fr/about.html">À propos</a></li>
+            <li><a href="mailto:support@socialeraser.app">Contact</a></li>
+            <li><a href="/fr/privacy.html">Confidentialité</a></li>
+            <li><a href="/fr/terms.html">Conditions</a></li>
+            <li><a href="https://github.com/socialeraser/SocialEraser#readme" target="_blank" rel="noopener noreferrer">Kit presse</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="site-footer__bottom">
+        <span>© 2026 SocialEraser. Tous droits réservés.</span>
+        <div class="site-footer__legal">
+          <span>Outil indépendant — non affilié à X, TikTok, YouTube, Instagram ou Facebook.</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/app.js" defer></script>
+  <script defer src="/assets/lang-switcher.js"></script>
+</body>
+</html>
