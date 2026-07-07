@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0a0b">
+  <title>SocialEraser をサポート — 開発者にコーヒー 1 杯を奢る ☕</title>
+  <meta name="description" content="SocialEraser は投げ銭サポート型です。無料版が本体 — ペイウォールもクォータもトライアルもありません。投げ銭は歓迎しますが、決して必須ではありません。お好きな金額を選んでください — すべてのコーヒーが、このツールを必要とする人々のために維持され続けます。">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://socialeraser.app/ja/support.html">
+  <link rel="alternate" hreflang="en" href="https://socialeraser.app/support.html">
+  <link rel="alternate" hreflang="zh" href="https://socialeraser.app/zh/support.html">
+  <link rel="alternate" hreflang="ja" href="https://socialeraser.app/ja/support.html">
+  <link rel="alternate" hreflang="es" href="https://socialeraser.app/es/support.html">
+  <link rel="alternate" hreflang="fr" href="https://socialeraser.app/fr/support.html">
+  <link rel="alternate" hreflang="de" href="https://socialeraser.app/de/support.html">
+  <link rel="alternate" hreflang="pt" href="https://socialeraser.app/pt/support.html">
+  <link rel="alternate" hreflang="ko" href="https://socialeraser.app/ko/support.html">
+  <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/ja/support.html"><link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://socialeraser.app/ja/support.html">
+  <meta property="og:title" content="SocialEraser をサポート — 開発者にコーヒー 1 杯を奢る">
+  <meta property="og:description" content="投げ銭サポート型。無料版が本体 — 投げ銭は歓迎しますが、決して必須ではありません。">
+  <meta property="og:image" content="https://socialeraser.app/assets/icons/socialeraser-mark.png">
+  <meta property="og:locale" content="ja_JP">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="SocialEraser をサポート — 開発者にコーヒー 1 杯を奢る">
+  <meta name="twitter:description" content="投げ銭サポート型。無料版が本体 — 投げ銭は歓迎しますが、決して必須ではありません。">
+  <link rel="icon" type="image/png" href="/assets/icons/socialeraser-mark.png">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/app.css">
+    <script defer src="/assets/app.js"></script>
+  <script defer src="/assets/lang-switcher.js"></script>
+  <style>
+    /* Page-scoped: tip tier cards */
+    .tip-hero { max-width: 760px; width: calc(100% - 32px); margin: 0 auto; text-align: center; padding: var(--space-8) var(--space-4) var(--space-4); }
+    .tip-hero__img { display: block; width: clamp(96px, 14vw, 128px); height: clamp(96px, 14vw, 128px); margin: 0 auto var(--space-3); border-radius: 50%; box-shadow: 0 8px 24px rgba(245, 158, 11, 0.18); }
+    .tip-hero__title { font-size: clamp(28px, 3.6vw, 44px); margin-bottom: var(--space-2); letter-spacing: -0.02em; }
+    .tip-hero__lede { color: var(--text-dim); font-size: var(--text-base); line-height: var(--leading-relaxed); margin-bottom: 0; }
+    .tip-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); max-width: 960px; width: calc(100% - 32px); margin: 0 auto var(--space-12); padding: 0 var(--space-4); }
+    @media (max-width: 800px) {
+      .tip-grid { display: flex; flex-direction: row; overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; scroll-padding-inline: 16px; scrollbar-width: none; gap: var(--space-3); padding: 8px var(--space-4) var(--space-2); margin-bottom: var(--space-8); }
+      .tip-grid::-webkit-scrollbar { display: none; }
+      .tip-grid .tip-tier { flex: 0 0 78%; scroll-snap-align: start; }
+    }
+    .tip-tier { background: var(--bg-elev-1); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-3); transition: transform var(--duration) var(--ease), border-color var(--duration) var(--ease), box-shadow var(--duration) var(--ease); }
+    .tip-tier:hover { transform: translateY(-2px); border-color: var(--border-accent); box-shadow: var(--shadow-lg); }
+    .tip-tier--featured { border-color: var(--border-accent); box-shadow: 0 0 0 1px var(--border-accent), var(--shadow-lg); position: relative; }
+    .tip-tier--featured::before { content: 'Most popular'; position: absolute; top: -10px; left: 0; right: 0; width: max-content; margin: 0 auto; text-align: center; background: var(--gradient-brand); color: #0a0a0a; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
+    .tip-tier__icon { font-size: 32px; line-height: 1; }
+    .tip-tier__amount { font-size: var(--text-3xl); font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+    .tip-tier__label { font-size: var(--text-sm); color: var(--text-mute); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+    .tip-tier__desc { color: var(--text-dim); font-size: var(--text-sm); line-height: var(--leading-relaxed); flex: 1; }
+    .tip-tier__cta { display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; background: var(--gradient-brand); color: #0a0a0a; font-weight: 600; font-size: var(--text-sm); border-radius: var(--radius); text-decoration: none; transition: transform var(--duration) var(--ease), box-shadow var(--duration) var(--ease); }
+    .tip-tier__cta:hover { transform: translateY(-1px); box-shadow: 0 12px 32px var(--accent-glow); color: #0a0a0a; }
+    .tip-tier--secondary .tip-tier__cta { background: transparent; color: var(--text); border: 1px solid var(--border-strong); }
+    .tip-tier--secondary .tip-tier__cta:hover { border-color: var(--border-accent); background: var(--bg-elev-2); color: var(--text); box-shadow: none; }
+    .tip-trust { max-width: 720px; width: calc(100% - 32px); margin: 0 auto var(--space-16); padding: var(--space-6) var(--space-4); background: var(--bg-elev-1); border: 1px solid var(--border); border-radius: var(--radius-lg); text-align: center; }
+    .tip-trust__title { font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-3); }
+    .tip-trust__text { color: var(--text-dim); font-size: var(--text-sm); line-height: var(--leading-relaxed); margin: 0; }
+    .tip-faq { max-width: 720px; width: calc(100% - 32px); margin: 0 auto var(--space-20); padding: 0 var(--space-4); }
+    .tip-faq h2 { font-size: var(--text-2xl); margin-bottom: var(--space-6); text-align: center; }
+    .tip-faq details { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); margin-bottom: var(--space-3); background: var(--bg-elev-1); }
+    .tip-faq details[open] { border-color: var(--border-accent); }
+    .tip-faq summary { font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+    .tip-faq summary::-webkit-details-marker { display: none; }
+    .tip-faq summary::after { content: '+'; font-size: 20px; color: var(--text-mute); transition: transform var(--duration) var(--ease); }
+    .tip-faq details[open] summary::after { content: '−'; }
+    .tip-faq p { color: var(--text-dim); font-size: var(--text-sm); line-height: var(--leading-relaxed); margin: var(--space-3) 0 0; }
+  </style>
+</head>
+<body>
+
+  <a href="#main" class="skip-to-content">Skip to content</a>
+
+  <header class="site-header">
+    <div class="site-header__inner container-lg">
+      <a href="/ja/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="">
+        </span>
+        <span>SocialEraser</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <details class="site-nav__platforms">
+          <summary class="site-nav__platforms-trigger">
+            Platforms
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div class="site-nav__platforms-menu">
+            <a href="/ja/platforms/x/">SocialEraser for X</a>
+            <a href="/ja/platforms/tiktok/">SocialEraser for TikTok</a>
+            <a href="/ja/platforms/youtube/">SocialEraser for YouTube</a>
+            <a href="/ja/platforms/instagram/">SocialEraser for Instagram</a>
+            <a href="/ja/platforms/facebook/">SocialEraser for Facebook</a>
+          </div>
+        </details>
+        <a href="/ja/" class="hide-mobile">Home</a>
+      </nav>
+      <details class="site-nav--mobile">
+        <summary class="site-nav--mobile-trigger" aria-label="Toggle menu">
+          <svg class="site-nav--mobile-icon-menu" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <svg class="site-nav--mobile-icon-close" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </summary>
+        <div class="site-nav--mobile-menu">
+          <a href="/ja/platforms/x/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>SocialEraser for X</a>
+          <a href="/ja/platforms/tiktok/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg>SocialEraser for TikTok</a>
+          <a href="/ja/platforms/youtube/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>SocialEraser for YouTube</a>
+          <a href="/ja/platforms/instagram/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>SocialEraser for Instagram</a>
+          <a href="/ja/platforms/facebook/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>SocialEraser for Facebook</a>
+          <a href="/ja/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12L12 3l9 9M5 10v10a1 1 0 001 1h3v-6h6v6h3a1 1 0 001-1V10"/></svg>Home</a>
+          <details class="site-nav--mobile-lang">
+            <summary>
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+              <span class="site-nav--mobile-lang__current">Language: <span data-lang-current>English</span></span>
+              <svg class="site-nav--mobile-lang__chev" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div data-lang-list></div>
+          </details>
+        </div>
+      </details>
+    </div>
+  </header>
+
+    <main id="main">
+      <div class="breadcrumbs-wrap container-lg">
+        <nav class="breadcrumbs" aria-label="Breadcrumb">
+          <a href="/ja/">Home</a>
+          <span class="breadcrumbs__sep">›</span>
+          <span class="breadcrumbs__current">Support</span>
+        </nav>
+      </div>
+      <section class="tip-hero">
+        <img class="tip-hero__img" src="/assets/icons/socialeraser-mark.png" alt="Developer with coffee" width="128" height="128" />
+        <h1 class="tip-hero__title">開発者にコーヒー 1 杯を奢る</h1>
+        <p class="tip-hero__lede">
+          SocialEraser は投げ銭サポート型です。無料版が本体 — 投げ銭は歓迎しますが、決して必須ではありません。このツールがあなたのお役に立てたなら、ここが投げ銭のページです。
+        </p>
+      </section>
+
+      <section class="tip-grid" aria-label="Tip amounts">
+        <div class="tip-tier tip-tier--secondary">
+          <div class="tip-tier__icon" aria-hidden="true">☕</div>
+          <div class="tip-tier__amount">$1</div>
+          <div class="tip-tier__label">コーヒー</div>
+          <p class="tip-tier__desc">公開セレクター設定の 1 日分の CDN 帯域を賄えます。</p>
+          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_3HVqQbK66LafUdCwR7sjXp" target="_blank" rel="noopener noreferrer">$1 を送る</a>
+        </div>
+
+        <div class="tip-tier tip-tier--featured">
+          <div class="tip-tier__icon" aria-hidden="true">🍕</div>
+          <div class="tip-tier__amount">$3</div>
+          <div class="tip-tier__label">ピザ一切れ</div>
+          <p class="tip-tier__desc">Chrome Web Store のデベロッパー アカウントを 1 ヶ月維持できます。</p>
+          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_7ASxApTnNUNsiUpAbSrYYc" target="_blank" rel="noopener noreferrer">$3 を送る</a>
+        </div>
+
+        <div class="tip-tier tip-tier--secondary">
+          <div class="tip-tier__icon" aria-hidden="true">🍱</div>
+          <div class="tip-tier__amount">$5</div>
+          <div class="tip-tier__label">ランチ</div>
+          <p class="tip-tier__desc">実アカウントでの数時間のクロスプラットフォーム回帰テスト費用を賄えます。</p>
+          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_2NxSAgacol9Jar7Q0EPQvI" target="_blank" rel="noopener noreferrer">$5 を送る</a>
+        </div>
+
+        <div class="tip-tier tip-tier--secondary">
+          <div class="tip-tier__icon" aria-hidden="true">💖</div>
+          <div class="tip-tier__amount">$10</div>
+          <div class="tip-tier__label">ジェネラス</div>
+          <p class="tip-tier__desc">バグ ハントとセレクター保守の丸 1 日を支えます。</p>
+          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_6mCS0pbjMZ9pFLGOY6PmOy" target="_blank" rel="noopener noreferrer">$10 を送る</a>
+        </div>
+
+        <div class="tip-tier tip-tier--secondary">
+          <div class="tip-tier__icon" aria-hidden="true">🎁</div>
+          <div class="tip-tier__amount">Custom</div>
+          <div class="tip-tier__label">気の向くまま</div>
+          <p class="tip-tier__desc">金額はあなた次第 — 1 ドルごとに次の 1 ヶ月の運営を支えます。</p>
+          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_4av6xu55UHRgVeEIEEQNUz" target="_blank" rel="noopener noreferrer">Creem を開く</a>
+        </div>
+      </section>
+
+      <section class="tip-trust">
+        <h2 class="tip-trust__title">資金の使い道</h2>
+        <p class="tip-trust__text">
+          投げ銭は以下の 4 つにだけ使われます: (1) 公開セレクター設定の CDN、(2) Chrome Web Store のデベロッパー登録料、(3) X が UI を変更した際の検証用の小さなテスト用 X アカウント、(4) コーヒー。会社もなければ、給与もなく、投資家もいません。すべての 1 ドルは
+          <a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">公開リポジトリ</a>
+          で確認できます。
+        </p>
+      </section>
+
+      <section class="tip-faq" aria-label="Frequently asked questions">
+        <h2>よくある質問</h2>
+
+        <details>
+          <summary>投げ銭で何がアンロックされますか?</summary>
+          <p>設計上、何もありません。投げ銭は感謝の気持ちであり、機能への対価ではありません。SocialEraser のすべての機能 — 過去、現在、未来 — は誰でも無料です。「プレミアム」階層は明示的に作っていません。</p>
+        </details>
+
+        <details>
+          <summary>無料なのに、なぜ 1 日 5000 件の上限があるのですか?</summary>
+          <p>この上限は <em>プラットフォームの安全</em> 上の制限であり、ビジネス上の制限ではありません。X (および他のすべてのプラットフォーム) は、一括削除を攻撃的に行うアカウントをレート制限し、停止する可能性があります。1 日 5000 件はあなたのアカウントを守る控えめな数値です。アカウントを危険にさらすことになるため、有料ユーザーに対してこの上限を引き上げることはありません — それでは本末転倒です。</p>
+        </details>
+
+        <details>
+          <summary>支払い情報は開発者に共有されますか?</summary>
+          <p>いいえ。支払いは Creem (決済代行業者) によって処理されます。私たちは「誰かが $3 を送った」という通知と、その方が共有することを選んだメールアドレスのみを受け取ります — それ以外はありません。カード番号を見ることは決してありません。拡張機能自体には、あなたが投げ銭したかどうかを知る手段すらありません。</p>
+        </details>
+
+        <details>
+          <summary>返金してもらえますか?</summary>
+          <p>はい — Creem は 30 日以内に質問なしに返金します。投げ銭は決して契約ではありません。</p>
+        </details>
+
+        <details>
+          <summary>会社のチームとして代理で投げ銭できますか?</summary>
+          <p>もちろんです。$200 以上 (プリセット金額を超える場合) の請求書や銀行振込が必要な場合は、<a href="mailto:support@socialeraser.app">support@socialeraser.app</a> までご連絡ください。何かしらの方法を見つけます。</p>
+        </details>
+
+        <details>
+          <summary>投げ銭する余裕がありません。他に手伝えることは?</summary>
+          <p>はい — そしてこれらは金銭以上の価値があります:
+            <a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">GitHub リポジトリ</a>
+            にスターを付ける、見つけたバグを報告する、まだない言語に拡張機能を翻訳する、便利だと思う友人に教える。すべて感謝します。
+          </p>
+        </details>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+    <div class="container-lg">
+      <div class="site-footer__grid">
+        <div class="site-footer__brand">
+          <a href="/ja/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="">
+        </span>
+            <span>SocialEraser</span>
+          </a>
+          <p>ソーシャル メディアを一括クリーンアップ。100% ローカル処理、パスワード不要、オープン ソース。2017 年の「いいね」を片付けるために週末を費やしたくない人のために。</p>
+        </div>
+        <div class="site-footer__col">
+          <h4>Platforms</h4>
+          <ul>
+            <li><a href="/ja/platforms/x/">X (Twitter)</a></li>
+            <li><a href="/ja/platforms/tiktok/">TikTok</a></li>
+            <li><a href="/ja/platforms/youtube/">YouTube</a></li>
+            <li><a href="/ja/platforms/instagram/">Instagram</a></li>
+            <li><a href="/ja/platforms/facebook/">Facebook</a></li>
+          </ul>
+        </div>
+        <div class="site-footer__col">
+          <h4>Product</h4>
+          <ul>
+            <li><a href="/ja/help.html">Help Center</a></li>
+            <li><a href="/ja/#download">Install</a></li>
+            <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/CHANGELOG.md" target="_blank" rel="noopener noreferrer">Changelog</a></li>
+            <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/ROADMAP.md" target="_blank" rel="noopener noreferrer">Roadmap</a></li>
+            <li><a href="/ja/support.html">☕ Support</a></li>
+            <li><a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">Source Code</a></li>
+          </ul>
+        </div>
+        <div class="site-footer__col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="/ja/about.html">About</a></li>
+            <li><a href="mailto:support@socialeraser.app">Contact</a></li>
+            <li><a href="/ja/privacy.html">Privacy</a></li>
+            <li><a href="/ja/terms.html">Terms</a></li>
+            <li><a href="https://github.com/socialeraser/SocialEraser#readme" target="_blank" rel="noopener noreferrer">Press Kit</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="site-footer__bottom">
+        <span>© 2026 SocialEraser. All rights reserved.</span>
+        <div class="site-footer__legal">
+          <span>Independent tool — not affiliated with X, TikTok, YouTube, Instagram, or Facebook.</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

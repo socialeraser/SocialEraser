@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0a0b">
+  <title>Como Limpar o Histórico do YouTube em Massa (Guia Passo a Passo 2026) — SocialEraser</title>
+  <meta name="description" content="Tutorial passo a passo: como limpar em massa seu histórico de exibição, histórico de pesquisa, vídeos curtidos, inscrições e comentários do YouTube com a extensão gratuita do Chrome SocialEraser. Filtre por data e canal. Sem senha, 100% local.">
+  <meta name="keywords" content="como limpar histórico do youtube, apagar histórico de exibição do youtube, limpar youtube em massa, limpador de histórico do youtube, desfazer curtidas em massa no youtube, remover inscrições do youtube, exclusão em massa no youtube, limpar curtidas do youtube, histórico de pesquisa do youtube">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://socialeraser.app/pt/guides/youtube.html">
+  <link rel="alternate" hreflang="en" href="https://socialeraser.app/guides/youtube.html">
+  <link rel="alternate" hreflang="zh" href="https://socialeraser.app/zh/guides/youtube.html">
+  <link rel="alternate" hreflang="ja" href="https://socialeraser.app/ja/guides/youtube.html">
+  <link rel="alternate" hreflang="es" href="https://socialeraser.app/es/guides/youtube.html">
+  <link rel="alternate" hreflang="fr" href="https://socialeraser.app/fr/guides/youtube.html">
+  <link rel="alternate" hreflang="de" href="https://socialeraser.app/de/guides/youtube.html">
+  <link rel="alternate" hreflang="pt" href="https://socialeraser.app/pt/guides/youtube.html">
+  <link rel="alternate" hreflang="ko" href="https://socialeraser.app/ko/guides/youtube.html">
+  <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/pt/guides/youtube.html"><link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="SocialEraser">
+  <meta property="og:url" content="https://socialeraser.app/pt/guides/youtube.html">
+  <meta property="og:title" content="Como Limpar o Histórico do YouTube em Massa (Guia Passo a Passo 2026)">
+  <meta property="og:description" content="Tutorial passo a passo: limpe em massa o histórico de exibição, histórico de pesquisa, curtidas e inscrições do YouTube com uma extensão gratuita para Chrome. Sem senha, 100% local.">
+  <meta property="og:image" content="https://socialeraser.app/assets/icons/socialeraser-mark.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="pt_BR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Como Limpar o Histórico do YouTube em Massa (Guia Passo a Passo 2026)">
+  <meta name="twitter:description" content="Tutorial passo a passo: limpe em massa o histórico de exibição, histórico de pesquisa, curtidas e inscrições do YouTube. Sem senha, 100% local.">
+  <meta name="twitter:image" content="https://socialeraser.app/assets/icons/socialeraser-mark.png">
+  <meta name="author" content="SocialEraser">
+  <link rel="icon" type="image/png" href="/assets/icons/socialeraser-mark.png">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/app.css">
+  <style>
+    /* Página de tutorial — tokens de marca vermelhos do YouTube. */
+    :root {
+      --accent:         #FF3B3B;
+      --accent-bright:  #FF5A5A;
+      --accent-soft:    rgba(255, 59, 59, 0.12);
+      --accent-glow:    rgba(255, 59, 59, 0.35);
+      --border-accent:  rgba(255, 59, 59, 0.4);
+      --gradient-brand:      linear-gradient(135deg, #FF3B3B 0%, #C71F1F 100%);
+      --gradient-brand-soft: linear-gradient(135deg, rgba(255, 59, 59, 0.18) 0%, rgba(199, 31, 31, 0.06) 100%);
+      --gradient-hero-glow:  radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 59, 59, 0.18) 0%, transparent 70%);
+    }
+    .article-wrap { max-width: 760px; margin: 0 auto; padding: 0 var(--space-6); }
+    .breadcrumbs {
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+      font-size: var(--text-sm); color: var(--text-mute);
+      margin-bottom: var(--space-6);
+    }
+    .breadcrumbs a { color: var(--text-dim); text-decoration: none; outline-offset: 4px; }
+    .breadcrumbs a:hover { color: var(--text); text-decoration: none; }
+    .breadcrumbs a:focus { outline: none; }
+    .breadcrumbs a:focus-visible { outline: 2px solid var(--border-strong); }
+    .breadcrumbs__sep { color: var(--text-faint); }
+    .breadcrumbs__current { color: var(--text); }
+    .article-hero { margin-bottom: var(--space-12); }
+    .article-hero h1 {
+      font-size: var(--text-5xl); line-height: 1.1; letter-spacing: -0.02em;
+      margin-bottom: var(--space-5);
+    }
+    .article-hero .lede { font-size: var(--text-lg); color: var(--text-dim); line-height: 1.55; }
+    .article-meta {
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+      font-size: var(--text-sm); color: var(--text-mute);
+      margin-top: var(--space-6); padding-top: var(--space-5);
+      border-top: 1px solid var(--border);
+    }
+    .article-body h2 {
+      font-size: var(--text-3xl);
+      margin-top: var(--space-16); margin-bottom: var(--space-4);
+      scroll-margin-top: var(--space-12);
+    }
+    .article-body h3 {
+      font-size: var(--text-xl);
+      margin-top: var(--space-8); margin-bottom: var(--space-3);
+    }
+    .article-body p {
+      font-size: var(--text-base); line-height: 1.7;
+      color: var(--text-dim); margin-bottom: var(--space-4);
+    }
+    .article-body p strong { color: var(--text); }
+    .article-body ul, .article-body ol {
+      margin: var(--space-4) 0 var(--space-6) var(--space-6);
+      color: var(--text-dim); line-height: 1.7;
+    }
+    .article-body ul li, .article-body ol li { margin-bottom: var(--space-2); }
+    .article-body a:not(.btn) { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+    .article-body a:not(.btn):hover { text-decoration: underline; opacity: 0.85; }
+    .toc {
+      background: var(--bg-elev-1); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: var(--space-5) var(--space-6);
+      margin-bottom: var(--space-12);
+    }
+    .toc__title {
+      font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-mute); margin-bottom: var(--space-3);
+    }
+    .toc ol { list-style: decimal; padding-left: var(--space-5); }
+    .toc ol li { color: var(--text-dim); margin-bottom: 4px; }
+    .toc a { color: var(--text-dim); text-decoration: none; }
+    .toc a:hover { color: var(--accent); }
+    .step-card {
+      background: var(--bg-elev-1); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: var(--space-6);
+      margin: var(--space-6) 0 var(--space-8);
+    }
+    .step-card__number {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--gradient-brand); color: #FFFFFF;
+      font-weight: 800; font-size: var(--text-base);
+      margin-bottom: var(--space-3);
+    }
+    .step-card h3 { margin-top: 0; font-size: var(--text-xl); }
+    .step-card p { margin-bottom: var(--space-3); }
+    .step-card p:last-child { margin-bottom: 0; }
+    .step-card code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.9em; background: var(--bg-elev-2);
+      padding: 2px 6px; border-radius: 4px; color: var(--accent);
+    }
+    .callout {
+      background: var(--accent-soft);
+      border-left: 3px solid var(--accent);
+      border-radius: 6px; padding: var(--space-4) var(--space-5);
+      margin: var(--space-6) 0;
+    }
+    .callout p { margin-bottom: 0; color: var(--text); }
+    .callout p strong { color: var(--accent); }
+    .filter-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--space-4); margin: var(--space-6) 0;
+    }
+    .filter-tile {
+      background: var(--bg-elev-1); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: var(--space-5);
+    }
+    .filter-tile h3 { margin-top: 0; font-size: var(--text-lg); color: var(--accent); }
+    .filter-tile p { margin-bottom: 0; font-size: var(--text-sm); }
+    .related-cta {
+      background: var(--gradient-brand-soft);
+      border: 1px solid rgba(255, 59, 59, 0.3);
+      border-radius: var(--radius-lg); padding: var(--space-8);
+      text-align: center; margin: var(--space-16) 0 var(--space-8);
+    }
+    .related-cta h2 { margin-top: 0; }
+    .related-cta p { color: var(--text-dim); margin-bottom: var(--space-5); }
+    @media (max-width: 640px) {
+      .article-hero h1 { font-size: var(--text-4xl); }
+      .article-body h2 { font-size: var(--text-2xl); }
+    }
+  </style>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Article","headline":"Como Limpar o Histórico do YouTube em Massa (Guia Passo a Passo)","description":"Tutorial passo a passo mostrando como limpar em massa o histórico de exibição, histórico de pesquisa, vídeos curtidos, inscrições e comentários do YouTube com a extensão gratuita do Chrome SocialEraser.","author":{"@type":"Organization","name":"SocialEraser","url":"https://socialeraser.app/"},"publisher":{"@type":"Organization","name":"SocialEraser","logo":{"@type":"ImageObject","url":"https://socialeraser.app/assets/icons/socialeraser-mark.png"}},"datePublished":"2026-07-04","dateModified":"2026-07-04","mainEntityOfPage":{"@type":"WebPage","@id":"https://socialeraser.app/guides/youtube.html"},"image":"https://socialeraser.app/assets/icons/socialeraser-mark.png"}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Início","item":"https://socialeraser.app/"},
+    {"@type":"ListItem","position":2,"name":"SocialEraser para YouTube","item":"https://socialeraser.app/platforms/youtube/"},
+    {"@type":"ListItem","position":3,"name":"Como Limpar o Histórico do YouTube em Massa","item":"https://socialeraser.app/guides/youtube.html"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"HowTo","name":"Como Limpar o Histórico do YouTube em Massa","description":"Instale o SocialEraser, abra youtube.com, escolha o que limpar, defina seus filtros e clique em Iniciar. O SocialEraser simula cliques normais em velocidade humana para limpar todas as entradas de histórico de exibição, vídeos curtidos ou inscrições correspondentes.","totalTime":"PT20M","estimatedCost":{"@type":"MonetaryAmount","value":"0","currency":"USD"},"tool":[{"@type":"HowToTool","name":"Google Chrome ou Microsoft Edge (versão 120 ou superior)"},{"@type":"HowToTool","name":"Extensão de navegador SocialEraser para YouTube (gratuita)"}],"step":[
+    {"@type":"HowToStep","position":1,"name":"Solicite o Google Takeout para YouTube (altamente recomendado)","text":"Antes de qualquer limpeza em massa, solicite um arquivo do Google Takeout com seus dados do YouTube. O arquivo contém seu histórico de exibição, histórico de pesquisa, vídeos curtidos, inscrições e comentários como arquivos para download. Uma vez que o histórico é limpo, o YouTube não mantém um backup, então este arquivo é a sua única forma de recuperá-lo.","url":"https://takeout.google.com/","image":"https://socialeraser.app/assets/icons/socialeraser-mark.png"},
+    {"@type":"HowToStep","position":2,"name":"Instale o SocialEraser para YouTube","text":"Adicione a extensão gratuita SocialEraser na Chrome Web Store. Sem conta, sem cadastro, sem pagamento. Dois cliques e ela está instalada e fixada na sua barra de ferramentas.","url":"https://socialeraser.app/platforms/youtube/#download","image":"https://socialeraser.app/assets/icons/socialeraser-mark.png"},
+    {"@type":"HowToStep","position":3,"name":"Abra o youtube.com e faça login","text":"Abra o youtube.com no mesmo perfil do Chrome onde você instalou a extensão. Faça login na sua conta do Google como de costume. Clique no ícone do painel lateral do SocialEraser — a extensão detecta automaticamente seu login e mostra o status da sua conta.","image":"https://socialeraser.app/assets/icons/socialeraser-mark.png"},
+    {"@type":"HowToStep","position":4,"name":"Escolha o que limpar e defina seus filtros","text":"Marque as caixas do que você quer limpar: Histórico de Exibição, Histórico de Pesquisa, Vídeos Curtidos, Playlists, Inscrições, Comentários ou Publicações da Comunidade. Em seguida, defina seus filtros. Use 'A partir da data' para manter o histórico recente e limpar entradas mais antigas. Use 'Inatividade do canal' para cancelar inscrição de canais que não publicam há 6 meses ou mais.","image":"https://socialeraser.app/assets/icons/socialeraser-mark.png"},
+    {"@type":"HowToStep","position":5,"name":"Clique em Iniciar e deixe rodar","text":"Clique no botão vermelho 'Iniciar Limpeza'. A extensão abre cada item correspondente, clica no botão de limpar / descurtir / cancelar inscrição em velocidade humana e mostra um contador de progresso ao vivo. Você pode fechar o notebook e voltar amanhã — o estado persiste entre reinicializações do navegador. A execução média é de cerca de 0,9 segundo por item, então 1.000 entradas levam aproximadamente 15 minutos.","image":"https://socialeraser.app/assets/icons/socialeraser-mark.png"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"Quanto tempo leva para limpar todo o meu histórico do YouTube?","acceptedAnswer":{"@type":"Answer","text":"O SocialEraser processa cerca de 0,9 segundo por item — então 1.000 entradas de histórico de exibição levam aproximadamente 15 minutos. Você pode deixar rodando em segundo plano ou fechar o notebook e voltar depois; o estado persiste entre reinicializações do navegador."}},
+    {"@type":"Question","name":"Limpar o histórico afeta minhas recomendações?","acceptedAnswer":{"@type":"Answer","text":"Sim — esse geralmente é o objetivo. Limpar seu histórico de exibição dá ao algoritmo do YouTube uma nova base, então suas recomendações voltam a refletir seus interesses atuais em vez do que você assistiu anos atrás. O histórico de pesquisa também influencia as sugestões, então limpe os dois para um reset completo."}},
+    {"@type":"Question","name":"Posso manter inscrições em canais que ainda assisto?","acceptedAnswer":{"@type":"Answer","text":"Sim. Use o filtro 'Inatividade do canal' para definir um limite (por ex., 6 meses). Canais que publicaram dentro da janela continuam com a inscrição mantida; canais que não publicam há 6 meses ou mais têm a inscrição cancelada. Esta é a forma padrão de manter criadores ativos enquanto limpa os follows inativos."}},
+    {"@type":"Question","name":"Posso apagar apenas vídeos que assisti em um ano específico?","acceptedAnswer":{"@type":"Answer","text":"Sim. Use o filtro de intervalo de datas. Defina uma data de início (por ex., 1º de janeiro de 2020) e uma data de término (por ex., 31 de dezembro de 2020) para apagar apenas o histórico daquele ano. Ótimo para limpar uma era específica de visualização mantendo o histórico mais antigo e mais novo intactos."}},
+    {"@type":"Question","name":"Limpar meu histórico afeta meu canal?","acceptedAnswer":{"@type":"Answer","text":"Não. Limpar seu histórico de exibição, histórico de pesquisa, curtidas e inscrições pessoais afeta apenas o algoritmo de recomendação da sua conta — seu canal, envios, inscritos e comentários permanecem completamente intactos."}},
+    {"@type":"Question","name":"Posso desfazer uma limpeza depois?","acceptedAnswer":{"@type":"Answer","text":"Não. Uma vez que o histórico de exibição do YouTube é limpo, ele desaparece dos servidores do YouTube em segundos. É por isso que o passo 1 deste guia é baixar seus dados do YouTube via Google Takeout antes de qualquer limpeza em massa."}},
+    {"@type":"Question","name":"Funciona no aplicativo móvel do YouTube?","acceptedAnswer":{"@type":"Answer","text":"Não. O aplicativo móvel do YouTube não permite extensões de navegador. O SocialEraser roda no Chrome para desktop. Um companheiro dedicado para mobile está no roadmap de 2027."}},
+    {"@type":"Question","name":"E se eu tiver anos de histórico acumulado?","acceptedAnswer":{"@type":"Answer","text":"O SocialEraser lida bem com grandes bibliotecas de histórico. A extensão pausa automaticamente se atingir um limite de taxa, e você pode continuar do mesmo ponto. Uma biblioteca de 20.000 entradas normalmente roda em 4 a 5 horas de tempo em segundo plano, sem necessidade de supervisão."}}
+  ]}
+  </script>
+</head>
+<body>
+
+  <a href="#main" class="skip-to-content">Pular para o conteúdo</a>
+
+  <header class="site-header">
+    <div class="site-header__inner container-lg">
+      <a href="/pt/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
+        </span>
+        <span>SocialEraser</span>
+      </a>
+      <nav class="site-nav" aria-label="Primária">
+        <details class="site-nav__platforms">
+          <summary class="site-nav__platforms-trigger">Plataformas <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></summary>
+          <div class="site-nav__platforms-menu">
+            <a href="/pt/platforms/x/">SocialEraser para X</a>
+            <a href="/pt/platforms/tiktok/">SocialEraser para TikTok</a>
+            <a href="/pt/platforms/youtube/">SocialEraser para YouTube</a>
+            <a href="/pt/platforms/instagram/">SocialEraser para Instagram</a>
+            <a href="/pt/platforms/facebook/">SocialEraser para Facebook</a>
+          </div>
+        </details>
+        <a href="/pt/help.html" class="hide-mobile">Ajuda</a>
+        <a href="/pt/platforms/youtube/#download" class="btn btn--primary btn--sm">Entrar na Lista de Espera</a>
+      </nav>
+      <details class="site-nav--mobile">
+        <summary class="site-nav--mobile-trigger" aria-label="Alternar menu">
+          <svg class="site-nav--mobile-icon-menu" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <svg class="site-nav--mobile-icon-close" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </summary>
+        <div class="site-nav--mobile-menu">
+          <a href="/pt/platforms/x/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>SocialEraser para X</a>
+          <a href="/pt/platforms/tiktok/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg>SocialEraser para TikTok</a>
+          <a href="/pt/platforms/youtube/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>SocialEraser para YouTube</a>
+          <a href="/pt/platforms/instagram/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>SocialEraser para Instagram</a>
+          <a href="/pt/platforms/facebook/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>SocialEraser para Facebook</a>
+          <a href="/pt/help.html"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>Ajuda</a>
+          <a href="/pt/platforms/youtube/#download" class="btn btn--primary"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Entrar na Lista de Espera</a>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main id="main">
+    <article class="article-wrap section">
+      <nav class="breadcrumbs" aria-label="Breadcrumb">
+        <a href="/pt/">Início</a>
+        <span class="breadcrumbs__sep">›</span>
+        <a href="/pt/platforms/youtube/">SocialEraser para YouTube</a>
+        <span class="breadcrumbs__sep">›</span>
+        <span class="breadcrumbs__current">Como Limpar o Histórico do YouTube em Massa</span>
+      </nav>
+
+      <header class="article-hero">
+        <h1>Como Limpar o Histórico do YouTube em Massa (Guia Passo a Passo)</h1>
+        <p class="lede">Quer um algoritmo do YouTube novo que reflita o que você assiste <em>agora</em>, e não o que assistiu em 2019? Precisa cancelar inscrição em massa de canais que não publicam há anos? Este guia mostra como limpar todas as entradas de histórico de exibição, curtidas, inscrições e comentários — com segurança, com filtros, em cerca de 15 minutos por 1.000 entradas.</p>
+        <div class="article-meta">
+          <span>Por <strong>SocialEraser</strong></span>
+          <span>·</span>
+          <span>Atualizado em <time datetime="2026-07-04">4 de julho de 2026</time></span>
+          <span>·</span>
+          <span>~8 min de leitura</span>
+        </div>
+      </header>
+
+      <div class="article-body">
+
+        <div class="toc">
+          <p class="toc__title">Nesta página</p>
+          <ol>
+            <li><a href="#why-bulk-clear">Por que limpar o histórico do YouTube em massa?</a></li>
+            <li><a href="#before-you-start">Antes de começar: faça backup dos seus dados</a></li>
+            <li><a href="#step-by-step">Passo a passo: limpe todas as entradas em massa</a></li>
+            <li><a href="#filters">Os quatro filtros que tornam a limpeza em massa precisa</a></li>
+            <li><a href="#what-stays">O que é limpo vs. o que permanece</a></li>
+            <li><a href="#safety">Segurança, limites de taxa e segurança da conta</a></li>
+            <li><a href="#faq">Perguntas frequentes</a></li>
+          </ol>
+        </div>
+
+        <h2 id="why-bulk-clear">Por que limpar o histórico do YouTube em massa?</h2>
+        <p>A maioria das pessoas chega a um ponto em que quer um YouTube renovado — um reposicionamento dos seus interesses, um corte limpo com velhos hábitos, um algoritmo novo que não fique recomendando conteúdo de 2017. O problema: o botão oficial "Limpar histórico de exibição" do YouTube é tudo ou nada. Não há filtro por intervalo de datas, nem limpeza por canal, nem botão de "cancelar inscrição de canais inativos".</p>
+        <p>Para 200 entradas de histórico de exibição, dá para fazer manualmente. Para 2.000 entradas, é uma semana clicando. Para 20.000 entradas, é praticamente impossível sem ajuda.</p>
+        <p>É para isso que existe o <a href="/pt/platforms/youtube/">SocialEraser para YouTube</a>. Ele roda no seu navegador, simula cliques normais em velocidade humana e permite filtrar por data, canal ou nível de atividade. Você define as regras, clica em Iniciar e vai embora. Este guia explica todo o processo.</p>
+
+        <h2 id="before-you-start">Antes de começar: faça backup dos seus dados</h2>
+        <p>Este é o passo mais importante, e você deve fazê-lo antes da primeira execução. Uma vez que você limpa o histórico do YouTube, ele se vai — não há lixeira, nem desfazer, nem janela de restauração. O YouTube trata as limpezas como permanentes.</p>
+        <p>A forma oficial de recuperar seu histórico (mesmo após a limpeza) é baixar seus dados do YouTube via Google Takeout. O arquivo contém seu histórico de exibição, histórico de pesquisa, vídeos curtidos, inscrições e comentários como arquivos independentes.</p>
+        <ol>
+          <li>Acesse <a href="https://takeout.google.com/" rel="noopener noreferrer">takeout.google.com</a> no seu navegador.</li>
+          <li>Selecione <strong>YouTube e YouTube Music</strong> e desmarque todo o resto.</li>
+          <li>Escolha o formato <strong>JSON + MP4</strong> e clique em <strong>Próxima etapa</strong>.</li>
+          <li>Clique em <strong>Criar exportação</strong>. O Google enviará para o seu e-mail um link para download em poucas horas.</li>
+        </ol>
+        <div class="callout">
+          <p><strong>Dica:</strong> Mesmo que você planeje limpar tudo, solicite este arquivo primeiro. É gratuito, são os seus dados e lhe dá uma forma de voltar atrás se você mudar de ideia.</p>
+        </div>
+
+        <h2 id="step-by-step">Passo a passo: limpe o histórico do YouTube em massa</h2>
+        <p>Todo o processo leva cerca de 60 segundos de configuração. A limpeza em si roda em segundo plano.</p>
+
+        <div class="step-card">
+          <span class="step-card__number">1</span>
+          <h3>Instale o SocialEraser para YouTube</h3>
+          <p>Acesse a <a href="/pt/platforms/youtube/#download">página do SocialEraser para YouTube</a> e clique em <strong>Entrar na Lista de Espera do YouTube</strong>. A extensão está atualmente em pré-lançamento — entrar na lista de espera garante acesso antecipado quando for lançada. (Você também pode instalar o <a href="/pt/platforms/x/#download">SocialEraser para X</a> hoje, que já está totalmente lançado.)</p>
+        </div>
+
+        <div class="step-card">
+          <span class="step-card__number">2</span>
+          <h3>Abra o youtube.com e faça login</h3>
+          <p>Navegue até <code>youtube.com</code> no navegador onde você instalou o SocialEraser. Faça login na sua conta do Google como de costume. A extensão não lida com senhas — o próprio login do Google faz isso. O SocialEraser só age na página depois que você já está autenticado.</p>
+          <p>Clique no ícone do SocialEraser na sua barra de ferramentas para abrir o painel lateral. O indicador de status no topo vai de amarelo a verde assim que confirmar que você está logado.</p>
+        </div>
+
+        <div class="step-card">
+          <span class="step-card__number">3</span>
+          <h3>Escolha o que limpar</h3>
+          <p>No painel lateral, marque as caixas do que você quer limpar. Você pode escolher uma ou combinar várias:</p>
+          <ul>
+            <li><strong>Histórico de Exibição</strong> — todos os vídeos que você já assistiu</li>
+            <li><strong>Histórico de Pesquisa</strong> — todas as consultas de pesquisa que você digitou</li>
+            <li><strong>Vídeos Curtidos</strong> — a playlist de Curtidos (seu histórico de joinha)</li>
+            <li><strong>Playlists</strong> — Assistir Mais Tarde, playlists personalizadas e listas salvas</li>
+            <li><strong>Inscrições</strong> — canais que você segue</li>
+            <li><strong>Comentários</strong> — seus próprios comentários em qualquer vídeo</li>
+            <li><strong>Publicações da Comunidade</strong> — publicações que você fez nas abas de comunidade dos canais</li>
+          </ul>
+          <p>Se você quer limpar apenas um tipo (por exemplo, só o histórico de exibição), marque apenas essa opção. A extensão vai pular as outras por completo.</p>
+        </div>
+
+        <div class="step-card">
+          <span class="step-card__number">4</span>
+          <h3>Defina seus filtros (opcional, mas recomendado)</h3>
+          <p>Os filtros são o que separam uma limpeza em massa precisa de um estrago total. Os quatro filtros são detalhados na próxima seção, mas a configuração mais comum é:</p>
+          <ul>
+            <li><strong>A partir da data:</strong> mantenha o histórico recente, limpe tudo antes de uma data específica</li>
+            <li><strong>Inatividade do canal:</strong> cancele inscrição de canais que não publicam há 6 meses ou mais</li>
+            <li><strong>Palavra-chave no título:</strong> limpe apenas entradas de histórico cujo título contenha uma palavra</li>
+            <li><strong>Duração do vídeo:</strong> limpe apenas vídeos curtos, ou apenas longos</li>
+          </ul>
+          <p>Você pode combinar vários filtros. Por exemplo, "limpar todo o histórico de exibição antes de 1º de janeiro de 2022 de canais com menos de 10.000 visualizações" é uma única combinação de filtros.</p>
+        </div>
+
+        <div class="step-card">
+          <span class="step-card__number">5</span>
+          <h3>Clique em Iniciar e deixe rodar</h3>
+          <p>Clique no botão vermelho <strong>Iniciar Limpeza</strong>. A extensão abre cada item correspondente, clica no botão de limpar / descurtir / cancelar inscrição em velocidade humana (cerca de 0,9 segundo por item) e atualiza um contador de progresso ao vivo.</p>
+          <p>Você pode:</p>
+          <ul>
+            <li><strong>Acompanhar em tempo real</strong> no painel lateral</li>
+            <li><strong>Minimizar a aba</strong> e usar o navegador normalmente</li>
+            <li><strong>Fechar o notebook por completo</strong> — o estado persiste entre reinicializações do navegador, então quando você voltar, ela continua do último item concluído</li>
+            <li><strong>Clicar em Pausar</strong> a qualquer momento para fazer uma pausa</li>
+            <li><strong>Clicar em Parar</strong> se você mudar de ideia no meio da execução</li>
+          </ul>
+          <p>Para um histórico típico de 1.000 entradas, a execução completa leva cerca de 15 minutos. Para 20.000 entradas, espere de 4 a 5 horas em segundo plano, sem necessidade de supervisão.</p>
+        </div>
+
+        <h2 id="filters">Os quatro filtros que tornam a limpeza em massa precisa</h2>
+        <p>Os filtros transformam um instrumento cego em um bisturi. Aqui estão os quatro disponíveis no SocialEraser para YouTube e os casos de uso que cada um resolve.</p>
+
+        <div class="filter-grid">
+          <div class="filter-tile">
+            <h3>Intervalo de datas</h3>
+            <p>Limpe entradas de histórico antes ou depois de qualquer data específica. Este é o filtro mais comum. Use-o para manter suas visualizações recentes e limpar a era antiga. A direção "antes" também é a ferramenta certa se você quer um algoritmo limpo sem apagar tudo o que assistiu este ano.</p>
+          </div>
+          <div class="filter-tile">
+            <h3>Inatividade do canal</h3>
+            <p>Cancele inscrição de canais que não publicam há N meses. Defina 6 meses para uma limpeza moderada, 24 meses para uma limpeza profunda. Este é o melhor filtro para manter criadores ativos enquanto limpa os follows inativos.</p>
+          </div>
+          <div class="filter-tile">
+            <h3>Palavra-chave no título</h3>
+            <p>Limpe apenas entradas de histórico cujo título contenha uma palavra ou frase específica. Ótimo para limpar um único tópico — como um curso, um criador do qual você se cansou, ou uma fase de fandom que você quer deixar para trás.</p>
+          </div>
+          <div class="filter-tile">
+            <h3>Duração do vídeo</h3>
+            <p>Limpe apenas vídeos curtos (menos de 4 minutos) ou apenas vídeos longos. Útil para limpar uma fase de binge-watching de conteúdo curto enquanto mantém os documentários longos, ou vice-versa.</p>
+          </div>
+        </div>
+        <p>Você pode combinar os quatro. A combinação mais popular é <strong>"antes de 1º de janeiro de 2022 E canal inativo há 6 meses ou mais"</strong> — mantém o passado recente, limpa o arquivo profundo.</p>
+
+        <h2 id="what-stays">O que é limpo vs. o que permanece</h2>
+        <p>O SocialEraser toca apenas no que você manda tocar. Especificamente:</p>
+        <ul>
+          <li><strong>Caixa Histórico de Exibição marcada</strong> — todo o seu histórico de exibição é limpo um por um.</li>
+          <li><strong>Caixa Histórico de Pesquisa marcada</strong> — cada consulta de pesquisa que você digitou é limpa.</li>
+          <li><strong>Caixa Vídeos Curtidos marcada</strong> — todos os vídeos na sua playlist de Curtidos são descurtidos.</li>
+          <li><strong>Caixa Playlists marcada</strong> — cada playlist sua é apagada (ou apenas esvaziada, dependendo do modo).</li>
+          <li><strong>Caixa Inscrições marcada</strong> — a inscrição de cada canal que você segue é cancelada.</li>
+          <li><strong>Caixa Comentários marcada</strong> — cada comentário que você publicou é apagado.</li>
+          <li><strong>Caixa Publicações da Comunidade marcada</strong> — cada publicação sua em comunidades é apagada.</li>
+        </ul>
+        <p>O que o SocialEraser <strong>não</strong> toca: seu canal, seus envios, sua contagem de inscritos, os comentários de outras pessoas no seu canal, sua foto de perfil, sua bio, o banner do seu canal ou qualquer outro conteúdo do YouTube que você não tenha marcado explicitamente uma caixa.</p>
+
+        <h2 id="safety">Segurança, limites de taxa e segurança da conta</h2>
+        <p>O SocialEraser simula cliques normais em velocidade humana — sem chamadas de API, sem scraping, sem navegador headless, sem automação em massa. A extensão literalmente clica nos mesmos botões que você clicaria, um de cada vez, com um intervalo entre cada um. A média é de cerca de 0,9 segundo por item, com uma variação aleatória para não parecer robótico.</p>
+        <p>Dito isso, a mesma ressalva se aplica a qualquer ferramenta de terceiros. Não somos afiliados à Google LLC. O uso de ferramentas em massa é por sua conta e risco. Se o YouTube mudar a interface, nosso sistema de atualização de configuração remota envia um novo esquema de seletores em poucas horas — não é preciso reinstalar a extensão.</p>
+        <p>Se você atingir um limite de taxa, a extensão pausa automaticamente, mostra um indicador de "reconectando" e continua quando o limite é liberado. O estado é preservado entre reinicializações do navegador, então uma execução de 20.000 entradas pode ser dividida em vários dias, sem duplicações ou itens pulados.</p>
+        <div class="callout">
+          <p><strong>Mais uma vez:</strong> baixe seus dados do YouTube via Google Takeout antes da sua primeira limpeza em massa. A página oficial do <a href="https://takeout.google.com/" rel="noopener noreferrer">Takeout</a> é a única forma de recuperar seu histórico de exibição após a limpeza.</p>
+        </div>
+
+        <h2 id="faq">Perguntas frequentes</h2>
+
+        <h3>Quanto tempo leva para limpar todo o meu histórico do YouTube?</h3>
+        <p>O SocialEraser processa cerca de 0,9 segundo por item. 1.000 entradas de histórico de exibição levam aproximadamente 15 minutos. 20.000 entradas levam cerca de 4 a 5 horas em segundo plano. Você pode deixar a execução rodando enquanto dorme, trabalha ou faz qualquer outra coisa.</p>
+
+        <h3>Posso limpar apenas o histórico de um ano específico?</h3>
+        <p>Sim. Use o filtro de <strong>intervalo de datas</strong> no painel lateral. Defina uma data de início e uma data de término para limpar apenas esse período. Ótimo para limpar uma era específica de visualização mantendo o histórico mais antigo e mais novo intactos.</p>
+
+        <h3>Limpar o histórico afeta minhas recomendações?</h3>
+        <p>Sim — esse geralmente é o objetivo. Limpar seu histórico de exibição dá ao algoritmo do YouTube uma nova base, então suas recomendações voltam a refletir seus interesses atuais em vez do que você assistiu anos atrás. O histórico de pesquisa também influencia as sugestões, então limpe os dois para um reset completo.</p>
+
+        <h3>Posso cancelar inscrição em massa de canais inativos?</h3>
+        <p>Sim. Use o filtro <strong>Inatividade do canal</strong> e defina um limite. Canais que publicaram dentro da janela continuam com a inscrição mantida; canais que não publicam há N meses têm a inscrição cancelada. Uma escolha comum é 6 meses — mantém criadores ativos, limpa os follows inativos.</p>
+
+        <h3>Limpar meu histórico afeta meu canal?</h3>
+        <p>Não. Limpar seu histórico de exibição, histórico de pesquisa, curtidas e inscrições pessoais afeta apenas o algoritmo de recomendação da sua conta — seu canal, envios, inscritos e comentários permanecem completamente intactos.</p>
+
+        <h3>Posso desfazer uma limpeza depois?</h3>
+        <p>Não. Uma vez que o histórico de exibição do YouTube é limpo, ele desaparece dos servidores do YouTube em segundos. É por isso que o primeiro passo deste guia é fazer backup dos seus dados primeiro usando o Google Takeout.</p>
+
+        <h3>Funciona no aplicativo móvel do YouTube?</h3>
+        <p>Não. O aplicativo móvel do YouTube não permite extensões de navegador. O SocialEraser roda no Chrome para desktop. Um companheiro dedicado para mobile está no roadmap de 2027.</p>
+
+        <h3>E se eu tiver anos de histórico acumulado?</h3>
+        <p>O SocialEraser lida bem com grandes bibliotecas de histórico. A extensão pausa automaticamente se atingir um limite de taxa, e você pode continuar do mesmo ponto. O estado é preservado entre reinicializações do navegador, então uma biblioteca de 20.000 entradas pode ser dividida em vários dias, sem duplicações ou itens pulados.</p>
+
+        <div class="related-cta">
+          <h2>Pronto para um YouTube limpo?</h2>
+          <p>O SocialEraser para YouTube está em pré-lançamento. Entre na lista de espera para receber acesso antecipado quando for lançado.</p>
+          <a href="/pt/platforms/youtube/#download" class="btn btn--primary btn--xl">Entrar na Lista de Espera do YouTube</a>
+        </div>
+
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container-lg">
+      <div class="site-footer__grid">
+        <div class="site-footer__brand">
+          <a href="/pt/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
+        </span>
+            <span>SocialEraser</span>
+          </a>
+          <p>Limpe suas redes sociais em massa. 100% local, sem senha, código aberto. Feito para quem prefere não passar o fim de semana desfazendo curtidas de 2017.</p>
+        </div>
+        <div class="site-footer__col"><h4>Plataformas</h4><ul>
+          <li><a href="/pt/platforms/x/">X (Twitter)</a></li>
+          <li><a href="/pt/platforms/tiktok/">TikTok</a></li>
+          <li><a href="/pt/platforms/youtube/">YouTube</a></li>
+          <li><a href="/pt/platforms/instagram/">Instagram</a></li>
+          <li><a href="/pt/platforms/facebook/">Facebook</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>Produto</h4><ul>
+          <li><a href="/pt/help.html">Central de Ajuda</a></li>
+          <li><a href="/pt/platforms/youtube/#download">Entrar na Lista de Espera</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/CHANGELOG.md" target="_blank" rel="noopener noreferrer">Changelog</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/ROADMAP.md" target="_blank" rel="noopener noreferrer">Roadmap</a></li>
+          <li><a href="/pt/support.html">☕ Apoiar</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">Código-fonte</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>Empresa</h4><ul>
+          <li><a href="/pt/about.html">Sobre</a></li>
+          <li><a href="mailto:support@socialeraser.app">Contato</a></li>
+          <li><a href="/pt/privacy.html">Privacidade</a></li>
+          <li><a href="/pt/terms.html">Termos</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser#readme" target="_blank" rel="noopener noreferrer">Kit de Imprensa</a></li>
+        </ul></div>
+      </div>
+      <div class="site-footer__bottom">
+        <span>© 2026 SocialEraser. Todos os direitos reservados.</span>
+        <div class="site-footer__legal"><span>Ferramenta independente — não afiliada à Google LLC.</span></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/app.js" defer></script>
+  <script defer src="/assets/lang-switcher.js"></script>
+</body>
+</html>

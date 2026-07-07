@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0a0b">
+  <title>ツイートを一括削除する方法(ステップバイステップガイド 2026) — SocialEraser</title>
+  <meta name="description" content="ステップバイステップのチュートリアル: 無料のSocialEraser Chrome拡張機能を使って、過去のツイート、リツイート、返信、いいね、フォローを一括削除する方法。日付、キーワード、エンゲージメントでフィルター可能。パスワード不要、100%ローカル動作。">
+  <meta name="keywords" content="ツイート削除方法, ツイート全削除, 古いツイート削除, ツイート一括削除, Xの一括いいね解除, 一括フォロー解除, Xクリーナー, リツイート取り消し, ツイート履歴削除, Xアカウント整理">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://socialeraser.app/ja/guides/twitter.html">
+  <link rel="alternate" hreflang="en" href="https://socialeraser.app/guides/twitter.html">
+  <link rel="alternate" hreflang="zh" href="https://socialeraser.app/zh/guides/twitter.html">
+  <link rel="alternate" hreflang="ja" href="https://socialeraser.app/ja/guides/twitter.html">
+  <link rel="alternate" hreflang="es" href="https://socialeraser.app/es/guides/twitter.html">
+  <link rel="alternate" hreflang="fr" href="https://socialeraser.app/fr/guides/twitter.html">
+  <link rel="alternate" hreflang="de" href="https://socialeraser.app/de/guides/twitter.html">
+  <link rel="alternate" hreflang="pt" href="https://socialeraser.app/pt/guides/twitter.html">
+  <link rel="alternate" hreflang="ko" href="https://socialeraser.app/ko/guides/twitter.html">
+  <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/ja/guides/twitter.html"><link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="SocialEraser">
+  <meta property="og:url" content="https://socialeraser.app/ja/guides/twitter.html">
+  <meta property="og:title" content="ツイートを一括削除する方法(ステップバイステップガイド 2026)">
+  <meta property="og:description" content="ステップバイステップのチュートリアル: 無料のChrome拡張機能で、過去のツイート、リツイート、いいね、フォローを一括削除。日付、キーワード、エンゲージメントでフィルター可能。パスワード不要、100%ローカル。">
+  <meta property="og:image" content="https://socialeraser.app/assets/icons/og-x.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="ツイートを一括削除する方法(ステップバイステップガイド 2026)">
+  <meta name="twitter:description" content="ステップバイステップのチュートリアル: 過去のツイート、リツイート、いいね、フォローを一括削除。パスワード不要、100%ローカル。">
+  <meta name="twitter:image" content="https://socialeraser.app/assets/icons/og-x.png">
+  <meta name="author" content="SocialEraser">
+  <link rel="icon" type="image/png" href="/assets/icons/socialeraser-mark.png">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/app.css">
+  <style>
+    :root {
+      --gradient-brand-soft: linear-gradient(135deg, rgba(251, 191, 36, 0.18) 0%, rgba(245, 158, 11, 0.06) 100%);
+    }
+    .article-wrap { max-width: 760px; margin: 0 auto; padding: 0 var(--space-6); }
+    .breadcrumbs {
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+      font-size: var(--text-sm); color: var(--text-mute);
+      margin-bottom: var(--space-6);
+    }
+    .breadcrumbs a { color: var(--text-dim); text-decoration: none; outline-offset: 4px; }
+    .breadcrumbs a:hover { color: var(--text); text-decoration: none; }
+    .breadcrumbs a:focus { outline: none; }
+    .breadcrumbs a:focus-visible { outline: 2px solid var(--border-strong); }
+    .breadcrumbs__sep { color: var(--text-faint); }
+    .breadcrumbs__current { color: var(--text); }
+    .article-hero { margin-bottom: var(--space-12); }
+    .article-hero h1 {
+      font-size: var(--text-5xl); line-height: 1.1; letter-spacing: -0.02em;
+      margin-bottom: var(--space-5);
+    }
+    .article-hero .lede { font-size: var(--text-lg); color: var(--text-dim); line-height: 1.55; }
+    .article-meta {
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+      font-size: var(--text-sm); color: var(--text-mute);
+      margin-top: var(--space-6); padding-top: var(--space-5);
+      border-top: 1px solid var(--border);
+    }
+    .article-body h2 {
+      font-size: var(--text-3xl);
+      margin-top: var(--space-16); margin-bottom: var(--space-4);
+      scroll-margin-top: var(--space-12);
+    }
+    .article-body h3 {
+      font-size: var(--text-xl);
+      margin-top: var(--space-8); margin-bottom: var(--space-3);
+    }
+    .article-body p {
+      font-size: var(--text-base); line-height: 1.7;
+      color: var(--text-dim); margin-bottom: var(--space-4);
+    }
+    .article-body p strong { color: var(--text); }
+    .article-body ul, .article-body ol {
+      margin: var(--space-4) 0 var(--space-6) var(--space-6);
+      color: var(--text-dim); line-height: 1.7;
+    }
+    .article-body ul li, .article-body ol li { margin-bottom: var(--space-2); }
+    .article-body a:not(.btn) { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+    .article-body a:not(.btn):hover { text-decoration: underline; opacity: 0.85; }
+    .toc {
+      background: var(--bg-elev-1); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: var(--space-5) var(--space-6);
+      margin-bottom: var(--space-12);
+    }
+    .toc__title {
+      font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-mute); margin-bottom: var(--space-3);
+    }
+    .toc ol { list-style: decimal; padding-left: var(--space-5); }
+    .toc ol li { color: var(--text-dim); margin-bottom: 4px; }
+    .toc a { color: var(--text-dim); text-decoration: none; }
+    .toc a:hover { color: var(--accent); }
+    .step-card {
+      background: var(--bg-elev-1); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: var(--space-6);
+      margin: var(--space-6) 0 var(--space-8);
+    }
+    .step-card__number {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--gradient-brand); color: #0F0F0F;
+      font-weight: 800; font-size: var(--text-base);
+      margin-bottom: var(--space-3);
+    }
+    .step-card h3 { margin-top: 0; font-size: var(--text-xl); }
+    .step-card p { margin-bottom: var(--space-3); }
+    .step-card p:last-child { margin-bottom: 0; }
+    .step-card code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.9em; background: var(--bg-elev-2);
+      padding: 2px 6px; border-radius: 4px; color: var(--accent);
+    }
+    .callout {
+      background: var(--accent-soft);
+      border-left: 3px solid var(--accent);
+      border-radius: 6px; padding: var(--space-4) var(--space-5);
+      margin: var(--space-6) 0;
+    }
+    .callout p { margin-bottom: 0; color: var(--text); }
+    .callout p strong { color: var(--accent); }
+    .filter-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--space-4); margin: var(--space-6) 0;
+    }
+    .filter-tile {
+      background: var(--bg-elev-1); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: var(--space-5);
+    }
+    .filter-tile h3 { margin-top: 0; font-size: var(--text-lg); color: var(--accent); }
+    .filter-tile p { margin-bottom: 0; font-size: var(--text-sm); }
+    .related-cta {
+      background: var(--gradient-brand-soft);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: var(--radius-lg); padding: var(--space-8);
+      text-align: center; margin: var(--space-16) 0 var(--space-8);
+    }
+    .related-cta h2 { margin-top: 0; }
+    .related-cta p { color: var(--text-dim); margin-bottom: var(--space-5); }
+    @media (max-width: 640px) {
+      .article-hero h1 { font-size: var(--text-4xl); }
+      .article-body h2 { font-size: var(--text-2xl); }
+    }
+  </style>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Article","headline":"ツイートを一括削除する方法(ステップバイステップガイド)","description":"無料のSocialEraser Chrome拡張機能を使って、過去のツイート、リツイート、返信、いいね、ブックマークを削除し、フォローを一括解除する方法を解説するステップバイステップのチュートリアル。","author":{"@type":"Organization","name":"SocialEraser","url":"https://socialeraser.app/"},"publisher":{"@type":"Organization","name":"SocialEraser","logo":{"@type":"ImageObject","url":"https://socialeraser.app/assets/icons/socialeraser-mark.png"}},"datePublished":"2026-07-04","dateModified":"2026-07-04","mainEntityOfPage":{"@type":"WebPage","@id":"https://socialeraser.app/ja/guides/twitter.html"},"image":"https://socialeraser.app/assets/icons/og-x.png"}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+    {"@type":"ListItem","position":1,"name":"ホーム","item":"https://socialeraser.app/ja/"},
+    {"@type":"ListItem","position":2,"name":"X用SocialEraser","item":"https://socialeraser.app/ja/platforms/x/"},
+    {"@type":"ListItem","position":3,"name":"ツイートを一括削除する方法","item":"https://socialeraser.app/ja/guides/twitter.html"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"HowTo","name":"ツイートを一括削除する方法","description":"SocialEraserをインストールし、x.comを開き、削除対象を選び、フィルターを設定して、スタートをクリック。SocialEraserが人間の速度で通常のクリックをシミュレートし、該当するすべてのツイート、リツイート、いいね、フォローを削除します。","totalTime":"PT15M","estimatedCost":{"@type":"MonetaryAmount","value":"0","currency":"USD"},"tool":[{"@type":"HowToTool","name":"Google Chrome または Microsoft Edge(バージョン120以降)"},{"@type":"HowToTool","name":"X用SocialEraserブラウザ拡張機能(無料)"}],"step":[
+    {"@type":"HowToStep","position":1,"name":"Xのアーカイブをバックアップする(任意だが推奨)","text":"一括削除を行う前に、Xの公式アーカイブを「設定 → アカウント → データのダウンロード」からリクエストしてください。24時間以内にダウンロード可能なZIPで届き、すべてのツイート、いいね、DM、フォロワーが含まれます。削除したツイートを後で後悔した場合、このアーカイブが唯一の復元手段です。","url":"https://x.com/settings/download_your_data","image":"https://socialeraser.app/assets/icons/og-x.png"},
+    {"@type":"HowToStep","position":2,"name":"X用SocialEraserをインストールする","text":"Chromeウェブストアから無料のSocialEraser拡張機能を追加します。アカウント不要、サインアップ不要、支払い不要。2回のクリックでインストールされ、ツールバーにピン留めされます。","url":"https://socialeraser.app/ja/platforms/x/#download","image":"https://socialeraser.app/assets/icons/og-x.png"},
+    {"@type":"HowToStep","position":3,"name":"x.comを開いてログインする","text":"拡張機能をインストールしたのと同じChromeプロファイルでx.comを開きます。通常通りアカウントにログインしてください。SocialEraserサイドパネルのアイコンをクリックすると、拡張機能がログインを自動検出しアカウント状態を表示します。","image":"https://socialeraser.app/assets/icons/og-x.png"},
+    {"@type":"HowToStep","position":4,"name":"削除対象を選び、フィルターを設定する","text":"削除したい対象にチェックを入れます: オリジナルツイート、リプライ、リツイート、いいね、ブックマーク、フォロー。次にフィルターを設定します。「開始日」を使えば最近のツイートを残して古いものを削除できます。キーワードフィルターで特定のトピックのみを対象にし、エンゲージメント下限でバズったツイートを残すこともできます。","image":"https://socialeraser.app/assets/icons/og-x.png"},
+    {"@type":"HowToStep","position":5,"name":"スタートをクリックして実行する","text":"「クリーンアップ開始」ボタンをクリックします。拡張機能は該当する各項目を開き、人間の速度で削除 / いいね解除 / フォロー解除ボタンをクリックし、進捗カウンターをリアルタイムで表示します。ラップトップを閉じて翌日に戻ってきても構いません — ブラウザの再起動をまたいで状態が保持されます。1項目あたり約0.9秒なので、1,000件のツイートで約15分かかります。","image":"https://socialeraser.app/assets/icons/og-x.png"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"すべてのツイートを削除するのにどのくらい時間がかかりますか?","acceptedAnswer":{"@type":"Answer","text":"SocialEraserは1項目あたり約0.9秒で処理します — つまり1,000件のツイートで約15分かかります。バックグラウンドで実行したままにしたり、ラップトップを閉じて後から戻ってきたりしても構いません。ブラウザの再起動をまたいで状態が保持されます。"}},
+    {"@type":"Question","name":"特定の日付以前のツイートだけ削除できますか?","acceptedAnswer":{"@type":"Answer","text":"はい。サイドパネルの「開始日」フィルターを使用して、その日付以降につぶやかれたツイートを保持し、それより古いものをすべて削除します。これは最もよく使われるフィルターで、リブランド、面接、新たなスタートの前にすべてを消去したい場合に多く使われています。"}},
+    {"@type":"Question","name":"最もいいねを集めたツイートを残して他を削除できますか?","acceptedAnswer":{"@type":"Answer","text":"はい。「エンゲージメント下限」フィルターを使って最低いいね数を設定します。上限を超えるツイートは保持され、それ以下のものは削除されます。これは、ブレイクした瞬間を残しつつ、実験的なノイズを一掃する標準的な方法です。"}},
+    {"@type":"Question","name":"リツイート、返信、いいねの削除にも対応していますか?","acceptedAnswer":{"@type":"Answer","text":"はい。SocialEraserはリツイートの一括取り消し、返信の一括削除、いいねの一括解除、フォローの一括解除が可能です。同じフィルターシステム(日付、キーワード、エンゲージメント下限、投稿タイプ)がすべてのクリーンアップ種別に対応します。"}},
+    {"@type":"Question","name":"一括削除でアカウント停止になりますか?","acceptedAnswer":{"@type":"Answer","text":"SocialEraserは人間の速度で通常のクリックをシミュレートし、Xのレート制限を尊重します。第三者ツール全般に言える注意書きと同様 — 私たちはX Corp.とは関係がなく、一括ツールの使用は自己責任で行ってください。"}},
+    {"@type":"Question","name":"削除後に元に戻すことはできますか?","acceptedAnswer":{"@type":"Answer","text":"いいえ。ツイートが一度削除されると、数秒以内にXの公開表示から消えます。本ガイドのステップ1で、まずXの公式アーカイブを使ってデータをバックアップする理由はここにあります。"}},
+    {"@type":"Question","name":"Xのモバイルアプリでも動作しますか?","acceptedAnswer":{"@type":"Answer","text":"いいえ。Xのモバイルアプリはブラウザ拡張機能に対応していません。SocialEraserはデスクトップのChromeで動作します。専用のモバイルコンパニオンは2027年のロードマップに含まれています。"}},
+    {"@type":"Question","name":"数万件のツイートがある場合はどうなりますか?","acceptedAnswer":{"@type":"Answer","text":"SocialEraserは大きなライブラリも問題なく処理します。レート制限に達した場合は自動で一時停止し、同じ場所から再開できます。50,000件のライブラリであれば、12〜13時間のバックグラウンド時間で完了することが一般的で、放置していても問題ありません。"}}
+  ]}
+  </script>
+</head>
+<body>
+
+  <a href="#main" class="skip-to-content">本文へスキップ</a>
+
+  <header class="site-header">
+    <div class="site-header__inner container-lg">
+      <a href="/ja/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
+        </span>
+        <span>SocialEraser</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <details class="site-nav__platforms">
+          <summary class="site-nav__platforms-trigger">プラットフォーム <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></summary>
+          <div class="site-nav__platforms-menu">
+            <a href="/ja/platforms/x/">X用SocialEraser</a>
+            <a href="/ja/platforms/tiktok/">TikTok用SocialEraser</a>
+            <a href="/ja/platforms/youtube/">YouTube用SocialEraser</a>
+            <a href="/ja/platforms/instagram/">Instagram用SocialEraser</a>
+            <a href="/ja/platforms/facebook/">Facebook用SocialEraser</a>
+          </div>
+        </details>
+        <a href="/ja/help.html" class="hide-mobile">ヘルプ</a>
+        <a href="/ja/platforms/x/#download" class="btn btn--primary btn--sm">無料でインストール</a>
+      </nav>
+      <details class="site-nav--mobile">
+        <summary class="site-nav--mobile-trigger" aria-label="メニューを開閉">
+          <svg class="site-nav--mobile-icon-menu" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <svg class="site-nav--mobile-icon-close" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </summary>
+        <div class="site-nav--mobile-menu">
+          <a href="/ja/platforms/x/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>X用SocialEraser</a>
+          <a href="/ja/platforms/tiktok/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg>TikTok用SocialEraser</a>
+          <a href="/ja/platforms/youtube/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>YouTube用SocialEraser</a>
+          <a href="/ja/platforms/instagram/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Instagram用SocialEraser</a>
+          <a href="/ja/platforms/facebook/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>Facebook用SocialEraser</a>
+          <a href="/ja/help.html"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>ヘルプ</a>
+          <a href="/ja/platforms/x/#download" class="btn btn--primary"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>無料でインストール</a>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main id="main">
+    <article class="article-wrap section">
+      <nav class="breadcrumbs" aria-label="パンくずリスト">
+        <a href="/ja/">ホーム</a>
+        <span class="breadcrumbs__sep">›</span>
+        <a href="/ja/platforms/x/">X用SocialEraser</a>
+        <span class="breadcrumbs__sep">›</span>
+        <span class="breadcrumbs__current">ツイートを一括削除する方法</span>
+      </nav>
+
+      <header class="article-hero">
+        <h1>ツイートを一括削除する方法(ステップバイステップガイド)</h1>
+        <p class="lede">過去の投稿が掘り出されるのにうんざりしていませんか?転職、リブランド、心機一転の前にクリーンなXプロフィールを手に入れたいですか?このガイドでは、アカウントのすべてのツイート、リツイート、いいね、フォローを一括削除する手順を、フィルター付きで安全に、1,000件あたり約15分で完了する方法を解説します。</p>
+        <div class="article-meta">
+          <span>執筆: <strong>SocialEraser</strong></span>
+          <span>·</span>
+          <span>更新日 <time datetime="2026-07-04">2026年7月4日</time></span>
+          <span>·</span>
+          <span>読了時間 約8分</span>
+        </div>
+      </header>
+
+      <div class="article-body">
+
+        <div class="toc">
+          <p class="toc__title">目次</p>
+          <ol>
+            <li><a href="#why-bulk-delete">なぜツイートを一括削除するのか?</a></li>
+            <li><a href="#before-you-start">始める前に: データをバックアップする</a></li>
+            <li><a href="#step-by-step">ステップバイステップ: すべてのツイートを一括削除する</a></li>
+            <li><a href="#filters">一括削除を正確にする4つのフィルター</a></li>
+            <li><a href="#what-stays">削除されるものと残されるもの</a></li>
+            <li><a href="#safety">安全性、レート制限、アカウント保護</a></li>
+            <li><a href="#faq">よくある質問</a></li>
+          </ol>
+        </div>
+
+        <h2 id="why-bulk-delete">なぜツイートを一括削除するのか?</h2>
+        <p>ほとんどの人は、いつかクリーンなXプロフィールが欲しくなる瞬間があります — リブランド、転職、新しい街への引っ越し、失恋後のやり直し、あるいは「いいね」タブが自分の2017年の博物館だと気付く瞬間です。問題は、Xの公式の「削除」ワークフローは1ツイートずつしか行えないことです。一括削除もバッチ操作も期間指定のフィルターも搭載されていません。</p>
+        <p>200件なら午後のクリックで済みます。2,000件なら1週間。50,000件なら、何かしらの助けなしには事実上不可能です。</p>
+        <p>そこで活躍するのが<a href="/ja/platforms/x/">X用SocialEraser</a>です。ブラウザで動作し、人間の速度で通常のクリックをシミュレートし、日付・キーワード・エンゲージメント下限・投稿種別でフィルターできます。ルールを設定し、スタートをクリックして、あとは離れるだけ。このガイドではその全工程を解説します。</p>
+
+        <h2 id="before-you-start">始める前に: データをバックアップする</h2>
+        <p>このステップだけは少し手間がかかるので、最初の実行前に必ず行ってください。ツイートを一度削除したら復元できません — ごみ箱も、元に戻すボタンも、復元期間もありません。Xは削除を永続的なものと扱います。</p>
+        <p>削除したツイートを(たとえ削除後でも)取り戻す唯一の公式な方法は、始める前にXから<strong>アーカイブ</strong>をリクエストすることです。アーカイブは24時間以内にダウンロード可能なZIPとして届き、すべてのツイート、いいね、DM、フォロワーが個別のファイルとして含まれています。</p>
+        <ol>
+          <li>ブラウザで <code>x.com</code> を開き、ログインします。</li>
+          <li><strong>設定 → アカウント → データのダウンロード</strong>(または直接 <a href="https://x.com/settings/download_your_data" rel="noopener noreferrer">x.com/settings/download_your_data</a>)に移動します。</li>
+          <li>アーカイブをリクエストします。Xから24時間以内にダウンロードリンクがメールで届きます。</li>
+        </ol>
+        <div class="callout">
+          <p><strong>ヒント:</strong> すべてを削除する予定でも、最初にこのアーカイブをリクエストしてください。無料で、あなた自身のデータであり、もし気が変わったときに戻る手段を残してくれます。</p>
+        </div>
+
+        <h2 id="step-by-step">ステップバイステップ: すべてのツイートを一括削除する</h2>
+        <p>全体の流れはセットアップに約60秒、実際の削除はバックグラウンドで実行されます。</p>
+
+        <div class="step-card">
+          <span class="step-card__number">1</span>
+          <h3>X用SocialEraserをインストールする</h3>
+          <p><a href="/ja/platforms/x/#download">X用SocialEraserのページ</a>を開き、<strong>無料でインストール</strong>をクリックします。Chromeウェブストアが開くので、<strong>Chromeに追加</strong>をクリックしてインストールを確定してください。拡張機能のアイコンがツールバーに表示されます。</p>
+          <p>アカウントも、サインアップも、メールアドレス認証も不要です。拡張機能は無料で、チップで支えられています — Chrome 120+ と Edge 120+ で動作します。</p>
+        </div>
+
+        <div class="step-card">
+          <span class="step-card__number">2</span>
+          <h3>x.comを開いてログインする</h3>
+          <p>SocialEraserをインストールしたブラウザで <code>x.com</code> にアクセスし、通常通りアカウントにログインしてください。拡張機能はパスワードを扱いません — X自身のログイン機構が使われます。SocialEraserは、認証後のページ上でのみ動作します。</p>
+          <p>ツールバーにあるSocialEraserアイコンをクリックしてサイドパネルを開きます。ログインが確定すると、上部のステータスインジケーターが黄色から緑色に変わります。</p>
+        </div>
+
+        <div class="step-card">
+          <span class="step-card__number">3</span>
+          <h3>クリーンアップ対象を選ぶ</h3>
+          <p>サイドパネルで、削除したい対象をチェックします。1つだけ選んでも、組み合わせても構いません:</p>
+          <ul>
+            <li><strong>オリジナルツイート</strong> — あなたが投稿したオリジナルのツイート(リプライやリツイートは除く)</li>
+            <li><strong>リプライ</strong> — 他の人のツイートに対して投稿したすべてのリプライ</li>
+            <li><strong>リツイート</strong> — プロフィールにあるすべてのリツイート</li>
+            <li><strong>いいね</strong> — いいねタブにあるすべてのツイート</li>
+            <li><strong>ブックマーク</strong> — 非公開のブックマークコレクション</li>
+            <li><strong>フォロー中</strong> — あなたがフォローしているアカウント</li>
+          </ul>
+          <p>1種類(例えばオリジナルのツイートだけ)だけをクリーンアップしたい場合は、そのチェックボックスだけをオンにします。拡張機能は他の対象を完全にスキップします。</p>
+        </div>
+
+        <div class="step-card">
+          <span class="step-card__number">4</span>
+          <h3>フィルターを設定する(任意だが推奨)</h3>
+          <p>フィルターこそが、精密な一括削除と、すべてを更地にする荒っぽい削除を分けるポイントです。4つのフィルターについては次のセクションで詳しく解説しますが、最も一般的な設定は以下のとおりです:</p>
+          <ul>
+            <li><strong>開始日:</strong> 最近のツイートは残し、特定の日付以前のものをすべて削除</li>
+            <li><strong>エンゲージメント下限:</strong> 一定以上のいいねを獲得したツイートは残し、それ以下を削除</li>
+            <li><strong>キーワード:</strong> 特定のワードを含むツイートだけを削除</li>
+            <li><strong>投稿タイプ:</strong> オリジナル、リプライ、リツイートのみを対象</li>
+          </ul>
+          <p>複数のフィルターを組み合わせることができます。例えば「2022年1月1日以前かつ10いいね未満のツイートをすべて削除」も1つのフィルター組み合わせで実現できます。</p>
+        </div>
+
+        <div class="step-card">
+          <span class="step-card__number">5</span>
+          <h3>スタートをクリックして実行する</h3>
+          <p><strong>クリーンアップ開始</strong>ボタンを押します。拡張機能は該当する各項目を開き、人間の速度(1項目あたり約0.9秒)で削除 / いいね解除 / フォロー解除ボタンをクリックし、進捗カウンターをリアルタイムで更新します。</p>
+          <p>次のように使えます:</p>
+          <ul>
+            <li>サイドパネルで<strong>リアルタイムに動作を見守る</strong></li>
+            <li>タブを<strong>最小化</strong>して通常通りブラウザを使う</li>
+            <li><strong>ラップトップを完全に閉じる</strong> — ブラウザの再起動をまたいで状態が保持されるので、戻ったときに最後に完了した項目から再開します</li>
+            <li>休憩したいときはいつでも<strong>一時停止</strong></li>
+            <li>実行中に気が変わったら<strong>停止</strong></li>
+          </ul>
+          <p>典型的な1,000件のライブラリなら、実行全体で約15分かかります。50,000件なら、12〜13時間のバックグラウンド時間を見込んでください — 放置していても問題ありません。</p>
+        </div>
+
+        <h2 id="filters">一括削除を正確にする4つのフィルター</h2>
+        <p>フィルターは鈍器の刀をメスに変えます。X用SocialEraserで利用可能な4つと、それぞれが解決するユースケースを以下に示します。</p>
+
+        <div class="filter-grid">
+          <div class="filter-tile">
+            <h3>日付範囲</h3>
+            <p>特定の日付の前後で、ツイートをまとめて削除します。最もよく使われるフィルターです。最近の作品を残して古い時代を消すのに使います。リブランドや面接の前にクリーンなXプロフィールが欲しい場合にも、「より前」の方向がぴったりです。</p>
+          </div>
+          <div class="filter-tile">
+            <h3>エンゲージメント下限</h3>
+            <p>いいねの閾値以上のツイートを残し、それ以外を削除します。100に設定してブレイクした瞬間を残し、0にすればいいね数に関わらずすべてを削除します。バズった投稿を残しつつ、いいねが0の孤独な投稿を一掃するのに最適なフィルターです。</p>
+          </div>
+          <div class="filter-tile">
+            <h3>キャプションキーワード</h3>
+            <p>特定のワードやハッシュタグを含むツイートだけを削除します。1つのトピックを消すのに最適 — ブランド案件、過激な投稿、ファンダムの時代、その他ライブラリには手を加えず一部分だけ消したい場合に便利です。</p>
+          </div>
+          <div class="filter-tile">
+            <h3>投稿タイプ</h3>
+            <p>オリジナル、リプライ、リツイートのみを対象にします。シェアやリプライ履歴を消す前に自分の文章による投稿を保護したい場合や、特定の会話を残して他をすべて消したい場合に便利です。</p>
+          </div>
+        </div>
+        <p>4つのいずれも自由に組み合わせられます。最も人気があるのは<strong>「2022年1月1日以前かつ10いいね未満」</strong>の組み合わせ — ブレイクした時代を残し、実験的な投稿を一掃します。</p>
+
+        <h2 id="what-stays">削除されるものと残されるもの</h2>
+        <p>SocialEraserは指示した対象にだけ手を加えます。具体的には:</p>
+        <ul>
+          <li><strong>オリジナルツイートにチェックON</strong> — あなたが投稿したオリジナルのツイートが1件ずつ削除されます。</li>
+          <li><strong>リプライにチェックON</strong> — 投稿したすべてのリプライが削除されます。</li>
+          <li><strong>リツイートにチェックON</strong> — プロフィールにあるすべてのリツイートが取り消されます。</li>
+          <li><strong>いいねにチェックON</strong> — いいねタブにあるすべてのツイートのいいねが解除されます。</li>
+          <li><strong>ブックマークにチェックON</strong> — 非公開ブックマークにあるすべてのツイートが削除されます。</li>
+          <li><strong>フォロー中にチェックON</strong> — フォローしているすべてのアカウントが順番にフォロー解除されます。途中で再開したい場合は順序が重要ですが、そうでない場合は効果は同じです。</li>
+        </ul>
+        <p>SocialEraserが<strong>触らない</strong>もの: アカウント設定、DM、下書き、プロフィール写真、自己紹介、ユーザー名、リスト、その他明示的にチェックを入れなかったX上のあらゆるコンテンツ。</p>
+
+        <h2 id="safety">安全性、レート制限、アカウント保護</h2>
+        <p>SocialEraserは人間の速度で通常のクリックをシミュレートします — API呼び出しも、スクレイピングも、ヘッドレスブラウザも、大量自動化もありません。拡張機能はあなたがクリックするのと同じボタンを1つずつ、間に遅延を入れてクリックするだけです。平均は1項目あたり約0.9秒で、不自然に見えないようランダムな揺らぎを持たせています。</p>
+        <p>ただし、他の第三者ツールと同様に共通の前提があります。X Corp.とは関係がなく、一括ツールの使用は自己責任で行ってください。XのUIが変更されても、当社のリモートコンフィグ更新システムが数時間以内に新しいセレクタスキーマを配信します — 拡張機能の再インストールは不要です。</p>
+        <p>レート制限に達した場合、拡張機能は自動的に一時停止し、「再接続中」インジケーターを表示し、制限が解除されると再開します。ブラウザの再起動をまたいで状態が保持されるため、50,000件の実行を複数日に分割しても、重複や漏れは発生しません。</p>
+        <div class="callout">
+          <p><strong>繰り返しになりますが:</strong> 一括実行の前にXのアーカイブをリクエストしてください。公式の<a href="https://x.com/settings/download_your_data" rel="noopener noreferrer">「データのダウンロード」</a>ページが、削除後にツイートを取り戻す唯一の手段です。</p>
+        </div>
+
+        <h2 id="faq">よくある質問</h2>
+
+        <h3>すべてのツイートを削除するのにどのくらい時間がかかりますか?</h3>
+        <p>SocialEraserは1項目あたり約0.9秒で処理します。1,000件のツイートで約15分、50,000件なら約12〜13時間のバックグラウンド時間です。寝ている間、仕事中、その他の活动中も実行したままにしておけます。</p>
+
+        <h3>特定の日付以前のツイートだけ削除できますか?</h3>
+        <p>はい。サイドパネルの<strong>開始日</strong>フィルターを使用します。その日付以降につぶやかれたツイートは保持され、それより古いものはすべて削除されます。これは最も一般的なフィルターで、リブランドや面接の前にすべてを消すために使う人が多いです。</p>
+
+        <h3>バズったツイートを残して他を削除できますか?</h3>
+        <p>はい。<strong>エンゲージメント下限</strong>フィルターで閾値を設定します。閾値を超えるツイートは残り、それ以下のものは削除されます。一般的な選択肢は10いいねです — ブレイクした瞬間を残し、ノイズを一掃します。</p>
+
+        <h3>リツイート、返信、フォローも削除できますか?</h3>
+        <p>はい。SocialEraserはリツイートの一括取り消し、返信の一括削除、いいねの一括解除、非公開ブックマークのクリア、フォローの一括解除が可能です。同じフィルターシステム(日付、キーワード、エンゲージメント下限、投稿タイプ)がすべてのクリーンアップ種別に対応します。消したい対象に合致するチェックボックスを入れてください。</p>
+
+        <h3>一括削除でアカウント停止になりますか?</h3>
+        <p>SocialEraserは人間の速度で通常のクリックをシミュレートし、Xのレート制限を尊重します。第三者ツール全般に言える注意書きと同様 — 私たちはX Corp.とは関係がなく、一括ツールの使用は自己責任で行ってください。</p>
+
+        <h3>削除後に元に戻すことはできますか?</h3>
+        <p>いいえ。ツイートが一度削除されると、数秒以内にXの公開表示から消えます。本ガイドの最初のステップがXの公式アーカイブを使ったバックアップであるのはこのためです。</p>
+
+        <h3>Xのモバイルアプリでも動作しますか?</h3>
+        <p>いいえ。Xのモバイルアプリはブラウザ拡張機能に対応していません。SocialEraserはデスクトップのChromeで動作します。専用のモバイルコンパニオンは2027年のロードマップに含まれています。</p>
+
+        <h3>数万件のツイートがある場合はどうなりますか?</h3>
+        <p>SocialEraserは大きなライブラリも問題なく処理します。レート制限に達した場合は自動で一時停止し、同じ場所から再開できます。ブラウザの再起動をまたいで状態が保持されるため、50,000件のライブラリを複数日に分割しても、重複や漏れは発生しません。</p>
+
+        <div class="related-cta">
+          <h2>Xプロフィールをクリーンにしませんか?</h2>
+          <p>無料Chrome拡張機能。アカウント不要、サインアップ不要。100%ローカルで、データはブラウザから一切出ません。</p>
+          <a href="/ja/platforms/x/#download" class="btn btn--primary btn--xl">X用SocialEraserをインストール</a>
+        </div>
+
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container-lg">
+      <div class="site-footer__grid">
+        <div class="site-footer__brand">
+          <a href="/ja/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
+        </span>
+            <span>SocialEraser</span>
+          </a>
+          <p>ソーシャルメディアを一括整理。100%ローカル、パスワード不要、オープンソース。2017年の投稿のいいね解除で週末を過ごしたくない人のために作られました。</p>
+        </div>
+        <div class="site-footer__col"><h4>プラットフォーム</h4><ul>
+          <li><a href="/ja/platforms/x/">X (Twitter)</a></li>
+          <li><a href="/ja/platforms/tiktok/">TikTok</a></li>
+          <li><a href="/ja/platforms/youtube/">YouTube</a></li>
+          <li><a href="/ja/platforms/instagram/">Instagram</a></li>
+          <li><a href="/ja/platforms/facebook/">Facebook</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>製品</h4><ul>
+          <li><a href="/ja/help.html">ヘルプセンター</a></li>
+          <li><a href="/ja/platforms/x/#download">インストール</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/CHANGELOG.md" target="_blank" rel="noopener noreferrer">更新履歴</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/ROADMAP.md" target="_blank" rel="noopener noreferrer">ロードマップ</a></li>
+          <li><a href="/ja/support.html">☕ サポート</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">ソースコード</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>会社情報</h4><ul>
+          <li><a href="/ja/about.html">について</a></li>
+          <li><a href="mailto:support@socialeraser.app">お問い合わせ</a></li>
+          <li><a href="/ja/privacy.html">プライバシー</a></li>
+          <li><a href="/ja/terms.html">利用規約</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser#readme" target="_blank" rel="noopener noreferrer">プレスキット</a></li>
+        </ul></div>
+      </div>
+      <div class="site-footer__bottom">
+        <span>© 2026 SocialEraser. All rights reserved.</span>
+        <div class="site-footer__legal"><span>独立したツール — X Corp.とは関係がありません。</span></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/app.js" defer></script>
+  <script defer src="/assets/lang-switcher.js"></script>
+</body>
+</html>

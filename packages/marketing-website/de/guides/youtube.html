@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="de-DE">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0a0b">
+  <title>So löschen Sie den YouTube-Verlauf in großen Mengen (Schritt-für-Schritt-Anleitung 2026) — SocialEraser</title>
+  <meta name="description" content="Schritt-für-Schritt-Anleitung: So löschen Sie Ihren YouTube-Wiedergabeverlauf, Suchverlauf, gelikten Videos, Abonnements und Kommentare in großen Mengen mit der kostenlosen SocialEraser Chrome-Erweiterung. Filter nach Datum und Kanal. Kein Passwort, 100 % lokal.">
+  <meta name="keywords" content="youtube verlauf löschen, youtube watched videos löschen, youtube bulk clear, youtube history cleaner, youtube videos massenhaft unliken, youtube abonnements entfernen, youtube bulk delete, youtube likes löschen, youtube suchverlauf">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://socialeraser.app/de/guides/youtube.html">
+  <link rel="alternate" hreflang="en" href="https://socialeraser.app/guides/youtube.html">
+  <link rel="alternate" hreflang="zh" href="https://socialeraser.app/zh/guides/youtube.html">
+  <link rel="alternate" hreflang="ja" href="https://socialeraser.app/ja/guides/youtube.html">
+  <link rel="alternate" hreflang="es" href="https://socialeraser.app/es/guides/youtube.html">
+  <link rel="alternate" hreflang="fr" href="https://socialeraser.app/fr/guides/youtube.html">
+  <link rel="alternate" hreflang="de" href="https://socialeraser.app/de/guides/youtube.html">
+  <link rel="alternate" hreflang="pt" href="https://socialeraser.app/pt/guides/youtube.html">
+  <link rel="alternate" hreflang="ko" href="https://socialeraser.app/ko/guides/youtube.html">
+  <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/de/guides/youtube.html"><link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="SocialEraser">
+  <meta property="og:url" content="https://socialeraser.app/de/guides/youtube.html">
+  <meta property="og:title" content="So löschen Sie den YouTube-Verlauf in großen Mengen (Schritt-für-Schritt-Anleitung 2026)">
+  <meta property="og:description" content="Schritt-für-Schritt-Anleitung: Löschen Sie YouTube-Wiedergabeverlauf, Suchverlauf, Likes und Abonnements in großen Mengen mit einer kostenlosen Chrome-Erweiterung. Kein Passwort, 100 % lokal.">
+  <meta property="og:image" content="https://socialeraser.app/assets/icons/socialeraser-mark.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="de_DE">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="So löschen Sie den YouTube-Verlauf in großen Mengen (Schritt-für-Schritt-Anleitung 2026)">
+  <meta name="twitter:description" content="Schritt-für-Schritt-Anleitung: Löschen Sie YouTube-Wiedergabeverlauf, Suchverlauf, Likes und Abonnements in großen Mengen. Kein Passwort, 100 % lokal.">
+  <meta name="twitter:image" content="https://socialeraser.app/assets/icons/socialeraser-mark.png">
+  <meta name="author" content="SocialEraser">
+  <link rel="icon" type="image/png" href="/assets/icons/socialeraser-mark.png">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/app.css">
+  <style>
+    /* Tutorial page — YouTube red brand tokens. */
+    :root {
+      --accent:         #FF3B3B;
+      --accent-bright:  #FF5A5A;
+      --accent-soft:    rgba(255, 59, 59, 0.12);
+      --accent-glow:    rgba(255, 59, 59, 0.35);
+      --border-accent:  rgba(255, 59, 59, 0.4);
+      --gradient-brand:      linear-gradient(135deg, #FF3B3B 0%, #C71F1F 100%);
+      --gradient-brand-soft: linear-gradient(135deg, rgba(255, 59, 59, 0.18) 0%, rgba(199, 31, 31, 0.06) 100%);
+      --gradient-hero-glow:  radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 59, 59, 0.18) 0%, transparent 70%);
+    }
+    .article-wrap { max-width: 760px; margin: 0 auto; padding: 0 var(--space-6); }
+    .breadcrumbs {
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+      font-size: var(--text-sm); color: var(--text-mute);
+      margin-bottom: var(--space-6);
+    }
+    .breadcrumbs a { color: var(--text-dim); text-decoration: none; outline-offset: 4px; }
+    .breadcrumbs a:hover { color: var(--text); text-decoration: none; }
+    .breadcrumbs a:focus { outline: none; }
+    .breadcrumbs a:focus-visible { outline: 2px solid var(--border-strong); }
+    .breadcrumbs__sep { color: var(--text-faint); }
+    .breadcrumbs__current { color: var(--text); }
+    .article-hero { margin-bottom: var(--space-12); }
+    .article-hero h1 {
+      font-size: var(--text-5xl); line-height: 1.1; letter-spacing: -0.02em;
+      margin-bottom: var(--space-5);
+    }
+    .article-hero .lede { font-size: var(--text-lg); color: var(--text-dim); line-height: 1.55; }
+    .article-meta {
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+      font-size: var(--text-sm); color: var(--text-mute);
+      margin-top: var(--space-6); padding-top: var(--space-5);
+      border-top: 1px solid var(--border);
+    }
+    .article-body h2 {
+      font-size: var(--text-3xl);
+      margin-top: var(--space-16); margin-bottom: var(--space-4);
+      scroll-margin-top: var(--space-12);
+    }
+    .article-body h3 {
+      font-size: var(--text-xl);
+      margin-top: var(--space-8); margin-bottom: var(--space-3);
+    }
+    .article-body p {
+      font-size: var(--text-base); line-height: 1.7;
+      color: var(--text-dim); margin-bottom: var(--space-4);
+    }
+    .article-body p strong { color: var(--text); }
+    .article-body ul, .article-body ol {
+      margin: var(--space-4) 0 var(--space-6) var(--space-6);
+      color: var(--text-dim); line-height: 1.7;
+    }
+    .article-body ul li, .article-body ol li { margin-bottom: var(--space-2); }
+    .article-body a:not(.btn) { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+    .article-body a:not(.btn):hover { text-decoration: underline; opacity: 0.85; }
+    .toc {
+      background: var(--bg-elev-1); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: var(--space-5) var(--space-6);
+      margin-bottom: var(--space-12);
+    }
+    .toc__title {
+      font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-mute); margin-bottom: var(--space-3);
+    }
+    .toc ol { list-style: decimal; padding-left: var(--space-5); }
+    .toc ol li { color: var(--text-dim); margin-bottom: 4px; }
+    .toc a { color: var(--text-dim); text-decoration: none; }
+    .toc a:hover { color: var(--accent); }
+    .step-card {
+      background: var(--bg-elev-1); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: var(--space-6);
+      margin: var(--space-6) 0 var(--space-8);
+    }
+    .step-card__number {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--gradient-brand); color: #FFFFFF;
+      font-weight: 800; font-size: var(--text-base);
+      margin-bottom: var(--space-3);
+    }
+    .step-card h3 { margin-top: 0; font-size: var(--text-xl); }
+    .step-card p { margin-bottom: var(--space-3); }
+    .step-card p:last-child { margin-bottom: 0; }
+    .step-card code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.9em; background: var(--bg-elev-2);
+      padding: 2px 6px; border-radius: 4px; color: var(--accent);
+    }
+    .callout {
+      background: var(--accent-soft);
+      border-left: 3px solid var(--accent);
+      border-radius: 6px; padding: var(--space-4) var(--space-5);
+      margin: var(--space-6) 0;
+    }
+    .callout p { margin-bottom: 0; color: var(--text); }
+    .callout p strong { color: var(--accent); }
+    .filter-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--space-4); margin: var(--space-6) 0;
+    }
+    .filter-tile {
+      background: var(--bg-elev-1); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: var(--space-5);
+    }
+    .filter-tile h3 { margin-top: 0; font-size: var(--text-lg); color: var(--accent); }
+    .filter-tile p { margin-bottom: 0; font-size: var(--text-sm); }
+    .related-cta {
+      background: var(--gradient-brand-soft);
+      border: 1px solid rgba(255, 59, 59, 0.3);
+      border-radius: var(--radius-lg); padding: var(--space-8);
+      text-align: center; margin: var(--space-16) 0 var(--space-8);
+    }
+    .related-cta h2 { margin-top: 0; }
+    .related-cta p { color: var(--text-dim); margin-bottom: var(--space-5); }
+    @media (max-width: 640px) {
+      .article-hero h1 { font-size: var(--text-4xl); }
+      .article-body h2 { font-size: var(--text-2xl); }
+    }
+  </style>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Article","headline":"So löschen Sie den YouTube-Verlauf in großen Mengen (Schritt-für-Schritt-Anleitung)","description":"Schritt-für-Schritt-Anleitung, die zeigt, wie Sie YouTube-Wiedergabeverlauf, Suchverlauf, gelikte Videos, Abonnements und Kommentare in großen Mengen mit der kostenlosen SocialEraser Chrome-Erweiterung löschen.","author":{"@type":"Organization","name":"SocialEraser","url":"https://socialeraser.app/"},"publisher":{"@type":"Organization","name":"SocialEraser","logo":{"@type":"ImageObject","url":"https://socialeraser.app/assets/icons/socialeraser-mark.png"}},"datePublished":"2026-07-04","dateModified":"2026-07-04","mainEntityOfPage":{"@type":"WebPage","@id":"https://socialeraser.app/de/guides/youtube.html"},"image":"https://socialeraser.app/assets/icons/socialeraser-mark.png"}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Startseite","item":"https://socialeraser.app/"},
+    {"@type":"ListItem","position":2,"name":"SocialEraser für YouTube","item":"https://socialeraser.app/platforms/youtube/"},
+    {"@type":"ListItem","position":3,"name":"So löschen Sie den YouTube-Verlauf in großen Mengen","item":"https://socialeraser.app/de/guides/youtube.html"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"HowTo","name":"So löschen Sie den YouTube-Verlauf in großen Mengen","description":"Installieren Sie SocialEraser, öffnen Sie youtube.com, wählen Sie, was bereinigt werden soll, legen Sie Ihre Filter fest und klicken Sie auf Start. SocialEraser simuliert normale Klicks in menschlicher Geschwindigkeit, um jeden passenden Wiedergabeverlaufeintrag, jedes gelikte Video oder Abonnement zu löschen.","totalTime":"PT20M","estimatedCost":{"@type":"MonetaryAmount","value":"0","currency":"USD"},"tool":[{"@type":"HowToTool","name":"Google Chrome oder Microsoft Edge (Version 120 oder höher)"},{"@type":"HowToTool","name":"SocialEraser für YouTube Browser-Erweiterung (kostenlos)"}],"step":[
+    {"@type":"HowToStep","position":1,"name":"Fordern Sie Google Takeout für YouTube an (dringend empfohlen)","text":"Fordern Sie vor jeder Massenlöschung ein Google Takeout-Archiv Ihrer YouTube-Daten an. Das Archiv enthält Ihren Wiedergabeverlauf, Suchverlauf, gelikte Videos, Abonnements und Kommentare als herunterladbare Dateien. Sobald der Verlauf gelöscht ist, behält YouTube keine Sicherung — dieses Archiv ist Ihr einziger Weg zurück.","url":"https://takeout.google.com/","image":"https://socialeraser.app/assets/icons/socialeraser-mark.png"},
+    {"@type":"HowToStep","position":2,"name":"Installieren Sie SocialEraser für YouTube","text":"Fügen Sie die kostenlose SocialEraser-Erweiterung aus dem Chrome Web Store hinzu. Kein Konto, keine Anmeldung, keine Zahlung. Zwei Klicks und sie ist installiert und an Ihrer Symbolleiste angeheftet.","url":"https://socialeraser.app/platforms/youtube/#download","image":"https://socialeraser.app/assets/icons/socialeraser-mark.png"},
+    {"@type":"HowToStep","position":3,"name":"Öffnen Sie youtube.com und melden Sie sich an","text":"Öffnen Sie youtube.com im selben Chrome-Profil, in dem Sie die Erweiterung installiert haben. Melden Sie sich wie gewohnt bei Ihrem Google-Konto an. Klicken Sie auf das SocialEraser-Seitenleisten-Symbol — die Erweiterung erkennt Ihre Anmeldung automatisch und zeigt Ihren Kontostatus an.","image":"https://socialeraser.app/assets/icons/socialeraser-mark.png"},
+    {"@type":"HowToStep","position":4,"name":"Wählen Sie, was bereinigt werden soll, und legen Sie Ihre Filter fest","text":"Aktivieren Sie die Kontrollkästchen für das, was Sie löschen möchten: Wiedergabeverlauf, Suchverlauf, gelikte Videos, Playlists, Abonnements, Kommentare oder Community-Beiträge. Legen Sie dann Ihre Filter fest. Verwenden Sie „Ab Datum", um aktuellen Verlauf zu behalten und ältere Einträge zu löschen. Verwenden Sie „Kanal-Inaktivität", um Kanäle zu entabonnieren, die seit 6+ Monaten nicht mehr gepostet haben.","image":"https://socialeraser.app/assets/icons/socialeraser-mark.png"},
+    {"@type":"HowToStep","position":5,"name":"Klicken Sie auf Start und lassen Sie es laufen","text":"Klicken Sie auf die rote Schaltfläche „Bereinigung starten". Die Erweiterung öffnet jedes passende Element, klickt in menschlicher Geschwindigkeit auf die Schaltfläche Löschen / Unlike / Abo beenden und zeigt einen Live-Fortschrittszähler an. Sie können den Laptop schließen und morgen wiederkommen — der Status bleibt über Browser-Neustarts hinweg erhalten. Die durchschnittliche Laufzeit beträgt etwa 0,9 Sekunden pro Element, sodass 1.000 Einträge ungefähr 15 Minuten dauern.","image":"https://socialeraser.app/assets/icons/socialeraser-mark.png"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"Wie lange dauert es, meinen gesamten YouTube-Verlauf zu löschen?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser verarbeitet etwa 0,9 Sekunden pro Element — also dauern 1.000 Wiedergabeverlaufeinträge ungefähr 15 Minuten. Sie können es im Hintergrund laufen lassen oder den Laptop vollständig schließen und später zurückkommen; der Status bleibt über Browser-Neustarts hinweg erhalten."}},
+    {"@type":"Question","name":"Beeinflusst das Löschen des Verlaufs meine Empfehlungen?","acceptedAnswer":{"@type":"Answer","text":"Ja — das ist normalerweise der Sinn. Das Löschen Ihres Wiedergabeverlaufs gibt dem YouTube-Algorithmus einen Neustart, sodass Ihre Empfehlungen auf Ihre aktuellen Interessen zurückgesetzt werden, anstatt auf das, was Sie vor Jahren angesehen haben. Der Suchverlauf beeinflusst ebenfalls die Vorschläge, also löschen Sie beide für einen vollständigen Neustart."}},
+    {"@type":"Question","name":"Kann ich Abonnements zu Kanälen behalten, die ich noch schaue?","acceptedAnswer":{"@type":"Answer","text":"Ja. Verwenden Sie den Filter „Kanal-Inaktivität" und legen Sie eine Schwelle fest (z. B. 6 Monate). Kanäle, die innerhalb des Fensters gepostet haben, bleiben abonniert; Kanäle, die seit 6+ Monaten nicht mehr gepostet haben, werden entabonniert. Dies ist die Standardmethode, um aktive Ersteller zu behalten und die toten Follows zu löschen."}},
+    {"@type":"Question","name":"Kann ich nur Videos löschen, die ich in einem bestimmten Jahr angesehen habe?","acceptedAnswer":{"@type":"Answer","text":"Ja. Verwenden Sie den Datumsbereich-Filter. Legen Sie ein Startdatum (z. B. 1. Januar 2020) und ein Enddatum (z. B. 31. Dezember 2020) fest, um nur den Verlauf dieses Jahres zu löschen. Dies ist großartig, um eine bestimmte Seh-Ära zu löschen, während sowohl älterer als auch neuerer Verlauf erhalten bleibt."}},
+    {"@type":"Question","name":"Beeinflusst das Löschen meines Verlaufs meinen Kanal?","acceptedAnswer":{"@type":"Answer","text":"Nein. Das Löschen Ihres persönlichen Wiedergabeverlaufs, Suchverlaufs, Ihrer Likes und Abonnements beeinflusst nur den Empfehlungsalgorithmus Ihres Kontos — Ihr Kanal, Uploads, Abonnentenzahl und Kommentare bleiben vollständig unberührt."}},
+    {"@type":"Question","name":"Kann ich eine Löschung nachträglich rückgängig machen?","acceptedAnswer":{"@type":"Answer","text":"Nein. Sobald der YouTube-Wiedergabeverlauf gelöscht ist, ist er innerhalb von Sekunden von den YouTube-Servern verschwunden. Deshalb ist Schritt 1 dieser Anleitung, Ihre YouTube-Daten über Google Takeout vor jeder Massenlöschung herunterzuladen."}},
+    {"@type":"Question","name":"Funktioniert dies in der YouTube-Mobil-App?","acceptedAnswer":{"@type":"Answer","text":"Nein. Die YouTube-Mobil-App erlaubt keine Browser-Erweiterungen. SocialEraser läuft in Chrome auf dem Desktop. Eine dedizierte mobile Begleit-App ist für 2027 in der Roadmap."}},
+    {"@type":"Question","name":"Was, wenn ich Jahre an angesammeltem Verlauf habe?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser verarbeitet auch große Verlaufsbibliotheken problemlos. Die Erweiterung pausiert automatisch, wenn sie auf ein Rate-Limit stößt, und Sie können an derselben Stelle fortfahren. Eine Bibliothek mit 20.000 Einträgen läuft typischerweise in 4–5 Stunden Hintergrundzeit, ohne dass eine Überwachung nötig ist."}}
+  ]}
+  </script>
+</head>
+<body>
+
+  <a href="#main" class="skip-to-content">Zum Inhalt springen</a>
+
+  <header class="site-header">
+    <div class="site-header__inner container-lg">
+      <a href="/de/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
+        </span>
+        <span>SocialEraser</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <details class="site-nav__platforms">
+          <summary class="site-nav__platforms-trigger">Plattformen <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></summary>
+          <div class="site-nav__platforms-menu">
+            <a href="/de/platforms/x/">SocialEraser für X</a>
+            <a href="/de/platforms/tiktok/">SocialEraser für TikTok</a>
+            <a href="/de/platforms/youtube/">SocialEraser für YouTube</a>
+            <a href="/de/platforms/instagram/">SocialEraser für Instagram</a>
+            <a href="/de/platforms/facebook/">SocialEraser für Facebook</a>
+          </div>
+        </details>
+        <a href="/de/help.html" class="hide-mobile">Hilfe</a>
+        <a href="/de/platforms/youtube/#download" class="btn btn--primary btn--sm">Warteliste beitreten</a>
+      </nav>
+      <details class="site-nav--mobile">
+        <summary class="site-nav--mobile-trigger" aria-label="Menü umschalten">
+          <svg class="site-nav--mobile-icon-menu" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <svg class="site-nav--mobile-icon-close" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </summary>
+        <div class="site-nav--mobile-menu">
+          <a href="/de/platforms/x/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>SocialEraser für X</a>
+          <a href="/de/platforms/tiktok/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg>SocialEraser für TikTok</a>
+          <a href="/de/platforms/youtube/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>SocialEraser für YouTube</a>
+          <a href="/de/platforms/instagram/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>SocialEraser für Instagram</a>
+          <a href="/de/platforms/facebook/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>SocialEraser für Facebook</a>
+          <a href="/de/help.html"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>Hilfe</a>
+          <a href="/de/platforms/youtube/#download" class="btn btn--primary"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Warteliste beitreten</a>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main id="main">
+    <article class="article-wrap section">
+      <nav class="breadcrumbs" aria-label="Brotkrumen">
+        <a href="/de/">Startseite</a>
+        <span class="breadcrumbs__sep">›</span>
+        <a href="/de/platforms/youtube/">SocialEraser für YouTube</a>
+        <span class="breadcrumbs__sep">›</span>
+        <span class="breadcrumbs__current">So löschen Sie den YouTube-Verlauf in großen Mengen</span>
+      </nav>
+
+      <header class="article-hero">
+        <h1>So löschen Sie den YouTube-Verlauf in großen Mengen (Schritt-für-Schritt-Anleitung)</h1>
+        <p class="lede">Wünschen Sie sich einen frischen YouTube-Algorithmus, der widerspiegelt, was Sie <em>jetzt</em> schauen, und nicht das, was Sie 2019 geschaut haben? Möchten Sie in großen Mengen Kanäle entabonnieren, die seit Jahren nicht mehr gepostet haben? Diese Anleitung führt Sie durch das Löschen jedes Wiedergabeverlaufeintrags, Likes, Abonnements und Kommentars — sicher, mit Filtern, in etwa 15 Minuten pro 1.000 Einträge.</p>
+        <div class="article-meta">
+          <span>Von <strong>SocialEraser</strong></span>
+          <span>·</span>
+          <span>Aktualisiert am <time datetime="2026-07-04">4. Juli 2026</time></span>
+          <span>·</span>
+          <span>~8 Min. Lesezeit</span>
+        </div>
+      </header>
+
+      <div class="article-body">
+
+        <div class="toc">
+          <p class="toc__title">Auf dieser Seite</p>
+          <ol>
+            <li><a href="#why-bulk-clear">Warum den YouTube-Verlauf in großen Mengen löschen?</a></li>
+            <li><a href="#before-you-start">Bevor Sie beginnen: Sichern Sie Ihre Daten</a></li>
+            <li><a href="#step-by-step">Schritt-für-Schritt: Jeden Eintrag in großen Mengen löschen</a></li>
+            <li><a href="#filters">Die vier Filter, die das Massenlöschen präzise machen</a></li>
+            <li><a href="#what-stays">Was wird gelöscht und was bleibt?</a></li>
+            <li><a href="#safety">Sicherheit, Rate-Limits und Kontosicherheit</a></li>
+            <li><a href="#faq">FAQ</a></li>
+          </ol>
+        </div>
+
+        <h2 id="why-bulk-clear">Warum den YouTube-Verlauf in großen Mengen löschen?</h2>
+        <p>Die meisten Menschen erreichen irgendwann den Punkt, an dem sie ein frisches YouTube wollen — ein Rebranding ihrer Interessen, ein sauberer Bruch mit alten Gewohnheiten, ein frischer Algorithmus, der nicht ständig Inhalte aus dem Jahr 2017 empfiehlt. Das Problem: Die offizielle Schaltfläche „Wiedergabeverlauf löschen" von YouTube ist alles-oder-nichts. Es gibt keinen Datumsbereich-Filter, keine pro-Kanal-Bereinigung und keine Schaltfläche „Inaktive Kanäle entabonnieren".</p>
+        <p>Für 200 Wiedergabeverlaufeinträge können Sie es von Hand erledigen. Für 2.000 Einträge ist es eine Woche voller Klicks. Für 20.000 Einträge ist es ohne Hilfe praktisch unmöglich.</p>
+        <p>Genau dafür ist <a href="/de/platforms/youtube/">SocialEraser für YouTube</a> da. Es läuft in Ihrem Browser, simuliert normale Klicks in menschlicher Geschwindigkeit und ermöglicht es Ihnen, nach Datum, Kanal oder Aktivitätsniveau zu filtern. Sie legen die Regeln fest, klicken auf Start und gehen weg. Diese Anleitung führt Sie durch den gesamten Prozess.</p>
+
+        <h2 id="before-you-start">Bevor Sie beginnen: Sichern Sie Ihre Daten</h2>
+        <p>Dies ist der wichtigste Schritt, und Sie sollten ihn vor Ihrem ersten Durchlauf erledigen. Sobald Sie den YouTube-Verlauf löschen, ist er weg — es gibt keinen Papierkorb, kein Rückgängig, kein Wiederherstellungsfenster. YouTube behandelt Löschungen als dauerhaft.</p>
+        <p>Der offizielle Weg, Ihren Verlauf zurückzubekommen (selbst nach dem Löschen), besteht darin, Ihre YouTube-Daten über Google Takeout herunterzuladen. Das Archiv enthält Ihren Wiedergabeverlauf, Suchverlauf, gelikte Videos, Abonnements und Kommentare als eigenständige Dateien.</p>
+        <ol>
+          <li>Besuchen Sie <a href="https://takeout.google.com/" rel="noopener noreferrer">takeout.google.com</a> in Ihrem Browser.</li>
+          <li>Wählen Sie <strong>YouTube und YouTube Music</strong> und deaktivieren Sie alles andere.</li>
+          <li>Wählen Sie das Format <strong>JSON + MP4</strong> und klicken Sie auf <strong>Nächster Schritt</strong>.</li>
+          <li>Klicken Sie auf <strong>Export erstellen</strong>. Google sendet Ihnen innerhalb weniger Stunden einen Download-Link per E-Mail.</li>
+        </ol>
+        <div class="callout">
+          <p><strong>Tipp:</strong> Auch wenn Sie planen, alles zu löschen, fordern Sie dieses Archiv zuerst an. Es ist kostenlos, es sind Ihre Daten, und es gibt Ihnen einen Weg zurück, falls Sie es sich anders überlegen.</p>
+        </div>
+
+        <h2 id="step-by-step">Schritt-für-Schritt: YouTube-Verlauf in großen Mengen löschen</h2>
+        <p>Der gesamte Vorgang dauert etwa 60 Sekunden Einrichtung. Die eigentliche Löschung läuft im Hintergrund.</p>
+
+        <div class="step-card">
+          <span class="step-card__number">1</span>
+          <h3>Installieren Sie SocialEraser für YouTube</h3>
+          <p>Gehen Sie zur <a href="/de/platforms/youtube/#download">SocialEraser für YouTube-Seite</a> und klicken Sie auf <strong>YouTube-Warteliste beitreten</strong>. Die Erweiterung befindet sich derzeit in der Vor-Veröffentlichung — der Beitritt zur Warteliste verschafft Ihnen frühen Zugriff, sobald sie verfügbar ist. (Sie können auch <a href="/de/platforms/x/#download">SocialEraser für X</a> heute installieren, das bereits vollständig veröffentlicht ist.)</p>
+        </div>
+
+        <div class="step-card">
+          <span class="step-card__number">2</span>
+          <h3>Öffnen Sie youtube.com und melden Sie sich an</h3>
+          <p>Navigieren Sie zu <code>youtube.com</code> im Browser, in dem Sie SocialEraser installiert haben. Melden Sie sich wie gewohnt bei Ihrem Google-Konto an. Die Erweiterung verarbeitet keine Passwörter — der eigene Login von Google erledigt das. SocialEraser wirkt erst auf der Seite, nachdem Sie bereits authentifiziert sind.</p>
+          <p>Klicken Sie auf das SocialEraser-Symbol in Ihrer Symbolleiste, um die Seitenleiste zu öffnen. Die Statusanzeige oben wechselt von Gelb zu Grün, sobald bestätigt ist, dass Sie angemeldet sind.</p>
+        </div>
+
+        <div class="step-card">
+          <span class="step-card__number">3</span>
+          <h3>Wählen Sie, was bereinigt werden soll</h3>
+          <p>Aktivieren Sie in der Seitenleiste die Kontrollkästchen für das, was Sie löschen möchten. Sie können eines auswählen oder mehrere kombinieren:</p>
+          <ul>
+            <li><strong>Wiedergabeverlauf</strong> — jedes Video, das Sie jemals angesehen haben</li>
+            <li><strong>Suchverlauf</strong> — jede Suchanfrage, die Sie eingegeben haben</li>
+            <li><strong>Gelikte Videos</strong> — die „Geliked"-Playlist (Ihre Daumen-hoch-Geschichte)</li>
+            <li><strong>Playlists</strong> — „Später ansehen", benutzerdefinierte Playlists und gespeicherte Listen</li>
+            <li><strong>Abonnements</strong> — Kanäle, denen Sie folgen</li>
+            <li><strong>Kommentare</strong> — Ihre eigenen Kommentare zu beliebigen Videos</li>
+            <li><strong>Community-Beiträge</strong> — Beiträge, die Sie auf Community-Tabs von Kanälen gemacht haben</li>
+          </ul>
+          <p>Wenn Sie nur einen Typ bereinigen möchten (z. B. nur den Wiedergabeverlauf), aktivieren Sie nur diesen. Die Erweiterung überspringt die anderen vollständig.</p>
+        </div>
+
+        <div class="step-card">
+          <span class="step-card__number">4</span>
+          <h3>Legen Sie Ihre Filter fest (optional, aber empfohlen)</h3>
+          <p>Filter sind das, was eine präzise Massenlöschung von einer Alles-niederbrennen-Aktion unterscheidet. Die vier Filter werden im nächsten Abschnitt ausführlich behandelt, aber die häufigste Konfiguration ist:</p>
+          <ul>
+            <li><strong>Ab Datum:</strong> aktuellen Verlauf behalten, alles vor einem bestimmten Datum löschen</li>
+            <li><strong>Kanal-Inaktivität:</strong> Kanäle entabonnieren, die seit 6+ Monaten nicht mehr gepostet haben</li>
+            <li><strong>Titel-Stichwort:</strong> nur Verlaufeinträge löschen, deren Titel ein Wort enthält</li>
+            <li><strong>Videolänge:</strong> nur kurze Videos löschen oder nur lange</li>
+          </ul>
+          <p>Sie können mehrere Filter kombinieren. Beispielsweise ist „Allen Wiedergabeverlauf vor dem 1. Januar 2022 von Kanälen mit weniger als 10.000 Aufrufen löschen" eine einzelne Filterkombination.</p>
+        </div>
+
+        <div class="step-card">
+          <span class="step-card__number">5</span>
+          <h3>Klicken Sie auf Start und lassen Sie es laufen</h3>
+          <p>Klicken Sie auf die rote Schaltfläche <strong>Bereinigung starten</strong>. Die Erweiterung öffnet jedes passende Element, klickt in menschlicher Geschwindigkeit (etwa 0,9 Sekunden pro Element) auf die Schaltfläche Löschen / Unlike / Abo beenden und aktualisiert einen Live-Fortschrittszähler.</p>
+          <p>Sie können:</p>
+          <ul>
+            <li>in <strong>Echtzeit in der Seitenleiste zusehen</strong></li>
+            <li>den Tab <strong>minimieren</strong> und Ihren Browser normal benutzen</li>
+            <li>den Laptop <strong>vollständig schließen</strong> — der Status bleibt über Browser-Neustarts hinweg erhalten, sodass beim Zurückkommen beim letzten abgeschlossenen Element fortgesetzt wird</li>
+            <li>jederzeit auf <strong>Pause</strong> klicken, um eine Pause einzulegen</li>
+            <li>auf <strong>Stopp</strong> klicken, falls Sie es sich mitten im Lauf anders überlegen</li>
+          </ul>
+          <p>Für einen typischen Wiedergabeverlauf mit 1.000 Einträgen dauert der gesamte Lauf etwa 15 Minuten. Für 20.000 Einträge rechnen Sie mit 4–5 Stunden Hintergrundzeit, ohne dass eine Überwachung nötig ist.</p>
+        </div>
+
+        <h2 id="filters">Die vier Filter, die das Massenlöschen präzise machen</h2>
+        <p>Filter verwandeln ein stumpfes Instrument in ein Skalpell. Hier sind die vier in SocialEraser für YouTube verfügbaren Filter und die Anwendungsfälle, die jeder einzelne löst.</p>
+
+        <div class="filter-grid">
+          <div class="filter-tile">
+            <h3>Datumsbereich</h3>
+            <p>Löschen Sie Verlaufeinträge vor oder nach einem bestimmten Datum. Dies ist der am häufigsten verwendete Filter. Verwenden Sie ihn, um Ihr aktuelles Sehverhalten zu behalten und die alte Ära zu löschen. Die Richtung „vor" ist auch das richtige Werkzeug, wenn Sie einen sauberen Algorithmus wünschen, ohne alles zu löschen, was Sie dieses Jahr angesehen haben.</p>
+          </div>
+          <div class="filter-tile">
+            <h3>Kanal-Inaktivität</h3>
+            <p>Entabonnieren Sie Kanäle, die seit N Monaten nicht mehr gepostet haben. Setzen Sie 6 Monate für eine moderate Bereinigung, 24 Monate für eine gründliche. Dies ist der beste Filter, um aktive Ersteller zu behalten und die toten Follows zu löschen.</p>
+          </div>
+          <div class="filter-tile">
+            <h3>Titel-Stichwort</h3>
+            <p>Löschen Sie nur Verlaufeinträge, deren Titel ein bestimmtes Wort oder eine Phrase enthält. Großartig, um ein einzelnes Thema zu bereinigen — wie einen Kurs, einen Ersteller, mit dem Sie fertig sind, oder eine Fandom-Ära, die Sie hinter sich lassen möchten.</p>
+          </div>
+          <div class="filter-tile">
+            <h3>Videolänge</h3>
+            <p>Löschen Sie nur kurze Videos (unter 4 Minuten) oder nur lange. Nützlich, um eine Phase des Binge-Watching von kurzen Inhalten zu löschen und die Deep-Dive-Dokumentationen zu behalten, oder umgekehrt.</p>
+          </div>
+        </div>
+        <p>Sie können alle vier kombinieren. Die beliebteste Kombination ist <strong>„vor dem 1. Januar 2022 UND Kanal inaktiv 6+ Monate"</strong> — behält die jüngste Vergangenheit, löscht das tiefe Archiv.</p>
+
+        <h2 id="what-stays">Was wird gelöscht und was bleibt?</h2>
+        <p>SocialEraser berührt nur das, was Sie ihm sagen. Konkret:</p>
+        <ul>
+          <li><strong>Kontrollkästchen Wiedergabeverlauf aktiviert</strong> — Ihr gesamter Wiedergabeverlauf wird einzeln gelöscht.</li>
+          <li><strong>Kontrollkästchen Suchverlauf aktiviert</strong> — jede Suchanfrage, die Sie eingegeben haben, wird gelöscht.</li>
+          <li><strong>Kontrollkästchen Gelikte Videos aktiviert</strong> — jedes Video in Ihrer „Geliked"-Playlist wird unliked.</li>
+          <li><strong>Kontrollkästchen Playlists aktiviert</strong> — jede Playlist, die Sie besitzen, wird gelöscht (oder nur geleert, je nach Modus).</li>
+          <li><strong>Kontrollkästchen Abonnements aktiviert</strong> — jedem Kanal, dem Sie folgen, wird entabonniert.</li>
+          <li><strong>Kontrollkästchen Kommentare aktiviert</strong> — jeder Kommentar, den Sie gepostet haben, wird gelöscht.</li>
+          <li><strong>Kontrollkästchen Community-Beiträge aktiviert</strong> — jeder Community-Beitrag, den Sie gemacht haben, wird gelöscht.</li>
+        </ul>
+        <p>Was SocialEraser <strong>nicht</strong> berührt: Ihren Kanal, Ihre Uploads, Ihre Abonnentenzahl, die Kanal-Kommentare (anderer Personen), Ihr Profilbild, Ihre Bio, Ihr Kanal-Banner oder andere Inhalte auf YouTube, für die Sie nicht ausdrücklich ein Kontrollkästchen aktiviert haben.</p>
+
+        <h2 id="safety">Sicherheit, Rate-Limits und Kontosicherheit</h2>
+        <p>SocialEraser simuliert normale Klicks in menschlicher Geschwindigkeit — keine API-Aufrufe, kein Scraping, kein Headless-Browser, keine Massenautomatisierung. Die Erweiterung klickt buchstäblich auf dieselben Schaltflächen, die Sie klicken würden, eine nach der anderen, mit einer Verzögerung dazwischen. Der Durchschnitt liegt bei etwa 0,9 Sekunden pro Element, mit einer zufälligen Streuung, damit es nicht roboterhaft wirkt.</p>
+        <p>Es gilt jedoch der gleiche Vorbehalt wie bei jedem Drittanbieter-Tool. Wir sind nicht mit Google LLC verbunden. Die Nutzung von Bulk-Tools erfolgt auf eigene Verantwortung. Wenn YouTube seine Benutzeroberfläche ändert, schiebt unser Remote-Config-Aktualisierungssystem innerhalb weniger Stunden ein neues Selektor-Schema — keine Neuinstallation der Erweiterung erforderlich.</p>
+        <p>Wenn Sie auf ein Rate-Limit stoßen, pausiert die Erweiterung automatisch, zeigt eine „Wird verbunden"-Anzeige und setzt fort, sobald die Begrenzung aufgehoben ist. Der Status bleibt über Browser-Neustarts hinweg erhalten, sodass ein Lauf mit 20.000 Einträgen auf mehrere Tage aufgeteilt werden kann, ohne dass es zu Duplikaten oder übersprungenen Elementen kommt.</p>
+        <div class="callout">
+          <p><strong>Noch einmal:</strong> Laden Sie Ihre YouTube-Daten über Google Takeout vor Ihrer ersten Massenlöschung herunter. Die offizielle <a href="https://takeout.google.com/" rel="noopener noreferrer">Takeout</a>-Seite ist der einzige Weg, Ihren Wiedergabeverlauf nach dem Löschen zurückzubekommen.</p>
+        </div>
+
+        <h2 id="faq">Häufig gestellte Fragen</h2>
+
+        <h3>Wie lange dauert es, meinen gesamten YouTube-Verlauf zu löschen?</h3>
+        <p>SocialEraser verarbeitet etwa 0,9 Sekunden pro Element. 1.000 Wiedergabeverlaufeinträge dauern ungefähr 15 Minuten. 20.000 Einträge dauern etwa 4–5 Stunden Hintergrundzeit. Sie können den Lauf laufen lassen, während Sie schlafen, arbeiten oder etwas anderes tun.</p>
+
+        <h3>Kann ich nur den Verlauf eines bestimmten Jahres löschen?</h3>
+        <p>Ja. Verwenden Sie den <strong>Datumsbereich</strong>-Filter in der Seitenleiste. Legen Sie ein Start- und Enddatum fest, um nur diesen Zeitraum zu löschen. Dies ist großartig, um eine bestimmte Seh-Ära zu löschen, während sowohl älterer als auch neuerer Verlauf erhalten bleibt.</p>
+
+        <h3>Beeinflusst das Löschen des Verlaufs meine Empfehlungen?</h3>
+        <p>Ja — das ist normalerweise der Sinn. Das Löschen Ihres Wiedergabeverlaufs gibt dem YouTube-Algorithmus einen Neustart, sodass Ihre Empfehlungen auf Ihre aktuellen Interessen zurückgesetzt werden, anstatt auf das, was Sie vor Jahren angesehen haben. Der Suchverlauf beeinflusst ebenfalls die Vorschläge, also löschen Sie beide für einen vollständigen Neustart.</p>
+
+        <h3>Kann ich in großen Mengen inaktive Kanäle entabonnieren?</h3>
+        <p>Ja. Verwenden Sie den Filter <strong>Kanal-Inaktivität</strong> und legen Sie eine Schwelle fest. Kanäle, die innerhalb des Fensters gepostet haben, bleiben abonniert; Kanäle, die seit N Monaten nicht mehr gepostet haben, werden entabonniert. Eine übliche Wahl sind 6 Monate — behält aktive Ersteller, löscht die toten Follows.</p>
+
+        <h3>Beeinflusst das Löschen meines Verlaufs meinen Kanal?</h3>
+        <p>Nein. Das Löschen Ihres persönlichen Wiedergabeverlaufs, Suchverlaufs, Ihrer Likes und Abonnements beeinflusst nur den Empfehlungsalgorithmus Ihres Kontos — Ihr Kanal, Uploads, Abonnentenzahl und Kommentare bleiben vollständig unberührt.</p>
+
+        <h3>Kann ich eine Löschung nachträglich rückgängig machen?</h3>
+        <p>Nein. Sobald der YouTube-Wiedergabeverlauf gelöscht ist, ist er innerhalb von Sekunden von den YouTube-Servern verschwunden. Deshalb ist der erste Schritt dieser Anleitung, Ihre Daten zuerst mit Google Takeout zu sichern.</p>
+
+        <h3>Funktioniert dies in der YouTube-Mobil-App?</h3>
+        <p>Nein. Die YouTube-Mobil-App erlaubt keine Browser-Erweiterungen. SocialEraser läuft in Chrome auf dem Desktop. Eine dedizierte mobile Begleit-App ist für 2027 in der Roadmap.</p>
+
+        <h3>Was, wenn ich Jahre an angesammeltem Verlauf habe?</h3>
+        <p>SocialEraser verarbeitet auch große Verlaufsbibliotheken problemlos. Die Erweiterung pausiert automatisch, wenn sie auf ein Rate-Limit stößt, und Sie können an derselben Stelle fortfahren. Der Status bleibt über Browser-Neustarts hinweg erhalten, sodass eine Bibliothek mit 20.000 Einträgen auf mehrere Tage aufgeteilt werden kann, ohne dass es zu Duplikaten oder übersprungenen Elementen kommt.</p>
+
+        <div class="related-cta">
+          <h2>Bereit für ein sauberes YouTube?</h2>
+          <p>SocialEraser für YouTube befindet sich in der Vor-Veröffentlichung. Treten Sie der Warteliste bei, um frühen Zugriff zu erhalten, sobald die Erweiterung verfügbar ist.</p>
+          <a href="/de/platforms/youtube/#download" class="btn btn--primary btn--xl">YouTube-Warteliste beitreten</a>
+        </div>
+
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container-lg">
+      <div class="site-footer__grid">
+        <div class="site-footer__brand">
+          <a href="/de/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
+        </span>
+            <span>SocialEraser</span>
+          </a>
+          <p>Bereinigen Sie Ihre sozialen Medien in großen Mengen. 100 % lokal, passwortfrei, Open Source. Für Menschen, die ihr Wochenende lieber nicht mit dem Unlike von Beiträgen aus dem Jahr 2017 verbringen möchten.</p>
+        </div>
+        <div class="site-footer__col"><h4>Plattformen</h4><ul>
+          <li><a href="/de/platforms/x/">X (Twitter)</a></li>
+          <li><a href="/de/platforms/tiktok/">TikTok</a></li>
+          <li><a href="/de/platforms/youtube/">YouTube</a></li>
+          <li><a href="/de/platforms/instagram/">Instagram</a></li>
+          <li><a href="/de/platforms/facebook/">Facebook</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>Produkt</h4><ul>
+          <li><a href="/de/help.html">Hilfe-Center</a></li>
+          <li><a href="/de/platforms/youtube/#download">Warteliste beitreten</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/CHANGELOG.md" target="_blank" rel="noopener noreferrer">Changelog</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/ROADMAP.md" target="_blank" rel="noopener noreferrer">Roadmap</a></li>
+          <li><a href="/de/support.html">☕ Unterstützen</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">Quellcode</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>Unternehmen</h4><ul>
+          <li><a href="/de/about.html">Über uns</a></li>
+          <li><a href="mailto:support@socialeraser.app">Kontakt</a></li>
+          <li><a href="/de/privacy.html">Datenschutz</a></li>
+          <li><a href="/de/terms.html">Bedingungen</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser#readme" target="_blank" rel="noopener noreferrer">Pressemappe</a></li>
+        </ul></div>
+      </div>
+      <div class="site-footer__bottom">
+        <span>© 2026 SocialEraser. Alle Rechte vorbehalten.</span>
+        <div class="site-footer__legal"><span>Unabhängiges Tool — nicht verbunden mit Google LLC.</span></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/app.js" defer></script>
+  <script defer src="/assets/lang-switcher.js"></script>
+</body>
+</html>

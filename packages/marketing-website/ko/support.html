@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ko-KR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0a0b">
+  <title>SocialEraser 후원하기 — 개발자에게 커피 한 잔 사주기 ☕</title>
+  <meta name="description" content="SocialEraser는 팁으로 운영됩니다. 무료 버전이 완전한 버전입니다 — 유료벽, 할당량, 체험판 없음. 팁 단지는 환영이지만 절대 의무는 아닙니다. 원하는 금액을 선택하세요 — 모든 커피 한 잔이 이 도구를 필요로 하는 사람들을 위해 유지합니다.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://socialeraser.app/ko/support.html">
+  <link rel="alternate" hreflang="en" href="https://socialeraser.app/support.html">
+  <link rel="alternate" hreflang="zh" href="https://socialeraser.app/zh/support.html">
+  <link rel="alternate" hreflang="ja" href="https://socialeraser.app/ja/support.html">
+  <link rel="alternate" hreflang="es" href="https://socialeraser.app/es/support.html">
+  <link rel="alternate" hreflang="fr" href="https://socialeraser.app/fr/support.html">
+  <link rel="alternate" hreflang="de" href="https://socialeraser.app/de/support.html">
+  <link rel="alternate" hreflang="pt" href="https://socialeraser.app/pt/support.html">
+  <link rel="alternate" hreflang="ko" href="https://socialeraser.app/ko/support.html">
+  <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/ko/support.html"><link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://socialeraser.app/ko/support.html">
+  <meta property="og:title" content="SocialEraser 후원하기 — 개발자에게 커피 한 잔 사주기">
+  <meta property="og:description" content="팁으로 운영됩니다. 무료 버전이 완전한 버전입니다 — 팁 단지는 환영이지만 절대 의무는 아닙니다.">
+  <meta property="og:image" content="https://socialeraser.app/assets/icons/socialeraser-mark.png">
+  <meta property="og:locale" content="ko_KR">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="SocialEraser 후원하기 — 개발자에게 커피 한 잔 사주기">
+  <meta name="twitter:description" content="팁으로 운영됩니다. 무료 버전이 완전한 버전입니다 — 팁 단지는 환영이지만 절대 의무는 아닙니다.">
+  <link rel="icon" type="image/png" href="/assets/icons/socialeraser-mark.png">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/app.css">
+    <script defer src="/assets/app.js"></script>
+  <script defer src="/assets/lang-switcher.js"></script>
+  <style>
+    /* Page-scoped: tip tier cards */
+    .tip-hero { max-width: 760px; width: calc(100% - 32px); margin: 0 auto; text-align: center; padding: var(--space-8) var(--space-4) var(--space-4); }
+    .tip-hero__img { display: block; width: clamp(96px, 14vw, 128px); height: clamp(96px, 14vw, 128px); margin: 0 auto var(--space-3); border-radius: 50%; box-shadow: 0 8px 24px rgba(245, 158, 11, 0.18); }
+    .tip-hero__title { font-size: clamp(28px, 3.6vw, 44px); margin-bottom: var(--space-2); letter-spacing: -0.02em; }
+    .tip-hero__lede { color: var(--text-dim); font-size: var(--text-base); line-height: var(--leading-relaxed); margin-bottom: 0; }
+    .tip-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-4); max-width: 960px; width: calc(100% - 32px); margin: 0 auto var(--space-12); padding: 0 var(--space-4); }
+    @media (max-width: 800px) {
+      .tip-grid { display: flex; flex-direction: row; overflow-x: auto; overflow-y: visible; -webkit-overflow-scrolling: touch; scroll-padding-inline: 16px; scrollbar-width: none; gap: var(--space-3); padding: 8px var(--space-4) var(--space-2); margin-bottom: var(--space-8); }
+      .tip-grid::-webkit-scrollbar { display: none; }
+      .tip-grid .tip-tier { flex: 0 0 78%; scroll-snap-align: start; }
+    }
+    .tip-tier { background: var(--bg-elev-1); border: 1px solid var(--border); border-radius: var(--radius-xl); padding: var(--space-6); display: flex; flex-direction: column; gap: var(--space-3); transition: transform var(--duration) var(--ease), border-color var(--duration) var(--ease), box-shadow var(--duration) var(--ease); }
+    .tip-tier:hover { transform: translateY(-2px); border-color: var(--border-accent); box-shadow: var(--shadow-lg); }
+    .tip-tier--featured { border-color: var(--border-accent); box-shadow: 0 0 0 1px var(--border-accent), var(--shadow-lg); position: relative; }
+    .tip-tier--featured::before { content: '가장 인기'; position: absolute; top: -10px; left: 0; right: 0; width: max-content; margin: 0 auto; text-align: center; background: var(--gradient-brand); color: #0a0a0a; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap; }
+    .tip-tier__icon { font-size: 32px; line-height: 1; }
+    .tip-tier__amount { font-size: var(--text-3xl); font-weight: 700; letter-spacing: -0.02em; color: var(--text); }
+    .tip-tier__label { font-size: var(--text-sm); color: var(--text-mute); text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+    .tip-tier__desc { color: var(--text-dim); font-size: var(--text-sm); line-height: var(--leading-relaxed); flex: 1; }
+    .tip-tier__cta { display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; background: var(--gradient-brand); color: #0a0a0a; font-weight: 600; font-size: var(--text-sm); border-radius: var(--radius); text-decoration: none; transition: transform var(--duration) var(--ease), box-shadow var(--duration) var(--ease); }
+    .tip-tier__cta:hover { transform: translateY(-1px); box-shadow: 0 12px 32px var(--accent-glow); color: #0a0a0a; }
+    .tip-tier--secondary .tip-tier__cta { background: transparent; color: var(--text); border: 1px solid var(--border-strong); }
+    .tip-tier--secondary .tip-tier__cta:hover { border-color: var(--border-accent); background: var(--bg-elev-2); color: var(--text); box-shadow: none; }
+    .tip-trust { max-width: 720px; width: calc(100% - 32px); margin: 0 auto var(--space-16); padding: var(--space-6) var(--space-4); background: var(--bg-elev-1); border: 1px solid var(--border); border-radius: var(--radius-lg); text-align: center; }
+    .tip-trust__title { font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-3); }
+    .tip-trust__text { color: var(--text-dim); font-size: var(--text-sm); line-height: var(--leading-relaxed); margin: 0; }
+    .tip-faq { max-width: 720px; width: calc(100% - 32px); margin: 0 auto var(--space-20); padding: 0 var(--space-4); }
+    .tip-faq h2 { font-size: var(--text-2xl); margin-bottom: var(--space-6); text-align: center; }
+    .tip-faq details { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); margin-bottom: var(--space-3); background: var(--bg-elev-1); }
+    .tip-faq details[open] { border-color: var(--border-accent); }
+    .tip-faq summary { font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+    .tip-faq summary::-webkit-details-marker { display: none; }
+    .tip-faq summary::after { content: '+'; font-size: 20px; color: var(--text-mute); transition: transform var(--duration) var(--ease); }
+    .tip-faq details[open] summary::after { content: '−'; }
+    .tip-faq p { color: var(--text-dim); font-size: var(--text-sm); line-height: var(--leading-relaxed); margin: var(--space-3) 0 0; }
+  </style>
+</head>
+<body>
+
+  <a href="#main" class="skip-to-content">본문으로 건너뛰기</a>
+
+  <header class="site-header">
+    <div class="site-header__inner container-lg">
+      <a href="/ko/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="">
+        </span>
+        <span>SocialEraser</span>
+      </a>
+      <nav class="site-nav" aria-label="주 메뉴">
+        <details class="site-nav__platforms">
+          <summary class="site-nav__platforms-trigger">
+            플랫폼
+            <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          </summary>
+          <div class="site-nav__platforms-menu">
+            <a href="/ko/platforms/x/">X용 SocialEraser</a>
+            <a href="/ko/platforms/tiktok/">TikTok용 SocialEraser</a>
+            <a href="/ko/platforms/youtube/">YouTube용 SocialEraser</a>
+            <a href="/ko/platforms/instagram/">Instagram용 SocialEraser</a>
+            <a href="/ko/platforms/facebook/">Facebook용 SocialEraser</a>
+          </div>
+        </details>
+        <a href="/ko/" class="hide-mobile">홈</a>
+      </nav>
+      <details class="site-nav--mobile">
+        <summary class="site-nav--mobile-trigger" aria-label="메뉴 토글">
+          <svg class="site-nav--mobile-icon-menu" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <svg class="site-nav--mobile-icon-close" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </summary>
+        <div class="site-nav--mobile-menu">
+          <a href="/ko/platforms/x/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>X용 SocialEraser</a>
+          <a href="/ko/platforms/tiktok/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg>TikTok용 SocialEraser</a>
+          <a href="/ko/platforms/youtube/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>YouTube용 SocialEraser</a>
+          <a href="/ko/platforms/instagram/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Instagram용 SocialEraser</a>
+          <a href="/ko/platforms/facebook/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>Facebook용 SocialEraser</a>
+          <a href="/ko/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12L12 3l9 9M5 10v10a1 1 0 001 1h3v-6h6v6h3a1 1 0 001-1V10"/></svg>홈</a>
+          <details class="site-nav--mobile-lang">
+            <summary>
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+              <span class="site-nav--mobile-lang__current">언어: <span data-lang-current>한국어</span></span>
+              <svg class="site-nav--mobile-lang__chev" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div data-lang-list></div>
+          </details>
+        </div>
+      </details>
+    </div>
+  </header>
+
+    <main id="main">
+      <div class="breadcrumbs-wrap container-lg">
+        <nav class="breadcrumbs" aria-label="빵 부스러기">
+          <a href="/ko/">홈</a>
+          <span class="breadcrumbs__sep">›</span>
+          <span class="breadcrumbs__current">후원</span>
+        </nav>
+      </div>
+      <section class="tip-hero">
+        <img class="tip-hero__img" src="/assets/icons/socialeraser-mark.png" alt="커피를 든 개발자" width="128" height="128" />
+        <h1 class="tip-hero__title">개발자에게 커피 한 잔 사주기</h1>
+        <p class="tip-hero__lede">
+          SocialEraser는 팁으로 운영됩니다. 무료 버전이 완전한 버전입니다 — 팁 단지는 환영이지만 절대 의무는 아닙니다. 이 도구가 도움이 되었다면, 이 페이지가 그 보답을 전하는 곳입니다.
+        </p>
+      </section>
+
+      <section class="tip-grid" aria-label="팁 금액">
+        <div class="tip-tier tip-tier--secondary">
+          <div class="tip-tier__icon" aria-hidden="true">☕</div>
+          <div class="tip-tier__amount">$1</div>
+          <div class="tip-tier__label">커피 한 잔</div>
+          <p class="tip-tier__desc">공개 셀렉터 구성을 위한 CDN 대역폭 하루 분을 충당합니다.</p>
+          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_3HVqQbK66LafUdCwR7sjXp" target="_blank" rel="noopener noreferrer">$1 팁</a>
+        </div>
+
+        <div class="tip-tier tip-tier--featured">
+          <div class="tip-tier__icon" aria-hidden="true">🍕</div>
+          <div class="tip-tier__amount">$3</div>
+          <div class="tip-tier__label">피자 한 조각</div>
+          <p class="tip-tier__desc">Chrome Web Store 개발자 계정을 한 달간 활성 상태로 유지합니다.</p>
+          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_7ASxApTnNUNsiUpAbSrYYc" target="_blank" rel="noopener noreferrer">$3 팁</a>
+        </div>
+
+        <div class="tip-tier tip-tier--secondary">
+          <div class="tip-tier__icon" aria-hidden="true">🍱</div>
+          <div class="tip-tier__amount">$5</div>
+          <div class="tip-tier__label">점심 한 끼</div>
+          <p class="tip-tier__desc">실제 계정에서 진행하는 플랫폼 간 회귀 테스트 몇 시간을 지원합니다.</p>
+          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_2NxSAgacol9Jar7Q0EPQvI" target="_blank" rel="noopener noreferrer">$5 팁</a>
+        </div>
+
+        <div class="tip-tier tip-tier--secondary">
+          <div class="tip-tier__icon" aria-hidden="true">💖</div>
+          <div class="tip-tier__amount">$10</div>
+          <div class="tip-tier__label">관대한 응원</div>
+          <p class="tip-tier__desc">버그 헌팅과 셀렉터 유지보수 하루 전체를 지원합니다.</p>
+          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_6mCS0pbjMZ9pFLGOY6PmOy" target="_blank" rel="noopener noreferrer">$10 팁</a>
+        </div>
+
+        <div class="tip-tier tip-tier--secondary">
+          <div class="tip-tier__icon" aria-hidden="true">🎁</div>
+          <div class="tip-tier__amount">사용자 지정</div>
+          <div class="tip-tier__label">합당하다고 느끼는 만큼</div>
+          <p class="tip-tier__desc">원하는 금액을 직접 입력하세요 — 모든 달러가 다음 한 달의 운영을 지원합니다.</p>
+          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_4av6xu55UHRgVeEIEEQNUz" target="_blank" rel="noopener noreferrer">Creem 열기</a>
+        </div>
+      </section>
+
+      <section class="tip-trust">
+        <h2 class="tip-trust__title">후원금은 어디로 가나요</h2>
+        <p class="tip-trust__text">
+          팁은 정확히 다음 네 가지에만 사용됩니다, 순서대로: (1) 공개 셀렉터 구성 CDN,
+          (2) Chrome Web Store 개발자 등록, (3) X가 UI를 변경한 후 업데이트를 검증하기
+          위한 소규모 테스트 X 계정, (4) 커피. 회사는 없고, 급여는 없고, 투자자도
+          없습니다. 모든 달러의 사용 내역은
+          <a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">공개 저장소</a>에
+          기록됩니다.
+        </p>
+      </section>
+
+      <section class="tip-faq" aria-label="자주 묻는 질문">
+        <h2>자주 묻는 질문</h2>
+
+        <details>
+          <summary>팁으로 실제로 무엇이 풀리나요?</summary>
+          <p>설계상 아무것도 없습니다. 팁은 감사의 표시이지, 기능에 대한 결제가 아닙니다.
+            SocialEraser의 모든 기능 — 과거, 현재, 미래 — 은 모두에게 무료입니다.
+            우리는 명시적으로 "프리미엄" 등급을 만들지 않습니다.</p>
+        </details>
+
+        <details>
+          <summary>무료인데 왜 일 5,000개 제한이 있나요?</summary>
+          <p>이 제한은 <em>플랫폼 안전</em>을 위한 것이지 비즈니스상의 이유가 아닙니다.
+            X (그리고 다른 모든 플랫폼)는 너무 공격적으로 일괄 삭제하는 계정에 대해
+            속도 제한을 걸고 계정을 정지시킬 수 있습니다. 5,000개/일은 계정을 안전하게
+            유지하는 보수적인 수치입니다. 유료 사용자에게 이를 올리지 않을 것입니다.
+            그럴 경우 계정이 위험해지고 — 그것은 본래의 목적에 어긋납니다.</p>
+        </details>
+
+        <details>
+          <summary>결제 정보가 개발자에게 공유되나요?</summary>
+          <p>아닙니다. 결제는 Creem (저희 결제 처리자)에서 처리합니다. 우리는 "누군가
+            $3를 팁으로 보냈다"는 알림과 사용자가 공유하기로 선택한 이메일 주소만
+            받습니다 — 그 외에는 없습니다. 카드 번호는 절대 볼 수 없습니다. 확장
+            프로그램 자체는 사용자가 팁을 보낸 적이 있는지 전혀 알지 못합니다.</p>
+        </details>
+
+        <details>
+          <summary>환불 가능한가요?</summary>
+          <p>네 — Creem은 30일 이내에 질문 없이 환불을 처리합니다. 팁은 계약이 아닙니다.</p>
+        </details>
+
+        <details>
+          <summary>회사에서 팀 대신 팁을 보낼 수 있나요?</summary>
+          <p>물론입니다. $200 이상(미리 설정된 금액을 초과하는 모든 금액)의 송장이나
+            계좌이체가 필요한 경우
+            <a href="mailto:support@socialeraser.app">support@socialeraser.app</a>로
+            이메일을 보내주세요. 합리적인 절충안을 모색하겠습니다.</p>
+        </details>
+
+        <details>
+          <summary>팁을 보낼 여유가 없습니다. 다른 방법으로 도울 수 있나요?</summary>
+          <p>네 — 그리고 이것들은 돈보다 더 가치 있습니다:
+            <a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">GitHub 저장소</a>에
+            별표를 찍거나, 발견한 버그를 신고하거나, 아직 지원되지 않는 언어로
+            확장 프로그램을 번역하거나, 유용할 것 같은 친구에게 알려주세요. 이 모든
+            것에 감사드립니다.</p>
+        </details>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+    <div class="container-lg">
+      <div class="site-footer__grid">
+        <div class="site-footer__brand">
+          <a href="/ko/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="">
+        </span>
+            <span>SocialEraser</span>
+          </a>
+          <p>소셜 미디어를 일괄 정리하세요. 100% 로컬, 비밀번호 불필요, 오픈 소스. 2017년의 게시물에 좋아요를 누르느라 주말을 쓰고 싶지 않은 사람들을 위해 만들어졌습니다.</p>
+        </div>
+        <div class="site-footer__col">
+          <h4>플랫폼</h4>
+          <ul>
+            <li><a href="/ko/platforms/x/">X (Twitter)</a></li>
+            <li><a href="/ko/platforms/tiktok/">TikTok</a></li>
+            <li><a href="/ko/platforms/youtube/">YouTube</a></li>
+            <li><a href="/ko/platforms/instagram/">Instagram</a></li>
+            <li><a href="/ko/platforms/facebook/">Facebook</a></li>
+          </ul>
+        </div>
+        <div class="site-footer__col">
+          <h4>제품</h4>
+          <ul>
+            <li><a href="/ko/help.html">도움말 센터</a></li>
+            <li><a href="/ko/#download">설치</a></li>
+            <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/CHANGELOG.md" target="_blank" rel="noopener noreferrer">Changelog</a></li>
+            <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/ROADMAP.md" target="_blank" rel="noopener noreferrer">로드맵</a></li>
+            <li><a href="/ko/support.html">☕ 후원</a></li>
+            <li><a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">소스 코드</a></li>
+          </ul>
+        </div>
+        <div class="site-footer__col">
+          <h4>회사</h4>
+          <ul>
+            <li><a href="/ko/about.html">회사 소개</a></li>
+            <li><a href="mailto:support@socialeraser.app">문의</a></li>
+            <li><a href="/ko/privacy.html">개인정보 보호</a></li>
+            <li><a href="/ko/terms.html">이용약관</a></li>
+            <li><a href="https://github.com/socialeraser/SocialEraser#readme" target="_blank" rel="noopener noreferrer">프레스 키트</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="site-footer__bottom">
+        <span>© 2026 SocialEraser. 모든 권리 보유.</span>
+        <div class="site-footer__legal">
+          <span>독립 도구 — X, TikTok, YouTube, Instagram, Facebook과 제휴 관계가 아닙니다.</span>
+        </div>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

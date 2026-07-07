@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="de-DE">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0a0b">
+  <title>So löschen Sie Tweets in großen Mengen (Schritt-für-Schritt-Anleitung 2026) — SocialEraser</title>
+  <meta name="description" content="Schritt-für-Schritt-Anleitung: So löschen Sie all Ihre alten Tweets, Retweets, Antworten, Likes und entfolgen Konten in großen Mengen mit der kostenlosen SocialEraser Chrome-Erweiterung. Filter nach Datum, Stichwort oder Engagement. Kein Passwort, 100 % lokal.">
+  <meta name="keywords" content="tweets löschen, alle tweets löschen, alte tweets löschen, tweets massenhaft löschen, x massenhaft unliken, massenhaft entfolgen, x cleaner, retweets entfernen, tweet-verlauf löschen, x konto aufräumen">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://socialeraser.app/de/guides/twitter.html">
+  <link rel="alternate" hreflang="en" href="https://socialeraser.app/guides/twitter.html">
+  <link rel="alternate" hreflang="zh" href="https://socialeraser.app/zh/guides/twitter.html">
+  <link rel="alternate" hreflang="ja" href="https://socialeraser.app/ja/guides/twitter.html">
+  <link rel="alternate" hreflang="es" href="https://socialeraser.app/es/guides/twitter.html">
+  <link rel="alternate" hreflang="fr" href="https://socialeraser.app/fr/guides/twitter.html">
+  <link rel="alternate" hreflang="de" href="https://socialeraser.app/de/guides/twitter.html">
+  <link rel="alternate" hreflang="pt" href="https://socialeraser.app/pt/guides/twitter.html">
+  <link rel="alternate" hreflang="ko" href="https://socialeraser.app/ko/guides/twitter.html">
+  <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/de/guides/twitter.html"><link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="article">
+  <meta property="og:site_name" content="SocialEraser">
+  <meta property="og:url" content="https://socialeraser.app/de/guides/twitter.html">
+  <meta property="og:title" content="So löschen Sie Tweets in großen Mengen (Schritt-für-Schritt-Anleitung 2026)">
+  <meta property="og:description" content="Schritt-für-Schritt-Anleitung: Löschen Sie all Ihre alten Tweets, Retweets, Likes und entfolgen Konten in großen Mengen mit einer kostenlosen Chrome-Erweiterung. Filter nach Datum, Stichwort oder Engagement. Kein Passwort, 100 % lokal.">
+  <meta property="og:image" content="https://socialeraser.app/assets/icons/og-x.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="de_DE">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="So löschen Sie Tweets in großen Mengen (Schritt-für-Schritt-Anleitung 2026)">
+  <meta name="twitter:description" content="Schritt-für-Schritt-Anleitung: Löschen Sie all Ihre alten Tweets, Retweets, Likes und entfolgen Konten in großen Mengen. Kein Passwort, 100 % lokal.">
+  <meta name="twitter:image" content="https://socialeraser.app/assets/icons/og-x.png">
+  <meta name="author" content="SocialEraser">
+  <link rel="icon" type="image/png" href="/assets/icons/socialeraser-mark.png">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/app.css">
+  <style>
+    /* Tutorial page — uses default amber brand tokens from styles.css. */
+    :root {
+      --gradient-brand-soft: linear-gradient(135deg, rgba(251, 191, 36, 0.18) 0%, rgba(245, 158, 11, 0.06) 100%);
+    }
+    .article-wrap { max-width: 760px; margin: 0 auto; padding: 0 var(--space-6); }
+    .breadcrumbs {
+      display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+      font-size: var(--text-sm); color: var(--text-mute);
+      margin-bottom: var(--space-6);
+    }
+    .breadcrumbs a { color: var(--text-dim); text-decoration: none; outline-offset: 4px; }
+    .breadcrumbs a:hover { color: var(--text); text-decoration: none; }
+    .breadcrumbs a:focus { outline: none; }
+    .breadcrumbs a:focus-visible { outline: 2px solid var(--border-strong); }
+    .breadcrumbs__sep { color: var(--text-faint); }
+    .breadcrumbs__current { color: var(--text); }
+    .article-hero { margin-bottom: var(--space-12); }
+    .article-hero h1 {
+      font-size: var(--text-5xl); line-height: 1.1; letter-spacing: -0.02em;
+      margin-bottom: var(--space-5);
+    }
+    .article-hero .lede { font-size: var(--text-lg); color: var(--text-dim); line-height: 1.55; }
+    .article-meta {
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+      font-size: var(--text-sm); color: var(--text-mute);
+      margin-top: var(--space-6); padding-top: var(--space-5);
+      border-top: 1px solid var(--border);
+    }
+    .article-body h2 {
+      font-size: var(--text-3xl);
+      margin-top: var(--space-16); margin-bottom: var(--space-4);
+      scroll-margin-top: var(--space-12);
+    }
+    .article-body h3 {
+      font-size: var(--text-xl);
+      margin-top: var(--space-8); margin-bottom: var(--space-3);
+    }
+    .article-body p {
+      font-size: var(--text-base); line-height: 1.7;
+      color: var(--text-dim); margin-bottom: var(--space-4);
+    }
+    .article-body p strong { color: var(--text); }
+    .article-body ul, .article-body ol {
+      margin: var(--space-4) 0 var(--space-6) var(--space-6);
+      color: var(--text-dim); line-height: 1.7;
+    }
+    .article-body ul li, .article-body ol li { margin-bottom: var(--space-2); }
+    .article-body a:not(.btn) { color: var(--accent); text-decoration: underline; text-underline-offset: 2px; }
+    .article-body a:not(.btn):hover { text-decoration: underline; opacity: 0.85; }
+    .toc {
+      background: var(--bg-elev-1); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: var(--space-5) var(--space-6);
+      margin-bottom: var(--space-12);
+    }
+    .toc__title {
+      font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--text-mute); margin-bottom: var(--space-3);
+    }
+    .toc ol { list-style: decimal; padding-left: var(--space-5); }
+    .toc ol li { color: var(--text-dim); margin-bottom: 4px; }
+    .toc a { color: var(--text-dim); text-decoration: none; }
+    .toc a:hover { color: var(--accent); }
+    .step-card {
+      background: var(--bg-elev-1); border: 1px solid var(--border);
+      border-radius: var(--radius-lg); padding: var(--space-6);
+      margin: var(--space-6) 0 var(--space-8);
+    }
+    .step-card__number {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 32px; height: 32px; border-radius: 50%;
+      background: var(--gradient-brand); color: #0F0F0F;
+      font-weight: 800; font-size: var(--text-base);
+      margin-bottom: var(--space-3);
+    }
+    .step-card h3 { margin-top: 0; font-size: var(--text-xl); }
+    .step-card p { margin-bottom: var(--space-3); }
+    .step-card p:last-child { margin-bottom: 0; }
+    .step-card code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+      font-size: 0.9em; background: var(--bg-elev-2);
+      padding: 2px 6px; border-radius: 4px; color: var(--accent);
+    }
+    .callout {
+      background: var(--accent-soft);
+      border-left: 3px solid var(--accent);
+      border-radius: 6px; padding: var(--space-4) var(--space-5);
+      margin: var(--space-6) 0;
+    }
+    .callout p { margin-bottom: 0; color: var(--text); }
+    .callout p strong { color: var(--accent); }
+    .filter-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: var(--space-4); margin: var(--space-6) 0;
+    }
+    .filter-tile {
+      background: var(--bg-elev-1); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: var(--space-5);
+    }
+    .filter-tile h3 { margin-top: 0; font-size: var(--text-lg); color: var(--accent); }
+    .filter-tile p { margin-bottom: 0; font-size: var(--text-sm); }
+    .related-cta {
+      background: var(--gradient-brand-soft);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      border-radius: var(--radius-lg); padding: var(--space-8);
+      text-align: center; margin: var(--space-16) 0 var(--space-8);
+    }
+    .related-cta h2 { margin-top: 0; }
+    .related-cta p { color: var(--text-dim); margin-bottom: var(--space-5); }
+    @media (max-width: 640px) {
+      .article-hero h1 { font-size: var(--text-4xl); }
+      .article-body h2 { font-size: var(--text-2xl); }
+    }
+  </style>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"Article","headline":"So löschen Sie Tweets in großen Mengen (Schritt-für-Schritt-Anleitung)","description":"Schritt-für-Schritt-Anleitung, die zeigt, wie Sie all Ihre alten Tweets, Retweets, Antworten, Likes, Lesezeichen und Konten in großen Mengen entfolgen mit der kostenlosen SocialEraser Chrome-Erweiterung.","author":{"@type":"Organization","name":"SocialEraser","url":"https://socialeraser.app/"},"publisher":{"@type":"Organization","name":"SocialEraser","logo":{"@type":"ImageObject","url":"https://socialeraser.app/assets/icons/socialeraser-mark.png"}},"datePublished":"2026-07-04","dateModified":"2026-07-04","mainEntityOfPage":{"@type":"WebPage","@id":"https://socialeraser.app/de/guides/twitter.html"},"image":"https://socialeraser.app/assets/icons/og-x.png"}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Startseite","item":"https://socialeraser.app/"},
+    {"@type":"ListItem","position":2,"name":"SocialEraser für X","item":"https://socialeraser.app/platforms/x/"},
+    {"@type":"ListItem","position":3,"name":"So löschen Sie Tweets in großen Mengen","item":"https://socialeraser.app/de/guides/twitter.html"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"HowTo","name":"So löschen Sie Tweets in großen Mengen","description":"Installieren Sie SocialEraser, öffnen Sie x.com, wählen Sie, was bereinigt werden soll, legen Sie Ihre Filter fest und klicken Sie auf Start. SocialEraser simuliert normale Klicks in menschlicher Geschwindigkeit, um jeden passenden Tweet, Retweet, Like oder Follow zu löschen.","totalTime":"PT15M","estimatedCost":{"@type":"MonetaryAmount","value":"0","currency":"USD"},"tool":[{"@type":"HowToTool","name":"Google Chrome oder Microsoft Edge (Version 120 oder höher)"},{"@type":"HowToTool","name":"SocialEraser für X Browser-Erweiterung (kostenlos)"}],"step":[
+    {"@type":"HowToStep","position":1,"name":"Sichern Sie Ihr X-Archiv (optional, aber empfohlen)","text":"Fordern Sie vor jeder Massenlöschung das offizielle Archiv von X unter Einstellungen → Dein Konto → Lade ein Archiv deiner Daten herunter an. Das Archiv trifft innerhalb von 24 Stunden als herunterladbare ZIP-Datei ein und enthält jeden Tweet, Like, DM und Follower. Wenn Sie einen Tweet löschen, den Sie später bereuen, ist dieses Archiv Ihr einziger Weg zurück.","url":"https://x.com/settings/download_your_data","image":"https://socialeraser.app/assets/icons/og-x.png"},
+    {"@type":"HowToStep","position":2,"name":"Installieren Sie SocialEraser für X","text":"Fügen Sie die kostenlose SocialEraser-Erweiterung aus dem Chrome Web Store hinzu. Kein Konto, keine Anmeldung, keine Zahlung. Zwei Klicks und sie ist installiert und an Ihrer Symbolleiste angeheftet.","url":"https://socialeraser.app/platforms/x/#download","image":"https://socialeraser.app/assets/icons/og-x.png"},
+    {"@type":"HowToStep","position":3,"name":"Öffnen Sie x.com und melden Sie sich an","text":"Öffnen Sie x.com im selben Chrome-Profil, in dem Sie die Erweiterung installiert haben. Melden Sie sich wie gewohnt bei Ihrem Konto an. Klicken Sie auf das SocialEraser-Seitenleisten-Symbol — die Erweiterung erkennt Ihre Anmeldung automatisch und zeigt Ihren Kontostatus an.","image":"https://socialeraser.app/assets/icons/og-x.png"},
+    {"@type":"HowToStep","position":4,"name":"Wählen Sie, was bereinigt werden soll, und legen Sie Ihre Filter fest","text":"Aktivieren Sie die Kontrollkästchen für das, was Sie löschen möchten: Original-Tweets, Antworten, Retweets, Likes, Lesezeichen oder Following. Legen Sie dann Ihre Filter fest. Verwenden Sie 'Ab Datum', um aktuelle Tweets zu behalten und ältere zu löschen. Verwenden Sie den Stichwortfilter, um ein bestimmtes Thema zu treffen. Verwenden Sie die Engagement-Untergrenze, um virale Tweets zu behalten.","image":"https://socialeraser.app/assets/icons/og-x.png"},
+    {"@type":"HowToStep","position":5,"name":"Klicken Sie auf Start und lassen Sie es laufen","text":"Klicken Sie auf die Schaltfläche 'Bereinigung starten'. Die Erweiterung öffnet jedes passende Element, klickt in menschlicher Geschwindigkeit auf die Schaltfläche Löschen / Unlike / Unfollow und zeigt einen Live-Fortschrittszähler an. Sie können den Laptop schließen und morgen wiederkommen — der Status bleibt über Browser-Neustarts hinweg erhalten. Die durchschnittliche Laufzeit beträgt etwa 0,9 Sekunden pro Element, sodass 1.000 Tweets ungefähr 15 Minuten dauern.","image":"https://socialeraser.app/assets/icons/og-x.png"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"Wie lange dauert es, alle meine Tweets zu löschen?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser verarbeitet etwa 0,9 Sekunden pro Element — also dauern 1.000 Tweets ungefähr 15 Minuten. Sie können es im Hintergrund laufen lassen oder den Laptop vollständig schließen und später zurückkommen; der Status bleibt über Browser-Neustarts hinweg erhalten."}},
+    {"@type":"Question","name":"Kann ich nur Tweets löschen, die vor einem bestimmten Datum gepostet wurden?","acceptedAnswer":{"@type":"Answer","text":"Ja. Verwenden Sie den Filter 'Ab Datum' in der Seitenleiste, um Tweets zu behalten, die am oder nach dem Datum gepostet wurden, und löschen Sie alles, was älter ist. Dies ist der am häufigsten verwendete Filter — viele nutzen ihn, um alles vor einem Rebranding, einem Vorstellungsgespräch oder einem Neuanfang zu löschen."}},
+    {"@type":"Question","name":"Kann ich meine meistgelikten Tweets behalten und nur den Rest löschen?","acceptedAnswer":{"@type":"Answer","text":"Ja. Verwenden Sie den Filter 'Engagement-Untergrenze' und legen Sie eine Mindestanzahl an Likes fest. Tweets über der Untergrenze werden behalten; Tweets darunter werden gelöscht. Dies ist die Standardmethode, um Ihre Durchbruch-Momente zu behalten und den experimentellen Lärm zu beseitigen."}},
+    {"@type":"Question","name":"Funktioniert dies auch zum Löschen von Retweets, Antworten und Likes?","acceptedAnswer":{"@type":"Answer","text":"Ja. SocialEraser kann Retweets massenhaft rückgängig machen, Antworten massenhaft löschen, Tweets massenhaft unliken und Konten massenhaft entfolgen. Das gleiche Filtersystem (Datum, Stichwort, Engagement-Untergrenze, Beitragsart) gilt für alle Bereinigungsarten."}},
+    {"@type":"Question","name":"Werde ich für das Massenlöschen gesperrt?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser simuliert normale Klicks in menschlicher Geschwindigkeit und respektiert die Rate-Limits von X. Es gilt der gleiche Vorbehalt wie bei jedem Drittanbieter-Tool — wir sind nicht mit X Corp. verbunden, und die Nutzung von Bulk-Tools erfolgt auf eigene Verantwortung."}},
+    {"@type":"Question","name":"Kann ich eine Löschung nachträglich rückgängig machen?","acceptedAnswer":{"@type":"Answer","text":"Nein. Sobald ein Tweet gelöscht ist, ist er innerhalb von Sekunden aus der öffentlichen Ansicht von X verschwunden. Deshalb ist Schritt 1 dieser Anleitung, Ihre Daten zuerst mit dem offiziellen Archiv von X zu sichern."}},
+    {"@type":"Question","name":"Funktioniert dies in der X-Mobil-App?","acceptedAnswer":{"@type":"Answer","text":"Nein. Die X-Mobil-App erlaubt keine Browser-Erweiterungen. SocialEraser läuft in Chrome auf dem Desktop. Eine dedizierte mobile Begleit-App ist für 2027 in der Roadmap."}},
+    {"@type":"Question","name":"Was, wenn ich zigtausende Tweets habe?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser verarbeitet auch große Bibliotheken problemlos. Die Erweiterung pausiert automatisch, wenn sie auf ein Rate-Limit stößt, und Sie können an derselben Stelle fortfahren. Eine Bibliothek mit 50.000 Tweets läuft typischerweise in 12–13 Stunden Hintergrundzeit, ohne dass eine Überwachung nötig ist."}}
+  ]}
+  </script>
+</head>
+<body>
+
+  <a href="#main" class="skip-to-content">Zum Inhalt springen</a>
+
+  <header class="site-header">
+    <div class="site-header__inner container-lg">
+      <a href="/de/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
+        </span>
+        <span>SocialEraser</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <details class="site-nav__platforms">
+          <summary class="site-nav__platforms-trigger">Plattformen <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></summary>
+          <div class="site-nav__platforms-menu">
+            <a href="/de/platforms/x/">SocialEraser für X</a>
+            <a href="/de/platforms/tiktok/">SocialEraser für TikTok</a>
+            <a href="/de/platforms/youtube/">SocialEraser für YouTube</a>
+            <a href="/de/platforms/instagram/">SocialEraser für Instagram</a>
+            <a href="/de/platforms/facebook/">SocialEraser für Facebook</a>
+          </div>
+        </details>
+        <a href="/de/help.html" class="hide-mobile">Hilfe</a>
+        <a href="/de/platforms/x/#download" class="btn btn--primary btn--sm">Kostenlos installieren</a>
+      </nav>
+      <details class="site-nav--mobile">
+        <summary class="site-nav--mobile-trigger" aria-label="Menü umschalten">
+          <svg class="site-nav--mobile-icon-menu" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <svg class="site-nav--mobile-icon-close" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </summary>
+        <div class="site-nav--mobile-menu">
+          <a href="/de/platforms/x/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>SocialEraser für X</a>
+          <a href="/de/platforms/tiktok/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg>SocialEraser für TikTok</a>
+          <a href="/de/platforms/youtube/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>SocialEraser für YouTube</a>
+          <a href="/de/platforms/instagram/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>SocialEraser für Instagram</a>
+          <a href="/de/platforms/facebook/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>SocialEraser für Facebook</a>
+          <a href="/de/help.html"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>Hilfe</a>
+          <a href="/de/platforms/x/#download" class="btn btn--primary"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Kostenlos installieren</a>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main id="main">
+    <article class="article-wrap section">
+      <nav class="breadcrumbs" aria-label="Brotkrumen">
+        <a href="/de/">Startseite</a>
+        <span class="breadcrumbs__sep">›</span>
+        <a href="/de/platforms/x/">SocialEraser für X</a>
+        <span class="breadcrumbs__sep">›</span>
+        <span class="breadcrumbs__current">So löschen Sie Tweets in großen Mengen</span>
+      </nav>
+
+      <header class="article-hero">
+        <h1>So löschen Sie Tweets in großen Mengen (Schritt-für-Schritt-Anleitung)</h1>
+        <p class="lede">Müde davon, dass Ihre alten Meinungen wieder auftauchen? Wünschen Sie sich ein sauberes X-Profil vor einer Jobsuche, einem Rebranding oder einem Neuanfang? Diese Anleitung führt Sie durch das Löschen jedes Tweets, Retweets, Likes und Follows auf Ihrem Konto in großen Mengen — sicher, mit Filtern, in etwa 15 Minuten pro 1.000 Elemente.</p>
+        <div class="article-meta">
+          <span>Von <strong>SocialEraser</strong></span>
+          <span>·</span>
+          <span>Aktualisiert am <time datetime="2026-07-04">4. Juli 2026</time></span>
+          <span>·</span>
+          <span>~8 Min. Lesezeit</span>
+        </div>
+      </header>
+
+      <div class="article-body">
+
+        <div class="toc">
+          <p class="toc__title">Auf dieser Seite</p>
+          <ol>
+            <li><a href="#why-bulk-delete">Warum Tweets in großen Mengen löschen?</a></li>
+            <li><a href="#before-you-start">Bevor Sie beginnen: Sichern Sie Ihre Daten</a></li>
+            <li><a href="#step-by-step">Schritt-für-Schritt: Alle Tweets in großen Mengen löschen</a></li>
+            <li><a href="#filters">Die vier Filter, die das Massenlöschen präzise machen</a></li>
+            <li><a href="#what-stays">Was wird gelöscht und was bleibt?</a></li>
+            <li><a href="#safety">Sicherheit, Rate-Limits und Kontosicherheit</a></li>
+            <li><a href="#faq">FAQ</a></li>
+          </ol>
+        </div>
+
+        <h2 id="why-bulk-delete">Warum Tweets in großen Mengen löschen?</h2>
+        <p>Die meisten Menschen erreichen irgendwann den Punkt, an dem sie ein sauberes X-Profil wollen — ein Rebranding, eine Jobsuche, ein Umzug in eine neue Stadt, ein Neuanfang nach einer Trennung oder einfach die Erkenntnis, dass Ihr Likes-Tab ein Museum des Jahres 2017 ist. Das Problem: Der offizielle „Löschen"-Workflow von X ist ein Tweet nach dem anderen. Es gibt keinen eingebauten Massenlösch-Vorgang, keine Stapelverarbeitung und keinen Zeitraum-Filter.</p>
+        <p>Für 200 Tweets ist das ein Nachmittag voller Klicks. Für 2.000 Tweets ist es eine Woche. Für 50.000 Tweets ist es ohne Hilfe praktisch unmöglich.</p>
+        <p>Genau dafür ist <a href="/de/platforms/x/">SocialEraser für X</a> da. Es läuft in Ihrem Browser, simuliert normale Klicks in menschlicher Geschwindigkeit und ermöglicht es Ihnen, nach Datum, Stichwort, Engagement-Untergrenze oder Beitragsart zu filtern. Sie legen die Regeln fest, klicken auf Start und gehen weg. Diese Anleitung führt Sie durch den gesamten Prozess.</p>
+
+        <h2 id="before-you-start">Bevor Sie beginnen: Sichern Sie Ihre Daten</h2>
+        <p>Dies ist der einzige Schritt, der etwas Planung erfordert, und Sie sollten ihn vor Ihrem ersten Durchlauf erledigen. Sobald Sie einen Tweet löschen, ist er weg — es gibt keinen Papierkorb, kein Rückgängig, kein Wiederherstellungsfenster. X behandelt Löschungen als dauerhaft.</p>
+        <p>Der offizielle Weg, Ihre Tweets zurückzubekommen (selbst nach der Löschung), besteht darin, Ihr <strong>Archiv</strong> von X anzufordern, bevor Sie beginnen. Das Archiv trifft innerhalb von 24 Stunden als herunterladbare ZIP-Datei ein und enthält jeden Tweet, Like, DM und Follower als eigenständige Dateien.</p>
+        <ol>
+          <li>Öffnen Sie <code>x.com</code> in Ihrem Browser und melden Sie sich an.</li>
+          <li>Gehen Sie zu <strong>Einstellungen → Dein Konto → Lade ein Archiv deiner Daten herunter</strong> (oder besuchen Sie direkt <a href="https://x.com/settings/download_your_data" rel="noopener noreferrer">x.com/settings/download_your_data</a>).</li>
+          <li>Fordern Sie das Archiv an. X sendet Ihnen innerhalb von 24 Stunden einen Download-Link per E-Mail.</li>
+        </ol>
+        <div class="callout">
+          <p><strong>Tipp:</strong> Auch wenn Sie planen, alles zu löschen, fordern Sie dieses Archiv zuerst an. Es ist kostenlos, es sind Ihre Daten, und es gibt Ihnen einen Weg zurück, falls Sie es sich anders überlegen.</p>
+        </div>
+
+        <h2 id="step-by-step">Schritt-für-Schritt: Alle Tweets in großen Mengen löschen</h2>
+        <p>Der gesamte Vorgang dauert etwa 60 Sekunden Einrichtung. Die eigentliche Löschung läuft im Hintergrund.</p>
+
+        <div class="step-card">
+          <span class="step-card__number">1</span>
+          <h3>Installieren Sie SocialEraser für X</h3>
+          <p>Gehen Sie zur <a href="/de/platforms/x/#download">SocialEraser für X-Seite</a> und klicken Sie auf <strong>Kostenlos installieren</strong>. Dies öffnet den Chrome Web Store. Klicken Sie auf <strong>Zu Chrome hinzufügen</strong> und bestätigen Sie die Installationsaufforderung. Das Erweiterungssymbol erscheint in Ihrer Symbolleiste.</p>
+          <p>Es gibt kein Konto, keine Anmeldung, keine E-Mail-Bestätigung. Die Erweiterung ist kostenlos und wird durch Trinkgelder unterstützt — sie funktioniert in Chrome 120+ und Edge 120+.</p>
+        </div>
+
+        <div class="step-card">
+          <span class="step-card__number">2</span>
+          <h3>Öffnen Sie x.com und melden Sie sich an</h3>
+          <p>Navigieren Sie zu <code>x.com</code> im Browser, in dem Sie gerade SocialEraser installiert haben. Melden Sie sich wie gewohnt bei Ihrem Konto an. Die Erweiterung verarbeitet keine Passwörter — der eigene Login von X erledigt das. SocialEraser wirkt erst auf der Seite, nachdem Sie bereits authentifiziert sind.</p>
+          <p>Klicken Sie auf das SocialEraser-Symbol in Ihrer Symbolleiste, um die Seitenleiste zu öffnen. Die Statusanzeige oben wechselt von Gelb zu Grün, sobald bestätigt ist, dass Sie angemeldet sind.</p>
+        </div>
+
+        <div class="step-card">
+          <span class="step-card__number">3</span>
+          <h3>Wählen Sie, was bereinigt werden soll</h3>
+          <p>Aktivieren Sie in der Seitenleiste die Kontrollkästchen für das, was Sie löschen möchten. Sie können eines auswählen oder mehrere kombinieren:</p>
+          <ul>
+            <li><strong>Original-Tweets</strong> — Ihre eigenen verfassten Tweets (keine Antworten oder Retweets)</li>
+            <li><strong>Antworten</strong> — jede Antwort, die Sie unter dem Tweet einer anderen Person gepostet haben</li>
+            <li><strong>Retweets</strong> — jeder Retweet in Ihrem Profil</li>
+            <li><strong>Likes</strong> — jeder Tweet in Ihrem Likes-Tab</li>
+            <li><strong>Lesezeichen</strong> — Ihre private Lesezeichen-Sammlung</li>
+            <li><strong>Following</strong> — Konten, denen Sie folgen</li>
+          </ul>
+          <p>Wenn Sie nur einen Typ bereinigen möchten (z. B. nur Ihre Original-Tweets), aktivieren Sie nur diesen. Die Erweiterung überspringt die anderen vollständig.</p>
+        </div>
+
+        <div class="step-card">
+          <span class="step-card__number">4</span>
+          <h3>Legen Sie Ihre Filter fest (optional, aber empfohlen)</h3>
+          <p>Filter sind das, was eine präzise Massenlöschung von einer Alles-niederbrennen-Aktion unterscheidet. Die vier Filter werden im nächsten Abschnitt ausführlich behandelt, aber die häufigste Konfiguration ist:</p>
+          <ul>
+            <li><strong>Ab Datum:</strong> Aktuelle Tweets behalten, alles vor einem bestimmten Datum löschen</li>
+            <li><strong>Engagement-Untergrenze:</strong> Tweets mit mindestens X Likes behalten, alles darunter löschen</li>
+            <li><strong>Stichwort:</strong> nur Tweets löschen, die ein bestimmtes Wort enthalten</li>
+            <li><strong>Beitragsart:</strong> nur Originale, nur Antworten oder nur Retweets</li>
+          </ul>
+          <p>Sie können mehrere Filter kombinieren. Beispielsweise ist „Alle Tweets vor dem 1. Januar 2022 mit weniger als 10 Likes löschen" eine einzelne Filterkombination.</p>
+        </div>
+
+        <div class="step-card">
+          <span class="step-card__number">5</span>
+          <h3>Klicken Sie auf Start und lassen Sie es laufen</h3>
+          <p>Klicken Sie auf die Schaltfläche <strong>Bereinigung starten</strong>. Die Erweiterung öffnet jedes passende Element, klickt in menschlicher Geschwindigkeit (etwa 0,9 Sekunden pro Element) auf die Schaltfläche Löschen / Unlike / Unfollow und aktualisiert einen Live-Fortschrittszähler.</p>
+          <p>Sie können:</p>
+          <ul>
+            <li>in <strong>Echtzeit in der Seitenleiste zusehen</strong></li>
+            <li>den Tab <strong>minimieren</strong> und Ihren Browser normal benutzen</li>
+            <li>den Laptop <strong>vollständig schließen</strong> — der Status bleibt über Browser-Neustarts hinweg erhalten, sodass beim Zurückkommen beim letzten abgeschlossenen Element fortgesetzt wird</li>
+            <li>jederzeit auf <strong>Pause</strong> klicken, um eine Pause einzulegen</li>
+            <li>auf <strong>Stopp</strong> klicken, falls Sie es sich mitten im Lauf anders überlegen</li>
+          </ul>
+          <p>Für eine typische Bibliothek mit 1.000 Tweets dauert der gesamte Lauf etwa 15 Minuten. Für 50.000 Tweets rechnen Sie mit 12–13 Stunden Hintergrundzeit, ohne dass eine Überwachung nötig ist.</p>
+        </div>
+
+        <h2 id="filters">Die vier Filter, die das Massenlöschen präzise machen</h2>
+        <p>Filter verwandeln ein stumpfes Instrument in ein Skalpell. Hier sind die vier in SocialEraser für X verfügbaren Filter und die Anwendungsfälle, die jeder einzelne löst.</p>
+
+        <div class="filter-grid">
+          <div class="filter-tile">
+            <h3>Datumsbereich</h3>
+            <p>Löschen Sie Tweets, die vor oder nach einem bestimmten Datum gepostet wurden. Dies ist der am häufigsten verwendete Filter. Verwenden Sie ihn, um Ihre aktuellen Arbeiten zu behalten und die alte Ära zu löschen. Die Richtung „vor" ist auch das richtige Werkzeug, wenn Sie ein sauberes X-Profil vor einem Rebranding oder einem Vorstellungsgespräch wünschen.</p>
+          </div>
+          <div class="filter-tile">
+            <h3>Engagement-Untergrenze</h3>
+            <p>Behalten Sie Tweets über einer Like-Schwelle und löschen Sie den Rest. Setzen Sie 100, um Ihre Durchbruch-Momente zu behalten. Setzen Sie 0, um alles unabhängig von den Likes zu löschen. Dies ist der beste Filter, um Ihre viralen Hits zu behalten und den einsamen 0-Like-Stapel zu löschen.</p>
+          </div>
+          <div class="filter-tile">
+            <h3>Beschriftungs-Stichwort</h3>
+            <p>Löschen Sie nur Tweets, deren Text ein bestimmtes Wort oder Hashtag enthält. Großartig, um ein einzelnes Thema zu bereinigen — wie einen Markendeal, eine hitzige Meinung, eine Fandom-Ära oder alles andere, das Sie verschwinden lassen möchten, ohne den Rest Ihrer Bibliothek anzufassen.</p>
+          </div>
+          <div class="filter-tile">
+            <h3>Beitragsart</h3>
+            <p>Filtern Sie so, dass nur Originale, nur Antworten oder nur Retweets gelöscht werden. Nützlich, um Ihre verfasste Stimme zu sichern, bevor Sie den Teilen- und Antwort-Verlauf löschen, oder um bestimmte Gespräche zu behalten, während alles andere gelöscht wird.</p>
+          </div>
+        </div>
+        <p>Sie können alle vier kombinieren. Die beliebteste Kombination ist <strong>„vor dem 1. Januar 2022 UND weniger als 10 Likes"</strong> — behält die Durchbruch-Ära, löscht den experimentellen Stapel.</p>
+
+        <h2 id="what-stays">Was wird gelöscht und was bleibt?</h2>
+        <p>SocialEraser berührt nur das, was Sie ihm sagen. Konkret:</p>
+        <ul>
+          <li><strong>Kontrollkästchen Original-Tweets aktiviert</strong> — Ihre eigenen verfassten Tweets werden einzeln gelöscht.</li>
+          <li><strong>Kontrollkästchen Antworten aktiviert</strong> — jede Antwort, die Sie gepostet haben, wird gelöscht.</li>
+          <li><strong>Kontrollkästchen Retweets aktiviert</strong> — jeder Retweet in Ihrem Profil wird rückgängig gemacht.</li>
+          <li><strong>Kontrollkästchen Likes aktiviert</strong> — jeder Tweet in Ihrem Likes-Tab wird unliked.</li>
+          <li><strong>Kontrollkästchen Lesezeichen aktiviert</strong> — jeder Tweet in Ihren privaten Lesezeichen wird entfernt.</li>
+          <li><strong>Kontrollkästchen Following aktiviert</strong> — jedem gefolgten Konto wird der Reihe nach entfolgt. Die Reihenfolge ist wichtig, wenn Sie dort weitermachen möchten, wo Sie aufgehört haben; wenn nicht, ist der Lauf genauso effektiv.</li>
+        </ul>
+        <p>Was SocialEraser <strong>nicht</strong> berührt: Ihre Kontoeinstellungen, Ihre DMs, Ihre Entwürfe, Ihr Profilbild, Ihre Bio, Ihren Benutzernamen, Ihre Listen oder andere Inhalte auf X, für die Sie nicht ausdrücklich ein Kontrollkästchen aktiviert haben.</p>
+
+        <h2 id="safety">Sicherheit, Rate-Limits und Kontosicherheit</h2>
+        <p>SocialEraser simuliert normale Klicks in menschlicher Geschwindigkeit — keine API-Aufrufe, kein Scraping, kein Headless-Browser, keine Massenautomatisierung. Die Erweiterung klickt buchstäblich auf dieselben Schaltflächen, die Sie klicken würden, eine nach der anderen, mit einer Verzögerung dazwischen. Der Durchschnitt liegt bei etwa 0,9 Sekunden pro Element, mit einer zufälligen Streuung, damit es nicht roboterhaft wirkt.</p>
+        <p>Es gilt jedoch der gleiche Vorbehalt wie bei jedem Drittanbieter-Tool. Wir sind nicht mit X Corp. verbunden. Die Nutzung von Bulk-Tools erfolgt auf eigene Verantwortung. Wenn X seine Benutzeroberfläche ändert, schiebt unser Remote-Config-Aktualisierungssystem innerhalb weniger Stunden ein neues Selektor-Schema — keine Neuinstallation der Erweiterung erforderlich.</p>
+        <p>Wenn Sie auf ein Rate-Limit stoßen, pausiert die Erweiterung automatisch, zeigt eine „Wird verbunden"-Anzeige und setzt fort, sobald die Begrenzung aufgehoben ist. Der Status bleibt über Browser-Neustarts hinweg erhalten, sodass ein Lauf mit 50.000 Tweets auf mehrere Tage aufgeteilt werden kann, ohne dass es zu Duplikaten oder übersprungenen Elementen kommt.</p>
+        <div class="callout">
+          <p><strong>Noch einmal:</strong> Fordern Sie Ihr X-Archiv vor Ihrem ersten Massenlauf an. Die offizielle Seite <a href="https://x.com/settings/download_your_data" rel="noopener noreferrer">„Lade ein Archiv deiner Daten herunter"</a> ist der einzige Weg, Ihre Tweets nach der Löschung zurückzubekommen.</p>
+        </div>
+
+        <h2 id="faq">Häufig gestellte Fragen</h2>
+
+        <h3>Wie lange dauert es, alle meine Tweets zu löschen?</h3>
+        <p>SocialEraser verarbeitet etwa 0,9 Sekunden pro Element. 1.000 Tweets dauern ungefähr 15 Minuten. 50.000 Tweets dauern etwa 12–13 Stunden Hintergrundzeit. Sie können den Lauf laufen lassen, während Sie schlafen, arbeiten oder etwas anderes tun.</p>
+
+        <h3>Kann ich nur Tweets löschen, die vor einem bestimmten Datum gepostet wurden?</h3>
+        <p>Ja. Verwenden Sie den Filter <strong>Ab Datum</strong> in der Seitenleiste. Tweets, die am oder nach dem Datum gepostet wurden, werden behalten; alles, was älter ist, wird gelöscht. Dies ist der am häufigsten verwendete Filter — viele nutzen ihn, um alles vor einem Rebranding oder einem Vorstellungsgespräch zu löschen.</p>
+
+        <h3>Kann ich meine viralen Tweets behalten und nur den Rest löschen?</h3>
+        <p>Ja. Verwenden Sie den Filter <strong>Engagement-Untergrenze</strong> und legen Sie eine Schwelle fest. Tweets über der Schwelle bleiben; Tweets darunter werden gelöscht. Eine übliche Wahl sind 10 Likes — behält die Durchbruch-Momente, löscht den Lärm.</p>
+
+        <h3>Funktioniert dies auch zum Löschen von Retweets, Antworten und Follows?</h3>
+        <p>Ja. SocialEraser kann Retweets massenhaft rückgängig machen, Antworten massenhaft löschen, Tweets massenhaft unliken, private Lesezeichen löschen und Konten massenhaft entfolgen. Das gleiche Filtersystem (Datum, Stichwort, Engagement-Untergrenze, Beitragsart) gilt für alle Bereinigungsarten. Aktivieren Sie die Kontrollkästchen, die dem entsprechen, was Sie entfernen möchten.</p>
+
+        <h3>Werde ich für das Massenlöschen gesperrt?</h3>
+        <p>SocialEraser simuliert normale Klicks in menschlicher Geschwindigkeit und respektiert die Rate-Limits von X. Es gilt der gleiche Vorbehalt wie bei jedem Drittanbieter-Tool — wir sind nicht mit X Corp. verbunden, und die Nutzung von Bulk-Tools erfolgt auf eigene Verantwortung.</p>
+
+        <h3>Kann ich eine Löschung nachträglich rückgängig machen?</h3>
+        <p>Nein. Sobald ein Tweet gelöscht ist, ist er innerhalb von Sekunden aus der öffentlichen Ansicht von X verschwunden. Deshalb ist der erste Schritt dieser Anleitung, Ihre Daten zuerst mit dem offiziellen Archiv von X zu sichern.</p>
+
+        <h3>Funktioniert dies in der X-Mobil-App?</h3>
+        <p>Nein. Die X-Mobil-App erlaubt keine Browser-Erweiterungen. SocialEraser läuft in Chrome auf dem Desktop. Eine dedizierte mobile Begleit-App ist für 2027 in der Roadmap.</p>
+
+        <h3>Was, wenn ich zigtausende Tweets habe?</h3>
+        <p>SocialEraser verarbeitet auch große Bibliotheken problemlos. Die Erweiterung pausiert automatisch, wenn sie auf ein Rate-Limit stößt, und Sie können an derselben Stelle fortfahren. Der Status bleibt über Browser-Neustarts hinweg erhalten, sodass eine Bibliothek mit 50.000 Tweets auf mehrere Tage aufgeteilt werden kann, ohne dass es zu Duplikaten oder übersprungenen Elementen kommt.</p>
+
+        <div class="related-cta">
+          <h2>Bereit, Ihr X-Profil zu bereinigen?</h2>
+          <p>Kostenlose Chrome-Erweiterung. Kein Konto, keine Anmeldung. 100 % lokal, Ihre Daten verlassen nie Ihren Browser.</p>
+          <a href="/de/platforms/x/#download" class="btn btn--primary btn--xl">SocialEraser für X installieren</a>
+        </div>
+
+      </div>
+    </article>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container-lg">
+      <div class="site-footer__grid">
+        <div class="site-footer__brand">
+          <a href="/de/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
+        </span>
+            <span>SocialEraser</span>
+          </a>
+          <p>Bereinigen Sie Ihre sozialen Medien in großen Mengen. 100 % lokal, passwortfrei, Open Source. Für Menschen, die ihr Wochenende lieber nicht mit dem Unlike von Beiträgen aus dem Jahr 2017 verbringen möchten.</p>
+        </div>
+        <div class="site-footer__col"><h4>Plattformen</h4><ul>
+          <li><a href="/de/platforms/x/">X (Twitter)</a></li>
+          <li><a href="/de/platforms/tiktok/">TikTok</a></li>
+          <li><a href="/de/platforms/youtube/">YouTube</a></li>
+          <li><a href="/de/platforms/instagram/">Instagram</a></li>
+          <li><a href="/de/platforms/facebook/">Facebook</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>Produkt</h4><ul>
+          <li><a href="/de/help.html">Hilfe-Center</a></li>
+          <li><a href="/de/platforms/x/#download">Installieren</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/CHANGELOG.md" target="_blank" rel="noopener noreferrer">Changelog</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/ROADMAP.md" target="_blank" rel="noopener noreferrer">Roadmap</a></li>
+          <li><a href="/de/support.html">☕ Unterstützen</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">Quellcode</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>Unternehmen</h4><ul>
+          <li><a href="/de/about.html">Über uns</a></li>
+          <li><a href="mailto:support@socialeraser.app">Kontakt</a></li>
+          <li><a href="/de/privacy.html">Datenschutz</a></li>
+          <li><a href="/de/terms.html">Bedingungen</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser#readme" target="_blank" rel="noopener noreferrer">Pressemappe</a></li>
+        </ul></div>
+      </div>
+      <div class="site-footer__bottom">
+        <span>© 2026 SocialEraser. Alle Rechte vorbehalten.</span>
+        <div class="site-footer__legal"><span>Unabhängiges Tool — nicht verbunden mit X Corp.</span></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/app.js" defer></script>
+  <script defer src="/assets/lang-switcher.js"></script>
+</body>
+</html>
