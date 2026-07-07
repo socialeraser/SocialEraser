@@ -533,18 +533,18 @@
     <section class="container-lg section">
       <div class="section-head">
         <span class="muted-eyebrow">横向对比</span>
-        <h2 class="section-head__h2">SocialEraser 与其他方案对比</h2>
+        <h2 class="section-head__h2">SocialEraser vs TweetDelete、Semiphemeral 和 Redact</h2>
       </div>
       <div class="comparison">
         <table>
-          <thead><tr><th>功能</th><th class="text-center">SocialEraser</th><th class="text-center">手动清理</th><th class="text-center">基于 API 的工具</th><th class="text-center">要求密码的应用</th></tr></thead>
+          <thead><tr><th>功能</th><th class="text-center">SocialEraser</th><th class="text-center">手动清理</th><th class="text-center">其他工具</th></tr></thead>
           <tbody>
-            <tr class="us"><td>是否要求密码</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> No</td><td>—</td><td>—</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> Yes</td></tr>
-            <tr class="us"><td>批量速度（1000 条）</td><td>~15 min</td><td>~3 hours</td><td>~15 min</td><td>~25 min</td></tr>
-            <tr class="us"><td>覆盖所有平台</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Chrome + Edge + Android + iOS</td><td>—</td><td>Varies</td><td>Usually 1</td></tr>
-            <tr class="us"><td>100% 本地处理</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Yes</td><td>—</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> No</td><td>Sometimes</td></tr>
-            <tr class="us"><td>免费版</td><td>打赏支持</td><td>—</td><td>限制</td><td>仅试用</td></tr>
-            <tr class="us"><td>是否开源</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> MIT</td><td>—</td><td>Rarely</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> No</td></tr>
+            <tr class="us"><td>是否要求密码</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 否</td><td>—</td><td>通常要求</td></tr>
+            <tr class="us"><td>批量速度（1000 条）</td><td>~15 分钟</td><td>~3 小时</td><td>~20 分钟</td></tr>
+            <tr class="us"><td>全端点支持（Web + Android + iOS）</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 4 个平台</td><td>—</td><td>通常仅 1 个</td></tr>
+            <tr class="us"><td>100% 本地处理</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 是</td><td>—</td><td>服务端处理</td></tr>
+            <tr class="us"><td>免费版</td><td>打赏支持</td><td>—</td><td>仅试用</td></tr>
+            <tr class="us"><td>是否开源</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> MIT</td><td>—</td><td>闭源</td></tr>
           </tbody>
         </table>
       </div>
@@ -622,7 +622,7 @@
           <details class="faq__item"><summary>批量删除具体是怎么工作的？</summary><div class="faq__answer"><p>扩展打开平台的原生界面（如 x.com），为每条内容找到操作菜单，点击删除，然后确认。这和你手动操作完全一样 — 只是更快，而且不知疲倦。</p></div></details>
           <details class="faq__item"><summary>有哪些过滤选项？</summary><div class="faq__answer"><p>日期范围（删除 X 之前 / 之后的帖子）、关键词（只删除包含 "Y" 的帖子）、媒体类型（只要图片、只要文字、只要视频），以及账号（只删除该账号的）。多个过滤条件之间是 AND 关系，不是 OR。</p></div></details>
           <details class="faq__item"><summary>可以暂停然后继续吗？</summary><div class="faq__answer"><p>可以。暂停 / 继续随时可用，即使关闭浏览器也行。状态保存在 <code>chrome.storage.local</code>，重启后也能保留。第二天回来，从上次离开的位置继续。</p></div></details>
-          <details class="faq__item"><summary>How fast is it?</summary><div class="faq__answer"><p>1 件平均不到 1 秒。1000 条的处理时间约为 15 分钟。准确估算可使用上方的 <a href="#estimator" style="color: var(--accent)">时间计算器</a>。</p></div></details>
+          <details class="faq__item"><summary>批量删除到底有多快？</summary><div class="faq__answer"><p>1 件平均不到 1 秒。1000 条的处理时间约为 15 分钟。准确估算可使用上方的 <a href="#estimator" style="color: var(--accent)">时间计算器</a>。</p></div></details>
           <details class="faq__item"><summary>删除前能先导出吗？</summary><div class="faq__answer"><p>可以。X 版扩展提供「导出归档」选项，会在删除前保存一份 <code>archive.json</code>。我们正在为其他平台陆续添加这个功能。</p></div></details>
           <details class="faq__item"><summary>清理中途断网会怎样？</summary><div class="faq__answer"><p>扩展会检测到断连，暂停任务，并显示「正在重新连接…」提示。网络恢复后，从上次完成的条目继续。不会有任何数据被发送或存储到别处 — 恢复状态只保存在你浏览器的本地存储中。</p></div></details>
           <details class="faq__item"><summary>清理后能撤销吗？</summary><div class="faq__answer"><p>不能 — 一旦帖子在平台上被删除，就无法恢复。我们建议在运行清理前使用「导出归档」选项（如果可用）保存一份 JSON 备份，留一份被删除内容的记录。</p></div></details>
