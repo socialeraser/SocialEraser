@@ -92,13 +92,13 @@ def build():
             if prefix == "" and plat == "x":
                 image = {
                     "loc": f"{BASE}/assets/icons/og-x.png",
-                    "title": "SocialEraser for X — Bulk Delete Tweets, Likes &amp; Bookmarks",
+                    "title": "Eraser for X — Bulk Delete Tweets, Likes &amp; Bookmarks",
                     "caption": "Free Chrome extension to bulk delete tweets, retweets, likes, bookmarks, and unfollow on X. 100% local."
                 }
             elif prefix == "" and plat == "tiktok":
                 image = {
                     "loc": f"{BASE}/assets/icons/og-tiktok.png",
-                    "title": "SocialEraser for TikTok — Bulk Delete Videos, Reposts &amp; Likes",
+                    "title": "Eraser for TikTok — Bulk Delete Videos, Reposts &amp; Likes",
                     "caption": "Free Chrome extension to bulk delete TikTok videos, reposts, likes, favorites, and unfollow. 100% local."
                 }
             blocks.append(url_block(loc, priority, "weekly", image=image))

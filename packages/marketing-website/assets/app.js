@@ -266,7 +266,7 @@ if (!customElements.get('lite-youtube')) {
 }
 
 // Hero install: single CTA button + platform picker popover.
-// Smart-default label: shows "Get SocialEraser for X" when only one platform
+// Smart-default label: shows "Get Eraser for X" when only one platform
 // is available, "Get SocialEraser" when multiple are, and falls back to a
 // generic label otherwise. Click trigger toggles the popover; click outside
 // or Esc closes it.
