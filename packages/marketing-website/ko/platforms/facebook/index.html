@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ko-KR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0a0b">
+  <title>SocialEraser for Facebook — 게시글, 사진, 좋아요, 친구 일괄 삭제</title>
+  <meta name="description" content="Facebook 게시글, 사진, 좋아요, 댓글을 일괄 삭제 또는 보관하고 친구를 일괄 삭제하는 무료 Chrome 확장 프로그램. 날짜와 키워드로 필터링. 100% 로컬, 비밀번호 불필요, API 키 불필요.">
+  <meta name="keywords" content="페이스북 게시글 삭제, 페이스북 일괄 삭제, 페이스북 정리, 페이스북 대량 좋아요 취소, 페이스북 친구 제거, 페이스북 타임라인 정리, 페이스북 게시글 제거기, 오래된 페이스북 게시글 삭제, 페이스북 일괄 삭제, 모든 친구 삭제, 페이스북 계정 정리, 페이스북 사진 삭제, 페이스북 친구 삭제 도구, 페이스북 좋아요 일괄 취소, 페이스북 댓글 일괄 삭제, 페이스북 페이지 게시글 제거기">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://socialeraser.app/ko/platforms/facebook/">
+  <link rel="alternate" hreflang="en" href="https://socialeraser.app/platforms/facebook/">
+  <link rel="alternate" hreflang="zh" href="https://socialeraser.app/zh/platforms/facebook/">
+  <link rel="alternate" hreflang="ja" href="https://socialeraser.app/ja/platforms/facebook/">
+  <link rel="alternate" hreflang="es" href="https://socialeraser.app/es/platforms/facebook/">
+  <link rel="alternate" hreflang="fr" href="https://socialeraser.app/fr/platforms/facebook/">
+  <link rel="alternate" hreflang="de" href="https://socialeraser.app/de/platforms/facebook/">
+  <link rel="alternate" hreflang="pt" href="https://socialeraser.app/pt/platforms/facebook/">
+  <link rel="alternate" hreflang="ko" href="https://socialeraser.app/ko/platforms/facebook/">
+  <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/ko/platforms/facebook/"><link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SocialEraser">
+  <meta property="og:url" content="https://socialeraser.app/ko/platforms/facebook/">
+  <meta property="og:title" content="SocialEraser for Facebook — 게시글, 사진, 좋아요 일괄 삭제">
+  <meta property="og:description" content="Facebook 게시글, 사진, 좋아요, 댓글을 일괄 삭제 또는 보관하고 친구를 일괄 삭제하는 무료 Chrome 확장 프로그램. 날짜와 키워드로 필터링. 100% 로컬, 비밀번호 불필요.">
+  <meta property="og:image" content="https://socialeraser.app/assets/icons/socialeraser-mark.png">
+  <meta property="og:image:width" content="400">
+  <meta property="og:image:height" content="400">
+  <meta property="og:image:alt" content="SocialEraser for Facebook — 무료 Chrome 확장으로 게시글, 사진, 좋아요, 댓글을 일괄 삭제 또는 보관하고 친구를 일괄 삭제. 100% 로컬, 비밀번호 불필요.">
+  <meta property="og:locale" content="ko_KR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SocialEraser for Facebook — 게시글, 사진, 좋아요 일괄 삭제">
+  <meta name="twitter:description" content="Facebook 게시글, 사진, 좋아요, 댓글을 일괄 삭제 또는 보관하고 친구를 일괄 삭제하는 무료 Chrome 확장 프로그램. 100% 로컬, 비밀번호 불필요.">
+  <meta name="twitter:image" content="https://socialeraser.app/assets/icons/socialeraser-mark.png">
+  <meta name="twitter:image:alt" content="SocialEraser for Facebook — 무료 Chrome 확장으로 게시글, 사진, 좋아요를 일괄 삭제">
+  <link rel="icon" type="image/png" href="/assets/icons/socialeraser-mark.png">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/app.css">
+  <style>
+    /* Facebook 페이지 — Facebook 브랜드는 #1877F2 파랑입니다. 공유 브랜드
+       토큰을 Facebook 파랑 강조와 그라데이션으로 덮어씁니다. */
+    :root {
+      --accent:         #1877F2;
+      --accent-bright:  #4596F5;
+      --accent-dark:    #0E5FC0;
+      --accent-deep:    #0A4D9E;
+      --accent-soft:    rgba(24, 119, 242, 0.12);
+      --accent-glow:    rgba(24, 119, 242, 0.35);
+      --border-accent:  rgba(24, 119, 242, 0.4);
+      --gradient-brand:      linear-gradient(135deg, #4596F5 0%, #1877F2 50%, #0E5FC0 100%);
+      --gradient-brand-soft: linear-gradient(135deg, rgba(69, 150, 245, 0.18) 0%, rgba(24, 119, 242, 0.12) 50%, rgba(14, 95, 192, 0.06) 100%);
+      --gradient-hero-glow:  radial-gradient(ellipse 80% 50% at 50% 0%, rgba(24, 119, 242, 0.18) 0%, transparent 70%);
+    }
+    /* 비교표의 ✗는 파란색 유지 — 중립적이며 빨강이 아닙니다. */
+    .comparison .cross { color: var(--blue); }
+  </style>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"SocialEraser for Facebook","applicationCategory":"BrowserApplication","applicationSubCategory":"BrowserExtension","operatingSystem":"Chrome 120+, Edge 120+","description":"Facebook 타임라인 게시글, 사진, 앨범, 좋아요, 리액션, 댓글, 저장 항목, 친구, 관리하는 페이지를 일괄 삭제 또는 보관합니다. 브라우저에서 100% 로컬 처리 — 비밀번호 불필요, 서버 불필요.","url":"https://socialeraser.app/ko/platforms/facebook/","image":"https://socialeraser.app/assets/icons/socialeraser-mark.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://socialeraser.app/ko/platforms/facebook/"},"featureList":["타임라인 게시글 일괄 삭제 또는 보관","사진 및 사진 앨범 일괄 삭제","좋아요 취소 또는 리액션 되돌리기","저장 항목 및 링크 일괄 정리","친구 일괄 삭제(상호작용 빈도별)","본인 댓글 일괄 삭제","메신저 스레드 일괄 삭제","관리하는 페이지의 게시글 일괄 삭제","날짜 범위로 필터","키워드 일치로 필터","게시글 유형으로 필터(상태, 사진, 링크, 체크인)","친구 휴면 기간으로 필터(월/년)","삭제 또는 보관 모드(복구 가능한 보관)","세션 간 일시 중지 및 재개"],"offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"}}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+    {"@type":"ListItem","position":1,"name":"홈","item":"https://socialeraser.app/ko/"},
+    {"@type":"ListItem","position":2,"name":"플랫폼","item":"https://socialeraser.app/ko/#platforms"},
+    {"@type":"ListItem","position":3,"name":"SocialEraser for Facebook","item":"https://socialeraser.app/ko/platforms/facebook/"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"HowTo","name":"SocialEraser로 Facebook 게시글을 일괄 삭제하는 방법","description":"SocialEraser Chrome 확장을 설치하고 facebook.com을 열고 정리할 대상을 선택한 다음 시작을 클릭하세요. SocialEraser는 사람의 속도로 정상적인 클릭을 시뮬레이션하여 일치하는 모든 게시글, 사진, 좋아요, 댓글 또는 친구를 삭제하거나 보관합니다.","totalTime":"PT20M","estimatedCost":{"@type":"MonetaryAmount","value":"0","currency":"USD"},"tool":[{"@type":"HowToTool","name":"Google Chrome 또는 Microsoft Edge(버전 120 이상)"},{"@type":"HowToTool","name":"SocialEraser for Facebook 브라우저 확장(무료)"}],"step":[
+    {"@type":"HowToStep","position":1,"name":"SocialEraser for Facebook 설치","text":"Chrome 웹스토어에서 무료 SocialEraser 확장을 추가하세요. 계정, 가입, 결제 모두 필요 없습니다. 두 번 클릭하면 설치되어 툴바에 고정됩니다.","url":"https://socialeraser.app/ko/platforms/facebook/#download"},
+    {"@type":"HowToStep","position":2,"name":"facebook.com을 열고 로그인","text":"Chrome에서 facebook.com으로 이동하여 평소처럼 계정에 로그인하세요. SocialEraser 사이드 패널 아이콘을 클릭하면 확장이 자동으로 로그인 상태를 감지하고 계정 상태를 표시합니다.","url":"https://socialeraser.app/ko/platforms/facebook/#main"},
+    {"@type":"HowToStep","position":3,"name":"정리할 대상을 선택하고 필터를 설정","text":"사이드 패널에서 삭제할 항목을 선택하세요: 타임라인 게시글, 사진, 좋아요, 저장 항목, 친구, 댓글, 메신저 또는 관리하는 페이지. 선택적으로 날짜 범위, 키워드 일치, 게시글 유형 필터, 친구 휴면 기간을 설정할 수 있습니다. 삭제 모드(영구) 또는 보관 모드(복구 가능) 중에서 선택하세요.","url":"https://socialeraser.app/ko/platforms/facebook/#main"},
+    {"@type":"HowToStep","position":4,"name":"시작을 클릭하고 떠나라","text":"정리 시작 버튼을 클릭하세요. SocialEraser는 일치하는 각 항목을 열고 사람의 속도로 삭제/보관/좋아요 취소/친구 삭제 버튼을 클릭하며 실시간 진행 카운터를 표시합니다. 노트북을 덮고 내일 돌아와도 됩니다 — 브라우저를 재시작해도 상태가 유지됩니다.","url":"https://socialeraser.app/ko/platforms/facebook/#main"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"오래된 Facebook 게시글을 일괄 삭제할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"네. 날짜 필터(예: 2015년 1월 1일 이전) 또는 키워드 일치를 설정하면 SocialEraser가 일치하는 모든 게시글을 삭제하거나 보관합니다. 항목당 약 0.9초로 실행되며, 게시글 1,000개에 약 15분이 걸립니다."}},
+    {"@type":"Question","name":"삭제인가요 보관인가요?","acceptedAnswer":{"@type":"Answer","text":"둘 다 가능합니다. SocialEraser는 두 가지 모드를 지원합니다: 영구 삭제(게시글이 영원히 사라짐)와 보관(타임라인에서는 숨겨지지만 활동 로그에서 복구 가능). 보관이 더 안전한 기본값입니다."}},
+    {"@type":"Question","name":"계정을 일괄 친구 삭제할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"네. 상호작용 빈도로 친구를 필터링하고 6개월 이상 연락하지 않은 모든 친구를 삭제하세요. 취향에 따라 조정 가능합니다. 권장 기본값: 24개월."}},
+    {"@type":"Question","name":"다른 사람이 올린 내 사진은 어떻게 되나요?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser는 내가 태그된 사진을 타임라인에서 숨길 수 있지만, 다른 사람이 업로드한 사진은 삭제할 수 없습니다. 완전한 제거를 위해서는 태그를 해제하고 업로드한 사람에게 삭제를 요청하세요."}},
+    {"@type":"Question","name":"제 계정이 정지될 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser는 사람의 속도로 정상적인 클릭을 시뮬레이션하며 속도 제한을 준수합니다. 모든 제3자 도구와 동일한 주의 사항이 적용됩니다 — 당사는 Meta Platforms, Inc.와 제휴 관계가 없으며, 일괄 도구 사용은 본인의 판단에 따릅니다."}},
+    {"@type":"Question","name":"삭제를 취소할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"영구 삭제는 복구할 수 없습니다. 첫 실행에는 보관 모드를 사용하는 것을 강력히 권장합니다. 그래야 마음이 바뀌면 활동 로그에서 검토하고 복구할 수 있습니다."}},
+    {"@type":"Question","name":"Facebook이 UI를 변경하면 어떻게 되나요?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser는 원격 CDN에서 DOM 선택기 스키마를 가져옵니다. Facebook이 UI를 변경하면 업데이트를 푸시하므로 확장 프로그램을 다시 설치할 필요가 없습니다. 업데이트는 자동으로 조용히 진행됩니다."}},
+    {"@type":"Question","name":"새 Facebook 레이아웃에서도 작동하나요?","acceptedAnswer":{"@type":"Answer","text":"네. SocialEraser는 최신 facebook.com 레이아웃과 이전 FB5 보기를 모두 지원합니다. 선택기 스키마는 매주 업데이트되어 Facebook의 최신 UI 변경 사항에 맞춥니다."}},
+    {"@type":"Question","name":"Facebook 모바일 앱에서도 작동하나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. Facebook 모바일 앱은 브라우저 확장을 허용하지 않습니다. SocialEraser는 데스크톱 Chrome에서 실행됩니다. 전용 모바일 동반 앱은 2027년 로드맵에 있습니다."}},
+    {"@type":"Question","name":"여러 Facebook 계정에서 실행할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"네 — 각 계정에 대해 별도의 브라우저 프로필을 사용하세요. 단일 프로필 내 다중 계정 기능은 로드맵에 있습니다."}}
+  ]}
+  </script>
+</head>
+<body>
+
+  <a href="#main" class="skip-to-content">본문으로 건너뛰기</a>
+
+  <header class="site-header">
+    <div class="site-header__inner container-lg">
+      <a href="/ko/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="">
+        </span>
+        <span>SocialEraser</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <details class="site-nav__platforms">
+          <summary class="site-nav__platforms-trigger">플랫폼 <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></summary>
+          <div class="site-nav__platforms-menu">
+            <a href="/ko/platforms/x/">SocialEraser for X</a>
+            <a href="/ko/platforms/tiktok/">SocialEraser for TikTok</a>
+            <a href="/ko/platforms/youtube/">SocialEraser for YouTube</a>
+            <a href="/ko/platforms/instagram/">SocialEraser for Instagram</a>
+            <a href="/ko/platforms/facebook/">SocialEraser for Facebook</a>
+          </div>
+        </details>
+        <a href="/ko/help.html" class="hide-mobile">도움말</a>
+        <a href="#download" class="btn btn--primary btn--sm">무료 설치</a>
+      </nav>
+      <details class="site-nav--mobile">
+        <summary class="site-nav--mobile-trigger" aria-label="메뉴 토글">
+          <svg class="site-nav--mobile-icon-menu" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <svg class="site-nav--mobile-icon-close" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </summary>
+        <div class="site-nav--mobile-menu">
+          <a href="/ko/platforms/x/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>SocialEraser for X</a>
+          <a href="/ko/platforms/tiktok/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg>SocialEraser for TikTok</a>
+          <a href="/ko/platforms/youtube/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>SocialEraser for YouTube</a>
+          <a href="/ko/platforms/instagram/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>SocialEraser for Instagram</a>
+          <a href="/ko/platforms/facebook/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>SocialEraser for Facebook</a>
+          <a href="/ko/help.html"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>도움말</a>
+          <a href="#download" class="btn btn--primary"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>무료 설치</a>
+          <details class="site-nav--mobile-lang">
+            <summary>
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+              <span class="site-nav--mobile-lang__current">언어: <span data-lang-current>한국어</span></span>
+              <svg class="site-nav--mobile-lang__chev" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div data-lang-list></div>
+          </details>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="breadcrumbs-wrap container-lg">
+      <nav class="breadcrumbs" aria-label="빵 부스러기 탐색">
+        <a href="/ko/">홈</a>
+        <span class="breadcrumbs__sep">›</span>
+        <span class="breadcrumbs__current">SocialEraser for Facebook</span>
+      </nav>
+    </div>
+    <section class="container-lg">
+      <div class="hero">
+        <span class="muted-eyebrow">SocialEraser for Facebook · 무료 · 팁으로 지원</span>
+        <h1 class="hero__h1">
+          <span class="gradient-text">Facebook 게시글, 사진, 좋아요를</span><br>
+          몇 분 안에 일괄 삭제하세요
+        </h1>
+        <p class="hero__lede">
+          Facebook 타임라인을 정리하고, 날짜나 키워드로 보관하고, 친구를 일괄 삭제하세요. <strong>비밀번호 불필요. API 키 불필요. 서버 불필요.</strong>
+        </p>
+        <div class="btn-row hero__cta btn-row--center">
+          <a href="mailto:support@socialeraser.app?subject=Join%20Facebook%20Waitlist" class="btn btn--primary btn--xl">Facebook 대기자 명단 참여</a>
+          <a href="/ko/platforms/x/" class="btn btn--secondary btn--xl">SocialEraser for X 사용</a>
+        </div>
+        <p class="hero__micro">오픈소스 · MIT 라이선스 · 추적 없음</p>
+      </div>
+    </section>
+
+    <section class="legal-strip">
+      <div class="container-md">
+        <strong>독립 도구입니다.</strong> Meta Platforms, Inc.와 제휴, 보증, 후원 관계가 없습니다. Facebook은 Meta Platforms, Inc.의 상표입니다. 사용에 따른 책임은 본인에게 있습니다.
+      </div>
+    </section>
+
+    <!-- 삭제할 수 있는 것 -->
+    <section class="container-lg section" aria-labelledby="section-cleanup">
+      <div class="section-head">
+        <span class="muted-eyebrow">정리 범위</span>
+        <h2 class="section-head__h2" id="section-cleanup">Facebook 정리 8종을 한 확장으로</h2>
+        <p class="section-head__lede">타임라인 게시글부터 친구 목록까지 — 하나만 실행하거나, 섞거나, 연속으로 모두 실행하세요.</p>
+      </div>
+      <div class="grid grid-auto">
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><h3 class="card__title">타임라인 게시글</h3><p class="card__desc">상태 업데이트를 일괄 삭제하거나 보관하세요. 날짜 범위나 키워드로 필터링하세요. 두 가지 모드 모두 지원됩니다.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 19a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></div><h3 class="card__title">사진 및 앨범</h3><p class="card__desc">사진과 사진 앨범을 일괄 삭제하세요. 태그된 사진과 태그되지 않은 사진 모두 지원됩니다. 먼저 백업하세요.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div><h3 class="card__title">좋아요 및 리액션</h3><p class="card__desc">수천 개의 게시글의 좋아요를 취소하거나 리액션을 되돌리세요. 활동 로그는 당신의 공개 기록입니다 — 깨끗이 정리하세요.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg></div><h3 class="card__title">저장 항목</h3><p class="card__desc">저장한 게시글과 링크를 정리하세요. 1,200개로 깊어진 "나중에 읽을게요" 더미를 비우세요.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></div><h3 class="card__title">친구</h3><p class="card__desc">친구를 일괄 삭제하세요. 상호작용 빈도로 필터링하여 5년 이상 연락하지 않은 600명의 친구를 찾으세요.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><h3 class="card__title">내 댓글</h3><p class="card__desc">다른 사람의 게시글에 남긴 모든 댓글을 삭제하세요. 같은 엔진, 다른 타임라인.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><h3 class="card__title">메시지</h3><p class="card__desc">메신저 스레드를 일괄 삭제하세요. 받은편지함 0 또는 수 년간 잠자던 채팅의 깨끗한 리셋에 유용합니다.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><h3 class="card__title">관리하는 페이지</h3><p class="card__desc">관리하는 Facebook 페이지의 게시글을 일괄 삭제하세요. 휴면 상태인 브랜드 페이지를 정리할 때 유용합니다.</p></div>
+      </div>
+    </section>
+
+    <!-- 시간 계산기 -->
+    <section class="container-md section" aria-labelledby="section-estimator">
+      <div class="section-head">
+        <span class="muted-eyebrow">시간 계산기</span>
+        <h2 class="section-head__h2" id="section-estimator">Facebook 정리에 얼마나 걸릴까요?</h2>
+      </div>
+      <div class="estimator" data-estimator>
+        <div class="estimator__input-block">
+          <label for="est-input-fb">삭제할 게시글 / 좋아요 수</label>
+          <input id="est-input-fb" type="number" class="estimator__input" data-estimator-input value="3000" min="1" max="100000">
+          <div class="estimator__quick">
+            <button class="estimator__quick-btn" data-estimator-quick data-value="100">100</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="500">500</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="1000">1,000</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="5000">5,000</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="10000">10,000</button>
+          </div>
+        </div>
+        <div class="estimator__result">
+          <div class="estimator__row">
+            <div class="estimator__row-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+            <div class="estimator__row-text"><span class="estimator__row-label">수동 정리</span><span class="estimator__row-value" data-estimator-manual>—</span></div>
+          </div>
+          <div class="estimator__row estimator__row--highlight">
+            <div class="estimator__row-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+            <div class="estimator__row-text"><span class="estimator__row-label">SocialEraser 사용 시</span><span class="estimator__row-value" data-estimator-auto>45분</span></div>
+          </div>
+          <div class="estimator__row">
+            <div class="estimator__row-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg></div>
+            <div class="estimator__row-text"><span class="estimator__row-label">절약한 시간</span><span class="estimator__row-value" data-estimator-saved>—</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3단계 -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">사용 방법</span>
+        <h2 class="section-head__h2">3단계로 끝.</h2>
+      </div>
+      <div class="steps">
+        <div class="steps__item">
+          <h3>SocialEraser for Facebook 설치</h3>
+          <p>Chrome 웹스토어에서 무료로 받으세요. 계정, 가입, 결제 모두 필요 없습니다. 두 번 클릭이면 끝.</p>
+        </div>
+        <div class="steps__item">
+          <h3>facebook.com을 열고 로그인</h3>
+          <p>facebook.com으로 이동하여 평소처럼 로그인하세요. SocialEraser 사이드 패널 아이콘을 클릭합니다. 정리할 항목과 필터(날짜 범위, 키워드, 상호작용 빈도)를 선택하세요.</p>
+        </div>
+        <div class="steps__item">
+          <h3>시작을 클릭하세요. 잠시 자리를 비우세요.</h3>
+          <p>SocialEraser가 사람의 속도로 클릭을 시뮬레이션합니다. 실시간 카운터를 보거나, 노트북을 덮고 내일 돌아와도 됩니다. 상태는 유지됩니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 필터 심층 분석 -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">필터</span>
+        <h2 class="section-head__h2">정밀하게, 맹목이 아닌</h2>
+        <p class="section-head__lede">일괄의 목적은 빠르게 정리하는 것이지만, 정밀함도 중요합니다. 필터를 조합하여 잘못된 것만 정확히 삭제하세요.</p>
+      </div>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3 class="card__title">날짜 범위</h3>
+          <p class="card__desc">특정 날짜 <strong>이전</strong> 또는 <strong>이후</strong>의 게시글을 삭제하거나 보관하세요. 최근 인생 업데이트는 남기고 2008~2012년 시기는 정리하세요. 가장 많이 사용되는 필터입니다.</p>
+        </div>
+        <div class="card">
+          <h3 class="card__title">키워드 일치</h3>
+          <p class="card__desc">특정 단어나 구문이 포함된 게시글만 삭제하세요. 주제를 정리할 때 좋습니다 — 구직기, 격한争论, 덕질 시절 등.</p>
+        </div>
+        <div class="card">
+          <h3 class="card__title">게시글 유형</h3>
+          <p class="card__desc">상태 업데이트만, 사진만, 공유 링크만, 또는 체크인만 필터링하세요. 다른 형식을 정리하면서 한 형식을 유지할 때 유용합니다.</p>
+        </div>
+        <div class="card">
+          <h3 class="card__title">친구 휴면 기간</h3>
+          <p class="card__desc">친구를 삭제할 때 월/년 단위로 기간을 설정하세요. 해당 기간 내에 상호작용이 없었던 모든 친구를 삭제합니다. 기본값: 24개월.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 비교 -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">대안 도구와 비교</span>
+        <h2 class="section-head__h2">SocialEraser for Facebook 비교</h2>
+      </div>
+      <div class="comparison">
+        <table>
+          <thead><tr><th>기능</th><th class="text-center">SocialEraser</th><th class="text-center">Facebook 활동 로그</th><th class="text-center">Social Fixer</th><th class="text-center">수동 작업</th></tr></thead>
+          <tbody>
+            <tr class="us"><td>비밀번호 불필요</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 예</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 예</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 예</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 예</td></tr>
+            <tr class="us"><td>100% 로컬</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 예</td><td>서버 측</td><td>로컬</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 예</td></tr>
+            <tr class="us"><td>오픈소스</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> MIT</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> 아니요</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> GPL</td><td>N/A</td></tr>
+            <tr class="us"><td>무료 등급</td><td>팁으로 지원</td><td>무료</td><td>전체(오픈소스)</td><td>무료(가장 느림)</td></tr>
+            <tr class="us"><td>날짜 + 키워드 필터</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 예</td><td>날짜만</td><td>날짜만</td><td>수동</td></tr>
+            <tr class="us"><td>좋아요 / 댓글 / 친구 일괄 처리</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 예</td><td>제한적</td><td>좋아요만</td><td>지루함</td></tr>
+            <tr class="us"><td>보관 모드(복구 가능)</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 예</td><td>수동만</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> 아니요</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> 아니요</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">FAQ</span>
+        <h2 class="section-head__h2">Facebook 관련 질문</h2>
+      </div>
+      <div class="faq">
+        <div class="faq__category">
+          <h3 class="faq__category-title">정리 범위</h3>
+          <details class="faq__item"><summary>오래된 Facebook 게시글을 일괄 삭제할 수 있나요?</summary><div class="faq__answer"><p>네. 날짜 필터(예: <em>2015년 1월 1일 이전</em>) 또는 키워드 일치를 설정하면 SocialEraser가 일치하는 모든 게시글을 삭제하거나 보관합니다. 항목당 약 0.9초로 실행되며, 게시글 1,000개에 약 15분이 걸립니다.</p></div></details>
+          <details class="faq__item"><summary>삭제인가요 보관인가요?</summary><div class="faq__answer"><p>둘 다 가능합니다. SocialEraser는 두 가지 모드를 지원합니다: <em>영구 삭제</em>(게시글이 영원히 사라짐)와 <em>보관</em>(타임라인에서는 숨겨지지만 활동 로그에서 복구 가능). 보관이 더 안전한 기본값입니다.</p></div></details>
+          <details class="faq__item"><summary>계정을 일괄 친구 삭제할 수 있나요?</summary><div class="faq__answer"><p>네. 상호작용 빈도로 친구를 필터링하고 6개월 이상 연락하지 않은 모든 친구를 삭제하세요. 취향에 따라 조정 가능합니다. 권장 기본값: 24개월.</p></div></details>
+          <details class="faq__item"><summary>다른 사람이 올린 내 사진은 어떻게 되나요?</summary><div class="faq__answer"><p>SocialEraser는 내가 태그된 사진을 타임라인에서 숨길 수 있지만, 다른 사람이 업로드한 사진은 삭제할 수 없습니다. 완전한 제거를 위해서는 태그를 해제하고 업로드한 사람에게 삭제를 요청하세요.</p></div></details>
+        </div>
+        <div class="faq__category">
+          <h3 class="faq__category-title">안전성</h3>
+          <details class="faq__item"><summary>제 계정이 정지될 수 있나요?</summary><div class="faq__answer"><p>SocialEraser는 사람의 속도로 정상적인 클릭을 시뮬레이션하며 속도 제한을 준수합니다. 모든 제3자 도구와 동일한 주의 사항이 적용됩니다 — 당사는 Meta Platforms, Inc.와 제휴 관계가 없으며, 일괄 도구 사용은 본인의 판단에 따릅니다.</p></div></details>
+          <details class="faq__item"><summary>삭제를 취소할 수 있나요?</summary><div class="faq__answer"><p>영구 삭제는 복구할 수 없습니다. 첫 실행에는 <em>보관</em> 모드를 사용하는 것을 강력히 권장합니다. 그래야 마음이 바뀌면 활동 로그에서 검토하고 복구할 수 있습니다.</p></div></details>
+          <details class="faq__item"><summary>Facebook이 UI를 변경하면 어떻게 되나요?</summary><div class="faq__answer"><p>SocialEraser는 원격 CDN에서 DOM 선택기 스키마를 가져옵니다. Facebook이 UI를 변경하면 업데이트를 푸시하므로 확장 프로그램을 다시 설치할 필요가 없습니다. 업데이트는 자동으로 조용히 진행됩니다.</p></div></details>
+        </div>
+        <div class="faq__category">
+          <h3 class="faq__category-title">기술</h3>
+          <details class="faq__item"><summary>새 Facebook 레이아웃에서도 작동하나요?</summary><div class="faq__answer"><p>네. SocialEraser는 최신 facebook.com 레이아웃과 이전 FB5 보기를 모두 지원합니다. 선택기 스키마는 매주 업데이트되어 Facebook의 최신 UI 변경 사항에 맞춥니다.</p></div></details>
+          <details class="faq__item"><summary>Facebook 모바일 앱에서도 작동하나요?</summary><div class="faq__answer"><p>아니요. Facebook 모바일 앱은 브라우저 확장을 허용하지 않습니다. SocialEraser는 데스크톱 Chrome에서 실행됩니다. 전용 모바일 동반 앱은 2027년 로드맵에 있습니다.</p></div></details>
+          <details class="faq__item"><summary>여러 Facebook 계정에서 실행할 수 있나요?</summary><div class="faq__answer"><p>네 — 각 계정에 대해 별도의 브라우저 프로필을 사용하세요. 단일 프로필 내 다중 계정 기능은 로드맵에 있습니다.</p></div></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- 가이드 -->
+    <section class="container-md section" aria-labelledby="section-guide">
+      <div class="cta-box" style="text-align:center;">
+        <span class="muted-eyebrow">심층 분석</span>
+        <h2 class="hero__h1" id="section-guide" style="font-size: var(--text-3xl);">전체 가이드를 보고 싶으신가요?</h2>
+        <p class="hero__lede">단계별 가이드에서 날짜, 키워드, 게시글 유형, 친구 휴면 필터를 스크린샷과 엣지 케이스와 함께 자세히 설명합니다.</p>
+        <div class="btn-row btn-row--center">
+          <a href="/ko/guides/facebook.html" class="btn btn--primary btn--xl">전체 가이드 읽기 →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 다운로드 -->
+    <section id="download" class="container-md section" aria-labelledby="section-download">
+      <div class="cta-box">
+        <span class="muted-eyebrow">무료 · 팁으로 지원 · 가입 불필요</span>
+        <h2 class="hero__h1" id="section-download">Facebook을 깨끗이. 오늘.</h2>
+        <p class="hero__lede">SocialEraser for Facebook을 설치하세요. 60초 이내에 삭제를 시작할 수 있습니다.</p>
+        <div class="btn-row btn-row--center">
+          <a href="mailto:support@socialeraser.app?subject=Join%20Facebook%20Waitlist" class="btn btn--primary btn--xl">Facebook 대기자 명단 참여</a>
+          <a href="/ko/platforms/x/" class="btn btn--secondary btn--xl">SocialEraser for X 사용</a>
+        </div>
+        <p class="hero__micro">Android + iOS 앱: 2027년 출시 예정 · <a href="/ko/">← 모든 플랫폼으로 돌아가기</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container-lg">
+      <div class="site-footer__grid">
+        <div class="site-footer__brand">
+          <a href="/ko/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="">
+        </span>
+            <span>SocialEraser</span>
+          </a>
+          <p>소셜 미디어를 일괄 정리하세요. 100% 로컬, 비밀번호 불필요, 오픈소스. 2017년의 좋아요를 취소하는 데 주말을 쓰고 싶지 않은 분들을 위해 만들어졌습니다.</p>
+        </div>
+        <div class="site-footer__col"><h4>플랫폼</h4><ul>
+          <li><a href="/ko/platforms/x/">X (Twitter)</a></li>
+          <li><a href="/ko/platforms/tiktok/">TikTok</a></li>
+          <li><a href="/ko/platforms/youtube/">YouTube</a></li>
+          <li><a href="/ko/platforms/instagram/">Instagram</a></li>
+          <li><a href="/ko/platforms/facebook/">Facebook</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>제품</h4><ul>
+          <li><a href="/ko/help.html">도움말 센터</a></li>
+          <li><a href="#download">설치</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/CHANGELOG.md" target="_blank" rel="noopener noreferrer">변경 로그</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/ROADMAP.md" target="_blank" rel="noopener noreferrer">로드맵</a></li>
+          <li><a href="/ko/support.html">☕ 지원하기</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">소스 코드</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>회사</h4><ul>
+          <li><a href="/ko/about.html">소개</a></li>
+          <li><a href="mailto:support@socialeraser.app">문의</a></li>
+          <li><a href="/ko/privacy.html">개인정보처리방침</a></li>
+          <li><a href="/ko/terms.html">이용약관</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser#readme" target="_blank" rel="noopener noreferrer">프레스 키트</a></li>
+        </ul></div>
+      </div>
+      <div class="site-footer__bottom">
+        <span>© 2026 SocialEraser. 모든 권리 보유.</span>
+        <div class="site-footer__legal"><span>독립 도구 — Meta Platforms, Inc.와 제휴 관계가 없음</span></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/app.js" defer></script>
+  <script defer src="/assets/lang-switcher.js"></script>
+</body>
+</html>

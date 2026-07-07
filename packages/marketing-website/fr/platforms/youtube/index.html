@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="fr-FR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0a0b">
+  <title>SocialEraser pour YouTube — Effacement en masse de l'historique, j'aime et abonnements</title>
+  <meta name="description" content="Extension Chrome gratuite pour effacer en masse l'historique de visionnage YouTube, l'historique de recherche, les vidéos j'aime, les playlists enregistrées, les abonnements et les commentaires. Filtres par date et inactivité de chaîne. 100% local, sans mot de passe, sans clé API.">
+  <meta name="keywords" content="effacer historique youtube, supprimer historique visionnage youtube, nettoyeur youtube, annuler j'aime youtube en masse, retirer abonnements youtube, suppression en masse youtube, effacer j'aime youtube, historique recherche youtube, nettoyage compte youtube, suppression massive youtube, supprimer vidéos youtube, à regarder plus tard youtube, nettoyeur commentaires youtube, désabonnement massif youtube, suppresseur playlists youtube">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://socialeraser.app/fr/platforms/youtube/">
+  <link rel="alternate" hreflang="en" href="https://socialeraser.app/platforms/youtube/">
+  <link rel="alternate" hreflang="zh" href="https://socialeraser.app/zh/platforms/youtube/">
+  <link rel="alternate" hreflang="ja" href="https://socialeraser.app/ja/platforms/youtube/">
+  <link rel="alternate" hreflang="es" href="https://socialeraser.app/es/platforms/youtube/">
+  <link rel="alternate" hreflang="fr" href="https://socialeraser.app/fr/platforms/youtube/">
+  <link rel="alternate" hreflang="de" href="https://socialeraser.app/de/platforms/youtube/">
+  <link rel="alternate" hreflang="pt" href="https://socialeraser.app/pt/platforms/youtube/">
+  <link rel="alternate" hreflang="ko" href="https://socialeraser.app/ko/platforms/youtube/">
+  <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/fr/platforms/youtube/"><link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SocialEraser">
+  <meta property="og:url" content="https://socialeraser.app/fr/platforms/youtube/">
+  <meta property="og:title" content="SocialEraser pour YouTube — Effacement en masse de l'historique, j'aime et abonnements">
+  <meta property="og:description" content="Extension Chrome gratuite pour effacer en masse l'historique de visionnage YouTube, l'historique de recherche, les vidéos j'aime, les playlists enregistrées, les abonnements et les commentaires. Filtres par date et inactivité de chaîne. 100% local, sans mot de passe.">
+  <meta property="og:image" content="https://socialeraser.app/assets/icons/socialeraser-mark.png">
+  <meta property="og:image:width" content="400">
+  <meta property="og:image:height" content="400">
+  <meta property="og:image:alt" content="SocialEraser pour YouTube — effacez en masse l'historique de visionnage, les j'aime, les abonnements, les commentaires et les playlists avec une extension Chrome gratuite. 100% local, sans mot de passe.">
+  <meta property="og:locale" content="fr_FR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SocialEraser pour YouTube — Effacement en masse de l'historique, j'aime et abonnements">
+  <meta name="twitter:description" content="Extension Chrome gratuite pour effacer en masse l'historique de visionnage YouTube, l'historique de recherche, les vidéos j'aime, les abonnements et les commentaires. 100% local, sans mot de passe.">
+  <meta name="twitter:image" content="https://socialeraser.app/assets/icons/socialeraser-mark.png">
+  <meta name="twitter:image:alt" content="SocialEraser pour YouTube — Effacez en masse l'historique de visionnage, les j'aime et les abonnements avec une extension Chrome gratuite">
+  <link rel="icon" type="image/png" href="/assets/icons/socialeraser-mark.png">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/app.css">
+  <style>
+    /* Page YouTube — la marque YouTube est rouge. On surcharge les tokens
+       partagés avec des accents et un dégradé rouge YouTube. On utilise
+       #FF3B3B (légèrement désaturé) pour le texte plutôt que le #FF0000 pur,
+       qui se lit comme erreur/danger sur fond sombre. */
+    :root {
+      --accent:         #FF3B3B;
+      --accent-soft:    rgba(255, 59, 59, 0.12);
+      --accent-glow:    rgba(255, 59, 59, 0.35);
+      --border-accent:  rgba(255, 59, 59, 0.4);
+      --gradient-brand:      linear-gradient(135deg, #FF5A5A 0%, #C71F1F 100%);
+      --gradient-brand-soft: linear-gradient(135deg, rgba(255, 90, 90, 0.18) 0%, rgba(199, 31, 31, 0.06) 100%);
+      --gradient-hero-glow:  radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 59, 59, 0.18) 0%, transparent 70%);
+    }
+    /* Le ✗ du tableau comparatif reste bleu — neutre, pas rouge. */
+    .comparison .cross { color: var(--blue); }
+  </style>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"SocialEraser pour YouTube","applicationCategory":"BrowserApplication","applicationSubCategory":"BrowserExtension","operatingSystem":"Chrome 120+, Edge 120+","description":"Effacez en masse l'historique de visionnage YouTube, l'historique de recherche, les vidéos j'aime, les playlists enregistrées, les abonnements et les commentaires. 100% traitement local dans votre navigateur — sans mot de passe, sans serveur.","url":"https://socialeraser.app/fr/platforms/youtube/","image":"https://socialeraser.app/assets/icons/socialeraser-mark.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://socialeraser.app/fr/platforms/youtube/"},"featureList":["Effacement en masse de l'historique de visionnage","Effacement en masse de l'historique de recherche","Annulation en masse des j'aime depuis votre playlist J'aime","Suppression en masse des playlists enregistrées (À regarder plus tard, personnalisées)","Désabonnement en masse des chaînes inactives","Suppression en masse de vos propres commentaires sur n'importe quelle vidéo","Suppression en masse des publications de la communauté","Suppression en masse de vos vidéos mises en ligne","Filtrer par plage de dates","Filtrer par inactivité de chaîne (6+ mois, 1+ an)","Filtrer par mot-clé de titre","Filtrer par durée de vidéo","Pause et reprise entre les sessions"],"offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"}}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Accueil","item":"https://socialeraser.app/fr/"},
+    {"@type":"ListItem","position":2,"name":"Plateformes","item":"https://socialeraser.app/fr/#platforms"},
+    {"@type":"ListItem","position":3,"name":"SocialEraser pour YouTube","item":"https://socialeraser.app/fr/platforms/youtube/"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"HowTo","name":"Comment effacer en masse l'historique YouTube avec SocialEraser","description":"Installez l'extension Chrome SocialEraser, ouvrez youtube.com, choisissez ce qu'il faut nettoyer et cliquez sur Démarrer. SocialEraser simule des clics normaux à vitesse humaine pour effacer chaque entrée d'historique de visionnage, vidéo j'aime, abonnement ou commentaire correspondant.","totalTime":"PT20M","estimatedCost":{"@type":"MonetaryAmount","value":"0","currency":"USD"},"tool":[{"@type":"HowToTool","name":"Google Chrome ou Microsoft Edge (version 120 ou ultérieure)"},{"@type":"HowToTool","name":"Extension navigateur SocialEraser pour YouTube (gratuite)"}],"step":[
+    {"@type":"HowToStep","position":1,"name":"Installer SocialEraser pour YouTube","text":"Ajoutez l'extension SocialEraser gratuite depuis le Chrome Web Store. Pas de compte, pas d'inscription, pas de paiement. Deux clics et elle est installée et épinglée à votre barre d'outils.","url":"https://socialeraser.app/fr/platforms/youtube/#download"},
+    {"@type":"HowToStep","position":2,"name":"Ouvrir youtube.com et se connecter","text":"Allez sur youtube.com dans Chrome et connectez-vous à votre compte Google comme d'habitude. Cliquez sur l'icône du panneau latéral SocialEraser. L'extension détectera automatiquement que vous êtes connecté et affichera le statut de votre compte.","url":"https://socialeraser.app/fr/platforms/youtube/#main"},
+    {"@type":"HowToStep","position":3,"name":"Choisir ce qu'il faut nettoyer et définir vos filtres","text":"Dans le panneau latéral, cochez les cases pour ce que vous souhaitez effacer : Historique de visionnage, Historique de recherche, Vidéos j'aime, Playlists, Abonnements, Commentaires ou Publications de la communauté. Vous pouvez éventuellement définir une plage de dates, une fenêtre d'inactivité de chaîne, un mot-clé de titre ou un filtre de durée de vidéo.","url":"https://socialeraser.app/fr/platforms/youtube/#main"},
+    {"@type":"HowToStep","position":4,"name":"Cliquer sur Démarrer et passer à autre chose","text":"Cliquez sur le bouton Démarrer le nettoyage. SocialEraser ouvrira chaque élément correspondant, cliquera sur le bouton effacer / annuler le j'aime / se désabonner à vitesse humaine et affichera un compteur de progression en direct. Vous pouvez fermer votre ordinateur portable et revenir demain — l'état persiste entre les redémarrages du navigateur.","url":"https://socialeraser.app/fr/platforms/youtube/#main"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"Puis-je effacer en masse mon historique de visionnage YouTube ?","acceptedAnswer":{"@type":"Answer","text":"Oui. SocialEraser efface tout votre historique de visionnage YouTube en un clic, ou filtre par plage de dates. Vitesse d'environ 0,9 seconde par élément — soit environ 15 minutes pour 1 000 entrées."}},
+    {"@type":"Question","name":"Effacer l'historique affecte-t-il mes recommandations ?","acceptedAnswer":{"@type":"Answer","text":"Oui — c'est généralement le but. Effacer votre historique de visionnage offre à l'algorithme de YouTube une table rase, vos recommandations se réinitialisent donc à vos centres d'intérêt actuels plutôt qu'aux vidéos que vous avez regardées il y a des années."}},
+    {"@type":"Question","name":"Puis-je me désabonner en masse des chaînes inactives ?","acceptedAnswer":{"@type":"Answer","text":"Oui. SocialEraser peut trouver les chaînes que vous suivez qui n'ont rien publié depuis 6+ mois et vous désabonner en masse. Ajustable selon vos préférences."}},
+    {"@type":"Question","name":"Qu'en est-il des playlists ?","acceptedAnswer":{"@type":"Answer","text":"Vous pouvez supprimer des playlists entières ou retirer des vidéos individuelles de n'importe quelle playlist dont vous êtes propriétaire. SocialEraser ne peut pas modifier les playlists d'autres personnes."}},
+    {"@type":"Question","name":"Ma chaîne sera-t-elle affectée ?","acceptedAnswer":{"@type":"Answer","text":"Effacer l'historique de visionnage, les j'aime et les abonnements n'affecte que votre compte personnel — votre chaîne, vos mises en ligne et votre nombre d'abonnés restent intacts. La même remarque s'applique qu'avec tout outil tiers — nous ne sommes pas affiliés à Google LLC."}},
+    {"@type":"Question","name":"Puis-je annuler un effacement ?","acceptedAnswer":{"@type":"Answer","text":"YouTube ne conserve pas de sauvegarde de votre historique de visionnage ou de recherche une fois effacé. Nous recommandons vivement de demander Google Takeout pour vos données YouTube avant tout effacement en masse, afin de disposer d'une archive personnelle."}},
+    {"@type":"Question","name":"Que se passe-t-il si YouTube change son interface ?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser récupère son schéma de sélecteurs DOM depuis un CDN distant. Lorsque YouTube publie des modifications d'interface, nous envoyons une mise à jour — aucune réinstallation de l'extension n'est nécessaire. La mise à jour est automatique et silencieuse."}},
+    {"@type":"Question","name":"Fonctionne-t-il avec la nouvelle mise en page YouTube ?","acceptedAnswer":{"@type":"Answer","text":"Oui. SocialEraser prend en charge le nouveau YouTube Material Design et l'ancienne mise en page. Le schéma de sélecteurs est mis à jour chaque semaine pour suivre les derniers changements d'interface de YouTube."}},
+    {"@type":"Question","name":"Fonctionne-t-il sur l'application mobile YouTube ?","acceptedAnswer":{"@type":"Answer","text":"Non. L'application mobile YouTube ne permet pas les extensions de navigateur. SocialEraser fonctionne dans Chrome sur ordinateur. Un compagnon mobile dédié est sur la feuille de route 2027."}},
+    {"@type":"Question","name":"Puis-je l'exécuter sur plusieurs comptes Google ?","acceptedAnswer":{"@type":"Answer","text":"Oui — utilisez des profils de navigateur distincts pour chaque compte Google. La gestion multi-comptes au sein d'un même profil est sur la feuille de route."}}
+  ]}
+  </script>
+</head>
+<body>
+
+  <a href="#main" class="skip-to-content">Aller au contenu</a>
+
+  <header class="site-header">
+    <div class="site-header__inner container-lg">
+      <a href="/fr/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
+        </span>
+        <span>SocialEraser</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <details class="site-nav__platforms">
+          <summary class="site-nav__platforms-trigger">Plateformes <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></summary>
+          <div class="site-nav__platforms-menu">
+            <a href="/fr/platforms/x/">SocialEraser pour X</a>
+            <a href="/fr/platforms/tiktok/">SocialEraser pour TikTok</a>
+            <a href="/fr/platforms/youtube/">SocialEraser pour YouTube</a>
+            <a href="/fr/platforms/instagram/">SocialEraser pour Instagram</a>
+            <a href="/fr/platforms/facebook/">SocialEraser pour Facebook</a>
+          </div>
+        </details>
+        <a href="/fr/help.html" class="hide-mobile">Aide</a>
+        <a href="#download" class="btn btn--primary btn--sm">Installer gratuitement</a>
+      </nav>
+      <details class="site-nav--mobile">
+        <summary class="site-nav--mobile-trigger" aria-label="Basculer le menu">
+          <svg class="site-nav--mobile-icon-menu" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <svg class="site-nav--mobile-icon-close" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </summary>
+        <div class="site-nav--mobile-menu">
+          <a href="/fr/platforms/x/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>SocialEraser pour X</a>
+          <a href="/fr/platforms/tiktok/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg>SocialEraser pour TikTok</a>
+          <a href="/fr/platforms/youtube/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>SocialEraser pour YouTube</a>
+          <a href="/fr/platforms/instagram/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>SocialEraser pour Instagram</a>
+          <a href="/fr/platforms/facebook/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>SocialEraser pour Facebook</a>
+          <a href="/fr/help.html"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>Aide</a>
+          <a href="#download" class="btn btn--primary"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Installer gratuitement</a>
+          <details class="site-nav--mobile-lang">
+            <summary>
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+              <span class="site-nav--mobile-lang__current">Langue : <span data-lang-current>Français</span></span>
+              <svg class="site-nav--mobile-lang__chev" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div data-lang-list></div>
+          </details>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="breadcrumbs-wrap container-lg">
+      <nav class="breadcrumbs" aria-label="Fil d'Ariane">
+        <a href="/fr/">Accueil</a>
+        <span class="breadcrumbs__sep">›</span>
+        <span class="breadcrumbs__current">SocialEraser pour YouTube</span>
+      </nav>
+    </div>
+    <section class="container-lg">
+      <div class="hero">
+        <span class="muted-eyebrow">SocialEraser pour YouTube · Gratuit · Soutenu par les pourboires</span>
+        <h1 class="hero__h1">
+          Effacez en masse <span class="gradient-text">l'historique, les j'aime et les abonnements YouTube</span><br>
+          en quelques minutes
+        </h1>
+        <p class="hero__lede">
+          Effacez des années d'historique de visionnage, réinitialisez vos recommandations et désabonnez-vous des chaînes inactives. <strong>Sans mot de passe. Sans clé API. Sans serveur.</strong>
+        </p>
+        <div class="btn-row hero__cta btn-row--center">
+          <a href="mailto:support@socialeraser.app?subject=Rejoindre%20la%20liste%20d%27attente%20YouTube" class="btn btn--primary btn--xl">Rejoindre la liste d'attente YouTube</a>
+          <a href="/fr/platforms/x/" class="btn btn--secondary btn--xl">Utiliser SocialEraser pour X</a>
+        </div>
+        <p class="hero__micro">Open source · Licence MIT · Aucun suivi</p>
+      </div>
+    </section>
+
+    <section class="legal-strip">
+      <div class="container-md">
+        <strong>Outil indépendant.</strong> Non affilié, approuvé ou sponsorisé par Google LLC. YouTube est une marque commerciale de Google LLC. Utilisez-le à votre entière discrétion.
+      </div>
+    </section>
+
+    <!-- CE QUE VOUS POUVEZ SUPPRIMER -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">Ce que vous pouvez nettoyer</span>
+        <h2 class="section-head__h2">Huit types de nettoyage YouTube, une seule extension</h2>
+        <p class="section-head__lede">De l'historique de visionnage au cimetière de commentaires — choisissez-en un, combinez-les, ou exécutez-les tous à la suite.</p>
+      </div>
+      <div class="grid grid-auto">
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><h3 class="card__title">Historique de visionnage</h3><p class="card__desc">Effacez tout votre historique de visionnage en un clic, ou filtrez par plage de dates. Réinitialisez l'algorithme à vos centres d'intérêt actuels.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div><h3 class="card__title">Historique de recherche</h3><p class="card__desc">Supprimez toutes les recherches que vous avez jamais tapées sur YouTube. La trace du « comment réparer un robinet qui fuit à 3h du matin » reste privée.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div><h3 class="card__title">Vidéos j'aime</h3><p class="card__desc">Retirez le j'aime de chaque vidéo de votre playlist J'aime. Cas d'usage courant : effacer le cringe de votre adolescence.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg></div><h3 class="card__title">Playlists enregistrées</h3><p class="card__desc">Supprimez votre « À regarder plus tard » privée et autres playlists personnalisées. Retirez en masse des vidéos individuelles de n'importe quelle playlist.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></div><h3 class="card__title">Abonnements</h3><p class="card__desc">Désabonnement en masse. Trouvez les chaînes inactives depuis 6+ mois et élaguez-les en un clic.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><h3 class="card__title">Vos commentaires</h3><p class="card__desc">Supprimez chaque commentaire que vous avez laissé sur n'importe quelle vidéo. Le même moteur, une chronologie différente.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></div><h3 class="card__title">Publications de la communauté</h3><p class="card__desc">Suppression en masse des publications de l'onglet Communauté sur votre chaîne.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v18H3z"/><path d="M9 9h6v6H9z"/></svg></div><h3 class="card__title">Vos mises en ligne</h3><p class="card__desc">Suppression en masse des vidéos que vous avez mises en ligne. Utile pour nettoyer une chaîne secondaire avant de la rediriger.</p></div>
+      </div>
+    </section>
+
+    <!-- ESTIMATEUR DE TEMPS -->
+    <section class="container-md section">
+      <div class="section-head">
+        <span class="muted-eyebrow">Calculateur de temps</span>
+        <h2 class="section-head__h2">Combien de temps prendra votre nettoyage YouTube ?</h2>
+      </div>
+      <div class="estimator" data-estimator>
+        <div class="estimator__input-block">
+          <label for="est-input-yt">Éléments à effacer</label>
+          <input id="est-input-yt" type="number" class="estimator__input" data-estimator-input value="2000" min="1" max="100000">
+          <div class="estimator__quick">
+            <button class="estimator__quick-btn" data-estimator-quick data-value="100">100</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="500">500</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="1000">1 000</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="5000">5 000</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="10000">10 000</button>
+          </div>
+        </div>
+        <div class="estimator__result">
+          <div class="estimator__row">
+            <div class="estimator__row-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+            <div class="estimator__row-text"><span class="estimator__row-label">Nettoyage manuel</span><span class="estimator__row-value" data-estimator-manual>5h 33m</span></div>
+          </div>
+          <div class="estimator__row estimator__row--highlight">
+            <div class="estimator__row-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+            <div class="estimator__row-text"><span class="estimator__row-label">Avec SocialEraser</span><span class="estimator__row-value" data-estimator-auto>—</span></div>
+          </div>
+          <div class="estimator__row">
+            <div class="estimator__row-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg></div>
+            <div class="estimator__row-text"><span class="estimator__row-label">Temps gagné</span><span class="estimator__row-value" data-estimator-saved>—</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 ÉTAPES -->
+    <section class="container-lg section" aria-labelledby="section-how">
+      <div class="section-head">
+        <span class="muted-eyebrow">Comment ça marche</span>
+        <h2 class="section-head__h2" id="section-how">Trois étapes. Et c'est terminé.</h2>
+      </div>
+      <div class="steps">
+        <div class="steps__item">
+          <h3>Installer SocialEraser pour YouTube</h3>
+          <p>Gratuit depuis le Chrome Web Store. Pas de compte, pas d'inscription, pas de paiement. Deux clics et c'est en place.</p>
+        </div>
+        <div class="steps__item">
+          <h3>Ouvrez youtube.com et connectez-vous</h3>
+          <p>Allez sur youtube.com et connectez-vous comme d'habitude. Cliquez sur l'icône du panneau latéral SocialEraser. Choisissez ce qu'il faut nettoyer et votre filtre (plage de dates, inactivité).</p>
+        </div>
+        <div class="steps__item">
+          <h3>Cliquez sur Démarrer. Passez à autre chose.</h3>
+          <p>SocialEraser simule des clics à vitesse humaine. Regardez le compteur en direct, ou fermez votre ordinateur portable et revenez demain. L'état persiste.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FILTRES EN PROFONDEUR -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">Filtres</span>
+        <h2 class="section-head__h2">Nettoyez avec précision — pas à l'aveugle</h2>
+        <p class="section-head__lede">Tout l'intérêt du nettoyage en masse, c'est la rapidité. Mais la précision compte aussi. Combinez les filtres pour supprimer exactement ce qui ne va pas.</p>
+      </div>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3 class="card__title">Plage de dates</h3>
+          <p class="card__desc">Effacez l'historique <strong>avant</strong> ou <strong>après</strong> n'importe quelle date. Gardez les tutoriels récents, supprimez la trace gênante de 2012. Le filtre le plus courant.</p>
+        </div>
+        <div class="card">
+          <h3 class="card__title">Inactivité de chaîne</h3>
+          <p class="card__desc">Lors de l'élagage des abonnements, trouvez les chaînes sans mise en ligne depuis 6+ mois. Désabonnement en masse en un clic. Ajustez la fenêtre d'inactivité selon vos préférences.</p>
+        </div>
+        <div class="card">
+          <h3 class="card__title">Mot-clé de titre</h3>
+          <p class="card__desc">N'effacez que l'historique ou les j'aime correspondant à un mot-clé. Idéal pour effacer un sujet spécifique — comme une période de recherche d'emploi, un débat houleux ou un fandom.</p>
+        </div>
+        <div class="card">
+          <h3 class="card__title">Durée de vidéo</h3>
+          <p class="card__desc">Filtrez par durée de vidéo. Utile pour effacer toutes les sessions de lecture automatique en format court tout en conservant le contenu long que vous avez réellement regardé.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPARAISON -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">Face aux alternatives</span>
+        <h2 class="section-head__h2">Comment SocialEraser pour YouTube se compare</h2>
+      </div>
+      <div class="comparison">
+        <table>
+          <thead><tr><th>Fonctionnalité</th><th class="text-center">SocialEraser</th><th class="text-center">Paramètres YouTube</th><th class="text-center">Watchmarker</th><th class="text-center">Boucles manuelles</th></tr></thead>
+          <tbody>
+            <tr class="us"><td>Sans mot de passe</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Oui</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Oui</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> Non (clé API)</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Oui</td></tr>
+            <tr class="us"><td>100% local</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Oui</td><td>Côté serveur</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> Non (serveur)</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Oui</td></tr>
+            <tr class="us"><td>Open source</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> MIT</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> Non</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> GPL</td><td>N/A</td></tr>
+            <tr class="us"><td>Offre gratuite</td><td>Soutenu par pourboires</td><td>Gratuit (lent)</td><td>Complète (open source)</td><td>Gratuit (le plus lent)</td></tr>
+            <tr class="us"><td>Filtres date + mot-clé</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Oui</td><td>Date uniquement</td><td>Date uniquement</td><td>Manuel</td></tr>
+            <tr class="us"><td>J'aime / abonnements / commentaires en masse</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Oui</td><td>Historique uniquement</td><td>Historique uniquement</td><td>Pénible</td></tr>
+            <tr class="us"><td>Pause auto sur limite de débit</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Oui</td><td>N/A</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> Non</td><td>N/A</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="container-lg section" aria-labelledby="section-faq">
+      <div class="section-head">
+        <span class="muted-eyebrow">FAQ</span>
+        <h2 class="section-head__h2" id="section-faq">Questions spécifiques à YouTube</h2>
+      </div>
+      <div class="faq">
+        <div class="faq__category">
+          <h3 class="faq__category-title">Portée du nettoyage</h3>
+          <details class="faq__item"><summary>Puis-je effacer tout mon historique de visionnage ?</summary><div class="faq__answer"><p>Oui. Un clic efface toutes les entrées de votre historique de visionnage. Vous pouvez aussi filtrer par date (par ex. <em>plus ancien qu'un an</em>) pour conserver les vidéos récentes tout en effaçant le reste. Vitesse d'environ 0,9 s par élément — environ 15 minutes pour 1 000 vidéos.</p></div></details>
+          <details class="faq__item"><summary>Effacer l'historique affecte-t-il les recommandations ?</summary><div class="faq__answer"><p>Oui — c'est généralement le but. Effacer votre historique de visionnage offre à l'algorithme de YouTube une table rase. Vos recommandations commenceront à refléter vos centres d'intérêt actuels plutôt que les vidéos que vous avez regardées il y a des années.</p></div></details>
+          <details class="faq__item"><summary>Puis-je me désabonner en masse des chaînes inactives ?</summary><div class="faq__answer"><p>Oui. Définissez une fenêtre d'inactivité (par ex. 6 mois, 1 an) et SocialEraser trouve les chaînes sans mise en ligne dans cette fenêtre et s'y désabonne en masse. Ajustable selon vos préférences.</p></div></details>
+          <details class="faq__item"><summary>Qu'en est-il des playlists ?</summary><div class="faq__answer"><p>Vous pouvez supprimer des playlists entières ou retirer des vidéos individuelles de n'importe quelle playlist dont vous êtes propriétaire. SocialEraser ne peut pas modifier les playlists d'autres personnes.</p></div></details>
+        </div>
+        <div class="faq__category">
+          <h3 class="faq__category-title">Sécurité</h3>
+          <details class="faq__item"><summary>Ma chaîne sera-t-elle affectée ?</summary><div class="faq__answer"><p>Effacer l'historique de visionnage, les j'aime et les abonnements n'affecte que votre compte personnel — votre chaîne, vos mises en ligne et votre nombre d'abonnés restent intacts. La même remarque s'applique qu'avec tout outil tiers — nous ne sommes pas affiliés à Google LLC.</p></div></details>
+          <details class="faq__item"><summary>Puis-je annuler un effacement ?</summary><div class="faq__answer"><p>YouTube ne conserve pas de sauvegarde de votre historique de visionnage ou de recherche une fois effacé. Nous recommandons vivement de demander Google Takeout pour vos données YouTube avant tout effacement en masse, afin de disposer d'une archive personnelle.</p></div></details>
+          <details class="faq__item"><summary>Que se passe-t-il si YouTube change son interface ?</summary><div class="faq__answer"><p>SocialEraser récupère son schéma de sélecteurs DOM depuis un CDN distant. Lorsque YouTube publie des modifications d'interface, nous envoyons une mise à jour — aucune réinstallation de l'extension n'est nécessaire. La mise à jour est automatique et silencieuse.</p></div></details>
+        </div>
+        <div class="faq__category">
+          <h3 class="faq__category-title">Technique</h3>
+          <details class="faq__item"><summary>Fonctionne-t-il avec la nouvelle mise en page YouTube ?</summary><div class="faq__answer"><p>Oui. SocialEraser prend en charge le nouveau YouTube Material Design et l'ancienne mise en page. Le schéma de sélecteurs est mis à jour chaque semaine pour suivre les derniers changements d'interface de YouTube.</p></div></details>
+          <details class="faq__item"><summary>Fonctionne-t-il sur l'application mobile YouTube ?</summary><div class="faq__answer"><p>Non. L'application mobile YouTube ne permet pas les extensions de navigateur. SocialEraser fonctionne dans Chrome sur ordinateur. Un compagnon mobile dédié est sur la feuille de route 2027.</p></div></details>
+          <details class="faq__item"><summary>Puis-je l'exécuter sur plusieurs comptes Google ?</summary><div class="faq__answer"><p>Oui — utilisez des profils de navigateur distincts pour chaque compte Google. La gestion multi-comptes au sein d'un même profil est sur la feuille de route.</p></div></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- GUIDE -->
+    <section class="container-md section" aria-labelledby="section-guide">
+      <div class="cta-box" style="text-align:center;">
+        <span class="muted-eyebrow">Plongée en profondeur</span>
+        <h2 class="hero__h1" id="section-guide" style="font-size: var(--text-3xl);">Vous voulez le guide complet ?</h2>
+        <p class="hero__lede">Notre guide étape par étape couvre en détail les filtres de date, d'inactivité de chaîne et de mot-clé, avec captures d'écran et cas particuliers.</p>
+        <div class="btn-row btn-row--center">
+          <a href="/fr/guides/youtube.html" class="btn btn--primary btn--xl">Lire le guide complet →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- TÉLÉCHARGEMENT -->
+    <section id="download" class="container-md section" aria-labelledby="section-download">
+      <div class="cta-box">
+        <span class="muted-eyebrow">Gratuit · Soutenu par pourboires · Sans inscription</span>
+        <h2 class="hero__h1" id="section-download">Nettoyez votre YouTube. Aujourd'hui.</h2>
+        <p class="hero__lede">Installez SocialEraser pour YouTube. Commencez à effacer en moins de 60 secondes.</p>
+        <div class="btn-row btn-row--center">
+          <a href="mailto:support@socialeraser.app?subject=Rejoindre%20la%20liste%20d%27attente%20YouTube" class="btn btn--primary btn--xl">Rejoindre la liste d'attente YouTube</a>
+          <a href="/fr/platforms/x/" class="btn btn--secondary btn--xl">Utiliser SocialEraser pour X</a>
+        </div>
+        <p class="hero__micro">Applications Android + iOS : prévues pour 2027 · <a href="/fr/">← Retour à toutes les plateformes</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container-lg">
+      <div class="site-footer__grid">
+        <div class="site-footer__brand">
+          <a href="/fr/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
+        </span>
+            <span>SocialEraser</span>
+          </a>
+          <p>Nettoyez en masse vos réseaux sociaux. 100% local, sans mot de passe, open source. Conçu pour les gens qui préfèrent ne pas passer leur week-end à retirer le j'aime de publications de 2017.</p>
+        </div>
+        <div class="site-footer__col"><h4>Plateformes</h4><ul>
+          <li><a href="/fr/platforms/x/">X (Twitter)</a></li>
+          <li><a href="/fr/platforms/tiktok/">TikTok</a></li>
+          <li><a href="/fr/platforms/youtube/">YouTube</a></li>
+          <li><a href="/fr/platforms/instagram/">Instagram</a></li>
+          <li><a href="/fr/platforms/facebook/">Facebook</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>Produit</h4><ul>
+          <li><a href="/fr/help.html">Centre d'aide</a></li>
+          <li><a href="#download">Installer</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/CHANGELOG.md" target="_blank" rel="noopener noreferrer">Journal des modifications</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/ROADMAP.md" target="_blank" rel="noopener noreferrer">Feuille de route</a></li>
+          <li><a href="/fr/support.html">☕ Soutenir</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">Code source</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>Entreprise</h4><ul>
+          <li><a href="/fr/about.html">À propos</a></li>
+          <li><a href="mailto:support@socialeraser.app">Contact</a></li>
+          <li><a href="/fr/privacy.html">Confidentialité</a></li>
+          <li><a href="/fr/terms.html">Conditions</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser#readme" target="_blank" rel="noopener noreferrer">Kit presse</a></li>
+        </ul></div>
+      </div>
+      <div class="site-footer__bottom">
+        <span>© 2026 SocialEraser. Tous droits réservés.</span>
+        <div class="site-footer__legal"><span>Outil indépendant — non affilié à Google LLC.</span></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/app.js" defer></script>
+  <script defer src="/assets/lang-switcher.js"></script>
+</body>
+</html>

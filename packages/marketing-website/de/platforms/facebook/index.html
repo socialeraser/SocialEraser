@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="de-DE">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0a0b">
+  <title>SocialEraser für Facebook — Posts, Fotos, Likes und Freunde massenhaft löschen</title>
+  <meta name="description" content="Kostenlose Chrome-Erweiterung zum Massenlöschen oder Archivieren von Facebook-Posts, Fotos, Likes, Kommentaren und Entfreunden. Nach Datum und Stichwort filtern. 100% lokal, kein Passwort, kein API-Schlüssel.">
+  <meta name="keywords" content="facebook posts löschen, facebook massenweise löschen, facebook cleaner, facebook massenentliken, facebook freunde entfernen, facebook timeline bereinigen, facebook post remover, alte facebook posts löschen, facebook bulk delete, allen entfreunden, facebook konto aufräumen, facebook fotos löschen, facebook unfriend tool, facebook allen likes entziehen, facebook kommentare massenhaft löschen, facebook seiten post remover">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://socialeraser.app/de/platforms/facebook/">
+  <link rel="alternate" hreflang="en" href="https://socialeraser.app/platforms/facebook/">
+  <link rel="alternate" hreflang="zh" href="https://socialeraser.app/zh/platforms/facebook/">
+  <link rel="alternate" hreflang="ja" href="https://socialeraser.app/ja/platforms/facebook/">
+  <link rel="alternate" hreflang="es" href="https://socialeraser.app/es/platforms/facebook/">
+  <link rel="alternate" hreflang="fr" href="https://socialeraser.app/fr/platforms/facebook/">
+  <link rel="alternate" hreflang="de" href="https://socialeraser.app/de/platforms/facebook/">
+  <link rel="alternate" hreflang="pt" href="https://socialeraser.app/pt/platforms/facebook/">
+  <link rel="alternate" hreflang="ko" href="https://socialeraser.app/ko/platforms/facebook/">
+  <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/de/platforms/facebook/"><link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SocialEraser">
+  <meta property="og:url" content="https://socialeraser.app/de/platforms/facebook/">
+  <meta property="og:title" content="SocialEraser für Facebook — Posts, Fotos und Likes massenhaft löschen">
+  <meta property="og:description" content="Kostenlose Chrome-Erweiterung zum Massenlöschen oder Archivieren von Facebook-Posts, Fotos, Likes, Kommentaren und Entfreunden. Nach Datum und Stichwort filtern. 100% lokal, kein Passwort.">
+  <meta property="og:image" content="https://socialeraser.app/assets/icons/socialeraser-mark.png">
+  <meta property="og:image:width" content="400">
+  <meta property="og:image:height" content="400">
+  <meta property="og:image:alt" content="SocialEraser für Facebook — Posts, Fotos, Likes, Kommentare und Freunde mit einer kostenlosen Chrome-Erweiterung massenhaft löschen oder archivieren. 100% lokal, kein Passwort.">
+  <meta property="og:locale" content="de_DE">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SocialEraser für Facebook — Posts, Fotos und Likes massenhaft löschen">
+  <meta name="twitter:description" content="Kostenlose Chrome-Erweiterung zum Massenlöschen oder Archivieren von Facebook-Posts, Fotos, Likes, Kommentaren und Entfreunden. Nach Datum und Stichwort filtern. 100% lokal, kein Passwort.">
+  <meta name="twitter:image" content="https://socialeraser.app/assets/icons/socialeraser-mark.png">
+  <meta name="twitter:image:alt" content="SocialEraser für Facebook — Posts, Fotos und Likes mit einer kostenlosen Chrome-Erweiterung massenhaft löschen">
+  <link rel="icon" type="image/png" href="/assets/icons/socialeraser-mark.png">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/app.css">
+  <style>
+    /* Facebook-Seite — Facebook-Marke ist #1877F2-Blau. Überschreibt die
+       gemeinsamen Marken-Token mit Facebook-Blau-Akzenten und Gradient. */
+    :root {
+      --accent:         #1877F2;
+      --accent-bright:  #4596F5;
+      --accent-dark:    #0E5FC0;
+      --accent-deep:    #0A4D9E;
+      --accent-soft:    rgba(24, 119, 242, 0.12);
+      --accent-glow:    rgba(24, 119, 242, 0.35);
+      --border-accent:  rgba(24, 119, 242, 0.4);
+      --gradient-brand:      linear-gradient(135deg, #4596F5 0%, #1877F2 50%, #0E5FC0 100%);
+      --gradient-brand-soft: linear-gradient(135deg, rgba(69, 150, 245, 0.18) 0%, rgba(24, 119, 242, 0.12) 50%, rgba(14, 95, 192, 0.06) 100%);
+      --gradient-hero-glow:  radial-gradient(ellipse 80% 50% at 50% 0%, rgba(24, 119, 242, 0.18) 0%, transparent 70%);
+    }
+    /* Vergleichsreihe ✗ bleibt blau — neutral, nicht rot. */
+    .comparison .cross { color: var(--blue); }
+  </style>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"SocialEraser für Facebook","applicationCategory":"BrowserApplication","applicationSubCategory":"BrowserExtension","operatingSystem":"Chrome 120+, Edge 120+","description":"Massenlöschen oder Archivieren von Facebook-Timeline-Posts, Fotos, Alben, Likes, Reaktionen, Kommentaren, gespeicherten Inhalten, Freunden und verwalteten Seiten. 100% lokale Verarbeitung im Browser — kein Passwort, kein Server.","url":"https://socialeraser.app/de/platforms/facebook/","image":"https://socialeraser.app/assets/icons/socialeraser-mark.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://socialeraser.app/de/platforms/facebook/"},"featureList":["Timeline-Posts massenhaft löschen oder archivieren","Fotos und Fotoalben massenhaft löschen","Likes und Reaktionen massenhaft zurücknehmen","Gespeicherte Inhalte und Links massenhaft leeren","Konten massenhaft entfreunden (nach Interaktions-Häufigkeit)","Eigene Kommentare massenhaft löschen","Messenger-Threads massenhaft löschen","Posts auf verwalteten Seiten massenhaft löschen","Nach Datumsbereich filtern","Nach Stichwort-Match filtern","Nach Post-Typ filtern (Status, Foto, Link, Check-in)","Nach Freund-Inaktivität filtern (Monate/Jahre)","Lösch- oder Archiv-Modus (wiederherstellbares Archiv)","Über Sitzungen hinweg pausieren und fortsetzen"],"offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"}}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Startseite","item":"https://socialeraser.app/de/"},
+    {"@type":"ListItem","position":2,"name":"Plattformen","item":"https://socialeraser.app/de/#platforms"},
+    {"@type":"ListItem","position":3,"name":"SocialEraser für Facebook","item":"https://socialeraser.app/de/platforms/facebook/"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"HowTo","name":"So löschst du Facebook-Posts massenhaft mit SocialEraser","description":"Installiere die SocialEraser Chrome-Erweiterung, öffne facebook.com, wähle aus, was bereinigt werden soll, und klicke auf Start. SocialEraser simuliert normale Klicks in menschlicher Geschwindigkeit und löscht oder archiviert jeden passenden Post, jedes Foto, jeden Like, Kommentar oder Freund.","totalTime":"PT20M","estimatedCost":{"@type":"MonetaryAmount","value":"0","currency":"USD"},"tool":[{"@type":"HowToTool","name":"Google Chrome oder Microsoft Edge (Version 120 oder höher)"},{"@type":"HowToTool","name":"SocialEraser für Facebook Browser-Erweiterung (kostenlos)"}],"step":[
+    {"@type":"HowToStep","position":1,"name":"SocialEraser für Facebook installieren","text":"Füge die kostenlose SocialEraser-Erweiterung aus dem Chrome Web Store hinzu. Kein Konto, keine Anmeldung, keine Zahlung. Zwei Klicks und sie ist installiert und in deiner Symbolleiste angeheftet.","url":"https://socialeraser.app/de/platforms/facebook/#download"},
+    {"@type":"HowToStep","position":2,"name":"facebook.com öffnen und anmelden","text":"Öffne facebook.com in Chrome und melde dich wie gewohnt an. Klicke auf das SocialEraser-Seitenleisten-Symbol. Die Erweiterung erkennt automatisch, dass du angemeldet bist, und zeigt deinen Kontostatus.","url":"https://socialeraser.app/de/platforms/facebook/#main"},
+    {"@type":"HowToStep","position":3,"name":"Wähle aus, was bereinigt werden soll, und lege deine Filter fest","text":"Markiere in der Seitenleiste die Kästchen für das, was du löschen möchtest: Timeline-Posts, Fotos, Likes, Gespeicherte Inhalte, Freunde, Kommentare, Nachrichten oder verwaltete Seiten. Optional kannst du einen Datumsbereich, ein Stichwort-Match, einen Post-Typ-Filter oder ein Freund-Inaktivitäts-Fenster festlegen. Wähle zwischen Lösch-Modus (endgültig) oder Archiv-Modus (wiederherstellbar).","url":"https://socialeraser.app/de/platforms/facebook/#main"},
+    {"@type":"HowToStep","position":4,"name":"Klicke auf Start und lass die Erweiterung arbeiten","text":"Klicke auf den Start-Cleanup-Button. SocialEraser öffnet jeden passenden Eintrag, klickt in menschlicher Geschwindigkeit auf die Schaltfläche Löschen / Archivieren / Unlike / Entfreunden und zeigt einen Live-Fortschrittszähler. Du kannst den Laptop zuklappen und morgen wiederkommen — der Status bleibt über Browser-Neustarts hinweg erhalten.","url":"https://socialeraser.app/de/platforms/facebook/#main"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"Kann ich alte Facebook-Posts massenhaft löschen?","acceptedAnswer":{"@type":"Answer","text":"Ja. Lege einen Datumsfilter (z. B. vor dem 1. Januar 2015) oder ein Stichwort-Match fest und SocialEraser löscht oder archiviert jeden passenden Post. Die Verarbeitung liegt bei etwa 0,9 Sekunden pro Eintrag — rund 15 Minuten für 1.000 Posts."}},
+    {"@type":"Question","name":"Löscht es oder archiviert es?","acceptedAnswer":{"@type":"Answer","text":"Beides. SocialEraser unterstützt zwei Modi: Endgültiges Löschen (der Post ist für immer weg) und Archivieren (aus deiner Timeline ausgeblendet, aber aus dem Aktivitätenprotokoll wiederherstellbar). Archivieren ist die sicherere Standardeinstellung."}},
+    {"@type":"Question","name":"Kann ich Konten massenhaft entfreunden?","acceptedAnswer":{"@type":"Answer","text":"Ja. Filtere deine Freunde nach Interaktions-Häufigkeit und entfreunde alle, mit denen du seit 6+ Monaten nicht mehr gesprochen hast. Beliebig anpassbar. Empfohlener Standard: 24 Monate."}},
+    {"@type":"Question","name":"Was ist mit Fotos, die andere von mir gepostet haben?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser kann Fotos, in denen du markiert bist, aus deiner Timeline ausblenden, aber keine Fotos löschen, die andere hochgeladen haben. Für eine vollständige Entfernung: Markierung entfernen und den Upload-Berechtigten bitten, es zu löschen."}},
+    {"@type":"Question","name":"Wird mein Konto gesperrt?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser simuliert normale Klicks in menschlicher Geschwindigkeit und respektiert Rate-Limits. Wie bei jedem Drittanbieter-Tool gilt: Wir sind nicht mit Meta Platforms, Inc. verbunden und die Nutzung von Bulk-Tools erfolgt auf eigene Verantwortung."}},
+    {"@type":"Question","name":"Kann ich eine Löschung rückgängig machen?","acceptedAnswer":{"@type":"Answer","text":"Endgültige Löschungen sind nicht wiederherstellbar. Wir empfehlen dringend, für den ersten Lauf den Archiv-Modus zu verwenden, damit du alles aus dem Aktivitätenprotokoll prüfen und wiederherstellen kannst, falls du es dir anders überlegst."}},
+    {"@type":"Question","name":"Was passiert, wenn Facebook die Benutzeroberfläche ändert?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser lädt sein DOM-Selektor-Schema von einem Remote-CDN. Wenn Facebook UI-Änderungen ausliefert, spielen wir ein Update ein — keine Neuinstallation der Erweiterung nötig. Das Update erfolgt automatisch und im Hintergrund."}},
+    {"@type":"Question","name":"Funktioniert es mit dem neuen Facebook-Layout?","acceptedAnswer":{"@type":"Answer","text":"Ja. SocialEraser unterstützt sowohl das aktuelle facebook.com-Layout als auch die ältere FB5-Ansicht. Das Selektor-Schema wird wöchentlich aktualisiert, um mit den neuesten UI-Änderungen von Facebook Schritt zu halten."}},
+    {"@type":"Question","name":"Funktioniert es in der Facebook Mobile-App?","acceptedAnswer":{"@type":"Answer","text":"Nein. Die Facebook Mobile-App erlaubt keine Browser-Erweiterungen. SocialEraser läuft in Chrome auf dem Desktop. Ein eigener Mobile-Begleiter ist für 2027 auf der Roadmap."}},
+    {"@type":"Question","name":"Kann ich es mit mehreren Facebook-Konten verwenden?","acceptedAnswer":{"@type":"Answer","text":"Ja — verwende für jedes Konto ein eigenes Browser-Profil. Mehrere Konten innerhalb eines Profils ist auf der Roadmap."}}
+  ]}
+  </script>
+</head>
+<body>
+
+  <a href="#main" class="skip-to-content">Zum Inhalt springen</a>
+
+  <header class="site-header">
+    <div class="site-header__inner container-lg">
+      <a href="/de/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="">
+        </span>
+        <span>SocialEraser</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <details class="site-nav__platforms">
+          <summary class="site-nav__platforms-trigger">Plattformen <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></summary>
+          <div class="site-nav__platforms-menu">
+            <a href="/de/platforms/x/">SocialEraser für X</a>
+            <a href="/de/platforms/tiktok/">SocialEraser für TikTok</a>
+            <a href="/de/platforms/youtube/">SocialEraser für YouTube</a>
+            <a href="/de/platforms/instagram/">SocialEraser für Instagram</a>
+            <a href="/de/platforms/facebook/">SocialEraser für Facebook</a>
+          </div>
+        </details>
+        <a href="/de/help.html" class="hide-mobile">Hilfe</a>
+        <a href="#download" class="btn btn--primary btn--sm">Kostenlos installieren</a>
+      </nav>
+      <details class="site-nav--mobile">
+        <summary class="site-nav--mobile-trigger" aria-label="Menü umschalten">
+          <svg class="site-nav--mobile-icon-menu" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <svg class="site-nav--mobile-icon-close" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </summary>
+        <div class="site-nav--mobile-menu">
+          <a href="/de/platforms/x/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>SocialEraser für X</a>
+          <a href="/de/platforms/tiktok/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg>SocialEraser für TikTok</a>
+          <a href="/de/platforms/youtube/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>SocialEraser für YouTube</a>
+          <a href="/de/platforms/instagram/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>SocialEraser für Instagram</a>
+          <a href="/de/platforms/facebook/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>SocialEraser für Facebook</a>
+          <a href="/de/help.html"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>Hilfe</a>
+          <a href="#download" class="btn btn--primary"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Kostenlos installieren</a>
+          <details class="site-nav--mobile-lang">
+            <summary>
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+              <span class="site-nav--mobile-lang__current">Sprache: <span data-lang-current>Deutsch</span></span>
+              <svg class="site-nav--mobile-lang__chev" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div data-lang-list></div>
+          </details>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="breadcrumbs-wrap container-lg">
+      <nav class="breadcrumbs" aria-label="Brotkrumen">
+        <a href="/de/">Startseite</a>
+        <span class="breadcrumbs__sep">›</span>
+        <span class="breadcrumbs__current">SocialEraser für Facebook</span>
+      </nav>
+    </div>
+    <section class="container-lg">
+      <div class="hero">
+        <span class="muted-eyebrow">SocialEraser für Facebook · Kostenlos · Spendenbasiert</span>
+        <h1 class="hero__h1">
+          Massenhaft löschen: <span class="gradient-text">Facebook-Posts, Fotos und Likes</span><br>
+          in Minuten
+        </h1>
+        <p class="hero__lede">
+          Wische deine Facebook-Timeline leer, archiviere nach Datum oder Stichwort und entfreunde massenhaft. <strong>Kein Passwort. Kein API-Schlüssel. Kein Server.</strong>
+        </p>
+        <div class="btn-row hero__cta btn-row--center">
+          <a href="mailto:support@socialeraser.app?subject=Join%20Facebook%20Waitlist" class="btn btn--primary btn--xl">Facebook-Warteliste beitreten</a>
+          <a href="/de/platforms/x/" class="btn btn--secondary btn--xl">SocialEraser für X nutzen</a>
+        </div>
+        <p class="hero__micro">Open Source · MIT-Lizenz · Kein Tracking</p>
+      </div>
+    </section>
+
+    <section class="legal-strip">
+      <div class="container-md">
+        <strong>Unabhängiges Tool.</strong> Wird weder von Meta Platforms, Inc. unterstützt noch gesponsert oder empfohlen. Facebook ist eine Marke von Meta Platforms, Inc. Nutzung auf eigene Verantwortung.
+      </div>
+    </section>
+
+    <!-- WAS DU LÖSCHEN KANNST -->
+    <section class="container-lg section" aria-labelledby="section-cleanup">
+      <div class="section-head">
+        <span class="muted-eyebrow">Was du aufräumen kannst</span>
+        <h2 class="section-head__h2" id="section-cleanup">Acht Arten von Facebook-Bereinigung, eine Erweiterung</h2>
+        <p class="section-head__lede">Von Timeline-Posts bis zur Freundesliste — wähle eine, kombiniere sie oder lass alle hintereinander laufen.</p>
+      </div>
+      <div class="grid grid-auto">
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div><h3 class="card__title">Timeline-Posts</h3><p class="card__desc">Lösche oder archiviere deine Status-Updates massenhaft. Nach Datumsbereich oder Stichwort filtern. Beide Modi unterstützt.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 19a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg></div><h3 class="card__title">Fotos & Alben</h3><p class="card__desc">Fotos und Fotoalben massenhaft löschen. Markierte und nicht markierte Fotos werden beide unterstützt. Vorher sichern.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div><h3 class="card__title">Likes & Reaktionen</h3><p class="card__desc">Entlike oder ziehe Reaktionen auf tausenden Posts zurück. Dein Aktivitätenprotokoll ist eine öffentlich sichtbare Aufzeichnung über dich — räume es auf.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg></div><h3 class="card__title">Gespeicherte Inhalte</h3><p class="card__desc">Leere deine gespeicherten Posts und Links. Den „Lese ich später"-Stapel, der 1.200 Einträge tief wurde.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></div><h3 class="card__title">Freunde</h3><p class="card__desc">Massenhaft entfreunden. Nach Interaktions-Häufigkeit filtern, um die 600 Freunde zu finden, mit denen du seit 5+ Jahren nicht mehr gesprochen hast.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg></div><h3 class="card__title">Deine Kommentare</h3><p class="card__desc">Lösche jeden Kommentar, den du unter Posts anderer hinterlassen hast. Gleiche Engine, andere Timeline.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><h3 class="card__title">Nachrichten</h3><p class="card__desc">Messenger-Threads massenhaft löschen. Nützlich für Inbox Zero oder für einen sauberen Neustart bei einem Chat, der seit Jahren ruht.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></div><h3 class="card__title">Verwaltete Seiten</h3><p class="card__desc">Massenhaft Posts auf Facebook-Seiten löschen, die du verwaltest. Praktisch zum Aufräumen von Marken-Seiten, die nicht mehr aktiv sind.</p></div>
+      </div>
+    </section>
+
+    <!-- ZEITSCHÄTZER -->
+    <section class="container-md section" aria-labelledby="section-estimator">
+      <div class="section-head">
+        <span class="muted-eyebrow">Zeit-Rechner</span>
+        <h2 class="section-head__h2" id="section-estimator">Wie lange dauert deine Facebook-Bereinigung?</h2>
+      </div>
+      <div class="estimator" data-estimator>
+        <div class="estimator__input-block">
+          <label for="est-input-fb">Posts / Likes zum Löschen</label>
+          <input id="est-input-fb" type="number" class="estimator__input" data-estimator-input value="3000" min="1" max="100000">
+          <div class="estimator__quick">
+            <button class="estimator__quick-btn" data-estimator-quick data-value="100">100</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="500">500</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="1000">1.000</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="5000">5.000</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="10000">10.000</button>
+          </div>
+        </div>
+        <div class="estimator__result">
+          <div class="estimator__row">
+            <div class="estimator__row-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+            <div class="estimator__row-text"><span class="estimator__row-label">Manuelle Bereinigung</span><span class="estimator__row-value" data-estimator-manual>—</span></div>
+          </div>
+          <div class="estimator__row estimator__row--highlight">
+            <div class="estimator__row-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+            <div class="estimator__row-text"><span class="estimator__row-label">Mit SocialEraser</span><span class="estimator__row-value" data-estimator-auto>45m</span></div>
+          </div>
+          <div class="estimator__row">
+            <div class="estimator__row-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg></div>
+            <div class="estimator__row-text"><span class="estimator__row-label">Gesparte Zeit</span><span class="estimator__row-value" data-estimator-saved>—</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3 SCHRITTE -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">So funktioniert es</span>
+        <h2 class="section-head__h2">Drei Schritte. Dann ist es erledigt.</h2>
+      </div>
+      <div class="steps">
+        <div class="steps__item">
+          <h3>SocialEraser für Facebook installieren</h3>
+          <p>Kostenlos im Chrome Web Store. Kein Konto, keine Anmeldung, keine Zahlung. Zwei Klicks und sie ist da.</p>
+        </div>
+        <div class="steps__item">
+          <h3>facebook.com öffnen & anmelden</h3>
+          <p>Gehe zu facebook.com und melde dich wie gewohnt an. Klicke auf das SocialEraser-Seitenleisten-Symbol. Wähle aus, was bereinigt werden soll, und lege deinen Filter fest (Datumsbereich, Stichwort, Interaktions-Häufigkeit).</p>
+        </div>
+        <div class="steps__item">
+          <h3>Klick auf Start. Geh weg.</h3>
+          <p>SocialEraser simuliert Klicks in menschlicher Geschwindigkeit. Beobachte den Live-Zähler — oder klappe den Laptop zu und komm morgen wieder. Der Status bleibt erhalten.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- FILTER IM DETAIL -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">Filter</span>
+        <h2 class="section-head__h2">Präzise wischen — nicht blind</h2>
+        <p class="section-head__lede">Der Sinn von Massenoperationen ist schnelles Aufräumen. Aber Präzision zählt ebenso. Kombiniere Filter, um genau die falschen Dinge zu löschen.</p>
+      </div>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3 class="card__title">Datumsbereich</h3>
+          <p class="card__desc">Lösche oder archiviere Posts <strong>vor</strong> oder <strong>nach</strong> einem beliebigen Datum. Behalte deine aktuellen Lebens-Updates, wische die 2008–2012-Ära weg. Der häufigste Filter.</p>
+        </div>
+        <div class="card">
+          <h3 class="card__title">Stichwort-Match</h3>
+          <p class="card__desc">Lösche nur Posts, die ein bestimmtes Wort oder eine Phrase enthalten. Praktisch, um ein Thema aufzuräumen — etwa eine Jobsuche, eine hitzige Debatte oder ein Fandom.</p>
+        </div>
+        <div class="card">
+          <h3 class="card__title">Post-Typ</h3>
+          <p class="card__desc">Filtere so, dass nur Status-Updates, nur Fotos, nur geteilte Links oder nur Check-ins gelöscht werden. Praktisch, um ein Format zu behalten und den Rest zu wischen.</p>
+        </div>
+        <div class="card">
+          <h3 class="card__title">Freund-Inaktivität</h3>
+          <p class="card__desc">Lege beim Entfreunden ein Zeitfenster in Monaten/Jahren fest. Entfreunde alle, mit denen du in diesem Zeitfenster nicht interagiert hast. Standard: 24 Monate.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- VERGLEICH -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">vs. Alternativen</span>
+        <h2 class="section-head__h2">Wie SocialEraser für Facebook im Vergleich abschneidet</h2>
+      </div>
+      <div class="comparison">
+        <table>
+          <thead><tr><th>Funktion</th><th class="text-center">SocialEraser</th><th class="text-center">Facebook-Aktivitätenprotokoll</th><th class="text-center">Social Fixer</th><th class="text-center">Manuelle Schleifen</th></tr></thead>
+          <tbody>
+            <tr class="us"><td>Kein Passwort</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Ja</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Ja</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Ja</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Ja</td></tr>
+            <tr class="us"><td>100% lokal</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Ja</td><td>Serverseitig</td><td>Lokal</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Ja</td></tr>
+            <tr class="us"><td>Open Source</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> MIT</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> Nein</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> GPL</td><td>N/A</td></tr>
+            <tr class="us"><td>Kostenlose Version</td><td>Spendenbasiert</td><td>Kostenlos</td><td>Vollversion (Open Source)</td><td>Kostenlos (am langsamsten)</td></tr>
+            <tr class="us"><td>Datum- + Stichwort-Filter</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Ja</td><td>Nur Datum</td><td>Nur Datum</td><td>Manuell</td></tr>
+            <tr class="us"><td>Massen-Likes / Kommentare / Freunde</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Ja</td><td>Eingeschränkt</td><td>Nur Likes</td><td>Schmerzhaft</td></tr>
+            <tr class="us"><td>Archiv-Modus (wiederherstellbar)</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Ja</td><td>Nur manuell</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> Nein</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> Nein</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">FAQ</span>
+        <h2 class="section-head__h2">Facebook-spezifische Fragen</h2>
+      </div>
+      <div class="faq">
+        <div class="faq__category">
+          <h3 class="faq__category-title">Umfang der Bereinigung</h3>
+          <details class="faq__item"><summary>Kann ich alte Facebook-Posts massenhaft löschen?</summary><div class="faq__answer"><p>Ja. Lege einen Datumsfilter (z. B. <em>vor dem 1. Januar 2015</em>) oder ein Stichwort-Match fest und SocialEraser löscht oder archiviert jeden passenden Post. Die Verarbeitung liegt bei ~0,9 Sek. pro Eintrag — etwa 15 Minuten für 1.000 Posts.</p></div></details>
+          <details class="faq__item"><summary>Löscht es oder archiviert es?</summary><div class="faq__answer"><p>Beides. SocialEraser unterstützt zwei Modi: <em>Endgültiges Löschen</em> (der Post ist für immer weg) und <em>Archivieren</em> (aus deiner Timeline ausgeblendet, aber aus dem Aktivitätenprotokoll wiederherstellbar). Archivieren ist die sicherere Standardeinstellung.</p></div></details>
+          <details class="faq__item"><summary>Kann ich Konten massenhaft entfreunden?</summary><div class="faq__answer"><p>Ja. Filtere deine Freunde nach Interaktions-Häufigkeit und entfreunde alle, mit denen du seit 6+ Monaten nicht mehr gesprochen hast. Beliebig anpassbar. Empfohlener Standard: 24 Monate.</p></div></details>
+          <details class="faq__item"><summary>Was ist mit Fotos, die andere von mir gepostet haben?</summary><div class="faq__answer"><p>SocialEraser kann Fotos, in denen du markiert bist, aus deiner Timeline ausblenden, aber keine Fotos löschen, die andere hochgeladen haben. Für eine vollständige Entfernung: Markierung entfernen und den Upload-Berechtigten bitten, es zu löschen.</p></div></details>
+        </div>
+        <div class="faq__category">
+          <h3 class="faq__category-title">Sicherheit</h3>
+          <details class="faq__item"><summary>Wird mein Konto gesperrt?</summary><div class="faq__answer"><p>SocialEraser simuliert normale Klicks in menschlicher Geschwindigkeit und respektiert Rate-Limits. Wie bei jedem Drittanbieter-Tool gilt: Wir sind nicht mit Meta Platforms, Inc. verbunden und die Nutzung von Bulk-Tools erfolgt auf eigene Verantwortung.</p></div></details>
+          <details class="faq__item"><summary>Kann ich eine Löschung rückgängig machen?</summary><div class="faq__answer"><p>Endgültige Löschungen sind nicht wiederherstellbar. Wir empfehlen dringend, für den ersten Lauf den <em>Archiv</em>-Modus zu verwenden, damit du alles aus dem Aktivitätenprotokoll prüfen und wiederherstellen kannst, falls du es dir anders überlegst.</p></div></details>
+          <details class="faq__item"><summary>Was passiert, wenn Facebook die Benutzeroberfläche ändert?</summary><div class="faq__answer"><p>SocialEraser lädt sein DOM-Selektor-Schema von einem Remote-CDN. Wenn Facebook UI-Änderungen ausliefert, spielen wir ein Update ein — keine Neuinstallation der Erweiterung nötig. Das Update erfolgt automatisch und im Hintergrund.</p></div></details>
+        </div>
+        <div class="faq__category">
+          <h3 class="faq__category-title">Technik</h3>
+          <details class="faq__item"><summary>Funktioniert es mit dem neuen Facebook-Layout?</summary><div class="faq__answer"><p>Ja. SocialEraser unterstützt sowohl das aktuelle facebook.com-Layout als auch die ältere FB5-Ansicht. Das Selektor-Schema wird wöchentlich aktualisiert, um mit den neuesten UI-Änderungen von Facebook Schritt zu halten.</p></div></details>
+          <details class="faq__item"><summary>Funktioniert es in der Facebook Mobile-App?</summary><div class="faq__answer"><p>Nein. Die Facebook Mobile-App erlaubt keine Browser-Erweiterungen. SocialEraser läuft in Chrome auf dem Desktop. Ein eigener Mobile-Begleiter ist für 2027 auf der Roadmap.</p></div></details>
+          <details class="faq__item"><summary>Kann ich es mit mehreren Facebook-Konten verwenden?</summary><div class="faq__answer"><p>Ja — verwende für jedes Konto ein eigenes Browser-Profil. Mehrere Konten innerhalb eines Profils ist auf der Roadmap.</p></div></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- LEITFADEN -->
+    <section class="container-md section" aria-labelledby="section-guide">
+      <div class="cta-box" style="text-align:center;">
+        <span class="muted-eyebrow">Ausführlicher Leitfaden</span>
+        <h2 class="hero__h1" id="section-guide" style="font-size: var(--text-3xl);">Willst du den kompletten Walkthrough?</h2>
+        <p class="hero__lede">Unsere Schritt-für-Schritt-Anleitung erklärt die Datums-, Stichwort-, Post-Typ- und Freund-Inaktivitäts-Filter im Detail — mit Screenshots und Edge Cases.</p>
+        <div class="btn-row btn-row--center">
+          <a href="/de/guides/facebook.html" class="btn btn--primary btn--xl">Vollständigen Leitfaden lesen →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- DOWNLOAD -->
+    <section id="download" class="container-md section" aria-labelledby="section-download">
+      <div class="cta-box">
+        <span class="muted-eyebrow">Kostenlos · Spendenbasiert · Keine Anmeldung</span>
+        <h2 class="hero__h1" id="section-download">Räume dein Facebook auf. Heute noch.</h2>
+        <p class="hero__lede">Installiere SocialEraser für Facebook. In unter 60 Sekunden löscht du los.</p>
+        <div class="btn-row btn-row--center">
+          <a href="mailto:support@socialeraser.app?subject=Join%20Facebook%20Waitlist" class="btn btn--primary btn--xl">Facebook-Warteliste beitreten</a>
+          <a href="/de/platforms/x/" class="btn btn--secondary btn--xl">SocialEraser für X nutzen</a>
+        </div>
+        <p class="hero__micro">Android + iOS Apps: Erscheinen 2027 · <a href="/de/">← Zurück zu allen Plattformen</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container-lg">
+      <div class="site-footer__grid">
+        <div class="site-footer__brand">
+          <a href="/de/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="">
+        </span>
+            <span>SocialEraser</span>
+          </a>
+          <p>Räume deine sozialen Medien massenhaft auf. 100% lokal, passwortfrei, Open Source. Für alle, die ihr Wochenende lieber nicht mit dem Entliken von Posts aus 2017 verbringen.</p>
+        </div>
+        <div class="site-footer__col"><h4>Plattformen</h4><ul>
+          <li><a href="/de/platforms/x/">X (Twitter)</a></li>
+          <li><a href="/de/platforms/tiktok/">TikTok</a></li>
+          <li><a href="/de/platforms/youtube/">YouTube</a></li>
+          <li><a href="/de/platforms/instagram/">Instagram</a></li>
+          <li><a href="/de/platforms/facebook/">Facebook</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>Produkt</h4><ul>
+          <li><a href="/de/help.html">Hilfecenter</a></li>
+          <li><a href="#download">Installieren</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/CHANGELOG.md" target="_blank" rel="noopener noreferrer">Changelog</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/ROADMAP.md" target="_blank" rel="noopener noreferrer">Roadmap</a></li>
+          <li><a href="/de/support.html">☕ Unterstützen</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">Quellcode</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>Unternehmen</h4><ul>
+          <li><a href="/de/about.html">Über uns</a></li>
+          <li><a href="mailto:support@socialeraser.app">Kontakt</a></li>
+          <li><a href="/de/privacy.html">Datenschutz</a></li>
+          <li><a href="/de/terms.html">Nutzungsbedingungen</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser#readme" target="_blank" rel="noopener noreferrer">Pressemappe</a></li>
+        </ul></div>
+      </div>
+      <div class="site-footer__bottom">
+        <span>© 2026 SocialEraser. Alle Rechte vorbehalten.</span>
+        <div class="site-footer__legal"><span>Unabhängiges Tool — nicht mit Meta Platforms, Inc. verbunden</span></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/app.js" defer></script>
+  <script defer src="/assets/lang-switcher.js"></script>
+</body>
+</html>

@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ko-KR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0a0b">
+  <title>SocialEraser for X — 트윗, 좋아요, 북마크 일괄 삭제</title>
+  <meta name="description" content="X(구 Twitter)에서 트윗, 답글, 리트윗, 좋아요, 북마크를 일괄 삭제하고 일괄 언팔로우하는 무료 Chrome 확장 프로그램. 날짜와 키워드로 필터링. 100% 로컬 실행, 비밀번호 불필요, API 키 불필요.">
+  <meta name="keywords" content="트윗 삭제, 트윗 일괄 삭제, 트위터 정리, 일괄 언팔, 트위터 좋아요 삭제, 트위터 북마크 삭제, X 정리, 트윗 대량 삭제, 오래된 트윗 삭제, 트위터 일괄 삭제, X 기록 정리, X 계정 정리, X 좋아요 삭제, X 답글 삭제, X 리트윗 제거">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://socialeraser.app/ko/platforms/x/">
+  <link rel="alternate" hreflang="en" href="https://socialeraser.app/platforms/x/">
+  <link rel="alternate" hreflang="zh" href="https://socialeraser.app/zh/platforms/x/">
+  <link rel="alternate" hreflang="ja" href="https://socialeraser.app/ja/platforms/x/">
+  <link rel="alternate" hreflang="es" href="https://socialeraser.app/es/platforms/x/">
+  <link rel="alternate" hreflang="fr" href="https://socialeraser.app/fr/platforms/x/">
+  <link rel="alternate" hreflang="de" href="https://socialeraser.app/de/platforms/x/">
+  <link rel="alternate" hreflang="pt" href="https://socialeraser.app/pt/platforms/x/">
+  <link rel="alternate" hreflang="ko" href="https://socialeraser.app/ko/platforms/x/">
+  <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/ko/platforms/x/"><link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SocialEraser">
+  <meta property="og:url" content="https://socialeraser.app/ko/platforms/x/">
+  <meta property="og:title" content="SocialEraser for X — 트윗, 좋아요, 북마크 일괄 삭제">
+  <meta property="og:description" content="X에서 트윗, 답글, 리트윗, 좋아요, 북마크를 일괄 삭제하고 일괄 언팔로우하는 무료 Chrome 확장 프로그램. 날짜와 키워드로 필터링. 100% 로컬 실행, 비밀번호 불필요.">
+  <meta property="og:image" content="https://socialeraser.app/assets/icons/og-x.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="SocialEraser for X — 무료 Chrome 확장으로 트윗, 좋아요, 북마크를 일괄 삭제">
+  <meta property="og:locale" content="ko_KR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SocialEraser for X — 트윗, 좋아요, 북마크 일괄 삭제">
+  <meta name="twitter:description" content="X에서 트윗, 답글, 리트윗, 좋아요, 북마크를 일괄 삭제하고 일괄 언팔로우하는 무료 Chrome 확장 프로그램. 날짜와 키워드로 필터링. 100% 로컬 실행, 비밀번호 불필요.">
+  <meta name="twitter:image" content="https://socialeraser.app/assets/icons/og-x.png">
+  <meta name="twitter:image:alt" content="SocialEraser for X — 무료 Chrome 확장으로 트윗, 좋아요, 북마크를 일괄 삭제">
+  <link rel="icon" type="image/png" href="/assets/icons/socialeraser-mark.png">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/app.css">
+  <style>
+    /* X 페이지 — X 브랜드는 단색(흰 배경에 검정)입니다. 공유 브랜드 토큰을
+       흰색 계열로 덮어써서 페이지가 "X"로 보이게 하고 "주황색"이 되지 않도록 합니다. */
+    :root {
+      --accent:         #ffffff;
+      --accent-soft:    rgba(255, 255, 255, 0.08);
+      --accent-glow:    rgba(255, 255, 255, 0.22);
+      --border-accent:  rgba(255, 255, 255, 0.35);
+      --gradient-brand:      linear-gradient(135deg, #ffffff 0%, #9ca0a8 100%);
+      --gradient-brand-soft: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(156, 160, 168, 0.06) 100%);
+      --gradient-hero-glow:  radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 255, 255, 0.10) 0%, transparent 70%);
+    }
+    /* 비교표의 ✗는 파란색 유지 — 중립적이며 빨강이 아닙니다. */
+    .comparison .cross { color: var(--blue); }
+  </style>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"SocialEraser for X","applicationCategory":"BrowserApplication","applicationSubCategory":"BrowserExtension","operatingSystem":"Chrome 120+, Edge 120+","description":"X(구 Twitter)에서 직접 작성한 트윗, 답글, 리트윗, 좋아요, 북마크를 일괄 삭제하고 팔로우를 일괄 취소합니다. 브라우저에서 100% 로컬 처리 — 비밀번호 불필요, 서버 불필요.","url":"https://socialeraser.app/ko/platforms/x/","image":"https://socialeraser.app/assets/icons/og-x.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://socialeraser.app/ko/platforms/x/"},"featureList":["내가 작성한 트윗 일괄 삭제","내 답글 일괄 삭제","리트윗 일괄 취소(언리포스트)","좋아요 탭의 게시글 일괄 좋아요 취소","북마크 일괄 비우기","계정 일괄 언팔로우(목록별, 맞팔 아님, 마지막 트윗 날짜별)","날짜 범위로 필터","키워드 일치로 필터","미디어 유형별 필터(텍스트, 이미지, 비디오, 링크)","인게이지먼트 하한선으로 필터(최소 좋아요 또는 답글 수)","삭제 전에 JSON으로 아카이브 내보내기","세션 간 일시 중지 및 재개"],"offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"}}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+    {"@type":"ListItem","position":1,"name":"홈","item":"https://socialeraser.app/ko/"},
+    {"@type":"ListItem","position":2,"name":"플랫폼","item":"https://socialeraser.app/ko/#platforms"},
+    {"@type":"ListItem","position":3,"name":"SocialEraser for X","item":"https://socialeraser.app/ko/platforms/x/"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"HowTo","name":"SocialEraser로 트윗을 일괄 삭제하는 방법","description":"SocialEraser Chrome 확장을 설치하고 x.com을 열고 정리할 대상을 선택한 다음 시작을 클릭하세요. SocialEraser는 사람의 속도로 정상적인 클릭을 시뮬레이션하여 일치하는 모든 트윗, 답글, 리트윗, 좋아요, 북마크 또는 팔로우를 삭제합니다.","totalTime":"PT15M","estimatedCost":{"@type":"MonetaryAmount","value":"0","currency":"USD"},"tool":[{"@type":"HowToTool","name":"Google Chrome 또는 Microsoft Edge(버전 120 이상)"},{"@type":"HowToTool","name":"SocialEraser for X 브라우저 확장(무료)"}],"step":[
+    {"@type":"HowToStep","position":1,"name":"SocialEraser for X 설치","text":"Chrome 웹스토어에서 무료 SocialEraser 확장을 추가하세요. 계정, 가입, 결제 모두 필요 없습니다. 두 번 클릭하면 설치되어 툴바에 고정됩니다.","url":"https://socialeraser.app/ko/platforms/x/#download"},
+    {"@type":"HowToStep","position":2,"name":"x.com을 열고 로그인","text":"Chrome에서 x.com으로 이동하여 평소처럼 계정에 로그인하세요. SocialEraser 사이드 패널 아이콘을 클릭하면 확장이 자동으로 로그인 상태를 감지하고 계정 상태를 표시합니다.","url":"https://socialeraser.app/ko/platforms/x/#main"},
+    {"@type":"HowToStep","position":3,"name":"정리할 대상을 선택하고 필터를 설정","text":"사이드 패널에서 삭제할 항목을 선택하세요: 원본 트윗, 답글, 리트윗, 좋아요, 북마크 또는 팔로잉. 선택적으로 날짜 범위, 키워드 일치, 미디어 유형 필터, 인게이지먼트 하한선을 설정할 수 있습니다.","url":"https://socialeraser.app/ko/platforms/x/#main"},
+    {"@type":"HowToStep","position":4,"name":"시작을 클릭하고 떠나라","text":"정리 시작 버튼을 클릭하세요. SocialEraser는 일치하는 각 항목을 열고 사람의 속도로 삭제/좋아요 취소/언팔로우 버튼을 클릭하며 실시간 진행 카운터를 표시합니다. 노트북을 덮고 내일 돌아와도 됩니다 — 브라우저를 재시작해도 상태가 유지됩니다. 평균 처리 속도는 항목당 약 0.9초입니다.","url":"https://socialeraser.app/ko/platforms/x/#main"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"오래된 트윗을 일괄 삭제할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"네. 날짜 필터(예: 2020년 1월 1일 이전)를 설정하면 SocialEraser가 일치하는 모든 트윗을 삭제합니다. 항목당 약 0.9초로 실행되며, 트윗 1,000개에 약 15분이 걸립니다."}},
+    {"@type":"Question","name":"내 답글만 삭제할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"네. 게시물 유형 필터를 사용하여 답글만(또는 원본 트윗만, 또는 리트윗만) 대상으로 지정하세요. 이 필터는 날짜 및 키워드 필터와 결합하여 정밀하게 사용할 수 있습니다."}},
+    {"@type":"Question","name":"좋아요가 많은 트윗은 유지할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"네. 인게이지먼트 하한선 필터를 사용하여 최소 좋아요 수를 설정하세요. 하한선보다 위의 트윗은 유지되고, 아래는 삭제됩니다."}},
+    {"@type":"Question","name":"스레드는 어떻게 되나요?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser는 트윗을 개별적으로 삭제합니다. 트윗이 스레드의 일부인 경우 답글 체인은 분리되어 계속 표시됩니다. 스레드 전체를 완전히 제거하려면 날짜 필터를 사용하여 최신 순서대로 트윗을 삭제하세요."}},
+    {"@type":"Question","name":"제 계정이 정지될 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser는 사람의 속도로 정상적인 클릭을 시뮬레이션하며 속도 제한을 준수합니다. 모든 제3자 도구와 동일한 주의 사항이 적용됩니다 — 당사는 X Corp.와 제휴 관계가 없으며, 일괄 도구 사용은 본인의 판단에 따릅니다."}},
+    {"@type":"Question","name":"삭제를 취소할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"아니요. 트윗이 삭제되면 몇 초 내에 X의 공개 보기에서 사라집니다. 첫 일괄 실행 전에 아카이브 내보내기 기능을 사용하는 것을 강력히 권장합니다."}},
+    {"@type":"Question","name":"X가 UI를 변경하면 어떻게 되나요?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser는 원격 CDN에서 DOM 선택기 스키마를 가져옵니다. X가 UI를 변경하면 업데이트를 푸시하므로 확장 프로그램을 다시 설치할 필요가 없습니다. 업데이트는 자동으로 조용히 진행됩니다."}},
+    {"@type":"Question","name":"새 x.com 레이아웃에서도 작동하나요?","acceptedAnswer":{"@type":"Answer","text":"네. SocialEraser는 x.com과 기존 twitter.com 도메인을 모두 지원합니다. 선택기 스키마는 매주 업데이트되어 X의 최신 UI 변경 사항에 맞춥니다."}},
+    {"@type":"Question","name":"모바일(모바일 브라우저의 x.com)에서도 작동하나요?","acceptedAnswer":{"@type":"Answer","text":"Android의 Chrome에서는 대부분의 기능이 작동합니다. iOS Safari는 Apple의 확장 모델로 인해 더 제한적입니다 — 전용 iOS 앱은 2027년 로드맵에 있습니다."}},
+    {"@type":"Question","name":"여러 X 계정에서 실행할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"네 — 각 계정에 대해 별도의 브라우저 프로필을 사용하세요. 단일 프로필 내 다중 계정 기능은 로드맵에 있습니다."}},
+    {"@type":"Question","name":"삭제하기 전에 트윗을 내보낼 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"네. 아카이브 내보내기 기능을 사용하여 삭제 전 모든 트윗을 JSON으로 저장하세요. 처음 사용하시는 분께 권장합니다."}}
+  ]}
+  </script>
+</head>
+<body>
+
+  <a href="#main" class="skip-to-content">본문으로 건너뛰기</a>
+
+  <header class="site-header">
+    <div class="site-header__inner container-lg">
+      <a href="/ko/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
+        </span>
+        <span>SocialEraser</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <details class="site-nav__platforms">
+          <summary class="site-nav__platforms-trigger">플랫폼 <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></summary>
+          <div class="site-nav__platforms-menu">
+            <a href="/ko/platforms/x/">SocialEraser for X</a>
+            <a href="/ko/platforms/tiktok/">SocialEraser for TikTok</a>
+            <a href="/ko/platforms/youtube/">SocialEraser for YouTube</a>
+            <a href="/ko/platforms/instagram/">SocialEraser for Instagram</a>
+            <a href="/ko/platforms/facebook/">SocialEraser for Facebook</a>
+          </div>
+        </details>
+        <a href="/ko/help.html" class="hide-mobile">도움말</a>
+        <a href="#download" class="btn btn--primary btn--sm">무료 설치</a>
+      </nav>
+      <details class="site-nav--mobile">
+        <summary class="site-nav--mobile-trigger" aria-label="메뉴 토글">
+          <svg class="site-nav--mobile-icon-menu" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <svg class="site-nav--mobile-icon-close" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </summary>
+        <div class="site-nav--mobile-menu">
+          <a href="/ko/platforms/x/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>SocialEraser for X</a>
+          <a href="/ko/platforms/tiktok/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg>SocialEraser for TikTok</a>
+          <a href="/ko/platforms/youtube/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>SocialEraser for YouTube</a>
+          <a href="/ko/platforms/instagram/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>SocialEraser for Instagram</a>
+          <a href="/ko/platforms/facebook/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>SocialEraser for Facebook</a>
+          <a href="/ko/help.html"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>도움말</a>
+          <a href="#download" class="btn btn--primary"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>무료 설치</a>
+          <details class="site-nav--mobile-lang">
+            <summary>
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+              <span class="site-nav--mobile-lang__current">언어: <span data-lang-current>한국어</span></span>
+              <svg class="site-nav--mobile-lang__chev" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div data-lang-list></div>
+          </details>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="breadcrumbs-wrap container-lg">
+      <nav class="breadcrumbs" aria-label="빵 부스러기 탐색">
+        <a href="/ko/">홈</a>
+        <span class="breadcrumbs__sep">›</span>
+        <span class="breadcrumbs__current">SocialEraser for X</span>
+      </nav>
+    </div>
+    <section class="container-lg">
+      <div class="hero">
+        <span class="muted-eyebrow">SocialEraser for X · 무료 · 팁으로 지원</span>
+        <h1 class="hero__h1">
+          X에서 <span class="gradient-text">트윗, 좋아요, 북마크를</span><br>
+          일괄 삭제하세요
+        </h1>
+        <p class="hero__lede">
+          주말이 아니라 몇 분 안에 X 기록을 깨끗이 정리하세요. 날짜와 키워드로 필터링하고, 실행 전에 아카이브를 내보내세요. <strong>비밀번호 불필요. API 키 불필요. 서버 불필요.</strong>
+        </p>
+        <div class="btn-row hero__cta btn-row--center">
+          <a rel="noopener noreferrer" href="https://chromewebstore.google.com/detail/socialeraser-for-x/hmlbkkbflcdofngldhekoajeedgcjfch" class="btn btn--primary btn--xl">Chrome에 추가 — 무료</a>
+          <a rel="noopener noreferrer" href="https://microsoftedge.microsoft.com/addons/" class="btn btn--secondary btn--xl">Edge에 추가</a>
+        </div>
+        <p class="hero__micro">오픈소스 · MIT 라이선스 · 추적 없음</p>
+      </div>
+    </section>
+
+    <section class="legal-strip">
+      <div class="container-md">
+        <strong>독립 도구입니다.</strong> X Corp.와 제휴, 보증, 후원 관계가 없습니다. X는 X Corp.의 상표입니다. 사용에 따른 책임은 본인에게 있습니다.
+      </div>
+    </section>
+
+    <!-- 삭제할 수 있는 것 -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">정리 범위</span>
+        <h2 class="section-head__h2">X 정리 6종을 한 확장으로</h2>
+        <p class="section-head__lede">분명한 것부터 잊고 있던 것까지. 하나만 실행하거나, 섞거나, 연속으로 모두 실행하세요.</p>
+      </div>
+      <div class="grid grid-auto">
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></div><h3 class="card__title">원본 트윗</h3><p class="card__desc">내가 작성한 트윗을 일괄 삭제하세요. 날짜 범위나 키워드로 필터링할 수 있습니다. 먼저 JSON으로 내보내 백업해 두세요.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg></div><h3 class="card__title">답글</h3><p class="card__desc">답글 기록을 일괄 비우세요. 구직, 브랜딩 변경, 새로운 시작 전에 유용합니다.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg></div><h3 class="card__title">리트윗</h3><p class="card__desc">리트윗을 일괄 취소하세요. 원작자의 트윗은 그대로 두고 내 프로필에서 공유 기록만 제거합니다.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div><h3 class="card__title">좋아요</h3><p class="card__desc">수백, 수천 개의 게시글 좋아요를 취소하세요. SocialEraser에서 가장 인기 있는 사용 사례입니다.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg></div><h3 class="card__title">북마크</h3><p class="card__desc">저장한 트윗을 비우세요. "나중에 읽을게요"의 무덤을 청소하세요.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></div><h3 class="card__title">팔로잉</h3><p class="card__desc">목록별, 맞팔 아님, 마지막 트윗 날짜별로 언팔로우하세요. 한 번의 클릭으로 휴면 계정을 찾으세요.</p></div>
+      </div>
+    </section>
+
+    <!-- 시간 계산기 -->
+    <section class="container-md section">
+      <div class="section-head">
+        <span class="muted-eyebrow">시간 계산기</span>
+        <h2 class="section-head__h2">X 정리에 얼마나 걸릴까요?</h2>
+      </div>
+      <div class="estimator" data-estimator>
+        <div class="estimator__input-block">
+          <label for="est-input-x">삭제할 트윗 / 좋아요 수</label>
+          <input id="est-input-x" type="number" class="estimator__input" data-estimator-input value="1000" min="1" max="100000">
+          <div class="estimator__quick">
+            <button class="estimator__quick-btn" data-estimator-quick data-value="100">100</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="500">500</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="1000">1,000</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="5000">5,000</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="10000">10,000</button>
+          </div>
+        </div>
+        <div class="estimator__result">
+          <div class="estimator__row">
+            <div class="estimator__row-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+            <div class="estimator__row-text"><span class="estimator__row-label">수동 정리</span><span class="estimator__row-value" data-estimator-manual>2시간 47분</span></div>
+          </div>
+          <div class="estimator__row estimator__row--highlight">
+            <div class="estimator__row-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+            <div class="estimator__row-text"><span class="estimator__row-label">SocialEraser 사용 시</span><span class="estimator__row-value" data-estimator-auto>—</span></div>
+          </div>
+          <div class="estimator__row">
+            <div class="estimator__row-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg></div>
+            <div class="estimator__row-text"><span class="estimator__row-label">절약한 시간</span><span class="estimator__row-value" data-estimator-saved>2시간 32분</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 동영상: 직접 보기 -->
+    <section class="container-lg section video-section" id="see-it-in-action" aria-labelledby="section-video">
+      <div class="section-head">
+        <span class="muted-eyebrow">직접 보기</span>
+        <h2 class="section-head__h2" id="section-video">60초 둘러보기</h2>
+        <p class="section-head__sub">데이터가 브라우저 밖으로 나가지 않는 상태에서 SocialEraser가 트윗, 좋아요, 팔로우 2,000개를 정리하는 모습을 확인하세요.</p>
+      </div>
+      <div class="video-frame">
+        <lite-youtube videoid="YzGAaDF8VyQ" playlabel="60초 둘러보기 재생"></lite-youtube>
+      </div>
+    </section>
+
+    <!-- 3단계 -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">사용 방법</span>
+        <h2 class="section-head__h2">3단계로 끝.</h2>
+      </div>
+      <div class="steps">
+        <div class="steps__item">
+          <div class="steps__media"><img src="/assets/screenshots/step-1-install.png" alt="SocialEraser 사이드 패널: 설치 시 상태 확인" loading="lazy"></div>
+          <div class="steps__body">
+            <h3>SocialEraser for X 설치</h3>
+            <p>Chrome 웹스토어에서 무료로 받으세요. 계정, 가입, 결제 모두 필요 없습니다. 두 번 클릭하면 툴바에 고정됩니다 — 100% 브라우저에서 실행됩니다.</p>
+          </div>
+        </div>
+        <div class="steps__item">
+          <div class="steps__media"><img src="/assets/screenshots/step-2-pick.png" alt="SocialEraser 사이드 패널: 체크박스로 삭제할 항목 선택" loading="lazy" width="280" height="504"></div>
+          <div class="steps__body">
+            <h3>x.com을 열고 로그인</h3>
+            <p>Chrome에서 x.com을 열고 평소처럼 로그인하세요. SocialEraser 사이드 패널 아이콘을 클릭합니다. 정리할 항목을 선택하세요 — 트윗, 답글, 리트윗, 좋아요, 북마크, 팔로우 — 그리고 필터(날짜 범위, 키워드, 인게이지먼트 하한선)를 설정하세요.</p>
+          </div>
+        </div>
+        <div class="steps__item">
+          <div class="steps__media">
+            <img src="/assets/screenshots/sidepanel-running.gif" alt="SocialEraser 사이드 패널: 실시간 정리 진행 중 — 5초 이내에 4,108개 트윗 삭제됨" loading="lazy" width="280" height="504">
+          </div>
+          <div class="steps__body">
+            <h3>시작을 클릭하세요. 그리고 잠시 자리를 비우세요.</h3>
+            <p>SocialEraser가 사람의 속도로 클릭을 시뮬레이션합니다. 실시간 카운터를 보거나, 노트북을 덮고 내일 돌아와도 됩니다 — 브라우저를 재시작해도 상태가 유지됩니다. 언제든지 일시 중지하세요.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 필터 심층 분석 -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">필터</span>
+        <h2 class="section-head__h2">정밀하게, 맹목이 아닌</h2>
+        <p class="section-head__lede">일괄의 목적은 빠르게 정리하는 것이지만, 정밀함도 중요합니다. 필터를 조합하여 잘못된 것만 정확히 삭제하세요.</p>
+      </div>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3 class="card__title">날짜 범위</h3>
+          <p class="card__desc">특정 날짜 <strong>이전</strong> 또는 <strong>이후</strong>에 작성된 트윗을 삭제하세요. 팬데믹时期的 생각을 남기고 2014년의 흑역사는 삭제하세요. 가장 많이 사용되는 필터입니다.</p>
+        </div>
+        <div class="card">
+          <h3 class="card__title">키워드 일치</h3>
+          <p class="card__desc">특정 단어나 구문이 포함된 트윗만 삭제하세요. 주제별로 정리할 때 유용합니다 — 구직기, 격한争论, 덕질 시절 등.</p>
+        </div>
+        <div class="card">
+          <h3 class="card__title">미디어 유형</h3>
+          <p class="card__desc">이미지, 비디오, 링크 또는 텍스트만 있는 트윗만 삭제하도록 필터링하세요. 게시글을 삭제하기 전에 미디어를 백업할 때 유용합니다.</p>
+        </div>
+        <div class="card">
+          <h3 class="card__title">인게이지먼트 하한선</h3>
+          <p class="card__desc">좋아요 또는 답글이 X개 이상인 트윗은 유지하세요. 인게이지먼트가 0인 외로운 게시글을 삭제하세요. 0으로 설정하면 모두 삭제합니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 비교 -->
+    <section class="container-lg section" aria-labelledby="section-comparison">
+      <div class="section-head">
+        <span class="muted-eyebrow">대안 도구와 비교</span>
+        <h2 class="section-head__h2" id="section-comparison">SocialEraser for X 비교</h2>
+      </div>
+      <div class="comparison">
+        <table>
+          <thead><tr><th>기능</th><th class="text-center">SocialEraser</th><th class="text-center">TweetDelete</th><th class="text-center">Semiphemeral</th><th class="text-center">Redact</th></tr></thead>
+          <tbody>
+            <tr class="us"><td>비밀번호 불필요</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 예</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> 아니요(OAuth)</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> 아니요(OAuth)</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> 아니요(API 키)</td></tr>
+            <tr class="us"><td>100% 로컬</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 예</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> 아니요(서버)</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> 아니요(서버)</td><td>로컬 CLI</td></tr>
+            <tr class="us"><td>오픈소스</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> MIT</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> 아니요</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> GPL</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> MIT</td></tr>
+            <tr class="us"><td>무료 등급</td><td>팁으로 지원</td><td>제한적</td><td>전체(오픈소스)</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> 유료</td></tr>
+            <tr class="us"><td>날짜 + 키워드 필터</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 예</td><td>날짜만</td><td>날짜만</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 예</td></tr>
+            <tr class="us"><td>좋아요 / 북마크 / 팔로우 일괄 처리</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 예</td><td>트윗만</td><td>트윗만</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 예</td></tr>
+            <tr class="us"><td>코딩 불필요</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 예</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 예</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 예</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> 아니요</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 로드맵 -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">로드맵</span>
+        <h2 class="section-head__h2">앞으로 출시될 기능</h2>
+        <p class="section-head__lede">세 가지 정리 모듈이 활발히 개발 중입니다. 이미 설치된 확장에 대한 무료 업데이트로 제공됩니다 — 새로 설치할 필요 없으며, 추가 비용 없습니다.</p>
+      </div>
+      <div class="grid grid-auto">
+        <div class="card platform-card--coming">
+          <div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+          <h3 class="card__title">DM <span class="badge badge--soon">개발 중</span></h3>
+          <p class="card__desc">DM 대화방을 일괄 삭제 — 받은편지함 0과 프라이버시 리셋에 유용합니다. <strong>참고:</strong> X는 <code>event.isTrusted</code>를 통해 스크립트 우클릭 이벤트를 차단합니다. 이를 우회하려면 <code>chrome.debugger</code> 권한이 필요한데, 우리는 이를 요청하지 않을 것입니다. debugger가 아닌 다른 방법을 평가 중이며, 출시일은 미정입니다.</p>
+        </div>
+        <div class="card platform-card--coming">
+          <div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <h3 class="card__title">검색 기록 <span class="badge badge--soon">개발 중</span></h3>
+          <p class="card__desc">X 검색 기록을 지우세요. 핸드폰을 빌려주기 전, 또는 마음의 평안을 위해. 다음 마이너 릴리스에 포함할 계획이며, 정확한 일정은 미정입니다.</p>
+        </div>
+      </div>
+      <p style="text-align:center;margin-top:var(--space-6);color:var(--text-mute);font-size:var(--text-sm)">진행 상황은 <a href="https://github.com/socialeraser/SocialEraser/blob/master/ROADMAP.md" target="_blank" rel="noopener noreferrer">공개 로드맵</a>에서 확인하세요 · 제안은 <a href="mailto:support@socialeraser.app">support@socialeraser.app</a>으로 보내주세요.</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="container-lg section" aria-labelledby="section-faq">
+      <div class="section-head">
+        <span class="muted-eyebrow">FAQ</span>
+        <h2 class="section-head__h2" id="section-faq">X 관련 질문</h2>
+      </div>
+      <div class="faq">
+        <div class="faq__category">
+          <h3 class="faq__category-title">정리 범위</h3>
+          <details class="faq__item"><summary>오래된 트윗을 일괄 삭제할 수 있나요?</summary><div class="faq__answer"><p>네. 날짜 필터(예: <em>2020년 1월 1일 이전</em>)를 설정하면 SocialEraser가 일치하는 모든 트윗을 삭제합니다. 항목당 약 0.9초로 실행되며, 트윗 1,000개에 약 15분이 걸립니다.</p></div></details>
+          <details class="faq__item"><summary>내 답글만 삭제할 수 있나요?</summary><div class="faq__answer"><p>네. <em>게시물 유형</em> 필터를 사용하여 답글만(또는 원본 트윗만, 또는 리트윗만) 대상으로 지정하세요. 날짜 및 키워드 필터와 결합할 수 있습니다.</p></div></details>
+          <details class="faq__item"><summary>좋아요가 많은 트윗은 유지할 수 있나요?</summary><div class="faq__answer"><p>네. <em>인게이지먼트 하한선</em> 필터를 사용하여 최소 좋아요 수를 설정하세요. 하한선보다 위의 트윗은 유지되고, 아래는 삭제됩니다.</p></div></details>
+          <details class="faq__item"><summary>스레드는 어떻게 되나요?</summary><div class="faq__answer"><p>SocialEraser는 트윗을 개별적으로 삭제합니다. 트윗이 스레드의 일부인 경우 답글 체인은 분리되어 계속 표시됩니다. 스레드 전체를 완전히 제거하려면 날짜 필터를 사용하여 최신 순서대로 트윗을 삭제하세요.</p></div></details>
+        </div>
+        <div class="faq__category">
+          <h3 class="faq__category-title">안전성</h3>
+          <details class="faq__item"><summary>제 계정이 정지될 수 있나요?</summary><div class="faq__answer"><p>SocialEraser는 사람의 속도로 정상적인 클릭을 시뮬레이션하며 속도 제한을 준수합니다. 모든 제3자 도구와 동일한 주의 사항이 적용됩니다 — 당사는 X Corp.와 제휴 관계가 없으며, 일괄 도구 사용은 본인의 판단에 따릅니다.</p></div></details>
+          <details class="faq__item"><summary>삭제를 취소할 수 있나요?</summary><div class="faq__answer"><p>아니요. 트윗이 삭제되면 몇 초 내에 X의 공개 보기에서 사라집니다. 첫 일괄 실행 전에 <em>아카이브 내보내기</em> 기능을 사용하는 것을 강력히 권장합니다.</p></div></details>
+          <details class="faq__item"><summary>X가 UI를 변경하면 어떻게 되나요?</summary><div class="faq__answer"><p>SocialEraser는 원격 CDN에서 DOM 선택기 스키마를 가져옵니다. X가 UI를 변경하면 업데이트를 푸시하므로 확장 프로그램을 다시 설치할 필요가 없습니다. 업데이트는 자동으로 조용히 진행됩니다.</p></div></details>
+        </div>
+        <div class="faq__category">
+          <h3 class="faq__category-title">기술</h3>
+          <details class="faq__item"><summary>새 x.com 레이아웃에서도 작동하나요?</summary><div class="faq__answer"><p>네. SocialEraser는 <em>x.com</em>과 기존 <em>twitter.com</em> 도메인을 모두 지원합니다. 선택기 스키마는 매주 업데이트되어 X의 최신 UI 변경 사항에 맞춥니다.</p></div></details>
+          <details class="faq__item"><summary>모바일(모바일 브라우저의 x.com)에서도 작동하나요?</summary><div class="faq__answer"><p>Android의 Chrome에서는 대부분의 기능이 작동합니다. iOS Safari는 Apple의 확장 모델로 인해 더 제한적입니다 — 전용 iOS 앱은 2027년 로드맵에 있습니다.</p></div></details>
+          <details class="faq__item"><summary>여러 X 계정에서 실행할 수 있나요?</summary><div class="faq__answer"><p>네 — 각 계정에 대해 별도의 브라우저 프로필을 사용하세요. 단일 프로필 내 다중 계정 기능은 로드맵에 있습니다.</p></div></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- 가이드 -->
+    <section class="container-md section" aria-labelledby="section-guide">
+      <div class="cta-box" style="text-align:center;">
+        <span class="muted-eyebrow">심층 분석</span>
+        <h2 class="hero__h1" id="section-guide" style="font-size: var(--text-3xl);">전체 가이드를 보고 싶으신가요?</h2>
+        <p class="hero__lede">단계별 가이드에서 날짜, 키워드, 인게이지먼트 필터를 스크린샷과 엣지 케이스와 함께 자세히 설명합니다.</p>
+        <div class="btn-row btn-row--center">
+          <a href="/ko/guides/twitter.html" class="btn btn--primary btn--xl">전체 가이드 읽기 →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- 다운로드 -->
+    <section id="download" class="container-md section">
+      <div class="cta-box">
+        <span class="muted-eyebrow">무료 · 팁으로 지원 · 가입 불필요</span>
+        <h2 class="hero__h1">X를 깨끗이. 오늘.</h2>
+        <p class="hero__lede">SocialEraser for X를 설치하세요. 60초 이내에 삭제를 시작할 수 있습니다.</p>
+        <div class="btn-row btn-row--center">
+          <a rel="noopener noreferrer" href="https://chromewebstore.google.com/detail/socialeraser-for-x/hmlbkkbflcdofngldhekoajeedgcjfch" class="btn btn--primary btn--xl">Chrome에 추가 — 무료</a>
+          <a rel="noopener noreferrer" href="https://microsoftedge.microsoft.com/addons/" class="btn btn--secondary btn--xl">Edge에 추가</a>
+        </div>
+        <p class="hero__micro">Android + iOS 앱: 2027년 출시 예정 · <a href="/ko/">← 모든 플랫폼으로 돌아가기</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container-lg">
+      <div class="site-footer__grid">
+        <div class="site-footer__brand">
+          <a href="/ko/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
+        </span>
+            <span>SocialEraser</span>
+          </a>
+          <p>소셜 미디어를 일괄 정리하세요. 100% 로컬, 비밀번호 불필요, 오픈소스. 2017년의 좋아요를 취소하는 데 주말을 쓰고 싶지 않은 분들을 위해 만들어졌습니다.</p>
+        </div>
+        <div class="site-footer__col"><h4>플랫폼</h4><ul>
+          <li><a href="/ko/platforms/x/">X (Twitter)</a></li>
+          <li><a href="/ko/platforms/tiktok/">TikTok</a></li>
+          <li><a href="/ko/platforms/youtube/">YouTube</a></li>
+          <li><a href="/ko/platforms/instagram/">Instagram</a></li>
+          <li><a href="/ko/platforms/facebook/">Facebook</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>제품</h4><ul>
+          <li><a href="/ko/help.html">도움말 센터</a></li>
+          <li><a href="#download">설치</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/CHANGELOG.md" target="_blank" rel="noopener noreferrer">변경 로그</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/ROADMAP.md" target="_blank" rel="noopener noreferrer">로드맵</a></li>
+          <li><a href="/ko/support.html">☕ 지원하기</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">소스 코드</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>회사</h4><ul>
+          <li><a href="/ko/about.html">소개</a></li>
+          <li><a href="mailto:support@socialeraser.app">문의</a></li>
+          <li><a href="/ko/privacy.html">개인정보처리방침</a></li>
+          <li><a href="/ko/terms.html">이용약관</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser#readme" target="_blank" rel="noopener noreferrer">프레스 키트</a></li>
+        </ul></div>
+      </div>
+      <div class="site-footer__bottom">
+        <span>© 2026 SocialEraser. 모든 권리 보유.</span>
+        <div class="site-footer__legal"><span>독립 도구 — X Corp.와 제휴 관계가 없음</span></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/app.js" defer></script>
+  <script defer src="/assets/lang-switcher.js"></script>
+</body>
+</html>

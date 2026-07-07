@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0a0b">
+  <title>SocialEraser for TikTok — 動画・リポスト・いいねを一括削除</title>
+  <meta name="description" content="TikTok動画、リポスト、いいね、お気に入り、フォロー中アカウントを一括削除できる無料Chrome拡張機能。投稿日や再生回数でフィルター可能。100%ローカル処理、パスワード不要。">
+  <meta name="keywords" content="tiktok動画削除, tiktok一括削除, tiktokクリーナー, tiktokフォロー解除, tiktokいいね削除, tiktokリポスト削除, tiktok動画大量削除, tiktok一括削除, 古いtiktok動画削除, tiktokアカウント整理, tiktok履歴クリーナー, tiktokお気に入り削除, tiktokフォロワー整理, tiktok一括フォロー解除">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://socialeraser.app/ja/platforms/tiktok/">
+  <link rel="alternate" hreflang="en" href="https://socialeraser.app/platforms/tiktok/">
+  <link rel="alternate" hreflang="zh" href="https://socialeraser.app/zh/platforms/tiktok/">
+  <link rel="alternate" hreflang="ja" href="https://socialeraser.app/ja/platforms/tiktok/">
+  <link rel="alternate" hreflang="es" href="https://socialeraser.app/es/platforms/tiktok/">
+  <link rel="alternate" hreflang="fr" href="https://socialeraser.app/fr/platforms/tiktok/">
+  <link rel="alternate" hreflang="de" href="https://socialeraser.app/de/platforms/tiktok/">
+  <link rel="alternate" hreflang="pt" href="https://socialeraser.app/pt/platforms/tiktok/">
+  <link rel="alternate" hreflang="ko" href="https://socialeraser.app/ko/platforms/tiktok/">
+  <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/ja/platforms/tiktok/"><link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SocialEraser">
+  <meta property="og:url" content="https://socialeraser.app/ja/platforms/tiktok/">
+  <meta property="og:title" content="SocialEraser for TikTok — 動画・リポスト・いいねを一括削除">
+  <meta property="og:description" content="TikTok動画、リポスト、いいね、お気に入り、フォローを一括削除できる無料Chrome拡張機能。投稿日や再生回数でフィルター可能。100%ローカル処理、パスワード不要。">
+  <meta property="og:image" content="https://socialeraser.app/assets/icons/og-tiktok.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="SocialEraser for TikTok — 無料Chrome拡張機能で動画、リポスト、いいねを一括削除">
+  <meta property="og:locale" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SocialEraser for TikTok — 動画・リポスト・いいねを一括削除">
+  <meta name="twitter:description" content="TikTok動画、リポスト、いいね、お気に入り、フォロー中アカウントを一括削除できる無料Chrome拡張機能。100%ローカル処理、パスワード不要。">
+  <meta name="twitter:image" content="https://socialeraser.app/assets/icons/og-tiktok.png">
+  <meta name="twitter:image:alt" content="SocialEraser for TikTok — 無料Chrome拡張機能で動画、リポスト、いいねを一括削除">
+  <link rel="icon" type="image/png" href="/assets/icons/socialeraser-mark.png">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/app.css">
+  <style>
+    /* TikTokページ — 拡張機能プラグインに合わせたブランドトークンを上書き
+       (linear-gradient 135deg #FE2C55 → #25F4EE)。他のプラットフォームページは
+       デフォルトのオレンジテーマを維持し、このページのみスコープ。 */
+    :root {
+      /* 単色アクセント → シアン。テキスト（見出し、比較セル、FAQリンク）に
+         純粋なピンク (#FE2C55) を使うとエラー/警告のように読まれるため。
+         メジャーデザインのピンクは --gradient-brand で維持。 */
+      --accent:         #25F4EE;
+      --accent-soft:    rgba(37, 244, 238, 0.12);
+      --accent-glow:    rgba(37, 244, 238, 0.35);
+      --border-accent:  rgba(37, 244, 238, 0.4);
+      --gradient-brand:      linear-gradient(135deg, #FE2C55, #25F4EE);
+      --gradient-brand-soft: linear-gradient(135deg, rgba(254, 44, 85, 0.18) 0%, rgba(37, 244, 238, 0.06) 100%);
+      --gradient-hero-glow:  radial-gradient(ellipse 80% 50% at 50% 0%, rgba(254, 44, 85, 0.18) 0%, transparent 70%);
+    }
+    /* 「✗ ネガティブ」の赤をニュートラルなブルーに置換 — マーケティングページで
+       赤い色はエラー/警告として読まれ、「競合にない機能」になりにくい。 */
+    .comparison .cross { color: var(--blue); }
+  </style>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"SocialEraser for TikTok","applicationCategory":"BrowserApplication","applicationSubCategory":"BrowserExtension","operatingSystem":"Chrome 120+, Edge 120+","datePublished":"2026-07-07","softwareVersion":"1.0.0","description":"TikTok動画、リポスト、いいね、お気に入り、フォロー中アカウントを一括削除。100%ブラウザ内ローカル処理 — パスワード不要、サーバー不要。","url":"https://socialeraser.app/ja/platforms/tiktok/","image":"https://socialeraser.app/assets/icons/og-tiktok.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://socialeraser.app/ja/platforms/tiktok/"},"featureList":["自分のTikTok動画を一括削除","いいねタブの動画を一括いいね解除","リポストを一括削除","非公開お気に入りコレクションを一括クリア","アカウントを一括フォロー解除","日付範囲でフィルター","最低再生回数でフィルター","キャプションのキーワードでフィルター","コンテンツタイプ(オリジナル/リポスト/デュエット/ステッチ)でフィルター","セッションをまたいだ一時停止と再開"],"offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"}}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+    {"@type":"ListItem","position":1,"name":"ホーム","item":"https://socialeraser.app/ja/"},
+    {"@type":"ListItem","position":2,"name":"プラットフォーム","item":"https://socialeraser.app/ja/#platforms"},
+    {"@type":"ListItem","position":3,"name":"SocialEraser for TikTok","item":"https://socialeraser.app/ja/platforms/tiktok/"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"HowTo","name":"SocialEraserでTikTok動画を一括削除する方法","description":"SocialEraserのChrome拡張機能をインストールし、tiktok.comを開いて整理対象を選び、Startをクリックするだけ。SocialEraserが人間と同じ速度で通常のクリックをシミュレートし、マッチした動画、リポスト、いいね、お気に入り、フォローをすべて削除します。","totalTime":"PT15M","estimatedCost":{"@type":"MonetaryAmount","value":"0","currency":"USD"},"tool":[{"@type":"HowToTool","name":"Google Chrome または Microsoft Edge (バージョン120以上)"},{"@type":"HowToTool","name":"SocialEraser for TikTok ブラウザ拡張機能(無料)"}],"step":[
+    {"@type":"HowToStep","position":1,"name":"SocialEraser for TikTokをインストール","text":"Chrome ウェブストアから無料のSocialEraser拡張機能を追加します。アカウント登録、サインアップ、支払いは不要。2クリックでインストールされ、ツールバーにピン留めされます。","url":"https://socialeraser.app/ja/platforms/tiktok/#download"},
+    {"@type":"HowToStep","position":2,"name":"tiktok.comを開いてログイン","text":"Chromeでtiktok.comを開き、通常通りアカウントにログインします。SocialEraserのサイドパネルアイコンをクリック。拡張機能がログイン済みであることを自動検出し、アカウントの状態を表示します。","url":"https://socialeraser.app/ja/platforms/tiktok/#main"},
+    {"@type":"HowToStep","position":3,"name":"整理対象とフィルターを選択","text":"サイドパネルで、削除する対象のチェックボックスをオンにします: 自分の動画、リポスト、いいね、お気に入り、フォロー中。任意で日付範囲(特定の日付の前または後を削除)、最低再生回数(バズった動画は残す)、キャプションのキーワード(特定のトピックを対象)、コンテンツタイプ(オリジナル、リポスト、デュエット)を設定できます。","url":"https://socialeraser.app/ja/platforms/tiktok/#main"},
+    {"@type":"HowToStep","position":4,"name":"Startをクリックして放置","text":"Start Cleanupボタンをクリックします。SocialEraserがマッチした各項目を開き、人間と同じ速度で削除/いいね解除/フォロー解除ボタンをクリックし、リアルタイムの進捗カウンターを表示します。ラップトップを閉じて翌日戻ってきてもOK — ブラウザの再起動をまたいで状態が保持されます。平均処理速度は1項目あたり約0.9秒です。","url":"https://socialeraser.app/ja/platforms/tiktok/#main"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"古いTikTok動画を一括削除できますか?","acceptedAnswer":{"@type":"Answer","text":"はい。日付フィルター(例: 2023年1月1日より前)または再生回数の下限を設定すると、SocialEraserがマッチしたすべての動画を削除します。処理速度は1項目あたり約0.9秒 — 1,000動画で15分前後です。"}},
+    {"@type":"Question","name":"リポストだけを削除できますか?","acceptedAnswer":{"@type":"Answer","text":"はい。コンテンツタイプフィルターを使って、リポストのみ、デュエットのみ、オリジナル投稿のみを対象にできます。より正確にするために、日付や再生回数のフィルターと組み合わせることもできます。"}},
+    {"@type":"Question","name":"バズった動画は残せますか?","acceptedAnswer":{"@type":"Answer","text":"はい。再生回数の下限フィルターで最低再生回数を設定できます。上限を超える動画は保持され、それ以外は削除されます。多くのユーザーが、バズった瞬間を残しつつ残りを整理するために1,000を設定しています。"}},
+    {"@type":"Question","name":"デュエットやステッチはどうなりますか?","acceptedAnswer":{"@type":"Answer","text":"SocialEraserは動画を個別に削除します。あなたが投稿した動画がデュエットやステッチだった場合でも、元の投稿者の動画はそのまま残り、チェーンのあなたの側だけが削除されます。"}},
+    {"@type":"Question","name":"SocialEraserを使うとアカウントはBANされますか?","acceptedAnswer":{"@type":"Answer","text":"SocialEraserは人間と同じ速度で通常のクリックをシミュレートし、レートリミットを尊重します。他のサードパーティ製ツールと同様、ByteDance Ltd.とは無関係であり、一括削除ツールの使用は自己責任でお願いします。"}},
+    {"@type":"Question","name":"削除を取り消せますか?","acceptedAnswer":{"@type":"Answer","text":"いいえ。一度削除された動画は、数秒以内にTikTokの公開表示から消えます。初めての一括削除を実行する前に、必ずTikTok公式の「データダウンロード」アーカイブをリクエストすることを強く推奨します。"}},
+    {"@type":"Question","name":"TikTokがUIを変更したらどうなりますか?","acceptedAnswer":{"@type":"Answer","text":"SocialEraserはDOMセレクタースキーマをリモートCDNから取得しています。TikTokがUIを変更すると、拡張機能の再インストール不要でアップデートを配信します。アップデートは自動的かつバックグラウンドで適用されます。"}},
+    {"@type":"Question","name":"新しいtiktok.comのレイアウトでも動作しますか?","acceptedAnswer":{"@type":"Answer","text":"はい。SocialEraserはtiktok.comの現行版と旧デスクトップレイアウトの両方に対応しています。セレクタースキーマは毎週更新され、TikTokの最新のUI変更に追従します。"}},
+    {"@type":"Question","name":"TikTokのモバイルアプリでも動作しますか?","acceptedAnswer":{"@type":"Answer","text":"いいえ。TikTokのモバイルアプリはブラウザ拡張機能の利用を許可していません。SocialEraserはデスクトップのChromeで動作します。専用のモバイルコンパニオンは2027年のロードマップに含まれています。"}},
+    {"@type":"Question","name":"複数のTikTokアカウントで実行できますか?","acceptedAnswer":{"@type":"Answer","text":"はい — アカウントごとに別のブラウザプロファイルを使用してください。単一プロファイル内での複数アカウント対応は今後のロードマップに含まれています。"}}
+  ]}
+  </script>
+</head>
+<body>
+
+  <a href="#main" class="skip-to-content">本文へスキップ</a>
+
+  <header class="site-header">
+    <div class="site-header__inner container-lg">
+      <a href="/ja/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
+        </span>
+        <span>SocialEraser</span>
+      </a>
+      <nav class="site-nav" aria-label="Primary">
+        <details class="site-nav__platforms">
+          <summary class="site-nav__platforms-trigger">プラットフォーム <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></summary>
+          <div class="site-nav__platforms-menu">
+            <a href="/ja/platforms/x/">SocialEraser for X</a>
+            <a href="/ja/platforms/tiktok/">SocialEraser for TikTok</a>
+            <a href="/ja/platforms/youtube/">SocialEraser for YouTube</a>
+            <a href="/ja/platforms/instagram/">SocialEraser for Instagram</a>
+            <a href="/ja/platforms/facebook/">SocialEraser for Facebook</a>
+          </div>
+        </details>
+        <a href="/ja/help.html" class="hide-mobile">ヘルプ</a>
+        <a href="#download" class="btn btn--primary btn--sm">無料でインストール</a>
+      </nav>
+      <details class="site-nav--mobile">
+        <summary class="site-nav--mobile-trigger" aria-label="メニュー切替">
+          <svg class="site-nav--mobile-icon-menu" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <svg class="site-nav--mobile-icon-close" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </summary>
+        <div class="site-nav--mobile-menu">
+          <a href="/ja/platforms/x/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>SocialEraser for X</a>
+          <a href="/ja/platforms/tiktok/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg>SocialEraser for TikTok</a>
+          <a href="/ja/platforms/youtube/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>SocialEraser for YouTube</a>
+          <a href="/ja/platforms/instagram/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>SocialEraser for Instagram</a>
+          <a href="/ja/platforms/facebook/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>SocialEraser for Facebook</a>
+          <a href="/ja/help.html"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>ヘルプ</a>
+          <a href="#download" class="btn btn--primary"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>無料でインストール</a>
+          <details class="site-nav--mobile-lang">
+            <summary>
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+              <span class="site-nav--mobile-lang__current">言語: <span data-lang-current>日本語</span></span>
+              <svg class="site-nav--mobile-lang__chev" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div data-lang-list></div>
+          </details>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="breadcrumbs-wrap container-lg">
+      <nav class="breadcrumbs" aria-label="パンくずリスト">
+        <a href="/ja/">ホーム</a>
+        <span class="breadcrumbs__sep">›</span>
+        <span class="breadcrumbs__current">SocialEraser for TikTok</span>
+      </nav>
+    </div>
+    <section class="container-lg">
+      <div class="hero">
+        <span class="muted-eyebrow">SocialEraser for TikTok · 無料 · チップで応援</span>
+        <h1 class="hero__h1">
+          <span class="gradient-text">TikTok動画・リポスト・いいね</span>を<br>
+          わずか数分で一括削除
+        </h1>
+        <p class="hero__lede">
+          TikTokの履歴を人間と同じ速度で一括整理。投稿日や再生回数でフィルター可能。<strong>パスワード不要。APIキー不要。サーバー不要。</strong>
+        </p>
+        <div class="btn-row hero__cta btn-row--center">
+          <a rel="noopener noreferrer" href="https://chromewebstore.google.com/detail/socialeraser-for-tiktok/hbeccanmeoflhdgefmjifbolkhpmonni" class="btn btn--primary btn--xl">Chromeに追加 — 無料</a>
+          <a href="/ja/platforms/x/" class="btn btn--secondary btn--xl">SocialEraser for X を使う</a>
+        </div>
+        <p class="hero__micro">オープンソース · MITライセンス · トラッキングなし</p>
+      </div>
+    </section>
+
+    <section class="legal-strip">
+      <div class="container-md">
+        <strong>独立したツールです。</strong> ByteDance Ltd.と提携、推奨、後援の関係は一切ありません。TikTokはByteDance Ltd.の商標です。使用は自己責任でお願いします。
+      </div>
+    </section>
+
+    <!-- 削除できる対象 -->
+    <section class="container-lg section" aria-labelledby="section-cleanup">
+      <div class="section-head">
+        <span class="muted-eyebrow">整理できる対象</span>
+        <h2 class="section-head__h2" id="section-cleanup">5種類のTikTok整理を1つの拡張機能で</h2>
+        <p class="section-head__lede">黒歴史動画から静かなリブランドまで — 1つだけ選んでも、組み合わせても、連続実行してもOKです。</p>
+      </div>
+      <div class="grid grid-auto">
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg></div><h3 class="card__title">自分の動画</h3><p class="card__desc">自分のTikTok動画を一括削除。投稿日、再生回数、またはその両方でフィルター可能。公開、非公開、限定公開すべてに対応。</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg></div><h3 class="card__title">リポスト</h3><p class="card__desc">プロフィール上のリポストを一括削除。注意: TikTok Webには「リポストの取り消し」がないため、リポストを削除するとその動画もプロフィールから消えます。</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div><h3 class="card__title">いいね</h3><p class="card__desc">数千件のいいねを一括解除。TikTok上で最も利用されているSocialEraserの用途 — あなたの「いいね」タブはあなたの人物像そのものです。</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg></div><h3 class="card__title">お気に入り</h3><p class="card__desc">非公開の「お気に入り」コレクションを一括クリア。アルゴリズムからも、公開表示からも外れ、すべてあなたの判断次第です。</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></div><h3 class="card__title">フォロー中</h3><p class="card__desc">フォロー中のアカウントを順番に一括フォロー解除。一時停止/停止でいつでも中断でき、次の実行で中断した箇所から再開できます。</p></div>
+      </div>
+    </section>
+
+    <!-- 時間見積もり -->
+    <section class="container-md section" aria-labelledby="section-estimator">
+      <div class="section-head">
+        <span class="muted-eyebrow">所要時間計算機</span>
+        <h2 class="section-head__h2" id="section-estimator">TikTok整理の所要時間は?</h2>
+      </div>
+      <div class="estimator" data-estimator>
+        <div class="estimator__input-block">
+          <label for="est-input-tt">削除する動画/いいね数</label>
+          <input id="est-input-tt" type="number" class="estimator__input" data-estimator-input value="800" min="1" max="100000">
+          <div class="estimator__quick">
+            <button class="estimator__quick-btn" data-estimator-quick data-value="100">100</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="500">500</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="1000">1,000</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="5000">5,000</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="10000">10,000</button>
+          </div>
+        </div>
+        <div class="estimator__result">
+          <div class="estimator__row">
+            <div class="estimator__row-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+            <div class="estimator__row-text"><span class="estimator__row-label">手動で整理した場合</span><span class="estimator__row-value" data-estimator-manual>2h 13m</span></div>
+          </div>
+          <div class="estimator__row estimator__row--highlight">
+            <div class="estimator__row-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+            <div class="estimator__row-text"><span class="estimator__row-label">SocialEraser使用時</span><span class="estimator__row-value" data-estimator-auto>12m</span></div>
+          </div>
+          <div class="estimator__row">
+            <div class="estimator__row-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg></div>
+            <div class="estimator__row-text"><span class="estimator__row-label">節約できる時間</span><span class="estimator__row-value" data-estimator-saved>2h 1m</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3ステップ -->
+    <section class="container-lg section" aria-labelledby="section-how">
+      <div class="section-head">
+        <span class="muted-eyebrow">使い方</span>
+        <h2 class="section-head__h2" id="section-how">3ステップで完了</h2>
+      </div>
+      <div class="steps">
+        <div class="steps__item">
+          <h3>SocialEraser for TikTokをインストール</h3>
+          <p>Chrome ウェブストアから無料取得。アカウント登録、サインアップ、支払いは不要。2クリックで導入完了。</p>
+        </div>
+        <div class="steps__item">
+          <h3>tiktok.comを開いてログイン</h3>
+          <p>tiktok.comを開き、通常通りログイン。SocialEraserのサイドパネルアイコンをクリックし、整珅対象とフィルター(日付範囲、再生回数)を選択。</p>
+        </div>
+        <div class="steps__item">
+          <h3>Startをクリックして放置</h3>
+          <p>SocialEraserが人間と同じ速度でクリックをシミュレート。リアルタイムカウンターを見るもよし、ラップトップを閉じて翌日戻るもよし。状態は保持されます。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- フィルター詳細 -->
+    <section class="container-lg section" aria-labelledby="section-filters">
+      <div class="section-head">
+        <span class="muted-eyebrow">フィルター</span>
+        <h2 class="section-head__h2" id="section-filters">雑ではなく、精准に</h2>
+        <p class="section-head__lede">一括整理の目的は高速処理です。しかし精度も重要。フィルターを組み合わせて、不要な項目だけを精准に削除できます。</p>
+      </div>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3 class="card__title">日付範囲</h3>
+          <p class="card__desc">任意の日付より<strong>前</strong>または<strong>後</strong>に投稿された動画を削除。バズった動画は残し、実験していた時期は一括削除。最もよく使われるフィルターです。</p>
+        </div>
+        <div class="card">
+          <h3 class="card__title">再生回数の下限</h3>
+          <p class="card__desc">指定した再生回数を超える動画だけを残し、それ以外を削除。0再生の寂しい投稿や「これ本垢じゃなくない?」な投稿を一掃。0に設定すれば全削除。</p>
+        </div>
+        <div class="card">
+          <h3 class="card__title">キャプションのキーワード</h3>
+          <p class="card__desc">キャプションに特定のワードやハッシュタグを含む動画だけ削除。ブランド案件、炎上、ファンダム時代など、特定のトピックを精准に消すのに最適。</p>
+        </div>
+        <div class="card">
+          <h3 class="card__title">コンテンツタイプ</h3>
+          <p class="card__desc">オリジナル投稿のみ、リポストのみ、デュエット/ステッチのみを削除対象に。作品をシェアで消す前にバックアップしておきたい場合に便利です。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 比較 -->
+    <section class="container-lg section" aria-labelledby="section-comparison">
+      <div class="section-head">
+        <span class="muted-eyebrow">他の選択肢との比較</span>
+        <h2 class="section-head__h2" id="section-comparison">SocialEraser for TikTokの立ち位置</h2>
+      </div>
+      <div class="comparison">
+        <table>
+          <thead><tr><th>機能</th><th class="text-center">SocialEraser</th><th class="text-center">TikTok設定</th><th class="text-center">TubeBuddy</th><th class="text-center">手動ループ</th></tr></thead>
+          <tbody>
+            <tr class="us"><td>パスワード不要</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> あり</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> あり</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> なし(OAuth)</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> あり</td></tr>
+            <tr class="us"><td>100%ローカル処理</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> あり</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> サーバーサイド</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> なし(サーバー)</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> あり</td></tr>
+            <tr class="us"><td>オープンソース</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> MIT</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> なし</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> なし</td><td>該当なし</td></tr>
+            <tr class="us"><td>無料プラン</td><td>チップで応援</td><td>無料(遅い)</td><td>制限あり</td><td>無料(最も遅い)</td></tr>
+            <tr class="us"><td>日付 + 再生回数のフィルター</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> あり</td><td>日付のみ</td><td>日付のみ</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> 手動</td></tr>
+            <tr class="us"><td>いいね/リポスト/お気に入りの一括削除</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> あり</td><td>いいねのみ</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> なし</td><td>非常に面倒</td></tr>
+            <tr class="us"><td>セッションをまたいで再開可能</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> あり</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> なし</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> なし</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> あり</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- FAQ -->
+    <section class="container-lg section" aria-labelledby="section-faq">
+      <div class="section-head">
+        <span class="muted-eyebrow">FAQ</span>
+        <h2 class="section-head__h2" id="section-faq">TikTokに関するよくある質問</h2>
+      </div>
+      <div class="faq">
+        <div class="faq__category">
+          <h3 class="faq__category-title">整理の対象範囲</h3>
+          <details class="faq__item"><summary>古いTikTok動画を一括削除できますか?</summary><div class="faq__answer"><p>はい。日付フィルター(例: <em>2023年1月1日より前</em>)または再生回数の下限を設定すると、SocialEraserがマッチしたすべての動画を削除します。処理速度は1項目あたり約0.9秒 — 1,000動画で15分前後です。</p></div></details>
+          <details class="faq__item"><summary>リポストだけを削除できますか?</summary><div class="faq__answer"><p>はい。<em>コンテンツタイプ</em>フィルターを使って、リポストのみ、デュエットのみ、オリジナル投稿のみを対象にできます。日付や再生回数のフィルターと組み合わせることも可能です。</p></div></details>
+          <details class="faq__item"><summary>バズった動画は残せますか?</summary><div class="faq__answer"><p>はい。<em>再生回数の下限</em>フィルターで最低再生回数を設定できます。上限を超える動画は保持され、それ以外は削除されます。多くのユーザーが、バズった瞬間を残しつつ残りを整理するために1,000を設定しています。</p></div></details>
+          <details class="faq__item"><summary>デュエットやステッチはどうなりますか?</summary><div class="faq__answer"><p>SocialEraserは動画を個別に削除します。あなたが投稿した動画がデュエットやステッチだった場合でも、元の投稿者の動画はそのまま残り、チェーンのあなたの側だけが削除されます。</p></div></details>
+        </div>
+        <div class="faq__category">
+          <h3 class="faq__category-title">安全性</h3>
+          <details class="faq__item"><summary>アカウントはBANされますか?</summary><div class="faq__answer"><p>SocialEraserは人間と同じ速度で通常のクリックをシミュレートし、レートリミットを尊重します。他のサードパーティ製ツールと同様、ByteDance Ltd.とは無関係であり、一括削除ツールの使用は自己責任でお願いします。</p></div></details>
+          <details class="faq__item"><summary>削除を取り消せますか?</summary><div class="faq__answer"><p>いいえ。一度削除された動画は、数秒以内にTikTokの公開表示から消えます。初めての一括削除を実行する前に、必ずTikTok公式の<em>「データダウンロード」</em>アーカイブをリクエストすることを強く推奨します。</p></div></details>
+          <details class="faq__item"><summary>TikTokがUIを変更したらどうなりますか?</summary><div class="faq__answer"><p>SocialEraserはDOMセレクタースキーマをリモートCDNから取得しています。TikTokがUIを変更すると、拡張機能の再インストール不要でアップデートを配信します。アップデートは自動的かつバックグラウンドで適用されます。</p></div></details>
+        </div>
+        <div class="faq__category">
+          <h3 class="faq__category-title">技術面</h3>
+          <details class="faq__item"><summary>新しいtiktok.comのレイアウトでも動作しますか?</summary><div class="faq__answer"><p>はい。SocialEraserは<em>tiktok.com</em>の現行版と旧デスクトップレイアウトの両方に対応しています。セレクタースキーマは毎週更新され、TikTokの最新のUI変更に追従します。</p></div></details>
+          <details class="faq__item"><summary>TikTokのモバイルアプリでも動作しますか?</summary><div class="faq__answer"><p>いいえ。TikTokのモバイルアプリはブラウザ拡張機能の利用を許可していません。SocialEraserはデスクトップのChromeで動作します。専用のモバイルコンパニオンは2027年のロードマップに含まれています。</p></div></details>
+          <details class="faq__item"><summary>複数のTikTokアカウントで実行できますか?</summary><div class="faq__answer"><p>はい — アカウントごとに別のブラウザプロファイルを使用してください。単一プロファイル内での複数アカウント対応は今後のロードマップに含まれています。</p></div></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ガイド -->
+    <section class="container-md section" aria-labelledby="section-guide">
+      <div class="cta-box" style="text-align:center;">
+        <span class="muted-eyebrow">詳細解説</span>
+        <h2 class="hero__h1" id="section-guide" style="font-size: var(--text-3xl);">完全ガイドもあります</h2>
+        <p class="hero__lede">ステップバイステップのガイドでは、日付、再生回数、キーワードの各フィルターをスクリーンショットとエッジケース付きで詳しく解説しています。</p>
+        <div class="btn-row btn-row--center">
+          <a href="/ja/guides/tiktok.html" class="btn btn--primary btn--xl">完全ガイドを読む →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ダウンロード -->
+    <section id="download" class="container-md section" aria-labelledby="section-download">
+      <div class="cta-box">
+        <span class="muted-eyebrow">無料 · チップで応援 · サインアップ不要</span>
+        <h2 class="hero__h1" id="section-download">今日のうちにTikTokを整理</h2>
+        <p class="hero__lede">SocialEraser for TikTokをインストール。60秒以内に削除を開始できます。</p>
+        <div class="btn-row btn-row--center">
+          <a rel="noopener noreferrer" href="https://chromewebstore.google.com/detail/socialeraser-for-tiktok/hbeccanmeoflhdgefmjifbolkhpmonni" class="btn btn--primary btn--xl">Chromeに追加 — 無料</a>
+          <a href="/ja/platforms/x/" class="btn btn--secondary btn--xl">SocialEraser for X を使う</a>
+        </div>
+        <p class="hero__micro">Android + iOSアプリ: 2027年提供予定 · <a href="/ja/">← すべてのプラットフォームに戻る</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container-lg">
+      <div class="site-footer__grid">
+        <div class="site-footer__brand">
+          <a href="/ja/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
+        </span>
+            <span>SocialEraser</span>
+          </a>
+          <p>SNSを一括整理。100%ローカル処理、パスワード不要、オープンソース。2017年の投稿に「いいね」を外す週末を過ごしたくない人のためのツールです。</p>
+        </div>
+        <div class="site-footer__col"><h4>プラットフォーム</h4><ul>
+          <li><a href="/ja/platforms/x/">X (Twitter)</a></li>
+          <li><a href="/ja/platforms/tiktok/">TikTok</a></li>
+          <li><a href="/ja/platforms/youtube/">YouTube</a></li>
+          <li><a href="/ja/platforms/instagram/">Instagram</a></li>
+          <li><a href="/ja/platforms/facebook/">Facebook</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>製品</h4><ul>
+          <li><a href="/ja/help.html">ヘルプセンター</a></li>
+          <li><a href="#download">インストール</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/CHANGELOG.md" target="_blank" rel="noopener noreferrer">更新履歴</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/ROADMAP.md" target="_blank" rel="noopener noreferrer">ロードマップ</a></li>
+          <li><a href="/ja/support.html">☕ サポート</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">ソースコード</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>会社情報</h4><ul>
+          <li><a href="/ja/about.html">会社概要</a></li>
+          <li><a href="mailto:support@socialeraser.app">お問い合わせ</a></li>
+          <li><a href="/ja/privacy.html">プライバシー</a></li>
+          <li><a href="/ja/terms.html">利用規約</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser#readme" target="_blank" rel="noopener noreferrer">プレスキット</a></li>
+        </ul></div>
+      </div>
+      <div class="site-footer__bottom">
+        <span>© 2026 SocialEraser. All rights reserved.</span>
+        <div class="site-footer__legal"><span>独立したツール — ByteDance Ltd.とは無関係です。</span></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/app.js" defer></script>
+  <script defer src="/assets/lang-switcher.js"></script>
+</body>
+</html>

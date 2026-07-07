@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0a0b">
+  <title>SocialEraser for X — ツイート、いいね、ブックマークを一括削除</title>
+  <meta name="description" content="X（旧Twitter）のツイート、リプライ、リツイート、いいね、ブックマークの一括削除とフォロー解除ができる無料Chrome拡張機能。日時とキーワードで絞り込み可能。100%ローカル処理で、パスワードもAPIキーも不要。">
+  <meta name="keywords" content="ツイート削除, ツイート一括削除, twitterクリーナー, 全員アンフォロー, twitterのいいね削除, twitterブックマーク削除, xクリーナー, ツイート大量削除, 古いツイート削除, twitter一括削除, x履歴消去, xアカウント整理, xのいいね消去, xのリプライ削除, xのリツイート削除">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://socialeraser.app/ja/platforms/x/">
+  <link rel="alternate" hreflang="en" href="https://socialeraser.app/platforms/x/">
+  <link rel="alternate" hreflang="zh" href="https://socialeraser.app/zh/platforms/x/">
+  <link rel="alternate" hreflang="ja" href="https://socialeraser.app/ja/platforms/x/">
+  <link rel="alternate" hreflang="es" href="https://socialeraser.app/es/platforms/x/">
+  <link rel="alternate" hreflang="fr" href="https://socialeraser.app/fr/platforms/x/">
+  <link rel="alternate" hreflang="de" href="https://socialeraser.app/de/platforms/x/">
+  <link rel="alternate" hreflang="pt" href="https://socialeraser.app/pt/platforms/x/">
+  <link rel="alternate" hreflang="ko" href="https://socialeraser.app/ko/platforms/x/">
+  <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/ja/platforms/x/"><link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SocialEraser">
+  <meta property="og:url" content="https://socialeraser.app/ja/platforms/x/">
+  <meta property="og:title" content="SocialEraser for X — ツイート、いいね、ブックマークを一括削除">
+  <meta property="og:description" content="Xのツイート、リプライ、リツイート、いいね、ブックマークの一括削除とフォロー解除ができる無料Chrome拡張機能。日時とキーワードで絞り込み可能。100%ローカル処理で、パスワード不要。">
+  <meta property="og:image" content="https://socialeraser.app/assets/icons/og-x.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="SocialEraser for X — 無料Chrome拡張機能でツイート、いいね、ブックマークを一括削除">
+  <meta property="og:locale" content="ja_JP">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SocialEraser for X — ツイート、いいね、ブックマークを一括削除">
+  <meta name="twitter:description" content="Xのツイート、リプライ、リツイート、いいね、ブックマークの一括削除とフォロー解除ができる無料Chrome拡張機能。日時とキーワードで絞り込み可能。100%ローカル処理で、パスワード不要。">
+  <meta name="twitter:image" content="https://socialeraser.app/assets/icons/og-x.png">
+  <meta name="twitter:image:alt" content="SocialEraser for X — 無料Chrome拡張機能でツイート、いいね、ブックマークを一括削除">
+  <link rel="icon" type="image/png" href="/assets/icons/socialeraser-mark.png">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/app.css">
+  <style>
+    /* X page — X brand is monochrome (black on white). Override shared brand
+       tokens with white-leaning accents so the page reads as "X" not "orange". */
+    :root {
+      --accent:         #ffffff;
+      --accent-soft:    rgba(255, 255, 255, 0.08);
+      --accent-glow:    rgba(255, 255, 255, 0.22);
+      --border-accent:  rgba(255, 255, 255, 0.35);
+      --gradient-brand:      linear-gradient(135deg, #ffffff 0%, #9ca0a8 100%);
+      --gradient-brand-soft: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(156, 160, 168, 0.06) 100%);
+      --gradient-hero-glow:  radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 255, 255, 0.10) 0%, transparent 70%);
+    }
+    /* Comparison row ✗ stays blue — neutral, not red. */
+    .comparison .cross { color: var(--blue); }
+  </style>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"SocialEraser for X","applicationCategory":"BrowserApplication","applicationSubCategory":"BrowserExtension","operatingSystem":"Chrome 120+, Edge 120+","description":"X（旧Twitter）上のオリジナルツイート、リプライ、リツイート、いいね、ブックマークを一括削除し、フォローも一括解除できます。100%ブラウザ内ローカル処理 — パスワードもサーバーも不要。","url":"https://socialeraser.app/ja/platforms/x/","image":"https://socialeraser.app/assets/icons/og-x.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://socialeraser.app/ja/platforms/x/"},"featureList":["オリジナルツイートを一括削除","リプライを一括削除","リツイート（ repost）の一括取り消し","いいねタブから投稿への「いいね」を一括解除","ブックマークを一括消去","アカウントの一括フォロー解除（リスト、相互フォローなし、最終ツイート日で指定可能）","日付範囲での絞り込み","キーワード一致での絞り込み","メディア種別（テキスト・画像・動画・リンク）での絞り込み","エンゲージメント下限（最小いいね数またはリプライ数）で絞り込み","削除前にアーカイブをJSONにエクスポート","セッションをまたいで一時停止と再開が可能"],"offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"}}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+    {"@type":"ListItem","position":1,"name":"ホーム","item":"https://socialeraser.app/ja/"},
+    {"@type":"ListItem","position":2,"name":"プラットフォーム","item":"https://socialeraser.app/ja/#platforms"},
+    {"@type":"ListItem","position":3,"name":"SocialEraser for X","item":"https://socialeraser.app/ja/platforms/x/"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"HowTo","name":"SocialEraserでツイートを一括削除する方法","description":"SocialEraserのChrome拡張機能をインストールし、x.comを開いて整理対象を選び、開始をクリックするだけ。SocialEraserが通常のクリックを人の速度で再現し、条件に一致するすべてのツイート、リプライ、リツイート、いいね、ブックマーク、フォローを削除します。","totalTime":"PT15M","estimatedCost":{"@type":"MonetaryAmount","value":"0","currency":"USD"},"tool":[{"@type":"HowToTool","name":"Google Chrome または Microsoft Edge（バージョン 120 以降）"},{"@type":"HowToTool","name":"SocialEraser for X ブラウザ拡張機能（無料）"}],"step":[
+    {"@type":"HowToStep","position":1,"name":"SocialEraser for X をインストール","text":"Chrome ウェブストアから無料の SocialEraser 拡張機能を追加します。アカウント登録、サインアップ、支払いは不要。2回クリックするだけで、ツールバーにピン留めされてインストール完了です。","url":"https://socialeraser.app/ja/platforms/x/#download"},
+    {"@type":"HowToStep","position":2,"name":"x.com を開いてログイン","text":"Chrome で x.com を開き、普段どおりアカウントにログインします。SocialEraser のサイドパネルアイコンをクリックすると、拡張機能がログイン状態を自動検出してアカウント状況を表示します。","url":"https://socialeraser.app/ja/platforms/x/#main"},
+    {"@type":"HowToStep","position":3,"name":"整理対象とフィルター条件を選ぶ","text":"サイドパネルで、削除したい対象にチェックを入れます：オリジナルツイート、リプライ、リツイート、いいね、ブックマーク、フォロー。必要に応じて、日付範囲、キーワード一致、メディア種別、エンゲージメント下限を設定できます。","url":"https://socialeraser.app/ja/platforms/x/#main"},
+    {"@type":"HowToStep","position":4,"name":"開始をクリックして放置する","text":"「クリーンアップ開始」ボタンをクリックします。SocialEraser が条件に一致する各項目を開き、人の速度で削除／いいね解除／フォロー解除ボタンをクリックし、進捗カウンターをリアルタイムで表示します。ノートパソコンを閉じて翌日戻ってきても構いません — 状態はブラウザの再起動をまたいで保持されます。1項目あたりの平均処理時間は約 0.9 秒です。","url":"https://socialeraser.app/ja/platforms/x/#main"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"古いツイートを一括削除できますか？","acceptedAnswer":{"@type":"Answer","text":"はい。日付フィルター（例：2020年1月1日以前）を設定すれば、条件に一致するすべてのツイートを SocialEraser が削除します。1項目あたり約0.9秒で動作し、1,000件のツイートならおよそ15分で完了します。"}},
+    {"@type":"Question","name":"リプライだけ削除できますか？","acceptedAnswer":{"@type":"Answer","text":"はい。投稿タイプフィルターを使えば、リプライのみ（あるいはオリジナル投稿のみ、リツイートのみ）を対象にできます。日付やキーワードのフィルターと組み合わせれば、精密な絞り込みも可能です。"}},
+    {"@type":"Question","name":"いいねが多いツイートは残せますか？","acceptedAnswer":{"@type":"Answer","text":"はい。エンゲージメント下限フィルターで、最小いいね数を設定できます。閾値より上のツイートは保持され、下回るものは削除されます。"}},
+    {"@type":"Question","name":"スレッドはどうなりますか？","acceptedAnswer":{"@type":"Answer","text":"SocialEraser はツイートを1件ずつ削除します。スレッド内のツイートだった場合、返信チェーンは孤児状態になりますが、表示自体は残ります。スレッドを完全に削除したい場合は、日付フィルターを使って新しい順（逆時系列順）に削除してください。"}},
+    {"@type":"Question","name":"アカウントは凍結されますか？","acceptedAnswer":{"@type":"Answer","text":"SocialEraser は通常のクリックを人の速度で再現し、API制限（レートリミット）を尊重します。他のサードパーティ製ツールと同様のご注意点はありますが、当社は X Corp. と提携関係にあるわけではなく、一括削除ツールのご使用はお客様の自己責任となります。"}},
+    {"@type":"Question","name":"削除を取り消せますか？","acceptedAnswer":{"@type":"Answer","text":"いいえ。一度削除されたツイートは、数秒以内に X の公開表示から消えます。初めて一括削除を行う際は、必ず事前に「エクスポート（アーカイブ保存）」機能をご利用になることを強くおすすめします。"}},
+    {"@type":"Question","name":"X の UI が変更された場合はどうなりますか？","acceptedAnswer":{"@type":"Answer","text":"SocialEraser は DOM セレクタのスキーマをリモート CDN から取得しています。X が UI を変更した際、当社側でアップデートを配信するため、拡張機能の再インストールは不要です。アップデートは自動的かつサイレントに適用されます。"}},
+    {"@type":"Question","name":"新しい x.com のレイアウトでも動作しますか？","acceptedAnswer":{"@type":"Answer","text":"はい。SocialEraser は x.com と旧 twitter.com ドメインの両方に対応しています。セレクタスキーマは X の最新の UI 変更に合わせて毎週更新されます。"}},
+    {"@type":"Question","name":"モバイル（モバイルブラウザの x.com）でも動作しますか？","acceptedAnswer":{"@type":"Answer","text":"Android 版 Chrome ではほとんどの機能が動作します。iOS Safari は Apple の拡張機能モデルの制約により制限が多く、iOS 専用アプリは 2027 年のロードマップに含まれています。"}},
+    {"@type":"Question","name":"複数の X アカウントで実行できますか？","acceptedAnswer":{"@type":"Answer","text":"はい — アカウントごとに別のブラウザプロフィールをご利用ください。1つのプロフィール内で複数アカウントを切り替える機能は、ロードマップに含まれています。"}},
+    {"@type":"Question","name":"削除前にツイートをエクスポートできますか？","acceptedAnswer":{"@type":"Answer","text":"はい。エクスポート機能を使えば、削除前にすべてのツイートを JSON で保存できます。初めてご利用される方におすすめです。"}}
+  ]}
+  </script>
+</head>
+<body>
+
+  <a href="#main" class="skip-to-content">本文へスキップ</a>
+
+  <header class="site-header">
+    <div class="site-header__inner container-lg">
+      <a href="/ja/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
+        </span>
+        <span>SocialEraser</span>
+      </a>
+      <nav class="site-nav" aria-label="主要ナビゲーション">
+        <details class="site-nav__platforms">
+          <summary class="site-nav__platforms-trigger">プラットフォーム <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></summary>
+          <div class="site-nav__platforms-menu">
+            <a href="/ja/platforms/x/">SocialEraser for X</a>
+            <a href="/ja/platforms/tiktok/">SocialEraser for TikTok</a>
+            <a href="/ja/platforms/youtube/">SocialEraser for YouTube</a>
+            <a href="/ja/platforms/instagram/">SocialEraser for Instagram</a>
+            <a href="/ja/platforms/facebook/">SocialEraser for Facebook</a>
+          </div>
+        </details>
+        <a href="/ja/help.html" class="hide-mobile">ヘルプ</a>
+        <a href="#download" class="btn btn--primary btn--sm">無料でインストール</a>
+      </nav>
+      <details class="site-nav--mobile">
+        <summary class="site-nav--mobile-trigger" aria-label="メニューを開閉">
+          <svg class="site-nav--mobile-icon-menu" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <svg class="site-nav--mobile-icon-close" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </summary>
+        <div class="site-nav--mobile-menu">
+          <a href="/ja/platforms/x/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>SocialEraser for X</a>
+          <a href="/ja/platforms/tiktok/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg>SocialEraser for TikTok</a>
+          <a href="/ja/platforms/youtube/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>SocialEraser for YouTube</a>
+          <a href="/ja/platforms/instagram/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>SocialEraser for Instagram</a>
+          <a href="/ja/platforms/facebook/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>SocialEraser for Facebook</a>
+          <a href="/ja/help.html"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>ヘルプ</a>
+          <a href="#download" class="btn btn--primary"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>無料でインストール</a>
+          <details class="site-nav--mobile-lang">
+            <summary>
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+              <span class="site-nav--mobile-lang__current">言語： <span data-lang-current>日本語</span></span>
+              <svg class="site-nav--mobile-lang__chev" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div data-lang-list></div>
+          </details>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="breadcrumbs-wrap container-lg">
+      <nav class="breadcrumbs" aria-label="パンくずリスト">
+        <a href="/ja/">ホーム</a>
+        <span class="breadcrumbs__sep">›</span>
+        <span class="breadcrumbs__current">SocialEraser for X</span>
+      </nav>
+    </div>
+    <section class="container-lg">
+      <div class="hero">
+        <span class="muted-eyebrow">SocialEraser for X · 無料 · 投げ銭で支援</span>
+        <h1 class="hero__h1">
+          <span class="gradient-text">ツイート、いいね、ブックマーク</span>を<br>
+          X 上で一括削除
+        </h1>
+        <p class="hero__lede">
+          X の履歴を週末ではなく数分で整理。日時とキーワードで絞り込み、削除前にアーカイブをエクスポート可能。<strong>パスワード不要。APIキー不要。サーバー不要。</strong>
+        </p>
+        <div class="btn-row hero__cta btn-row--center">
+          <a rel="noopener noreferrer" href="https://chromewebstore.google.com/detail/socialeraser-for-x/hmlbkkbflcdofngldhekoajeedgcjfch" class="btn btn--primary btn--xl">Chrome に追加 — 無料</a>
+          <a rel="noopener noreferrer" href="https://microsoftedge.microsoft.com/addons/" class="btn btn--secondary btn--xl">Edge に追加</a>
+        </div>
+        <p class="hero__micro">オープンソース · MIT ライセンス · トラッキングなし</p>
+      </div>
+    </section>
+
+    <section class="legal-strip">
+      <div class="container-md">
+        <strong>独立したツールです。</strong> X Corp. とは提携関係になく、X Corp. による承認・後援もありません。X は X Corp. の商標です。自己責任でご利用ください。
+      </div>
+    </section>
+
+    <!-- WHAT YOU CAN DELETE -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">削除できる内容</span>
+        <h2 class="section-head__h2">6 種類の X 整理機能を 1 つの拡張機能で</h2>
+        <p class="section-head__lede">よく使われるものから忘れがちなものまで。1つだけ選んでも、組み合わせても、連続実行することもできます。</p>
+      </div>
+      <div class="grid grid-auto">
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></div><h3 class="card__title">オリジナルツイート</h3><p class="card__desc">自分のオリジナル投稿を一括削除。日付範囲やキーワードで絞り込み可能。バックアップとしてまず JSON にエクスポートできます。</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg></div><h3 class="card__title">リプライ</h3><p class="card__desc">リプライ履歴を一括消去。転職活動やリブランド、心機一転のタイミングに便利です。</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg></div><h3 class="card__title">リツイート</h3><p class="card__desc">リポストを一括取り消し。元の投稿者のツイートはそのまま残し、自分のプロフィールから共有を削除します。</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div><h3 class="card__title">いいね</h3><p class="card__desc">何百、何千もの投稿への「いいね」を解除。SocialEraser の中で最も利用されている機能です。</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg></div><h3 class="card__title">ブックマーク</h3><p class="card__desc">保存したツイートを消去。「あとで読む」コレクションの整理に。</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></div><h3 class="card__title">フォロー</h3><p class="card__desc">リスト、相互フォローなし、最終ツイート日で指定してフォロー解除。休眠アカウントをワンクリックで発掘できます。</p></div>
+      </div>
+    </section>
+
+    <!-- TIME ESTIMATOR -->
+    <section class="container-md section">
+      <div class="section-head">
+        <span class="muted-eyebrow">所要時間計算</span>
+        <h2 class="section-head__h2">あなたの X 整理はどれくらいかかる？</h2>
+      </div>
+      <div class="estimator" data-estimator>
+        <div class="estimator__input-block">
+          <label for="est-input-x">削除するツイート・いいね数</label>
+          <input id="est-input-x" type="number" class="estimator__input" data-estimator-input value="1000" min="1" max="100000">
+          <div class="estimator__quick">
+            <button class="estimator__quick-btn" data-estimator-quick data-value="100">100</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="500">500</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="1000">1,000</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="5000">5,000</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="10000">10,000</button>
+          </div>
+        </div>
+        <div class="estimator__result">
+          <div class="estimator__row">
+            <div class="estimator__row-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+            <div class="estimator__row-text"><span class="estimator__row-label">手動での整理</span><span class="estimator__row-value" data-estimator-manual>2時間47分</span></div>
+          </div>
+          <div class="estimator__row estimator__row--highlight">
+            <div class="estimator__row-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+            <div class="estimator__row-text"><span class="estimator__row-label">SocialEraser を使用</span><span class="estimator__row-value" data-estimator-auto>—</span></div>
+          </div>
+          <div class="estimator__row">
+            <div class="estimator__row-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg></div>
+            <div class="estimator__row-text"><span class="estimator__row-label">節約できた時間</span><span class="estimator__row-value" data-estimator-saved>2時間32分</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIDEO: See it in action -->
+    <section class="container-lg section video-section" id="see-it-in-action" aria-labelledby="section-video">
+      <div class="section-head">
+        <span class="muted-eyebrow">実際の動作</span>
+        <h2 class="section-head__h2" id="section-video">60 秒でわかる使い方</h2>
+        <p class="section-head__sub">データがブラウザから一切外に出ることなく、SocialEraser が 2,000 件のツイート・いいね・フォローを整理する様子をご覧ください。</p>
+      </div>
+      <div class="video-frame">
+        <lite-youtube videoid="YzGAaDF8VyQ" playlabel="60 秒のデモ動画を再生"></lite-youtube>
+      </div>
+    </section>
+
+    <!-- 3 STEPS -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">使い方</span>
+        <h2 class="section-head__h2">3 ステップで完了</h2>
+      </div>
+      <div class="steps">
+        <div class="steps__item">
+          <div class="steps__media"><img src="/assets/screenshots/step-1-install.png" alt="SocialEraser サイドパネル：インストール時のステータス確認" loading="lazy"></div>
+          <div class="steps__body">
+            <h3>SocialEraser for X をインストール</h3>
+            <p>Chrome ウェブストアから無料で入手。アカウント登録、サインアップ、支払いは不要。2 回クリックするだけでツールバーにピン留めされ、100% ブラウザ内で動作します。</p>
+          </div>
+        </div>
+        <div class="steps__item">
+          <div class="steps__media"><img src="/assets/screenshots/step-2-pick.png" alt="SocialEraser サイドパネル：チェックボックスで削除対象を選択" loading="lazy" width="280" height="504"></div>
+          <div class="steps__body">
+            <h3>x.com を開いてログイン</h3>
+            <p>Chrome で x.com を開き、普段どおりログイン。SocialEraser のサイドパネルアイコンをクリックし、整理対象（ツイート、リプライ、リツイート、いいね、ブックマーク、フォロー）にチェックを入れ、フィルター条件（日付範囲、キーワード、エンゲージメント下限）を設定します。</p>
+          </div>
+        </div>
+        <div class="steps__item">
+          <div class="steps__media">
+            <img src="/assets/screenshots/sidepanel-running.gif" alt="SocialEraser サイドパネル：クリーンアップ実行中 — 5 秒未満で 4,108 件のツイートを削除" loading="lazy" width="280" height="504">
+          </div>
+          <div class="steps__body">
+            <h3>開始をクリックして、あとは放置</h3>
+            <p>SocialEraser が人の速度でクリックを再現。ライブカウンターを横目で確認しても、ノートパソコンを閉じて翌日戻ってきても大丈夫。ブラウザの再起動をまたいで状態が保持されます。いつでも一時停止可能。</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FILTERS DEEP-DIVE -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">フィルター</span>
+        <h2 class="section-head__h2">雑に消すのではなく、的確に整理する</h2>
+        <p class="section-head__lede">一括削除の意義はスピードですが、精度も同様に重要です。フィルターを組み合わせて、不要なものだけを的確に削除できます。</p>
+      </div>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3 class="card__title">日付範囲</h3>
+          <p class="card__desc">任意の日付より<strong>前</strong>または<strong>後</strong>に投稿されたツイートを削除。コロナ禍の思い出は残して、2014 年の黒歴史は消したい、そんな時に。最もよく使われるフィルターです。</p>
+        </div>
+        <div class="card">
+          <h3 class="card__title">キーワード一致</h3>
+          <p class="card__desc">特定の単語やフレーズを含むツイートだけを削除。転職活動中、議論中、特定のファンダムなど、トピックをまたいだ整理に便利です。</p>
+        </div>
+        <div class="card">
+          <h3 class="card__title">メディア種別</h3>
+          <p class="card__desc">画像付き、動画付き、リンク付き、テキストのみなど、メディア種別で絞り込み可能。投稿を消す前にメディアをバックアップしておきたい時にも便利です。</p>
+        </div>
+        <div class="card">
+          <h3 class="card__title">エンゲージメント下限</h3>
+          <p class="card__desc">一定数以上のいいねやリプライが付いたツイートを残す設定。誰にも反応されなかった投稿を一掃します。0 に設定すれば、すべてが削除対象に。</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPARISON -->
+    <section class="container-lg section" aria-labelledby="section-comparison">
+      <div class="section-head">
+        <span class="muted-eyebrow">他社ツールとの比較</span>
+        <h2 class="section-head__h2" id="section-comparison">SocialEraser for X の強み</h2>
+      </div>
+      <div class="comparison">
+        <table>
+          <thead><tr><th>機能</th><th class="text-center">SocialEraser</th><th class="text-center">TweetDelete</th><th class="text-center">Semiphemeral</th><th class="text-center">Redact</th></tr></thead>
+          <tbody>
+            <tr class="us"><td>パスワード不要</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> はい</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> いいえ（OAuth）</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> いいえ（OAuth）</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> いいえ（API キー）</td></tr>
+            <tr class="us"><td>100% ローカル処理</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> はい</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> いいえ（サーバー）</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> いいえ（サーバー）</td><td>ローカル CLI</td></tr>
+            <tr class="us"><td>オープンソース</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> MIT</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> いいえ</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> GPL</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> MIT</td></tr>
+            <tr class="us"><td>無料プラン</td><td>投げ銭で支援</td><td>制限あり</td><td>全機能（オープンソース）</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> 有料</td></tr>
+            <tr class="us"><td>日付 + キーワード フィルター</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> はい</td><td>日付のみ</td><td>日付のみ</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> はい</td></tr>
+            <tr class="us"><td>いいね / ブックマーク / フォロー の一括削除</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> はい</td><td>ツイートのみ</td><td>ツイートのみ</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> はい</td></tr>
+            <tr class="us"><td>コーディング不要</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> はい</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> はい</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> はい</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> いいえ</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ROADMAP -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">ロードマップ</span>
+        <h2 class="section-head__h2">今後の展開</h2>
+        <p class="section-head__lede">3 つのクリーンアップモジュールが現在開発中です。すでにインストール済みの拡張機能への無料アップデートとして配信されるため、新規インストールや追加費用なしでご利用いただけます。</p>
+      </div>
+      <div class="grid grid-auto">
+        <div class="card platform-card--coming">
+          <div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+          <h3 class="card__title">DM <span class="badge badge--soon">開発中</span></h3>
+          <p class="card__desc">ダイレクトメッセージの会話履歴を一括削除 — 受信箱のゼロ化や、プライバシーのリセットに便利です。<strong>ご注意：</strong> X は <code>event.isTrusted</code> を介してスクリプト化された右クリックイベントをブロックしています。これを回避するには <code>chrome.debugger</code> 権限が必要になりますが、当社はこの権限を要求しません。デバッガーを使用しない代替手法を現在検討中であり、リリース日は未定です。</p>
+        </div>
+        <div class="card platform-card--coming">
+          <div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <h3 class="card__title">検索履歴 <span class="badge badge--soon">開発中</span></h3>
+          <p class="card__desc">X の検索履歴を消去。スマホを貸す前や、単なる安心感のためにも。直近のマイナーアップデートでの提供を予定しており、リリース日は未定です。</p>
+        </div>
+      </div>
+      <p style="text-align:center;margin-top:var(--space-6);color:var(--text-mute);font-size:var(--text-sm)">進捗は <a href="https://github.com/socialeraser/SocialEraser/blob/master/ROADMAP.md" target="_blank" rel="noopener noreferrer">公開ロードマップ</a> でご確認いただけます · ご要望は <a href="mailto:support@socialeraser.app">support@socialeraser.app</a> までお寄せください。</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="container-lg section" aria-labelledby="section-faq">
+      <div class="section-head">
+        <span class="muted-eyebrow">よくある質問</span>
+        <h2 class="section-head__h2" id="section-faq">X 特有の質問</h2>
+      </div>
+      <div class="faq">
+        <div class="faq__category">
+          <h3 class="faq__category-title">整理の範囲</h3>
+          <details class="faq__item"><summary>古いツイートを一括削除できますか？</summary><div class="faq__answer"><p>はい。日付フィルター（例：<em>2020年1月1日より前</em>）を設定すれば、条件に一致するすべてのツイートを SocialEraser が削除します。1項目あたり約 0.9 秒で動作し、1,000 件のツイートなら約 15 分で完了します。</p></div></details>
+          <details class="faq__item"><summary>リプライだけ削除できますか？</summary><div class="faq__answer"><p>はい。<em>投稿タイプ</em>フィルターを使えば、リプライのみ（あるいはオリジナル投稿のみ、リツイートのみ）を対象にできます。日付やキーワードのフィルターと組み合わせられます。</p></div></details>
+          <details class="faq__item"><summary>いいねが多いツイートは残せますか？</summary><div class="faq__answer"><p>はい。<em>エンゲージメント下限</em>フィルターで、最小いいね数を設定できます。閾値より上のツイートは保持され、下回るものは削除されます。</p></div></details>
+          <details class="faq__item"><summary>スレッドはどうなりますか？</summary><div class="faq__answer"><p>SocialEraser はツイートを1件ずつ削除します。スレッド内のツイートだった場合、返信チェーンは孤児状態になりますが、表示自体は残ります。スレッドを完全に削除したい場合は、日付フィルターを使って新しい順（逆時系列順）に削除してください。</p></div></details>
+        </div>
+        <div class="faq__category">
+          <h3 class="faq__category-title">安全性</h3>
+          <details class="faq__item"><summary>アカウントは凍結されますか？</summary><div class="faq__answer"><p>SocialEraser は通常のクリックを人の速度で再現し、API 制限（レートリミット）を尊重します。他のサードパーティ製ツールと同様のご注意点はありますが、当社は X Corp. と提携関係にあるわけではなく、一括削除ツールのご使用はお客様の自己責任となります。</p></div></details>
+          <details class="faq__item"><summary>削除を取り消せますか？</summary><div class="faq__answer"><p>いいえ。一度削除されたツイートは、数秒以内に X の公開表示から消えます。初めて一括削除を行う際は、必ず事前に<em>エクスポート（アーカイブ保存）</em>機能をご利用になることを強くおすすめします。</p></div></details>
+          <details class="faq__item"><summary>X の UI が変更された場合はどうなりますか？</summary><div class="faq__answer"><p>SocialEraser は DOM セレクタのスキーマをリモート CDN から取得しています。X が UI を変更した際、当社側でアップデートを配信するため、拡張機能の再インストールは不要です。アップデートは自動的かつサイレントに適用されます。</p></div></details>
+        </div>
+        <div class="faq__category">
+          <h3 class="faq__category-title">技術面</h3>
+          <details class="faq__item"><summary>新しい x.com のレイアウトでも動作しますか？</summary><div class="faq__answer"><p>はい。SocialEraser は <em>x.com</em> と旧 <em>twitter.com</em> ドメインの両方に対応しています。セレクタスキーマは X の最新の UI 変更に合わせて毎週更新されます。</p></div></details>
+          <details class="faq__item"><summary>モバイル（モバイルブラウザの x.com）でも動作しますか？</summary><div class="faq__answer"><p>Android 版 Chrome ではほとんどの機能が動作します。iOS Safari は Apple の拡張機能モデルの制約により制限が多く、iOS 専用アプリは 2027 年のロードマップに含まれています。</p></div></details>
+          <details class="faq__item"><summary>複数の X アカウントで実行できますか？</summary><div class="faq__answer"><p>はい — アカウントごとに別のブラウザプロフィールをご利用ください。1つのプロフィール内で複数アカウントを切り替える機能は、ロードマップに含まれています。</p></div></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- GUIDE -->
+    <section class="container-md section" aria-labelledby="section-guide">
+      <div class="cta-box" style="text-align:center;">
+        <span class="muted-eyebrow">詳細ガイド</span>
+        <h2 class="hero__h1" id="section-guide" style="font-size: var(--text-3xl);">完全版のご案内をご覧になりますか？</h2>
+        <p class="hero__lede">ステップバイステップのガイドでは、日付・キーワード・エンゲージメントの各フィルターをスクリーンショットとエッジケースとともに詳しく解説しています。</p>
+        <div class="btn-row btn-row--center">
+          <a href="/ja/guides/twitter.html" class="btn btn--primary btn--xl">完全版ガイドを読む →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- DOWNLOAD -->
+    <section id="download" class="container-md section">
+      <div class="cta-box">
+        <span class="muted-eyebrow">無料 · 投げ銭で支援 · サインアップ不要</span>
+        <h2 class="hero__h1">今日、X を整理しましょう。</h2>
+        <p class="hero__lede">SocialEraser for X をインストール。60 秒以内に削除を開始できます。</p>
+        <div class="btn-row btn-row--center">
+          <a rel="noopener noreferrer" href="https://chromewebstore.google.com/detail/socialeraser-for-x/hmlbkkbflcdofngldhekoajeedgcjfch" class="btn btn--primary btn--xl">Chrome に追加 — 無料</a>
+          <a rel="noopener noreferrer" href="https://microsoftedge.microsoft.com/addons/" class="btn btn--secondary btn--xl">Edge に追加</a>
+        </div>
+        <p class="hero__micro">Android + iOS アプリ：2027 年提供予定 · <a href="/ja/">← すべてのプラットフォームに戻る</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container-lg">
+      <div class="site-footer__grid">
+        <div class="site-footer__brand">
+          <a href="/ja/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
+        </span>
+            <span>SocialEraser</span>
+          </a>
+          <p>SNS を一括整理。100% ローカル処理でパスワード不要、オープンソース。2017 年の「いいね」を外すために週末を費やしたくない方のためのツールです。</p>
+        </div>
+        <div class="site-footer__col"><h4>プラットフォーム</h4><ul>
+          <li><a href="/ja/platforms/x/">X (Twitter)</a></li>
+          <li><a href="/ja/platforms/tiktok/">TikTok</a></li>
+          <li><a href="/ja/platforms/youtube/">YouTube</a></li>
+          <li><a href="/ja/platforms/instagram/">Instagram</a></li>
+          <li><a href="/ja/platforms/facebook/">Facebook</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>製品</h4><ul>
+          <li><a href="/ja/help.html">ヘルプセンター</a></li>
+          <li><a href="#download">インストール</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/CHANGELOG.md" target="_blank" rel="noopener noreferrer">更新履歴</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/ROADMAP.md" target="_blank" rel="noopener noreferrer">ロードマップ</a></li>
+          <li><a href="/ja/support.html">☕ 支援する</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">ソースコード</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>会社情報</h4><ul>
+          <li><a href="/ja/about.html">私たちについて</a></li>
+          <li><a href="mailto:support@socialeraser.app">お問い合わせ</a></li>
+          <li><a href="/ja/privacy.html">プライバシー</a></li>
+          <li><a href="/ja/terms.html">利用規約</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser#readme" target="_blank" rel="noopener noreferrer">プレスキット</a></li>
+        </ul></div>
+      </div>
+      <div class="site-footer__bottom">
+        <span>© 2026 SocialEraser. All rights reserved.</span>
+        <div class="site-footer__legal"><span>独立したツール — X Corp. とは提携関係にありません。</span></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/app.js" defer></script>
+  <script defer src="/assets/lang-switcher.js"></script>
+</body>
+</html>

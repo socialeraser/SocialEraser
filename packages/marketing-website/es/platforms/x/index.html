@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="es-ES">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#0a0a0b">
+  <title>SocialEraser para X — Borrado masivo de tuits, me gusta y marcadores</title>
+  <meta name="description" content="Extensión gratuita de Chrome para borrar en masa tuits, respuestas, retuits, me gusta, marcadores y dejar de seguir en X (Twitter). Filtra por fecha y palabra clave. 100% local, sin contraseña, sin clave de API.">
+  <meta name="keywords" content="borrar tuits, borrar tuits en masa, limpiar twitter, dejar de seguir a todos, eliminar me gusta de twitter, borrar marcadores de twitter, limpiador de x, borrado masivo de tuits, borrar tuits antiguos, borrado en masa de twitter, borrar historial de x, limpieza de cuenta de x, borrar me gusta de x, borrar respuestas de x, eliminar retuits de x">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://socialeraser.app/es/platforms/x/">
+  <link rel="alternate" hreflang="en" href="https://socialeraser.app/platforms/x/">
+  <link rel="alternate" hreflang="zh" href="https://socialeraser.app/zh/platforms/x/">
+  <link rel="alternate" hreflang="ja" href="https://socialeraser.app/ja/platforms/x/">
+  <link rel="alternate" hreflang="es" href="https://socialeraser.app/es/platforms/x/">
+  <link rel="alternate" hreflang="fr" href="https://socialeraser.app/fr/platforms/x/">
+  <link rel="alternate" hreflang="de" href="https://socialeraser.app/de/platforms/x/">
+  <link rel="alternate" hreflang="pt" href="https://socialeraser.app/pt/platforms/x/">
+  <link rel="alternate" hreflang="ko" href="https://socialeraser.app/ko/platforms/x/">
+  <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/es/platforms/x/"><link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="SocialEraser">
+  <meta property="og:url" content="https://socialeraser.app/es/platforms/x/">
+  <meta property="og:title" content="SocialEraser para X — Borrado masivo de tuits, me gusta y marcadores">
+  <meta property="og:description" content="Extensión gratuita de Chrome para borrar en masa tuits, respuestas, retuits, me gusta, marcadores y dejar de seguir en X. Filtra por fecha y palabra clave. 100% local, sin contraseña.">
+  <meta property="og:image" content="https://socialeraser.app/assets/icons/og-x.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="SocialEraser para X — Borrado masivo de tuits, me gusta y marcadores con una extensión gratuita de Chrome">
+  <meta property="og:locale" content="es_ES">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="SocialEraser para X — Borrado masivo de tuits, me gusta y marcadores">
+  <meta name="twitter:description" content="Extensión gratuita de Chrome para borrar en masa tuits, respuestas, retuits, me gusta, marcadores y dejar de seguir en X. Filtra por fecha y palabra clave. 100% local, sin contraseña.">
+  <meta name="twitter:image" content="https://socialeraser.app/assets/icons/og-x.png">
+  <meta name="twitter:image:alt" content="SocialEraser para X — Borrado masivo de tuits, me gusta y marcadores con una extensión gratuita de Chrome">
+  <link rel="icon" type="image/png" href="/assets/icons/socialeraser-mark.png">
+  <link rel="stylesheet" href="/assets/styles.css">
+  <link rel="stylesheet" href="/assets/app.css">
+  <style>
+    /* Página de X — la marca X es monocromática (negro sobre blanco). Sobrescribe
+       los tokens de marca compartidos con acentos blanquecinos para que la página
+       se lea como "X" y no como "naranja". */
+    :root {
+      --accent:         #ffffff;
+      --accent-soft:    rgba(255, 255, 255, 0.08);
+      --accent-glow:    rgba(255, 255, 255, 0.22);
+      --border-accent:  rgba(255, 255, 255, 0.35);
+      --gradient-brand:      linear-gradient(135deg, #ffffff 0%, #9ca0a8 100%);
+      --gradient-brand-soft: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(156, 160, 168, 0.06) 100%);
+      --gradient-hero-glow:  radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 255, 255, 0.10) 0%, transparent 70%);
+    }
+    /* La ✗ de la fila de comparación se mantiene en azul — neutro, no rojo. */
+    .comparison .cross { color: var(--blue); }
+  </style>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"SoftwareApplication","name":"SocialEraser para X","applicationCategory":"BrowserApplication","applicationSubCategory":"BrowserExtension","operatingSystem":"Chrome 120+, Edge 120+","description":"Borrado masivo de tuits originales, respuestas, retuits, me gusta, marcadores y dejar de seguir en X (Twitter). Procesamiento 100% local en tu navegador — sin contraseña, sin servidor.","url":"https://socialeraser.app/es/platforms/x/","image":"https://socialeraser.app/assets/icons/og-x.png","mainEntityOfPage":{"@type":"WebPage","@id":"https://socialeraser.app/es/platforms/x/"},"featureList":["Borrado masivo de tus tuits originales","Borrado masivo de tus respuestas","Borrado masivo de retuits (revertirlos)","Borrado masivo de me gusta desde tu pestaña de Me gusta","Borrado masivo de marcadores","Dejar de seguir cuentas en masa (por lista, no mutuos, o fecha del último tuit)","Filtro por rango de fechas","Filtro por palabra clave","Filtro por tipo de medio (texto, imagen, vídeo, enlace)","Filtro por umbral de interacción (mín. de me gusta o respuestas)","Exporta tu archivo a JSON antes de borrar","Pausa y reanuda entre sesiones"],"offers":{"@type":"Offer","price":"0","priceCurrency":"USD","availability":"https://schema.org/InStock"}}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[
+    {"@type":"ListItem","position":1,"name":"Inicio","item":"https://socialeraser.app/es/"},
+    {"@type":"ListItem","position":2,"name":"Plataformas","item":"https://socialeraser.app/es/#platforms"},
+    {"@type":"ListItem","position":3,"name":"SocialEraser para X","item":"https://socialeraser.app/es/platforms/x/"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"HowTo","name":"Cómo borrar tuits en masa con SocialEraser","description":"Instala la extensión SocialEraser para Chrome, abre x.com, elige qué limpiar y haz clic en Iniciar. SocialEraser simula clics normales a velocidad humana para borrar cada tuit, respuesta, retuit, me gusta, marcador o seguimiento que coincida.","totalTime":"PT15M","estimatedCost":{"@type":"MonetaryAmount","value":"0","currency":"USD"},"tool":[{"@type":"HowToTool","name":"Google Chrome o Microsoft Edge (versión 120 o posterior)"},{"@type":"HowToTool","name":"Extensión de navegador SocialEraser para X (gratis)"}],"step":[
+    {"@type":"HowToStep","position":1,"name":"Instala SocialEraser para X","text":"Añade la extensión gratuita SocialEraser desde la Chrome Web Store. Sin cuenta, sin registro, sin pago. Dos clics y queda instalada y fijada en tu barra de herramientas.","url":"https://socialeraser.app/es/platforms/x/#download"},
+    {"@type":"HowToStep","position":2,"name":"Abre x.com e inicia sesión","text":"Ve a x.com en Chrome e inicia sesión en tu cuenta como de costumbre. Haz clic en el icono del panel lateral de SocialEraser. La extensión detectará automáticamente que has iniciado sesión y mostrará el estado de tu cuenta.","url":"https://socialeraser.app/es/platforms/x/#main"},
+    {"@type":"HowToStep","position":3,"name":"Elige qué limpiar y configura tus filtros","text":"En el panel lateral, marca las casillas de lo que quieras borrar: tuits originales, respuestas, retuits, me gusta, marcadores o seguidos. Opcionalmente, define un rango de fechas, una coincidencia de palabra clave, un filtro de tipo de medio o un umbral de interacción.","url":"https://socialeraser.app/es/platforms/x/#main"},
+    {"@type":"HowToStep","position":4,"name":"Haz clic en Iniciar y olvídate","text":"Haz clic en el botón Iniciar limpieza. SocialEraser abrirá cada elemento coincidente, hará clic en el botón de borrar / quitar me gusta / dejar de seguir a velocidad humana y mostrará un contador de progreso en vivo. Puedes cerrar el portátil y volver mañana — el estado persiste entre reinicios del navegador. La duración media es de unos 0,9 segundos por elemento.","url":"https://socialeraser.app/es/platforms/x/#main"}
+  ]}
+  </script>
+  <script type="application/ld+json">
+  {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
+    {"@type":"Question","name":"¿Puedo borrar en masa tuits antiguos?","acceptedAnswer":{"@type":"Answer","text":"Sí. Define un filtro de fecha (por ejemplo, antes del 1 de enero de 2020) y SocialEraser borrará cada tuit coincidente. Funciona a unos 0,9 segundos por elemento — aproximadamente 15 minutos para 1.000 tuits."}},
+    {"@type":"Question","name":"¿Puedo borrar solo mis respuestas?","acceptedAnswer":{"@type":"Answer","text":"Sí. Usa el filtro Tipo de publicación para apuntar solo a respuestas (o solo a publicaciones originales, o solo a retuits). El filtro se combina con los filtros de fecha y palabra clave para mayor precisión."}},
+    {"@type":"Question","name":"¿Puedo conservar los tuits con muchos me gusta?","acceptedAnswer":{"@type":"Answer","text":"Sí. Usa el filtro Umbral de interacción para fijar un número mínimo de me gusta. Los tuits por encima del umbral se conservan; los que estén por debajo se borran."}},
+    {"@type":"Question","name":"¿Qué pasa con los hilos?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser borra los tuits de forma individual. Si un tuit forma parte de un hilo, la cadena de respuestas queda huérfana pero sigue siendo visible. Para eliminar un hilo completo, borra los tuits en orden cronológico inverso usando el filtro de fecha."}},
+    {"@type":"Question","name":"¿Mi cuenta será suspendida?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser simula clics normales a velocidad humana y respeta los límites de velocidad. Se aplica la misma advertencia que con cualquier herramienta de terceros: no estamos afiliados a X Corp., y el uso de herramientas de borrado masivo queda bajo tu propio criterio."}},
+    {"@type":"Question","name":"¿Puedo deshacer un borrado?","acceptedAnswer":{"@type":"Answer","text":"No. Una vez borrado, el tuit desaparece de la vista pública de X en cuestión de segundos. Recomendamos encarecidamente usar Exportar archivo antes de cualquier borrado masivo la primera vez."}},
+    {"@type":"Question","name":"¿Y si X cambia su interfaz?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser obtiene su esquema de selectores DOM desde un CDN remoto. Cuando X publica cambios de UI, enviamos una actualización — no es necesario reinstalar la extensión. La actualización es automática y silenciosa."}},
+    {"@type":"Question","name":"¿Funciona con el nuevo diseño de x.com?","acceptedAnswer":{"@type":"Answer","text":"Sí. SocialEraser es compatible tanto con x.com como con el antiguo dominio twitter.com. El esquema de selectores se actualiza semanalmente para adaptarse a los últimos cambios de interfaz de X."}},
+    {"@type":"Question","name":"¿Funciona en móvil (x.com en navegador móvil)?","acceptedAnswer":{"@type":"Answer","text":"Chrome en Android funciona con la mayoría de las funciones. iOS Safari está más limitado debido al modelo de extensiones de Apple — hay una aplicación dedicada para iOS prevista en la hoja de ruta de 2027."}},
+    {"@type":"Question","name":"¿Puedo ejecutarlo en varias cuentas de X?","acceptedAnswer":{"@type":"Answer","text":"Sí: usa perfiles de navegador separados para cada cuenta. La gestión de varias cuentas dentro de un mismo perfil está en la hoja de ruta."}},
+    {"@type":"Question","name":"¿Puedo exportar mis tuits antes de borrarlos?","acceptedAnswer":{"@type":"Answer","text":"Sí. Usa Exportar archivo para guardar un JSON con cada tuit antes del borrado. Recomendado para los usuarios noveles."}}
+  ]}
+  </script>
+</head>
+<body>
+
+  <a href="#main" class="skip-to-content">Saltar al contenido</a>
+
+  <header class="site-header">
+    <div class="site-header__inner container-lg">
+      <a href="/es/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
+        </span>
+        <span>SocialEraser</span>
+      </a>
+      <nav class="site-nav" aria-label="Principal">
+        <details class="site-nav__platforms">
+          <summary class="site-nav__platforms-trigger">Plataformas <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg></summary>
+          <div class="site-nav__platforms-menu">
+            <a href="/es/platforms/x/">SocialEraser para X</a>
+            <a href="/es/platforms/tiktok/">SocialEraser para TikTok</a>
+            <a href="/es/platforms/youtube/">SocialEraser para YouTube</a>
+            <a href="/es/platforms/instagram/">SocialEraser para Instagram</a>
+            <a href="/es/platforms/facebook/">SocialEraser para Facebook</a>
+          </div>
+        </details>
+        <a href="/es/help.html" class="hide-mobile">Ayuda</a>
+        <a href="#download" class="btn btn--primary btn--sm">Instalar gratis</a>
+      </nav>
+      <details class="site-nav--mobile">
+        <summary class="site-nav--mobile-trigger" aria-label="Alternar menú">
+          <svg class="site-nav--mobile-icon-menu" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <svg class="site-nav--mobile-icon-close" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </summary>
+        <div class="site-nav--mobile-menu">
+          <a href="/es/platforms/x/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>SocialEraser para X</a>
+          <a href="/es/platforms/tiktok/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg>SocialEraser para TikTok</a>
+          <a href="/es/platforms/youtube/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>SocialEraser para YouTube</a>
+          <a href="/es/platforms/instagram/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>SocialEraser para Instagram</a>
+          <a href="/es/platforms/facebook/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>SocialEraser para Facebook</a>
+          <a href="/es/help.html"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>Ayuda</a>
+          <a href="#download" class="btn btn--primary"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>Instalar gratis</a>
+          <details class="site-nav--mobile-lang">
+            <summary>
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+              <span class="site-nav--mobile-lang__current">Idioma: <span data-lang-current>Español</span></span>
+              <svg class="site-nav--mobile-lang__chev" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+            </summary>
+            <div data-lang-list></div>
+          </details>
+        </div>
+      </details>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="breadcrumbs-wrap container-lg">
+      <nav class="breadcrumbs" aria-label="Migas de pan">
+        <a href="/es/">Inicio</a>
+        <span class="breadcrumbs__sep">›</span>
+        <span class="breadcrumbs__current">SocialEraser para X</span>
+      </nav>
+    </div>
+    <section class="container-lg">
+      <div class="hero">
+        <span class="muted-eyebrow">SocialEraser para X · Gratis · Con propinas</span>
+        <h1 class="hero__h1">
+          Borra en masa <span class="gradient-text">tuits, me gusta y marcadores</span><br>
+          en X
+        </h1>
+        <p class="hero__lede">
+          Borra tu historial de X en minutos, no en fines de semana. Filtra por fecha y palabra clave. Exporta un archivo antes de lanzarte. <strong>Sin contraseña. Sin clave de API. Sin servidor.</strong>
+        </p>
+        <div class="btn-row hero__cta btn-row--center">
+          <a rel="noopener noreferrer" href="https://chromewebstore.google.com/detail/socialeraser-for-x/hmlbkkbflcdofngldhekoajeedgcjfch" class="btn btn--primary btn--xl">Añadir a Chrome — Gratis</a>
+          <a rel="noopener noreferrer" href="https://microsoftedge.microsoft.com/addons/" class="btn btn--secondary btn--xl">Añadir a Edge</a>
+        </div>
+        <p class="hero__micro">Código abierto · Licencia MIT · Sin rastreo</p>
+      </div>
+    </section>
+
+    <section class="legal-strip">
+      <div class="container-md">
+        <strong>Herramienta independiente.</strong> No está afiliada, respaldada ni patrocinada por X Corp. X es una marca comercial de X Corp. Úsala bajo tu propio criterio.
+      </div>
+    </section>
+
+    <!-- QUÉ PUEDES BORRAR -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">Qué puedes limpiar</span>
+        <h2 class="section-head__h2">Seis tipos de limpieza para X, en una sola extensión</h2>
+        <p class="section-head__lede">De lo obvio a lo olvidado. Elige uno, combínalos o ejecútalos todos seguidos.</p>
+      </div>
+      <div class="grid grid-auto">
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></div><h3 class="card__title">Tuits originales</h3><p class="card__desc">Borra tus publicaciones originales en masa. Filtra por rango de fechas o palabra clave. Exporta primero a JSON como copia de seguridad.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 17 4 12 9 7"/><path d="M20 18v-2a4 4 0 00-4-4H4"/></svg></div><h3 class="card__title">Respuestas</h3><p class="card__desc">Limpia tu historial de respuestas en masa. Útil antes de una búsqueda de empleo, un cambio de marca o un nuevo comienzo.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg></div><h3 class="card__title">Retuits</h3><p class="card__desc">Deshaz retuits en masa. Conserva el tuit del autor original y elimina el compartido de tu perfil.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg></div><h3 class="card__title">Me gusta</h3><p class="card__desc">Quita el me gusta de cientos o miles de publicaciones. El caso de uso más popular de SocialEraser.</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z"/></svg></div><h3 class="card__title">Marcadores</h3><p class="card__desc">Vacía tus tuits guardados. El cementerio de "lo leeré luego".</p></div>
+        <div class="card card--hover"><div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg></div><h3 class="card__title">Seguidos</h3><p class="card__desc">Deja de seguir por lista, por no mutuos o por fecha del último tuit. Encuentra cuentas inactivas con un clic.</p></div>
+      </div>
+    </section>
+
+    <!-- CALCULADORA DE TIEMPO -->
+    <section class="container-md section">
+      <div class="section-head">
+        <span class="muted-eyebrow">Calculadora de tiempo</span>
+        <h2 class="section-head__h2">¿Cuánto tardarás en limpiar tu X?</h2>
+      </div>
+      <div class="estimator" data-estimator>
+        <div class="estimator__input-block">
+          <label for="est-input-x">Tuits / me gusta que quieres borrar</label>
+          <input id="est-input-x" type="number" class="estimator__input" data-estimator-input value="1000" min="1" max="100000">
+          <div class="estimator__quick">
+            <button class="estimator__quick-btn" data-estimator-quick data-value="100">100</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="500">500</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="1000">1.000</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="5000">5.000</button>
+            <button class="estimator__quick-btn" data-estimator-quick data-value="10000">10.000</button>
+          </div>
+        </div>
+        <div class="estimator__result">
+          <div class="estimator__row">
+            <div class="estimator__row-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+            <div class="estimator__row-text"><span class="estimator__row-label">Limpieza manual</span><span class="estimator__row-value" data-estimator-manual>2h 47m</span></div>
+          </div>
+          <div class="estimator__row estimator__row--highlight">
+            <div class="estimator__row-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+            <div class="estimator__row-text"><span class="estimator__row-label">Con SocialEraser</span><span class="estimator__row-value" data-estimator-auto>—</span></div>
+          </div>
+          <div class="estimator__row">
+            <div class="estimator__row-icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg></div>
+            <div class="estimator__row-text"><span class="estimator__row-label">Tiempo ahorrado</span><span class="estimator__row-value" data-estimator-saved>2h 32m</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- VÍDEO: Véalo en acción -->
+    <section class="container-lg section video-section" id="see-it-in-action" aria-labelledby="section-video">
+      <div class="section-head">
+        <span class="muted-eyebrow">Véalo en acción</span>
+        <h2 class="section-head__h2" id="section-video">Un recorrido de 60 segundos</h2>
+        <p class="section-head__sub">Observa cómo SocialEraser limpia 2.000 tuits, me gusta y seguidos — sin que tus datos salgan nunca del navegador.</p>
+      </div>
+      <div class="video-frame">
+        <lite-youtube videoid="YzGAaDF8VyQ" playlabel="Reproducir el recorrido de 60 segundos"></lite-youtube>
+      </div>
+    </section>
+
+    <!-- 3 PASOS -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">Cómo funciona</span>
+        <h2 class="section-head__h2">Tres pasos. Y listo.</h2>
+      </div>
+      <div class="steps">
+        <div class="steps__item">
+          <div class="steps__media"><img src="/assets/screenshots/step-1-install.png" alt="Panel lateral de SocialEraser: comprobación de estado tras la instalación" loading="lazy"></div>
+          <div class="steps__body">
+            <h3>Instala SocialEraser para X</h3>
+            <p>Gratis desde la Chrome Web Store. Sin cuenta, sin registro, sin pago. Dos clics y queda fijada en tu barra — funciona al 100% en tu navegador.</p>
+          </div>
+        </div>
+        <div class="steps__item">
+          <div class="steps__media"><img src="/assets/screenshots/step-2-pick.png" alt="Panel lateral de SocialEraser: marca con casillas los elementos a borrar" loading="lazy" width="280" height="504"></div>
+          <div class="steps__body">
+            <h3>Abre x.com e inicia sesión</h3>
+            <p>Ve a x.com en Chrome e inicia sesión como siempre. Haz clic en el icono del panel lateral de SocialEraser. Marca qué limpiar — tuits, respuestas, retuits, me gusta, marcadores, seguidos — y define tu filtro (rango de fechas, palabra clave, umbral de interacción).</p>
+          </div>
+        </div>
+        <div class="steps__item">
+          <div class="steps__media">
+            <img src="/assets/screenshots/sidepanel-running.gif" alt="Panel lateral de SocialEraser: limpieza en directo — 4.108 tuits eliminados en menos de 5 segundos" loading="lazy" width="280" height="504">
+          </div>
+          <div class="steps__body">
+            <h3>Haz clic en Iniciar. Y olvídate.</h3>
+            <p>SocialEraser simula clics a velocidad humana. Mira el contador en directo, o cierra el portátil y vuelve mañana — el estado se conserva entre reinicios del navegador. Pausa en cualquier momento.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FILTROS EN PROFUNDIDAD -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">Filtros</span>
+        <h2 class="section-head__h2">Borra con precisión, no a ciegas</h2>
+        <p class="section-head__lede">La gracia del borrado en masa es ir rápido. Pero la precisión también importa. Combina filtros para borrar exactamente lo que quieres.</p>
+      </div>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3 class="card__title">Rango de fechas</h3>
+          <p class="card__desc">Borra tuits publicados <strong>antes</strong> o <strong>después</strong> de cualquier fecha. Conserva tus reflexiones de la pandemia, borra la vergüenza de 2014. El filtro más habitual.</p>
+        </div>
+        <div class="card">
+          <h3 class="card__title">Coincidencia de palabra clave</h3>
+          <p class="card__desc">Borra solo los tuits que contengan una palabra o frase específica. Ideal para limpiar un tema, como una etapa de búsqueda de empleo, un debate acalorado o una época de fandom.</p>
+        </div>
+        <div class="card">
+          <h3 class="card__title">Tipo de medio</h3>
+          <p class="card__desc">Filtra para borrar solo tuits con imágenes, solo vídeos, solo enlaces o solo texto. Útil para hacer una copia de seguridad de los medios antes de borrar la publicación.</p>
+        </div>
+        <div class="card">
+          <h3 class="card__title">Umbral de interacción</h3>
+          <p class="card__desc">Conserva los tuits con más de X me gusta o respuestas. Borra los posts solitarios con cero interacción. Pon 0 para borrar todo.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- COMPARATIVA -->
+    <section class="container-lg section" aria-labelledby="section-comparison">
+      <div class="section-head">
+        <span class="muted-eyebrow">vs. las alternativas</span>
+        <h2 class="section-head__h2" id="section-comparison">Comparativa de SocialEraser para X</h2>
+      </div>
+      <div class="comparison">
+        <table>
+          <thead><tr><th>Característica</th><th class="text-center">SocialEraser</th><th class="text-center">TweetDelete</th><th class="text-center">Semiphemeral</th><th class="text-center">Redact</th></tr></thead>
+          <tbody>
+            <tr class="us"><td>Sin contraseña</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Sí</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> No (OAuth)</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> No (OAuth)</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> No (claves de API)</td></tr>
+            <tr class="us"><td>100% local</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Sí</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> No (servidor)</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> No (servidor)</td><td>CLI local</td></tr>
+            <tr class="us"><td>Código abierto</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> MIT</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> No</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> GPL</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> MIT</td></tr>
+            <tr class="us"><td>Plan gratuito</td><td>Con propinas</td><td>Limitado</td><td>Completo (código abierto)</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> De pago</td></tr>
+            <tr class="us"><td>Filtros de fecha + palabra clave</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Sí</td><td>Solo fecha</td><td>Solo fecha</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Sí</td></tr>
+            <tr class="us"><td>Borrado masivo de me gusta / marcadores / seguidos</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Sí</td><td>Solo tuits</td><td>Solo tuits</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Sí</td></tr>
+            <tr class="us"><td>Sin necesidad de programar</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Sí</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Sí</td><td><svg class="check" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5L20 7"/></svg> Sí</td><td><svg class="cross" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg> No</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- HOJA DE RUTA -->
+    <section class="container-lg section">
+      <div class="section-head">
+        <span class="muted-eyebrow">Hoja de ruta</span>
+        <h2 class="section-head__h2">Próximas novedades</h2>
+        <p class="section-head__lede">Hay tres módulos de limpieza más en desarrollo activo. Llegarán como actualizaciones gratuitas de la extensión que ya tienes instalada — sin nueva instalación, sin coste extra.</p>
+      </div>
+      <div class="grid grid-auto">
+        <div class="card platform-card--coming">
+          <div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+          <h3 class="card__title">DMs <span class="badge badge--soon">En desarrollo</span></h3>
+          <p class="card__desc">Borrado masivo de conversaciones de mensajes directos — útil para llegar a bandeja cero y restablecer la privacidad. <strong>Atención:</strong> X bloquea los eventos de clic derecho con scripts mediante <code>event.isTrusted</code>. Saltarse esto requeriría el permiso <code>chrome.debugger</code>, que no vamos a solicitar. Estamos evaluando enfoques sin debugger; sin fecha de lanzamiento por ahora.</p>
+        </div>
+        <div class="card platform-card--coming">
+          <div class="card__icon"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></div>
+          <h3 class="card__title">Historial de búsqueda <span class="badge badge--soon">En desarrollo</span></h3>
+          <p class="card__desc">Borra tu historial de búsqueda en X. Útil antes de prestar el móvil, o simplemente por tranquilidad. Previsto para la próxima versión menor — sin fecha confirmada.</p>
+        </div>
+      </div>
+      <p style="text-align:center;margin-top:var(--space-6);color:var(--text-mute);font-size:var(--text-sm)">Sigue el progreso en la <a href="https://github.com/socialeraser/SocialEraser/blob/master/ROADMAP.md" target="_blank" rel="noopener noreferrer">hoja de ruta pública</a> · se aceptan sugerencias en <a href="mailto:support@socialeraser.app">support@socialeraser.app</a>.</p>
+    </section>
+
+    <!-- FAQ -->
+    <section class="container-lg section" aria-labelledby="section-faq">
+      <div class="section-head">
+        <span class="muted-eyebrow">Preguntas frecuentes</span>
+        <h2 class="section-head__h2" id="section-faq">Preguntas específicas de X</h2>
+      </div>
+      <div class="faq">
+        <div class="faq__category">
+          <h3 class="faq__category-title">Alcance de la limpieza</h3>
+          <details class="faq__item"><summary>¿Puedo borrar en masa tuits antiguos?</summary><div class="faq__answer"><p>Sí. Define un filtro de fecha (por ejemplo, <em>antes del 1 de enero de 2020</em>) y SocialEraser borrará cada tuit coincidente. Funciona a ~0,9 s por elemento — unos 15 minutos para 1.000 tuits.</p></div></details>
+          <details class="faq__item"><summary>¿Puedo borrar solo mis respuestas?</summary><div class="faq__answer"><p>Sí. Usa el filtro <em>Tipo de publicación</em> para apuntar solo a respuestas (o solo a publicaciones originales, o solo a retuits). Se combina con los filtros de fecha y palabra clave.</p></div></details>
+          <details class="faq__item"><summary>¿Puedo conservar los tuits con muchos me gusta?</summary><div class="faq__answer"><p>Sí. Usa el filtro <em>Umbral de interacción</em> para fijar un número mínimo de me gusta. Los tuits por encima del umbral se conservan; los que estén por debajo se borran.</p></div></details>
+          <details class="faq__item"><summary>¿Qué pasa con los hilos?</summary><div class="faq__answer"><p>SocialEraser borra los tuits de forma individual. Si un tuit forma parte de un hilo, la cadena de respuestas queda huérfana pero sigue siendo visible. Para eliminar un hilo completo, borra los tuits en orden cronológico inverso usando el filtro de fecha.</p></div></details>
+        </div>
+        <div class="faq__category">
+          <h3 class="faq__category-title">Seguridad</h3>
+          <details class="faq__item"><summary>¿Mi cuenta será suspendida?</summary><div class="faq__answer"><p>SocialEraser simula clics normales a velocidad humana y respeta los límites de velocidad. Se aplica la misma advertencia que con cualquier herramienta de terceros: no estamos afiliados a X Corp., y el uso de herramientas de borrado masivo queda bajo tu propio criterio.</p></div></details>
+          <details class="faq__item"><summary>¿Puedo deshacer un borrado?</summary><div class="faq__answer"><p>No. Una vez borrado, el tuit desaparece de la vista pública de X en cuestión de segundos. Recomendamos encarecidamente usar <em>Exportar archivo</em> antes de cualquier borrado masivo la primera vez.</p></div></details>
+          <details class="faq__item"><summary>¿Y si X cambia su interfaz?</summary><div class="faq__answer"><p>SocialEraser obtiene su esquema de selectores DOM desde un CDN remoto. Cuando X publica cambios de UI, enviamos una actualización — no es necesario reinstalar la extensión. La actualización es automática y silenciosa.</p></div></details>
+        </div>
+        <div class="faq__category">
+          <h3 class="faq__category-title">Técnico</h3>
+          <details class="faq__item"><summary>¿Funciona con el nuevo diseño de x.com?</summary><div class="faq__answer"><p>Sí. SocialEraser es compatible tanto con <em>x.com</em> como con el antiguo dominio <em>twitter.com</em>. El esquema de selectores se actualiza semanalmente para adaptarse a los últimos cambios de interfaz de X.</p></div></details>
+          <details class="faq__item"><summary>¿Funciona en móvil (x.com en navegador móvil)?</summary><div class="faq__answer"><p>Chrome en Android funciona con la mayoría de las funciones. iOS Safari está más limitado debido al modelo de extensiones de Apple — hay una aplicación dedicada para iOS prevista en la hoja de ruta de 2027.</p></div></details>
+          <details class="faq__item"><summary>¿Puedo ejecutarlo en varias cuentas de X?</summary><div class="faq__answer"><p>Sí: usa perfiles de navegador separados para cada cuenta. La gestión de varias cuentas dentro de un mismo perfil está en la hoja de ruta.</p></div></details>
+        </div>
+      </div>
+    </section>
+
+    <!-- GUÍA -->
+    <section class="container-md section" aria-labelledby="section-guide">
+      <div class="cta-box" style="text-align:center;">
+        <span class="muted-eyebrow">Análisis a fondo</span>
+        <h2 class="hero__h1" id="section-guide" style="font-size: var(--text-3xl);">¿Quieres el tutorial completo?</h2>
+        <p class="hero__lede">Nuestra guía paso a paso explica en detalle los filtros de fecha, palabra clave e interacción, con capturas de pantalla y casos límite.</p>
+        <div class="btn-row btn-row--center">
+          <a href="/es/guides/twitter.html" class="btn btn--primary btn--xl">Leer la guía completa →</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- DESCARGA -->
+    <section id="download" class="container-md section">
+      <div class="cta-box">
+        <span class="muted-eyebrow">Gratis · Con propinas · Sin registro</span>
+        <h2 class="hero__h1">Limpia tu X. Hoy mismo.</h2>
+        <p class="hero__lede">Instala SocialEraser para X. Empieza a borrar en menos de 60 segundos.</p>
+        <div class="btn-row btn-row--center">
+          <a rel="noopener noreferrer" href="https://chromewebstore.google.com/detail/socialeraser-for-x/hmlbkkbflcdofngldhekoajeedgcjfch" class="btn btn--primary btn--xl">Añadir a Chrome — Gratis</a>
+          <a rel="noopener noreferrer" href="https://microsoftedge.microsoft.com/addons/" class="btn btn--secondary btn--xl">Añadir a Edge</a>
+        </div>
+        <p class="hero__micro">Apps para Android + iOS: previstas para 2027 · <a href="/es/">← Volver a todas las plataformas</a></p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container-lg">
+      <div class="site-footer__grid">
+        <div class="site-footer__brand">
+          <a href="/es/" class="site-logo">
+<span class="site-logo__mark" aria-hidden="true">
+          <img src="/assets/icons/socialeraser-mark.png" alt="" width="40" height="40" decoding="async">
+        </span>
+            <span>SocialEraser</span>
+          </a>
+          <p>Limpia tus redes sociales en masa. 100% local, sin contraseña, código abierto. Pensado para quienes prefieren no dedicar el fin de semana a quitar me gusta de 2017.</p>
+        </div>
+        <div class="site-footer__col"><h4>Plataformas</h4><ul>
+          <li><a href="/es/platforms/x/">X (Twitter)</a></li>
+          <li><a href="/es/platforms/tiktok/">TikTok</a></li>
+          <li><a href="/es/platforms/youtube/">YouTube</a></li>
+          <li><a href="/es/platforms/instagram/">Instagram</a></li>
+          <li><a href="/es/platforms/facebook/">Facebook</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>Producto</h4><ul>
+          <li><a href="/es/help.html">Centro de ayuda</a></li>
+          <li><a href="#download">Instalar</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/CHANGELOG.md" target="_blank" rel="noopener noreferrer">Registro de cambios</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/ROADMAP.md" target="_blank" rel="noopener noreferrer">Hoja de ruta</a></li>
+          <li><a href="/es/support.html">☕ Apóyanos</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">Código fuente</a></li>
+        </ul></div>
+        <div class="site-footer__col"><h4>Empresa</h4><ul>
+          <li><a href="/es/about.html">Acerca de</a></li>
+          <li><a href="mailto:support@socialeraser.app">Contacto</a></li>
+          <li><a href="/es/privacy.html">Privacidad</a></li>
+          <li><a href="/es/terms.html">Términos</a></li>
+          <li><a href="https://github.com/socialeraser/SocialEraser#readme" target="_blank" rel="noopener noreferrer">Kit de prensa</a></li>
+        </ul></div>
+      </div>
+      <div class="site-footer__bottom">
+        <span>© 2026 SocialEraser. Todos los derechos reservados.</span>
+        <div class="site-footer__legal"><span>Herramienta independiente — no afiliada a X Corp.</span></div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/assets/app.js" defer></script>
+  <script defer src="/assets/lang-switcher.js"></script>
+</body>
+</html>
