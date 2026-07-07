@@ -235,6 +235,15 @@ for (let i = 0; i < 5; i++) {
     '期望含 "Free · Tip-Supported · No Signup"');
 }
 
+for (let i = 0; i < 5; i++) {
+  const f = path.join(MW, 'platforms', platformNames[i].toLowerCase(), 'index.html');
+  if (!fs.existsSync(f)) continue;
+  const src = fs.readFileSync(f, 'utf8');
+  check(`platforms/${platformNames[i].toLowerCase()}/index.html comparison table 精确文案`,
+    src.includes('<td>Tip-supported</td>'),
+    '期望 comparison table 第二列含 "<td>Tip-supported</td>"');
+}
+
 {
   const f = path.join(MW, 'index.html');
   if (fs.existsSync(f)) {
