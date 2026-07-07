@@ -26,6 +26,114 @@
   <link rel="icon" type="image/png" href="/assets/icons/socialeraser-mark.png">
   <link rel="stylesheet" href="/assets/styles.css">
   <link rel="stylesheet" href="/assets/app.css">
+  <style>
+    /* Guides — horizontal-scroll row of 5 tutorial cards. Each card uses a
+       per-platform accent (top bar + icon + arrow) so the row stays visually
+       consistent with PLATFORMS GRID above. */
+    .guides-row-wrap {
+      position: relative;
+      margin: 0 calc(-1 * var(--space-6));
+      padding: 0 var(--space-6);
+    }
+    .guides-row {
+      display: flex;
+      gap: var(--space-4);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding-left: var(--space-6);
+      padding-bottom: var(--space-3);
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .guides-row::-webkit-scrollbar { display: none; }
+
+    /* Right-edge fade hints scrollability. */
+    .guides-row-wrap::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: var(--space-3);
+      right: 0;
+      width: 64px;
+      background: linear-gradient(to right, rgba(10,10,11,0), var(--bg) 80%);
+      pointer-events: none;
+    }
+
+    .guide-card {
+      position: relative;
+      flex: 0 0 340px;
+      scroll-snap-align: start;
+      background: var(--bg-elev-1);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-xl);
+      padding: var(--space-10) var(--space-8) var(--space-8);
+      text-decoration: none;
+      color: inherit;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-3);
+      transition: transform var(--duration) var(--ease), border-color var(--duration) var(--ease), background var(--duration) var(--ease);
+      overflow: hidden;
+    }
+    .guide-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: var(--guide-accent, #ffffff);
+    }
+    .guide-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--guide-accent, var(--border-accent));
+      background: var(--bg-elev-2);
+    }
+    .guide-card__eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: var(--text-xs);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--guide-accent, var(--text-dim));
+      font-weight: 700;
+    }
+    .guide-card__icon {
+      width: 28px;
+      height: 28px;
+      color: var(--guide-accent, var(--text));
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .guide-card__icon svg { width: 100%; height: 100%; }
+    .guide-card__title {
+      font-size: var(--text-xl);
+      font-weight: 700;
+      line-height: 1.3;
+      margin: 0;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .guide-card__hook {
+      font-size: var(--text-sm);
+      color: var(--text-dim);
+      line-height: 1.55;
+      margin: 0;
+      flex: 1;
+    }
+    .guide-card__cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: var(--text-sm);
+      font-weight: 600;
+      color: var(--guide-accent, var(--text));
+      margin-top: var(--space-2);
+    }
+
+    @media (max-width: 640px) {
+      .guide-card { flex-basis: 84vw; }
+    }
+  </style>
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"SoftwareApplication","name":"SocialEraser","applicationCategory":"BrowserApplication","operatingSystem":"Chrome, Edge, Android, iOS","description":"Bulk delete posts, likes, follows, and saved items on X, TikTok, YouTube, Instagram, and Facebook. 100% local processing.","url":"https://socialeraser.app","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"}}
   </script>
@@ -250,6 +358,55 @@
           <div class="trust-strip__hint">完全状态控制</div>
         </div>
       </div>
+    </section>
+
+    <!-- SUPPORT THE PROJECT (Creem requires products visible on homepage) -->
+    <section id="support" class="container-lg section" aria-labelledby="support-h">
+      <div class="section-head">
+        <span class="muted-eyebrow">支持这个项目</span>
+        <h2 class="section-head__h2" id="support-h">免费。打赏支持。欢迎打赏，从不强求。</h2>
+        <p class="section-head__lede">SocialEraser 是打赏支持型工具——免费版就是完整版，没有付费墙、没有配额、没有试用期、没有升级提示。如果这个工具帮你省下了一个周末，打赏入口就在这里。</p>
+      </div>
+      <div class="tip-grid" role="list" aria-label="打赏金额">
+        <div class="tip-tier tip-tier--secondary" role="listitem">
+          <div class="tip-tier__icon" aria-hidden="true">☕</div>
+          <div class="tip-tier__amount">$1</div>
+          <div class="tip-tier__label">一杯咖啡</div>
+          <p class="tip-tier__desc">覆盖一天公共选择器配置的 CDN 带宽。</p>
+          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_3HVqQbK66LafUdCwR7sjXp" target="_blank" rel="noopener noreferrer">打赏 $1</a>
+        </div>
+        <div class="tip-tier tip-tier--featured" role="listitem">
+          <div class="tip-tier__icon" aria-hidden="true">🍕</div>
+          <div class="tip-tier__amount">$3</div>
+          <div class="tip-tier__label">一片披萨</div>
+          <p class="tip-tier__desc">维持 Chrome Web Store 开发者账户一个月。</p>
+          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_7ASxApTnNUNsiUpAbSrYYc" target="_blank" rel="noopener noreferrer">打赏 $3</a>
+        </div>
+        <div class="tip-tier tip-tier--secondary" role="listitem">
+          <div class="tip-tier__icon" aria-hidden="true">🍱</div>
+          <div class="tip-tier__amount">$5</div>
+          <div class="tip-tier__label">一顿午餐</div>
+          <p class="tip-tier__desc">支付几小时跨平台回归测试的费用。</p>
+          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_2NxSAgacol9Jar7Q0EPQvI" target="_blank" rel="noopener noreferrer">打赏 $5</a>
+        </div>
+        <div class="tip-tier tip-tier--secondary" role="listitem">
+          <div class="tip-tier__icon" aria-hidden="true">💖</div>
+          <div class="tip-tier__amount">$10</div>
+          <div class="tip-tier__label">慷慨解囊</div>
+          <p class="tip-tier__desc">支付一整天的 bug 排查与选择器维护。</p>
+          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_6mCS0pbjMZ9pFLGOY6PmOy" target="_blank" rel="noopener noreferrer">打赏 $10</a>
+        </div>
+        <div class="tip-tier tip-tier--secondary" role="listitem">
+          <div class="tip-tier__icon" aria-hidden="true">🎁</div>
+          <div class="tip-tier__amount">自定义</div>
+          <div class="tip-tier__label">随心定价</div>
+          <p class="tip-tier__desc">自选金额——每一元都用于下个月的运营。</p>
+          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_4av6xu55UHRgVeEIEEQNUz" target="_blank" rel="noopener noreferrer">前往 Creem</a>
+        </div>
+      </div>
+      <p class="tip-footnote">
+        打赏是感谢，不是为功能付费。<a href="/support.html" rel="noopener noreferrer">查看资金去向与退款政策 →</a>
+      </p>
     </section>
 
     <!-- TIME ESTIMATOR -->
@@ -483,53 +640,47 @@
       </div>
     </section>
 
-    <!-- SUPPORT THE PROJECT (Creem requires products visible on homepage) -->
-    <section id="support" class="container-lg section" aria-labelledby="support-h">
+    <!-- GUIDES -->
+    <section id="guides" class="container-lg section" aria-labelledby="guides-h">
       <div class="section-head">
-        <span class="muted-eyebrow">支持这个项目</span>
-        <h2 class="section-head__h2" id="support-h">免费。打赏支持。欢迎打赏，从不强求。</h2>
-        <p class="section-head__lede">SocialEraser 是打赏支持型工具——免费版就是完整版，没有付费墙、没有配额、没有试用期、没有升级提示。如果这个工具帮你省下了一个周末，打赏入口就在这里。</p>
+        <span class="muted-eyebrow">操作指南</span>
+        <h2 class="section-head__h2" id="guides-h">每个平台，分步详解</h2>
+        <p class="section-head__lede">带截图、过滤条件拆解、安全建议的详细教程。没有废话，没有凑数 —— 只讲真正能用的方法。</p>
       </div>
-      <div class="tip-grid" role="list" aria-label="打赏金额">
-        <div class="tip-tier tip-tier--secondary" role="listitem">
-          <div class="tip-tier__icon" aria-hidden="true">☕</div>
-          <div class="tip-tier__amount">$1</div>
-          <div class="tip-tier__label">一杯咖啡</div>
-          <p class="tip-tier__desc">覆盖一天公共选择器配置的 CDN 带宽。</p>
-          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_3HVqQbK66LafUdCwR7sjXp" target="_blank" rel="noopener noreferrer">打赏 $1</a>
-        </div>
-        <div class="tip-tier tip-tier--featured" role="listitem">
-          <div class="tip-tier__icon" aria-hidden="true">🍕</div>
-          <div class="tip-tier__amount">$3</div>
-          <div class="tip-tier__label">一片披萨</div>
-          <p class="tip-tier__desc">维持 Chrome Web Store 开发者账户一个月。</p>
-          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_7ASxApTnNUNsiUpAbSrYYc" target="_blank" rel="noopener noreferrer">打赏 $3</a>
-        </div>
-        <div class="tip-tier tip-tier--secondary" role="listitem">
-          <div class="tip-tier__icon" aria-hidden="true">🍱</div>
-          <div class="tip-tier__amount">$5</div>
-          <div class="tip-tier__label">一顿午餐</div>
-          <p class="tip-tier__desc">支付几小时跨平台回归测试的费用。</p>
-          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_2NxSAgacol9Jar7Q0EPQvI" target="_blank" rel="noopener noreferrer">打赏 $5</a>
-        </div>
-        <div class="tip-tier tip-tier--secondary" role="listitem">
-          <div class="tip-tier__icon" aria-hidden="true">💖</div>
-          <div class="tip-tier__amount">$10</div>
-          <div class="tip-tier__label">慷慨解囊</div>
-          <p class="tip-tier__desc">支付一整天的 bug 排查与选择器维护。</p>
-          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_6mCS0pbjMZ9pFLGOY6PmOy" target="_blank" rel="noopener noreferrer">打赏 $10</a>
-        </div>
-        <div class="tip-tier tip-tier--secondary" role="listitem">
-          <div class="tip-tier__icon" aria-hidden="true">🎁</div>
-          <div class="tip-tier__amount">自定义</div>
-          <div class="tip-tier__label">随心定价</div>
-          <p class="tip-tier__desc">自选金额——每一元都用于下个月的运营。</p>
-          <a class="tip-tier__cta" href="https://www.creem.io/payment/prod_4av6xu55UHRgVeEIEEQNUz" target="_blank" rel="noopener noreferrer">前往 Creem</a>
+      <div class="guides-row-wrap">
+        <div class="guides-row" role="list">
+          <a href="/guides/twitter.html" class="guide-card" role="listitem" style="--guide-accent: #ffffff;">
+            <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span>指南 · X</span>
+            <h3 class="guide-card__title">如何批量删除推文、点赞和书签</h3>
+            <p class="guide-card__hook">日期与关键词过滤、互动量下限，以及大多数人都会跳过的"删除前先导出归档"步骤。</p>
+            <span class="guide-card__cta">阅读完整指南 →</span>
+          </a>
+          <a href="/guides/tiktok.html" class="guide-card" role="listitem" style="--guide-accent: #25F4EE;">
+            <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg></span>指南 · TikTok</span>
+            <h3 class="guide-card__title">如何批量删除 TikTok 视频、转发和点赞</h3>
+            <p class="guide-card__hook">用播放量下限过滤保留爆款，其余按日期、关键词、内容类型批量清除。</p>
+            <span class="guide-card__cta">阅读完整指南 →</span>
+          </a>
+          <a href="/guides/youtube.html" class="guide-card" role="listitem" style="--guide-accent: #FF3B3B;">
+            <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></span>指南 · YouTube</span>
+            <h3 class="guide-card__title">如何批量清除 YouTube 历史记录</h3>
+            <p class="guide-card__hook">一键重置你的推荐内容。按日期过滤观看历史，或按"长期未活跃"清理订阅。</p>
+            <span class="guide-card__cta">阅读完整指南 →</span>
+          </a>
+          <a href="/guides/instagram.html" class="guide-card" role="listitem" style="--guide-accent: #E1306C;">
+            <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></span>指南 · Instagram</span>
+            <h3 class="guide-card__title">如何批量删除 Instagram 帖子和 Reels</h3>
+            <p class="guide-card__hook">支持删除模式与归档模式、话题标签和日期过滤，讲解如何保留最受欢迎的帖子同时清理其余内容。</p>
+            <span class="guide-card__cta">阅读完整指南 →</span>
+          </a>
+          <a href="/guides/facebook.html" class="guide-card" role="listitem" style="--guide-accent: #1877F2;">
+            <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></span>指南 · Facebook</span>
+            <h3 class="guide-card__title">如何批量删除 Facebook 帖子和照片</h3>
+            <p class="guide-card__hook">归档模式是更稳妥的默认选择。先按日期、关键词或好友不活跃程度过滤，再执行删除。</p>
+            <span class="guide-card__cta">阅读完整指南 →</span>
+          </a>
         </div>
       </div>
-      <p class="tip-footnote">
-        打赏是感谢，不是为功能付费。<a href="/support.html" rel="noopener noreferrer">查看资金去向与退款政策 →</a>
-      </p>
     </section>
 
   </main>
