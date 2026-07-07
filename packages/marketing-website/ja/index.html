@@ -35,12 +35,12 @@
   <script type="application/ld+json">
   {"@context":"https://schema.org","@type":"FAQPage","mainEntity":[
     {"@type":"Question","name":"What exactly does SocialEraser do?","acceptedAnswer":{"@type":"Answer","text":"It bulk-deletes content on the social media platform of your choice — posts, likes, follows, saved items, and more. You pick what to clean, set filters, and it processes items one by one in your browser."}},
-    {"@type":"Question","name":"Is SocialEraser really free?","acceptedAnswer":{"@type":"Answer","text":"Yes — free during launch, no account required. A tip jar is welcome but never required."}},
+    {"@type":"Question","name":"Is SocialEraser really free?","acceptedAnswer":{"@type":"Answer","text":"Yes — SocialEraser is tip-supported. The free tier is the version, with no limits, no accounts, no trial. A tip jar is welcome but never required."}},
     {"@type":"Question","name":"Do I need to create an account?","acceptedAnswer":{"@type":"Answer","text":"No. Zero accounts, zero signups, zero emails. Install, use, done."}},
     {"@type":"Question","name":"Do I need to keep my browser open during cleanup?","acceptedAnswer":{"@type":"Answer","text":"The browser tab where the cleanup runs must stay open, but you can minimize it. Closing the tab pauses the run; reopening resumes from the last completed item."}},
     {"@type":"Question","name":"Can I verify the extension doesn't talk to a server?","acceptedAnswer":{"@type":"Answer","text":"Yes. Open Chrome DevTools → Network tab while the extension is running. You will see zero outbound requests to any third-party domain. The only traffic is between your browser and the platform you are cleaning."}},
     {"@type":"Question","name":"Will my account get banned?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser simulates normal clicks at human speed and respects rate limits. We are not affiliated with X Corp. or any platform; using bulk tools is at your own discretion."}},
-    {"@type":"Question","name":"Why no TikTok / YouTube / Instagram / Facebook yet?","acceptedAnswer":{"@type":"Answer","text":"Each platform has unique UI patterns, rate limits, and anti-bot measures. We ship one platform at a time and tune it until it is reliable. X shipped first; the others are queued."}},
+    {"@type":"Question","name":"YouTube / Instagram / Facebook はいつ対応しますか？","acceptedAnswer":{"@type":"Answer","text":"X と TikTok は公開中です。YouTube、Instagram、Facebook はそれぞれ独自の UI パターン、レート制限、ボット対策があるため、1 つずつ出荷し、信頼性が確保されるまで調整します。<a href=\"/platforms/youtube/\" class=\"link-accent\">YouTube のウェイトリスト</a> に参加して、リリース時に通知を受け取ってください。"}},
     {"@type":"Question","name":"Does my data ever leave my browser?","acceptedAnswer":{"@type":"Answer","text":"No. SocialEraser runs 100% locally in your browser. There is no server, no analytics, no tracking. Uninstall removes all stored data."}},
     {"@type":"Question","name":"Can I pause and resume a run?","acceptedAnswer":{"@type":"Answer","text":"Yes. Pause / resume works any time, even after closing the browser. State is stored in chrome.storage.local, so it survives a restart. Come back the next day and continue exactly where you left off."}},
     {"@type":"Question","name":"What happens if my internet drops mid-cleanup?","acceptedAnswer":{"@type":"Answer","text":"The extension detects the disconnect, pauses the run, and shows a reconnecting indicator. Once the network is back, it resumes from the last completed item."}}
@@ -117,9 +117,9 @@
             <span class="hero-platform__name">X</span>
             <span class="hero-platform__action">無料でインストール</span>
           </a>
-          <a href="/platforms/tiktok/" class="hero-platform hero-platform--soon">
+          <a rel="noopener noreferrer" href="https://chromewebstore.google.com/detail/socialeraser-for-tiktok/hbeccanmeoflhdgefmjifbolkhpmonni" class="hero-platform hero-platform--available">
             <span class="hero-platform__name">TikTok</span>
-            <span class="hero-platform__action">2026 Q4</span>
+            <span class="hero-platform__action">無料でインストール</span>
           </a>
           <a href="/platforms/youtube/" class="hero-platform hero-platform--soon">
             <span class="hero-platform__name">YouTube</span>
@@ -167,19 +167,19 @@
           </div>
           <a class="platform-card__more" href="/platforms/x/">X 清理ツールを開く <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
         </article>
-        <article class="platform-card platform-card--coming">
+        <article class="platform-card platform-card--available">
           <a href="/platforms/tiktok/" class="platform-card__head">
             <div class="platform-card__logo" data-platform="tiktok"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg></div>
             <h3 class="platform-card__name">SocialEraser for TikTok</h3>
-            <p class="platform-card__desc">リポスト取り消し、いいね取り消し、フォロー解除、視聴履歴クリアを一括処理。2026 年 Q4 リリース予定。</p>
+            <p class="platform-card__desc">自分の動画をリポスト取り消し、いいね取り消し、フォロー解除、を一括処理。無料でご利用いただけます。</p>
           </a>
           <div class="platform-card__endpoints">
-            <a class="endpoint-btn endpoint-btn--soon" href="mailto:support@socialeraser.app?subject=Notify%20me%20when%20SocialEraser%20for%20TikTok%20is%20ready%20on%20Chrome&amp;body=Hi%2C%20please%20notify%20me%20when%20the%20SocialEraser%20for%20TikTok%20Chrome%20extension%20is%20ready.%20Thanks%21">リリース時に通知 · Chrome</a>
+            <a rel="noopener noreferrer" class="endpoint-btn endpoint-btn--available" href="https://chromewebstore.google.com/detail/socialeraser-for-tiktok/hbeccanmeoflhdgefmjifbolkhpmonni">Chrome</a>
             <a class="endpoint-btn endpoint-btn--soon" href="mailto:support@socialeraser.app?subject=Notify%20me%20when%20SocialEraser%20for%20TikTok%20is%20ready%20on%20Edge&amp;body=Hi%2C%20please%20notify%20me%20when%20the%20SocialEraser%20for%20TikTok%20Edge%20add-on%20is%20ready.%20Thanks%21">リリース時に通知 · Edge</a>
             <a class="endpoint-btn endpoint-btn--soon" href="mailto:support@socialeraser.app?subject=Notify%20me%20when%20SocialEraser%20for%20TikTok%20is%20ready%20on%20Android&amp;body=Hi%2C%20please%20notify%20me%20when%20the%20SocialEraser%20for%20TikTok%20Android%20app%20is%20ready.%20Thanks%21">リリース時に通知 · Android</a>
             <a class="endpoint-btn endpoint-btn--soon" href="mailto:support@socialeraser.app?subject=Notify%20me%20when%20SocialEraser%20for%20TikTok%20is%20ready%20on%20iOS&amp;body=Hi%2C%20please%20notify%20me%20when%20the%20SocialEraser%20for%20TikTok%20iOS%20app%20is%20ready.%20Thanks%21">リリース時に通知 · iOS</a>
           </div>
-          <a class="platform-card__more" href="/platforms/tiktok/">ウェイトリストに参加 <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
+          <a class="platform-card__more" href="/platforms/tiktok/">TikTok 清理ツールを開く <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
         </article>
         <article class="platform-card platform-card--coming">
           <a href="/platforms/youtube/" class="platform-card__head">
@@ -475,7 +475,7 @@
         </div>
         <div class="faq__category">
           <h3 class="faq__category-title">プラットフォーム別</h3>
-          <details class="faq__item"><summary>TikTok / YouTube / Instagram / Facebook はなぜ未対応？</summary><div class="faq__answer"><p>各プラットフォームには固有の UI パターン、レート制限、ボット対策があります。私たちは 1 つずつプラットフォームを出荷し、信頼性が確保されるまで調整します。X が最初に出荷されたのは、最も明確な需要があったためです。他はキューに入っています — <a href="/platforms/tiktok/" class="link-accent">ウェイトリスト</a> に参加して通知を受け取ってください。</p></div></details>
+          <details class="faq__item"><summary>YouTube / Instagram / Facebook はいつ対応しますか？</summary><div class="faq__answer"><p>X と TikTok は公開中です。YouTube、Instagram、Facebook はそれぞれ独自の UI パターン、レート制限、ボット対策があるため、1 つずつ出荷し、信頼性が確保されるまで調整します。<a href="/platforms/youtube/" class="link-accent">YouTube のウェイトリスト</a> に参加して、リリース時に通知を受け取ってください。</p></div></details>
           <details class="faq__item"><summary>モバイル（iOS / Android）アプリも無料ですか？</summary><div class="faq__answer"><p>はい。Android と iOS のアプリも公開中無料です。回数制限やアカウント登録は不要です。</p></div></details>
           <details class="faq__item"><summary>複数のアカウントで SocialEraser を使えますか？</summary><div class="faq__answer"><p>Chrome では、アカウントごとに別のブラウザ プロファイルを使用できます。1 つのプロファイル内での複数アカウント対応はロードマップにあります。</p></div></details>
           <details class="faq__item"><summary>最初にプラットフォームにログインしておく必要がありますか？</summary><div class="faq__answer"><p>はい。SocialEraser はすでにログイン済みのブラウザ セッション内で動作します。ログイン操作、クッキー保存、認証トークンへの干渉は一切行いません。セッションの有効期限が切れた場合は、ログインし直して実行を再開してください。</p></div></details>

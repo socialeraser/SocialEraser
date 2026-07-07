@@ -318,15 +318,16 @@ if (!customElements.get('lite-youtube')) {
   const installBtn = document.querySelector('[data-install-cta]');
   if (!installBtn) return;
 
-  // Hardcoded store URLs per (platform, endpoint). Only X is shipped today;
-  // the rest get the waitlist fallback. When a new platform ships, add its
-  // URLs here and update the [data-newly-released] config to show a red dot.
+  // Hardcoded store URLs per (platform, endpoint). Add a new platform's URLs
+  // here and update the [data-newly-released] config to show a red dot.
   const STORES = {
     x: {
       chrome: 'https://chromewebstore.google.com/detail/socialeraser-for-x/hmlbkkbflcdofngldhekoajeedgcjfch',
       edge:   'https://microsoftedge.microsoft.com/addons/',
     },
-    tiktok:    {},
+    tiktok: {
+      chrome: 'https://chromewebstore.google.com/detail/socialeraser-for-tiktok/hbeccanmeoflhdgefmjifbolkhpmonni',
+    },
     youtube:   {},
     instagram: {},
     facebook:  {},

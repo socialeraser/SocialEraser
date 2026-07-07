@@ -7,7 +7,6 @@
 //   - 过滤器新增: minViewCount / maxViewCount
 //   - 备份提示: 2 个 .backup-tip（videos + reposts）
 //   - 日志前缀: [Eraser for TikTok]
-//   - CWS 评审：MVP 阶段 Eraser for TikTok 暂未上 CWS，rating prompt 复用模板但跳 socialeraser.app 主页
 (function() {
   'use strict';
 
@@ -39,9 +38,10 @@
   // 每日额度配置
   var FREE_LIMIT_PER_DAY = 5000;
 
-  // MVP 阶段 Eraser for TikTok 暂未上 Chrome Web Store；
-  // rating prompt 4-5 星跳 socialeraser.app 主页（用户从那进 CWS 评分入口）
-  var CWS_REVIEW_URL = 'https://socialeraser.app/';
+  // CWS extension id — used by the rating prompt to deep-link to the review page.
+  // For Edge the review URL differs (Edge opens a tab on microsoftedge.microsoft.com).
+  var CWS_EXTENSION_ID = 'hbeccanmeoflhdgefmjifbolkhpmonni';
+  var CWS_REVIEW_URL = 'https://chromewebstore.google.com/detail/' + CWS_EXTENSION_ID + '/reviews';
 
   // Rating prompt cooldown: 30 days between prompts. After 3 skips the prompt
   // is permanently muted. Once the user rates 4 or 5 stars it's permanently

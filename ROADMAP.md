@@ -4,16 +4,18 @@ Public-facing development plan. Times are estimates, not commitments. Updated as
 
 ## Now — Stability & Launch
 - Chrome Web Store launch (X Eraser)
+- Chrome Web Store launch (TikTok Eraser) — shipped 2026-07-07
 - Edge add-on store launch
 - Real-account end-to-end regression tests (tweets / likes / bookmarks / following)
 - 5,000/day safety cap + tip model
 - Remote selector hot-reload via GitHub-hosted config
 - Top feedback channel (✉️ → mailto) + non-modal completion summary card
 
-## Next (Q4 2026 – Q1 2027) — Mobile & TikTok
+## Next (Q4 2026 – Q1 2027) — Mobile & Multi-platform
 - Android (Capacitor): UI port + QA on real devices
 - iOS (Capacitor): scaffold + port
-- TikTok project: MVP code complete (5-type + 8-language + verify suite), pending CWS/Edge Web Store submission
+- YouTube: unlike videos, un-save, clear watch history
+- Instagram: unlike, unfollow, clear saved posts
 - Restore reviews section once ≥6 real reviews collected (Chrome Web Store, GitHub stars, Product Hunt)
 
 ### TikTok Eraser — explicitly deferred to V2+ (NOT on roadmap until real demand)
