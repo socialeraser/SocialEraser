@@ -55,9 +55,17 @@
     .tip-tier__cta:hover { transform: translateY(-1px); box-shadow: 0 12px 32px var(--accent-glow); color: #0a0a0a; }
     .tip-tier--secondary .tip-tier__cta { background: transparent; color: var(--text); border: 1px solid var(--border-strong); }
     .tip-tier--secondary .tip-tier__cta:hover { border-color: var(--border-accent); background: var(--bg-elev-2); color: var(--text); box-shadow: none; }
-    .tip-trust { max-width: 720px; width: calc(100% - 32px); margin: 0 auto var(--space-16); padding: var(--space-6) var(--space-4); background: var(--bg-elev-1); border: 1px solid var(--border); border-radius: var(--radius-lg); text-align: center; }
-    .tip-trust__title { font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-3); }
-    .tip-trust__text { color: var(--text-dim); font-size: var(--text-sm); line-height: var(--leading-relaxed); margin: 0; }
+    .tip-trust { max-width: 720px; width: calc(100% - 32px); margin: 0 auto var(--space-16); padding: var(--space-6) var(--space-4); background: var(--bg-elev-1); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+    .tip-trust__title { font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-3); text-align: center; }
+    .tip-trust__intro { color: var(--text-dim); font-size: var(--text-sm); line-height: var(--leading-relaxed); margin: 0 0 var(--space-4); text-align: center; }
+    .tip-trust__list { list-style: none; padding: 0; margin: 0 0 var(--space-5); display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+    .tip-trust__item { display: flex; gap: var(--space-3); padding: var(--space-4); background: var(--bg-elev-2); border: 1px solid var(--border); border-radius: var(--radius); }
+    .tip-trust__num { flex-shrink: 0; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; background: var(--accent); color: #0a0a0a; font-weight: 700; font-size: var(--text-sm); border-radius: 50%; }
+    .tip-trust__body { flex: 1; min-width: 0; }
+    .tip-trust__label { font-weight: 600; font-size: var(--text-sm); color: var(--text); line-height: 1.3; margin-bottom: 4px; }
+    .tip-trust__desc { font-size: var(--text-xs); color: var(--text-dim); line-height: 1.5; }
+    .tip-trust__foot { color: var(--text-dim); font-size: var(--text-sm); line-height: var(--leading-relaxed); margin: 0; text-align: center; }
+    @media (max-width: 480px) { .tip-trust__list { grid-template-columns: 1fr; } }
     .tip-faq { max-width: 720px; width: calc(100% - 32px); margin: 0 auto var(--space-20); padding: 0 var(--space-4); }
     .tip-faq h2 { font-size: var(--text-2xl); margin-bottom: var(--space-6); text-align: center; }
     .tip-faq details { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); margin-bottom: var(--space-3); background: var(--bg-elev-1); }
@@ -182,10 +190,39 @@
 
       <section class="tip-trust">
         <h2 class="tip-trust__title">钱都花到哪儿去了</h2>
-        <p class="tip-trust__text">
-          打赏资金严格只用于以下四项，按顺序：(1) 公共选择器配置的 CDN，
-          (2) Chrome Web Store 开发者注册费，(3) 一个用于在 X 变更 UI 后验证更新的小型测试 X 账号，
-          (4) 咖啡。没有公司，没有工资，没有投资人。每一元钱的去向都在
+        <p class="tip-trust__intro">打赏资金严格只用于以下四项：</p>
+        <ol class="tip-trust__list">
+          <li class="tip-trust__item">
+            <div class="tip-trust__num">1</div>
+            <div class="tip-trust__body">
+              <div class="tip-trust__label">公共选择器配置 CDN</div>
+              <div class="tip-trust__desc">无需发布新版本，也能即时推送选择器更新。</div>
+            </div>
+          </li>
+          <li class="tip-trust__item">
+            <div class="tip-trust__num">2</div>
+            <div class="tip-trust__body">
+              <div class="tip-trust__label">Chrome Web Store 注册费</div>
+              <div class="tip-trust__desc">每年开发者注册费，让扩展保持上架状态。</div>
+            </div>
+          </li>
+          <li class="tip-trust__item">
+            <div class="tip-trust__num">3</div>
+            <div class="tip-trust__body">
+              <div class="tip-trust__label">覆盖 5 个平台的小号测试账号</div>
+              <div class="tip-trust__desc">X / TikTok / YouTube / Instagram / Facebook — 改版先于你发现。</div>
+            </div>
+          </li>
+          <li class="tip-trust__item">
+            <div class="tip-trust__num">4</div>
+            <div class="tip-trust__body">
+              <div class="tip-trust__label">维持这个一人项目持续运转</div>
+              <div class="tip-trust__desc">咖啡、服务器账单和深夜的 bug 修复。</div>
+            </div>
+          </li>
+        </ol>
+        <p class="tip-trust__foot">
+          没有公司，没有工资，没有投资人。每一元钱的去向都在
           <a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">公开仓库</a>
           里可查。
         </p>

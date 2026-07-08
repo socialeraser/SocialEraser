@@ -55,9 +55,17 @@
     .tip-tier__cta:hover { transform: translateY(-1px); box-shadow: 0 12px 32px var(--accent-glow); color: #0a0a0a; }
     .tip-tier--secondary .tip-tier__cta { background: transparent; color: var(--text); border: 1px solid var(--border-strong); }
     .tip-tier--secondary .tip-tier__cta:hover { border-color: var(--border-accent); background: var(--bg-elev-2); color: var(--text); box-shadow: none; }
-    .tip-trust { max-width: 720px; width: calc(100% - 32px); margin: 0 auto var(--space-16); padding: var(--space-6) var(--space-4); background: var(--bg-elev-1); border: 1px solid var(--border); border-radius: var(--radius-lg); text-align: center; }
-    .tip-trust__title { font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-3); }
-    .tip-trust__text { color: var(--text-dim); font-size: var(--text-sm); line-height: var(--leading-relaxed); margin: 0; }
+    .tip-trust { max-width: 720px; width: calc(100% - 32px); margin: 0 auto var(--space-16); padding: var(--space-6) var(--space-4); background: var(--bg-elev-1); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+    .tip-trust__title { font-size: var(--text-lg); font-weight: 600; margin-bottom: var(--space-3); text-align: center; }
+    .tip-trust__intro { color: var(--text-dim); font-size: var(--text-sm); line-height: var(--leading-relaxed); margin: 0 0 var(--space-4); text-align: center; }
+    .tip-trust__list { list-style: none; padding: 0; margin: 0 0 var(--space-5); display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+    .tip-trust__item { display: flex; gap: var(--space-3); padding: var(--space-4); background: var(--bg-elev-2); border: 1px solid var(--border); border-radius: var(--radius); }
+    .tip-trust__num { flex-shrink: 0; width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; background: var(--accent); color: #0a0a0a; font-weight: 700; font-size: var(--text-sm); border-radius: 50%; }
+    .tip-trust__body { flex: 1; min-width: 0; }
+    .tip-trust__label { font-weight: 600; font-size: var(--text-sm); color: var(--text); line-height: 1.3; margin-bottom: 4px; }
+    .tip-trust__desc { font-size: var(--text-xs); color: var(--text-dim); line-height: 1.5; }
+    .tip-trust__foot { color: var(--text-dim); font-size: var(--text-sm); line-height: var(--leading-relaxed); margin: 0; text-align: center; }
+    @media (max-width: 480px) { .tip-trust__list { grid-template-columns: 1fr; } }
     .tip-faq { max-width: 720px; width: calc(100% - 32px); margin: 0 auto var(--space-20); padding: 0 var(--space-4); }
     .tip-faq h2 { font-size: var(--text-2xl); margin-bottom: var(--space-6); text-align: center; }
     .tip-faq details { border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-4) var(--space-5); margin-bottom: var(--space-3); background: var(--bg-elev-1); }
@@ -182,11 +190,39 @@
 
       <section class="tip-trust">
         <h2 class="tip-trust__title">후원금은 어디로 가나요</h2>
-        <p class="tip-trust__text">
-          팁은 정확히 다음 네 가지에만 사용됩니다, 순서대로: (1) 공개 셀렉터 구성 CDN,
-          (2) Chrome Web Store 개발자 등록, (3) X가 UI를 변경한 후 업데이트를 검증하기
-          위한 소규모 테스트 X 계정, (4) 커피. 회사는 없고, 급여는 없고, 투자자도
-          없습니다. 모든 달러의 사용 내역은
+        <p class="tip-trust__intro">팁은 정확히 다음 네 가지에만 사용됩니다:</p>
+        <ol class="tip-trust__list">
+          <li class="tip-trust__item">
+            <div class="tip-trust__num">1</div>
+            <div class="tip-trust__body">
+              <div class="tip-trust__label">공개 셀렉터 구성 CDN</div>
+              <div class="tip-trust__desc">새 버전을 출시하지 않고도 셀렉터 업데이트를 즉시 배포합니다.</div>
+            </div>
+          </li>
+          <li class="tip-trust__item">
+            <div class="tip-trust__num">2</div>
+            <div class="tip-trust__body">
+              <div class="tip-trust__label">Chrome Web Store 등록비</div>
+              <div class="tip-trust__desc">확장 프로그램을 계속 게시하기 위한 연간 개발자 등록비.</div>
+            </div>
+          </li>
+          <li class="tip-trust__item">
+            <div class="tip-trust__num">3</div>
+            <div class="tip-trust__body">
+              <div class="tip-trust__label">5개 플랫폼의 테스트 계정</div>
+              <div class="tip-trust__desc">X / TikTok / YouTube / Instagram / Facebook — UI 변경 사항을 가장 먼저 포착.</div>
+            </div>
+          </li>
+          <li class="tip-trust__item">
+            <div class="tip-trust__num">4</div>
+            <div class="tip-trust__body">
+              <div class="tip-trust__label">이 1인 프로젝트를 계속 운영</div>
+              <div class="tip-trust__desc">커피, 서버 비용, 야간 버그 수정.</div>
+            </div>
+          </li>
+        </ol>
+        <p class="tip-trust__foot">
+          회사는 없고, 급여는 없고, 투자자도 없습니다. 모든 달러의 사용 내역은
           <a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">공개 저장소</a>에
           기록됩니다.
         </p>
