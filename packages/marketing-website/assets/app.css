@@ -187,11 +187,13 @@
   color: #fff;
 }
 
-/* Leading icon for every mobile menu row. Platform links get their brand
-   colour; the generic Help/Home/Install rows use the dim text colour. */
+/* Leading icon for every mobile menu row. Sized to match the parent menu's
+   hamburger/close button (20px) so every icon in the toolbar and the slide-out
+   menu reads at the same scale. Platform links get their brand colour; the
+   generic Help/Home/Install rows use the dim text colour. */
 .site-nav--mobile-menu a > svg:first-of-type {
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
   margin-right: var(--space-3);
   color: var(--text-dim);
@@ -222,6 +224,15 @@
 .site-nav--mobile-lang > summary:hover { background: var(--bg-elev-3); }
 .site-nav--mobile-lang > summary::-webkit-details-marker { display: none; }
 .site-nav--mobile-lang > summary svg { width: 16px; height: 16px; flex-shrink: 0; }
+/* Match the hamburger trigger icon size (20px) for the language summary's
+   leading globe icon — the trigger is the "parent menu" icon, so the
+   language switcher should read at the same scale. The chevron stays at
+   16px as a dropdown indicator. */
+.site-nav--mobile-lang > summary > svg:first-of-type {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
 .site-nav--mobile-lang__current { flex: 1; }
 .site-nav--mobile-lang__chev {
   margin-left: auto;

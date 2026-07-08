@@ -166,12 +166,17 @@
   });
 })();
 
-// Mobile back button: shown on subpages (anything other than the homepage).
-// Uses history.back() when the user came from within the site, otherwise
-// falls back to the home page.
+// Mobile back button: shown on subpages (anything other than a language
+// homepage). Uses history.back() when the user came from within the site,
+// otherwise falls back to the home page.
 (function () {
+  // All 8 language homepages are conceptually "home" — switching language on
+  // mobile should NOT surface a back button just because the URL path now
+  // starts with /zh/, /ja/, etc. Keep this list in sync with LANGS in
+  // assets/lang-switcher.js when a new locale ships.
+  const HOME_PATHS = new Set(['/', '/zh/', '/ja/', '/es/', '/fr/', '/de/', '/pt/', '/ko/']);
   const path = location.pathname.replace(/\/index\.html$/, '/');
-  if (path === '/' || path === '') return; // home page — no back button
+  if (HOME_PATHS.has(path)) return; // language homepage — no back button
 
   const inner = document.querySelector('.site-header__inner');
   const logo = inner && inner.querySelector('.site-logo');
