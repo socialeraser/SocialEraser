@@ -153,7 +153,7 @@
     {"@type":"Question","name":"Do I need to keep my browser open during cleanup?","acceptedAnswer":{"@type":"Answer","text":"The browser tab where the cleanup runs must stay open, but you can minimize it. Closing the tab pauses the run; reopening resumes from the last completed item."}},
     {"@type":"Question","name":"Can I verify the extension doesn't talk to a server?","acceptedAnswer":{"@type":"Answer","text":"Yes. Open Chrome DevTools → Network tab while the extension is running. You will see zero outbound requests to any third-party domain. The only traffic is between your browser and the platform you are cleaning."}},
     {"@type":"Question","name":"Will my account get banned?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser simulates normal clicks at human speed and respects rate limits. We are not affiliated with X Corp. or any platform; using bulk tools is at your own discretion."}},
-    {"@type":"Question","name":"When are YouTube / Instagram / Facebook coming?","acceptedAnswer":{"@type":"Answer","text":"X and TikTok are live. YouTube, Instagram, and Facebook each have unique UI patterns, rate limits, and anti-bot measures — we ship one platform at a time and tune it until it is reliable. <a href=\"/platforms/youtube/\" class=\"link-accent\">Join the YouTube waitlist</a> to be notified when it ships."}},
+    {"@type":"Question","name":"When are YouTube / Instagram / Facebook coming?","acceptedAnswer":{"@type":"Answer","text":"X and TikTok are live. YouTube, Instagram, and Facebook each have unique UI patterns, rate limits, and anti-bot measures — we ship one platform at a time, tune it until it is reliable, then move on to the next."}},
     {"@type":"Question","name":"Does my data ever leave my browser?","acceptedAnswer":{"@type":"Answer","text":"No. SocialEraser runs 100% locally in your browser. There is no server, no analytics, no tracking. Uninstall removes all stored data."}},
     {"@type":"Question","name":"Can I pause and resume a run?","acceptedAnswer":{"@type":"Answer","text":"Yes. Pause / resume works any time, even after closing the browser. State is stored in chrome.storage.local, so it survives a restart. Come back the next day and continue exactly where you left off."}},
     {"@type":"Question","name":"What happens if my internet drops mid-cleanup?","acceptedAnswer":{"@type":"Answer","text":"The extension detects the disconnect, pauses the run, and shows a reconnecting indicator. Once the network is back, it resumes from the last completed item."}}
@@ -203,7 +203,7 @@
             <a href="/platforms/facebook/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg> Eraser for Facebook</a>
           </div>
         </details>
-        <a href="/help.html" class="hide-mobile">Help</a>
+        <a href="/help" class="hide-mobile">Help</a>
       </nav>
       <details class="site-nav--mobile">
         <summary class="site-nav--mobile-trigger" aria-label="Toggle menu">
@@ -216,7 +216,7 @@
           <a href="/platforms/youtube/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>Eraser for YouTube</a>
           <a href="/platforms/instagram/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Eraser for Instagram</a>
           <a href="/platforms/facebook/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>Eraser for Facebook</a>
-          <a href="/help.html"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>Help</a>
+          <a href="/help"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>Help</a>
           <details class="site-nav--mobile-lang">
             <summary>
               <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
@@ -460,7 +460,7 @@
         </div>
       </div>
       <p class="tip-footnote">
-        Tipping is gratitude, not payment for features. <a href="/support.html" rel="noopener noreferrer">See where the money goes &amp; refund policy →</a>
+        Tipping is gratitude, not payment for features. <a href="/support" rel="noopener noreferrer">See where the money goes &amp; refund policy →</a>
       </p>
     </section>
 
@@ -649,7 +649,7 @@
       <div class="section-head">
         <span class="muted-eyebrow">Frequently Asked</span>
         <h2 class="section-head__h2">30+ Questions, Answered</h2>
-        <p class="section-head__lede">Still curious? Check the <a href="/help.html" style="color: var(--accent)">full help center</a> or email us.</p>
+        <p class="section-head__lede">Still curious? Check the <a href="/help" style="color: var(--accent)">full help center</a> or email us.</p>
       </div>
       <div class="faq">
         <div class="faq__category">
@@ -687,7 +687,7 @@
         </div>
         <div class="faq__category">
           <h3 class="faq__category-title">Per-Platform</h3>
-          <details class="faq__item"><summary>When are YouTube / Instagram / Facebook coming?</summary><div class="faq__answer"><p>X and TikTok are live. YouTube, Instagram, and Facebook each have unique UI patterns, rate limits, and anti-bot measures — we ship one platform at a time and tune it until it's reliable. <a href="/platforms/youtube/" class="link-accent">Join the YouTube waitlist</a> to be notified when it ships.</p></div></details>
+          <details class="faq__item"><summary>When are YouTube / Instagram / Facebook coming?</summary><div class="faq__answer"><p>X and TikTok are live. YouTube, Instagram, and Facebook each have unique UI patterns, rate limits, and anti-bot measures — we ship one platform at a time, tune it until it's reliable, then move on to the next.</p></div></details>
           <details class="faq__item"><summary>Will mobile (iOS / Android) apps be free too?</summary><div class="faq__answer"><p>Yes — the Android and iOS apps will be tip-supported as well, same model as desktop. No limits, no accounts, no paywalls. The free tier is the version.</p></div></details>
           <details class="faq__item"><summary>Can I run SocialEraser on multiple accounts?</summary><div class="faq__answer"><p>On Chrome, you can use separate browser profiles for each account. Multi-account within a single profile is on the roadmap.</p></div></details>
           <details class="faq__item"><summary>Do I need to log into the platform first?</summary><div class="faq__answer"><p>Yes — SocialEraser works inside the browser session you're already logged into. It does not log in for you, store cookies, or touch your auth tokens. If your session expires, simply log in again and resume the run.</p></div></details>
@@ -704,31 +704,31 @@
       </div>
       <div class="guides-row-wrap">
         <div class="guides-row" role="list">
-          <a href="/guides/twitter.html" class="guide-card" role="listitem" style="--guide-accent: #ffffff;">
+          <a href="/guides/twitter" class="guide-card" role="listitem" style="--guide-accent: #ffffff;">
             <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span>Guide · X</span>
             <h3 class="guide-card__title">How to Bulk Delete Tweets, Likes &amp; Bookmarks</h3>
             <p class="guide-card__hook">Date and keyword filters, engagement floor, and the export-archive-before-you-delete step most people skip.</p>
             <span class="guide-card__cta">Read the guide →</span>
           </a>
-          <a href="/guides/tiktok.html" class="guide-card" role="listitem" style="--guide-accent: #25F4EE;">
+          <a href="/guides/tiktok" class="guide-card" role="listitem" style="--guide-accent: #25F4EE;">
             <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg></span>Guide · TikTok</span>
             <h3 class="guide-card__title">How to Bulk Delete TikTok Videos, Reposts &amp; Likes</h3>
             <p class="guide-card__hook">Keep your viral hits with the view-count floor filter. Wipe the rest — by date, by keyword, by content type.</p>
             <span class="guide-card__cta">Read the guide →</span>
           </a>
-          <a href="/guides/youtube.html" class="guide-card" role="listitem" style="--guide-accent: #FF3B3B;">
+          <a href="/guides/youtube" class="guide-card" role="listitem" style="--guide-accent: #FF3B3B;">
             <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></span>Guide · YouTube</span>
             <h3 class="guide-card__title">How to Clear YouTube History in Bulk</h3>
             <p class="guide-card__hook">Reset your recommendations in one click. Filter watch history by date, or prune dead subscriptions by inactivity.</p>
             <span class="guide-card__cta">Read the guide →</span>
           </a>
-          <a href="/guides/instagram.html" class="guide-card" role="listitem" style="--guide-accent: #E1306C;">
+          <a href="/guides/instagram" class="guide-card" role="listitem" style="--guide-accent: #E1306C;">
             <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></span>Guide · Instagram</span>
             <h3 class="guide-card__title">How to Bulk Delete Instagram Posts &amp; Reels</h3>
             <p class="guide-card__hook">Delete or archive mode, hashtag and date filters, and how to keep your most-liked posts while clearing the rest.</p>
             <span class="guide-card__cta">Read the guide →</span>
           </a>
-          <a href="/guides/facebook.html" class="guide-card" role="listitem" style="--guide-accent: #1877F2;">
+          <a href="/guides/facebook" class="guide-card" role="listitem" style="--guide-accent: #1877F2;">
             <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></span>Guide · Facebook</span>
             <h3 class="guide-card__title">How to Bulk Delete Facebook Posts &amp; Photos</h3>
             <p class="guide-card__hook">Archive mode is the safer default. Filter by date, keyword, or friend inactivity before you commit.</p>
@@ -766,21 +766,21 @@
         <div class="site-footer__col">
           <h4>Product</h4>
           <ul>
-            <li><a href="/help.html">Help Center</a></li>
+            <li><a href="/help">Help Center</a></li>
             <li><a href="#download">Install</a></li>
             <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/CHANGELOG.md" target="_blank" rel="noopener noreferrer">Changelog</a></li>
             <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/ROADMAP.md" target="_blank" rel="noopener noreferrer">Roadmap</a></li>
-            <li><a href="/support.html">☕ Support</a></li>
+            <li><a href="/support">☕ Support</a></li>
             <li><a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">Source Code</a></li>
           </ul>
         </div>
         <div class="site-footer__col">
           <h4>Company</h4>
           <ul>
-            <li><a href="/about.html">About</a></li>
+            <li><a href="/about">About</a></li>
             <li><a href="mailto:support@socialeraser.app">Contact</a></li>
-            <li><a href="/privacy.html">Privacy</a></li>
-            <li><a href="/terms.html">Terms</a></li>
+            <li><a href="/privacy">Privacy</a></li>
+            <li><a href="/terms">Terms</a></li>
             <li><a href="https://github.com/socialeraser/SocialEraser#readme" target="_blank" rel="noopener noreferrer">Press Kit</a></li>
           </ul>
         </div>

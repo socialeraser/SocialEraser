@@ -17,7 +17,7 @@
   <link rel="alternate" hreflang="de" href="https://socialeraser.app/de/">
   <link rel="alternate" hreflang="pt" href="https://socialeraser.app/pt/">
   <link rel="alternate" hreflang="ko" href="https://socialeraser.app/ko/">
-  <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/es/"><link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/"><link rel="sitemap" type="application/xml" href="/sitemap.xml">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="SocialEraser">
   <meta property="og:url" content="https://socialeraser.app/es/">
@@ -157,7 +157,7 @@
     {"@type":"Question","name":"¿Necesito mantener el navegador abierto durante la limpieza?","acceptedAnswer":{"@type":"Answer","text":"La pestaña del navegador donde se ejecuta la limpieza debe permanecer abierta, pero puedes minimizarla. Cerrar la pestaña pausa la ejecución; al reabrirla continúa desde el último elemento completado."}},
     {"@type":"Question","name":"¿Puedo verificar que la extensión no habla con un servidor?","acceptedAnswer":{"@type":"Answer","text":"Sí. Abre Chrome DevTools → pestaña Network mientras la extensión se ejecuta. Verás cero solicitudes salientes a cualquier dominio de terceros. El único tráfico es entre tu navegador y la plataforma que estás limpiando."}},
     {"@type":"Question","name":"¿Mi cuenta puede ser baneada?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser simula clics normales a velocidad humana y respeta los límites de tasa. No estamos afiliados con X Corp. ni con ninguna plataforma; el uso de herramientas masivas es bajo tu propio criterio."}},
-    {"@type":"Question","name":"¿Cuándo llegan YouTube / Instagram / Facebook?","acceptedAnswer":{"@type":"Answer","text":"X y TikTok ya están disponibles. YouTube, Instagram y Facebook tienen patrones de UI, límites de tasa y medidas anti-bot únicos — lanzamos una plataforma a la vez y la ajustamos hasta que sea confiable. <a href=\"/platforms/youtube/\" class=\"link-accent\">Únete a la lista de espera de YouTube</a> para recibir un aviso cuando se lance."}},
+    {"@type":"Question","name":"¿Cuándo llegan YouTube / Instagram / Facebook?","acceptedAnswer":{"@type":"Answer","text":"X y TikTok ya están disponibles. YouTube, Instagram y Facebook tienen patrones de UI, límites de tasa y medidas anti-bot únicos — lanzamos una plataforma a la vez, la ajustamos hasta que sea confiable y luego pasamos a la siguiente."}},
     {"@type":"Question","name":"¿Mis datos salen alguna vez de mi navegador?","acceptedAnswer":{"@type":"Answer","text":"No. SocialEraser se ejecuta 100% localmente en tu navegador. No hay servidor, ni analíticas, ni rastreo. Desinstalar elimina todos los datos almacenados."}},
     {"@type":"Question","name":"¿Puedo pausar y reanudar una ejecución?","acceptedAnswer":{"@type":"Answer","text":"Sí. Pausar / reanudar funciona en cualquier momento, incluso después de cerrar el navegador. El estado se guarda en chrome.storage.local, así que sobrevive a un reinicio. Vuelve al día siguiente y continúa exactamente donde lo dejaste."}},
     {"@type":"Question","name":"¿Qué pasa si mi internet se cae durante la limpieza?","acceptedAnswer":{"@type":"Answer","text":"La extensión detecta la desconexión, pausa la ejecución y muestra un indicador de reconexión. Cuando la red vuelve, continúa desde el último elemento completado."}}
@@ -207,7 +207,7 @@
             <a href="/es/platforms/facebook/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg> SocialEraser para Facebook</a>
           </div>
         </details>
-        <a href="/es/help.html" class="hide-mobile">Ayuda</a>
+        <a href="/es/help" class="hide-mobile">Ayuda</a>
       </nav>
       <details class="site-nav--mobile">
         <summary class="site-nav--mobile-trigger" aria-label="Alternar menú">
@@ -220,7 +220,7 @@
           <a href="/es/platforms/youtube/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>SocialEraser para YouTube</a>
           <a href="/es/platforms/instagram/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>SocialEraser para Instagram</a>
           <a href="/es/platforms/facebook/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>SocialEraser para Facebook</a>
-          <a href="/es/help.html"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>Ayuda</a>
+          <a href="/es/help"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>Ayuda</a>
           <details class="site-nav--mobile-lang">
             <summary>
               <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
@@ -464,7 +464,7 @@
         </div>
       </div>
       <p class="tip-footnote">
-        La propina es gratitud, no pago por funciones. <a href="/es/support.html" rel="noopener noreferrer">Mira a dónde va el dinero y la política de reembolso →</a>
+        La propina es gratitud, no pago por funciones. <a href="/es/support" rel="noopener noreferrer">Mira a dónde va el dinero y la política de reembolso →</a>
       </p>
     </section>
 
@@ -610,7 +610,7 @@
       <div class="section-head">
         <span class="muted-eyebrow">Preguntas frecuentes</span>
         <h2 class="section-head__h2">Más de 30 preguntas respondidas</h2>
-        <p class="section-head__lede">¿Aún con dudas? Consulta el <a href="/es/help.html" style="color: var(--accent)">centro de ayuda completo</a> o escríbenos.</p>
+        <p class="section-head__lede">¿Aún con dudas? Consulta el <a href="/es/help" style="color: var(--accent)">centro de ayuda completo</a> o escríbenos.</p>
       </div>
       <div class="faq">
         <div class="faq__category">
@@ -648,7 +648,7 @@
         </div>
         <div class="faq__category">
           <h3 class="faq__category-title">Por plataforma</h3>
-          <details class="faq__item"><summary>¿Cuándo llegan YouTube / Instagram / Facebook?</summary><div class="faq__answer"><p>X y TikTok ya están disponibles. YouTube, Instagram y Facebook tienen patrones de UI, límites de tasa y medidas anti-bot únicos — lanzamos una plataforma a la vez y la ajustamos hasta que sea confiable. <a href="/es/platforms/youtube/" class="link-accent">Únete a la lista de espera de YouTube</a> para recibir un aviso cuando se lance.</p></div></details>
+          <details class="faq__item"><summary>¿Cuándo llegan YouTube / Instagram / Facebook?</summary><div class="faq__answer"><p>X y TikTok ya están disponibles. YouTube, Instagram y Facebook tienen patrones de UI, límites de tasa y medidas anti-bot únicos — lanzamos una plataforma a la vez, la ajustamos hasta que sea confiable y luego pasamos a la siguiente.</p></div></details>
           <details class="faq__item"><summary>¿Las apps móviles (iOS / Android) también serán gratis?</summary><div class="faq__answer"><p>Sí — las apps de Android e iOS también se sostendrán con propinas, con el mismo modelo que la de escritorio. Sin límites, sin cuentas, sin paywalls. La versión gratuita es la versión completa.</p></div></details>
           <details class="faq__item"><summary>¿Puedo usar SocialEraser en varias cuentas?</summary><div class="faq__answer"><p>En Chrome puedes usar perfiles de navegador separados para cada cuenta. El multi-cuenta dentro de un solo perfil está en la hoja de ruta.</p></div></details>
           <details class="faq__item"><summary>¿Necesito iniciar sesión primero en la plataforma?</summary><div class="faq__answer"><p>Sí — SocialEraser funciona dentro de la sesión del navegador en la que ya estás conectado. No inicia sesión por ti, no guarda cookies ni toca tus tokens de autenticación. Si tu sesión caduca, simplemente vuelve a iniciar sesión y reanuda la pasada.</p></div></details>
@@ -665,31 +665,31 @@
       </div>
       <div class="guides-row-wrap">
         <div class="guides-row" role="list">
-          <a href="/es/guides/twitter.html" class="guide-card" role="listitem" style="--guide-accent: #ffffff;">
+          <a href="/es/guides/twitter" class="guide-card" role="listitem" style="--guide-accent: #ffffff;">
             <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span>Guía · X</span>
             <h3 class="guide-card__title">Cómo borrar en masa tweets, likes y marcadores</h3>
             <p class="guide-card__hook">Filtros de fecha y palabra clave, umbral de interacción y el paso de "exportar archivo antes de borrar" que casi todos se saltan.</p>
             <span class="guide-card__cta">Leer la guía →</span>
           </a>
-          <a href="/es/guides/tiktok.html" class="guide-card" role="listitem" style="--guide-accent: #25F4EE;">
+          <a href="/es/guides/tiktok" class="guide-card" role="listitem" style="--guide-accent: #25F4EE;">
             <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg></span>Guía · TikTok</span>
             <h3 class="guide-card__title">Cómo borrar en masa videos, repos y likes de TikTok</h3>
             <p class="guide-card__hook">Conserva tus hits virales con el filtro de umbral de reproducciones. Borra el resto — por fecha, por palabra clave, por tipo de contenido.</p>
             <span class="guide-card__cta">Leer la guía →</span>
           </a>
-          <a href="/es/guides/youtube.html" class="guide-card" role="listitem" style="--guide-accent: #FF3B3B;">
+          <a href="/es/guides/youtube" class="guide-card" role="listitem" style="--guide-accent: #FF3B3B;">
             <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></span>Guía · YouTube</span>
             <h3 class="guide-card__title">Cómo limpiar el historial de YouTube en masa</h3>
             <p class="guide-card__hook">Reinicia tus recomendaciones con un clic. Filtra el historial de reproducciones por fecha o poda las suscripciones muertas por inactividad.</p>
             <span class="guide-card__cta">Leer la guía →</span>
           </a>
-          <a href="/es/guides/instagram.html" class="guide-card" role="listitem" style="--guide-accent: #E1306C;">
+          <a href="/es/guides/instagram" class="guide-card" role="listitem" style="--guide-accent: #E1306C;">
             <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></span>Guía · Instagram</span>
             <h3 class="guide-card__title">Cómo borrar en masa publicaciones y Reels de Instagram</h3>
             <p class="guide-card__hook">Modo borrar o modo archivar, filtros de hashtag y fecha, y cómo conservar tus publicaciones con más likes mientras limpias el resto.</p>
             <span class="guide-card__cta">Leer la guía →</span>
           </a>
-          <a href="/es/guides/facebook.html" class="guide-card" role="listitem" style="--guide-accent: #1877F2;">
+          <a href="/es/guides/facebook" class="guide-card" role="listitem" style="--guide-accent: #1877F2;">
             <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></span>Guía · Facebook</span>
             <h3 class="guide-card__title">Cómo borrar en masa publicaciones y fotos de Facebook</h3>
             <p class="guide-card__hook">El modo archivar es el valor predeterminado más seguro. Filtra por fecha, palabra clave o inactividad de amigos antes de lanzarte.</p>
@@ -727,21 +727,21 @@
         <div class="site-footer__col">
           <h4>Producto</h4>
           <ul>
-            <li><a href="/es/help.html">Centro de ayuda</a></li>
+            <li><a href="/es/help">Centro de ayuda</a></li>
             <li><a href="#download">Instalar</a></li>
             <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/CHANGELOG.md" target="_blank" rel="noopener noreferrer">Changelog</a></li>
             <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/ROADMAP.md" target="_blank" rel="noopener noreferrer">Hoja de ruta</a></li>
-            <li><a href="/es/support.html">☕ Apoyar</a></li>
+            <li><a href="/es/support">☕ Apoyar</a></li>
             <li><a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">Código fuente</a></li>
           </ul>
         </div>
         <div class="site-footer__col">
           <h4>Empresa</h4>
           <ul>
-            <li><a href="/es/about.html">Sobre nosotros</a></li>
+            <li><a href="/es/about">Sobre nosotros</a></li>
             <li><a href="mailto:support@socialeraser.app">Contacto</a></li>
-            <li><a href="/es/privacy.html">Privacidad</a></li>
-            <li><a href="/es/terms.html">Términos</a></li>
+            <li><a href="/es/privacy">Privacidad</a></li>
+            <li><a href="/es/terms">Términos</a></li>
             <li><a href="https://github.com/socialeraser/SocialEraser#readme" target="_blank" rel="noopener noreferrer">Kit de prensa</a></li>
           </ul>
         </div>

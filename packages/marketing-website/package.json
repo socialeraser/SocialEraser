@@ -4,11 +4,13 @@
   "description": "Marketing website for socialeraser.app (static HTML/CSS).",
   "private": true,
   "scripts": {
-    "dev": "python3 -m http.server 8765",
-    "dev:npx": "npx --yes serve . -l 8765",
+    "dev": "python3 scripts/dev-server.py 8765",
+    "dev:python": "python3 -m http.server 8765",
+    "dev:npx": "npx --yes serve . -l 8765 --no-clipboard",
     "deploy": "wrangler pages deploy . --project-name=socialeraser --commit-dirty=true"
   },
   "devDependencies": {
+    "serve": "^14.2.4",
     "wrangler": "^3.90.0"
   }
 }

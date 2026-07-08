@@ -1,0 +1,27 @@
+# Cloudflare Pages redirects
+# https://developers.cloudflare.com/pages/configuration/redirects/
+
+# --- Legacy .html URLs → clean /path form ---------------------------------
+# A handful of pages used to live at /<page>.html. We now serve them at /<page>
+# (canonical, hreflang, sitemap all point at the bare path), but external
+# inbound links from blogs and older bookmarks may still request the .html
+# variant. These 301s send that traffic to the canonical URL with the
+# non-www host. List each leaf explicitly so we never accidentally swallow
+# an asset request that happens to end in .html.
+
+/about.html         https://socialeraser.app/about          301
+/privacy.html       https://socialeraser.app/privacy        301
+/terms.html         https://socialeraser.app/terms          301
+/support.html       https://socialeraser.app/support        301
+/help.html          https://socialeraser.app/help           301
+/success.html       https://socialeraser.app/success        301
+/guides/twitter.html   https://socialeraser.app/guides/twitter   301
+/guides/tiktok.html    https://socialeraser.app/guides/tiktok    301
+/guides/youtube.html   https://socialeraser.app/guides/youtube   301
+/guides/instagram.html https://socialeraser.app/guides/instagram 301
+/guides/facebook.html  https://socialeraser.app/guides/facebook  301
+
+# --- 404 handler -----------------------------------------------------------
+# Cloudflare Pages serves 404.html automatically when a path is not found,
+# but explicit /404 mapping makes intent clear and protects against future
+# static-asset shadowing.

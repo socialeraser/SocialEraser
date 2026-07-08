@@ -17,7 +17,7 @@
   <link rel="alternate" hreflang="de" href="https://socialeraser.app/de/">
   <link rel="alternate" hreflang="pt" href="https://socialeraser.app/pt/">
   <link rel="alternate" hreflang="ko" href="https://socialeraser.app/ko/">
-  <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/ko/"><link rel="sitemap" type="application/xml" href="/sitemap.xml">
+  <link rel="alternate" hreflang="x-default" href="https://socialeraser.app/"><link rel="sitemap" type="application/xml" href="/sitemap.xml">
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="SocialEraser">
   <meta property="og:url" content="https://socialeraser.app/ko/">
@@ -157,7 +157,7 @@
     {"@type":"Question","name":"정리하는 동안 브라우저를 열어두어야 하나요?","acceptedAnswer":{"@type":"Answer","text":"정리가 실행되는 브라우저 탭은 열어 두어야 하지만 최소화할 수 있습니다. 탭을 닫으면 실행이 일시정지되며, 다시 열면 마지막 완료 항목부터 이어서 진행됩니다."}},
     {"@type":"Question","name":"확장 프로그램이 서버와 통신하지 않는지 확인할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"네. 확장 프로그램이 실행되는 동안 Chrome DevTools → Network 탭을 여세요. 제3자 도메인으로 나가는 요청은 0건임을 확인할 수 있습니다. 유일한 트래픽은 브라우저와 정리 중인 플랫폼 간의 통신뿐입니다."}},
     {"@type":"Question","name":"계정이 정지될 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"SocialEraser는 사람의 속도로 정상적인 클릭을 시뮬레이션하며 속도 제한을 준수합니다. 저희는 X Corp. 또는 어떤 플랫폼과도 제휴 관계가 없으며, 대량 삭제 도구 사용은 본인의 책임입니다."}},
-    {"@type":"Question","name":"YouTube / Instagram / Facebook은 언제 출시되나요?","acceptedAnswer":{"@type":"Answer","text":"X와 TikTok은 이미 사용 가능합니다. YouTube, Instagram, Facebook은 고유한 UI 패턴, 속도 제한, 안티 봇 조치가 있어, 한 번에 한 플랫폼씩 출시하여 안정적일 때까지 조정합니다. <a href=\"/ko/platforms/youtube/\" class=\"link-accent\">YouTube 대기 목록에 등록</a>하시면 출시 시 알려드립니다."}},
+    {"@type":"Question","name":"YouTube / Instagram / Facebook은 언제 출시되나요?","acceptedAnswer":{"@type":"Answer","text":"X와 TikTok은 이미 사용 가능합니다. YouTube, Instagram, Facebook은 고유한 UI 패턴, 속도 제한, 안티 봇 조치가 있어, 한 번에 한 플랫폼씩 출시하여 안정적일 때까지 조정한 뒤 다음으로 넘어갑니다."}},
     {"@type":"Question","name":"내 데이터가 브라우저 밖으로 나가나요?","acceptedAnswer":{"@type":"Answer","text":"아닙니다. SocialEraser는 브라우저에서 100% 로컬로 실행됩니다. 서버도 없고 분석도 없고 추적도 없습니다. 제거하면 저장된 모든 데이터가 삭제됩니다."}},
     {"@type":"Question","name":"실행을 일시정지하고 재개할 수 있나요?","acceptedAnswer":{"@type":"Answer","text":"네. 일시정지/재개는 브라우저를 닫은 후에도 언제든지 작동합니다. 상태는 chrome.storage.local에 저장되므로 재시작 후에도 유지됩니다. 다음 날 돌아와서 멈춘 지점부터 정확히 이어서 진행할 수 있습니다."}},
     {"@type":"Question","name":"정리 중 인터넷이 끊기면 어떻게 되나요?","acceptedAnswer":{"@type":"Answer","text":"확장 프로그램은 연결 끊김을 감지하고 실행을 일시정지하며 재연결 표시기를 보여줍니다. 네트워크가 복구되면 마지막 완료 항목부터 이어서 진행됩니다."}}
@@ -207,7 +207,7 @@
             <a href="/ko/platforms/facebook/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg> Facebook용 SocialEraser</a>
           </div>
         </details>
-        <a href="/ko/help.html" class="hide-mobile">도움말</a>
+        <a href="/ko/help" class="hide-mobile">도움말</a>
       </nav>
       <details class="site-nav--mobile">
         <summary class="site-nav--mobile-trigger" aria-label="메뉴 전환">
@@ -220,7 +220,7 @@
           <a href="/ko/platforms/youtube/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>YouTube용 SocialEraser</a>
           <a href="/ko/platforms/instagram/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>Instagram용 SocialEraser</a>
           <a href="/ko/platforms/facebook/"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>Facebook용 SocialEraser</a>
-          <a href="/ko/help.html"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>도움말</a>
+          <a href="/ko/help"><svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3M12 17h.01"/></svg>도움말</a>
           <details class="site-nav--mobile-lang">
             <summary>
               <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
@@ -464,7 +464,7 @@
         </div>
       </div>
       <p class="tip-footnote">
-        팁은 감사의 표시이며, 기능에 대한 결제가 아닙니다. <a href="/ko/support.html" rel="noopener noreferrer">후원이 어디로 가는지와 환불 정책 보기 →</a>
+        팁은 감사의 표시이며, 기능에 대한 결제가 아닙니다. <a href="/ko/support" rel="noopener noreferrer">후원이 어디로 가는지와 환불 정책 보기 →</a>
       </p>
     </section>
 
@@ -610,7 +610,7 @@
       <div class="section-head">
         <span class="muted-eyebrow">자주 묻는 질문</span>
         <h2 class="section-head__h2">30개 이상의 질문에 대한 답변</h2>
-        <p class="section-head__lede">아직 궁금한 점이 있으신가요? <a href="/ko/help.html" style="color: var(--accent)">전체 도움말 센터</a>를 확인하시거나 이메일을 보내주세요.</p>
+        <p class="section-head__lede">아직 궁금한 점이 있으신가요? <a href="/ko/help" style="color: var(--accent)">전체 도움말 센터</a>를 확인하시거나 이메일을 보내주세요.</p>
       </div>
       <div class="faq">
         <div class="faq__category">
@@ -648,7 +648,7 @@
         </div>
         <div class="faq__category">
           <h3 class="faq__category-title">플랫폼별</h3>
-          <details class="faq__item"><summary>YouTube / Instagram / Facebook은 언제 출시되나요?</summary><div class="faq__answer"><p>X와 TikTok은 이미 사용 가능합니다. YouTube, Instagram, Facebook은 고유한 UI 패턴, 속도 제한, 안티 봇 조치가 있어, 한 번에 한 플랫폼씩 출시하여 안정적일 때까지 조정합니다. <a href="/ko/platforms/youtube/" class="link-accent">YouTube 대기 목록에 등록</a>하시면 출시 시 알려드립니다.</p></div></details>
+          <details class="faq__item"><summary>YouTube / Instagram / Facebook은 언제 출시되나요?</summary><div class="faq__answer"><p>X와 TikTok은 이미 사용 가능합니다. YouTube, Instagram, Facebook은 고유한 UI 패턴, 속도 제한, 안티 봇 조치가 있어, 한 번에 한 플랫폼씩 출시하여 안정적일 때까지 조정한 뒤 다음으로 넘어갑니다.</p></div></details>
           <details class="faq__item"><summary>모바일 앱(iOS / Android)도 무료인가요?</summary><div class="faq__answer"><p>네 — Android와 iOS 앱도 데스크톱과 동일한 팁 운영 모델을 따릅니다. 제한도, 계정도, 유료 벽도 없습니다. 무료 버전이 완전한 버전입니다.</p></div></details>
           <details class="faq__item"><summary>여러 계정에서 SocialEraser를 사용할 수 있나요?</summary><div class="faq__answer"><p>Chrome에서는 각 계정마다 별도의 브라우저 프로필을 사용할 수 있습니다. 단일 프로필에서 여러 계정 지원은 로드맵에 있습니다.</p></div></details>
           <details class="faq__item"><summary>먼저 플랫폼에 로그인해야 하나요?</summary><div class="faq__answer"><p>네 — SocialEraser는 이미 로그인된 브라우저 세션 안에서 동작합니다. 로그인을 대신 처리하지 않고, 쿠키를 저장하지 않으며, 인증 토큰을 건드리지 않습니다. 세션이 만료되면 다시 로그인하고 실행을 이어가세요.</p></div></details>
@@ -665,31 +665,31 @@
       </div>
       <div class="guides-row-wrap">
         <div class="guides-row" role="list">
-          <a href="/ko/guides/twitter.html" class="guide-card" role="listitem" style="--guide-accent: #ffffff;">
+          <a href="/ko/guides/twitter" class="guide-card" role="listitem" style="--guide-accent: #ffffff;">
             <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span>가이드 · X</span>
             <h3 class="guide-card__title">트윗, 좋아요, 북마크를 일괄 삭제하는 방법</h3>
             <p class="guide-card__hook">날짜·키워드 필터, 최소 상호작용 한도, 그리고 대부분의 사용자가 건너뛰는 "삭제 전 파일 내보내기" 단계까지 다룹니다.</p>
             <span class="guide-card__cta">가이드 읽기 →</span>
           </a>
-          <a href="/ko/guides/tiktok.html" class="guide-card" role="listitem" style="--guide-accent: #25F4EE;">
+          <a href="/ko/guides/tiktok" class="guide-card" role="listitem" style="--guide-accent: #25F4EE;">
             <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-5.2 1.74 2.89 2.89 0 012.31-4.64 2.93 2.93 0 01.88.13V9.4a6.84 6.84 0 00-1-.05A6.33 6.33 0 005.8 20.1a6.34 6.34 0 0010.86-4.43V8.84a8.16 8.16 0 004.77 1.52V6.93a4.85 4.85 0 01-1.84-.24z"/></svg></span>가이드 · TikTok</span>
             <h3 class="guide-card__title">TikTok 영상, 리포스트, 좋아요를 일괄 삭제하는 방법</h3>
             <p class="guide-card__hook">최소 조회수 필터로 바이럴 히트는 남기고, 나머지는 — 날짜·키워드·콘텐츠 유형별로 삭제하세요.</p>
             <span class="guide-card__cta">가이드 읽기 →</span>
           </a>
-          <a href="/ko/guides/youtube.html" class="guide-card" role="listitem" style="--guide-accent: #FF3B3B;">
+          <a href="/ko/guides/youtube" class="guide-card" role="listitem" style="--guide-accent: #FF3B3B;">
             <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" fill-rule="evenodd"><path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg></span>가이드 · YouTube</span>
             <h3 class="guide-card__title">YouTube 시청 기록을 일괄 정리하는 방법</h3>
             <p class="guide-card__hook">클릭 한 번으로 추천을 리셋하세요. 시청 기록을 날짜별로 필터링하거나 비활성 구독을 정리하세요.</p>
             <span class="guide-card__cta">가이드 읽기 →</span>
           </a>
-          <a href="/ko/guides/instagram.html" class="guide-card" role="listitem" style="--guide-accent: #E1306C;">
+          <a href="/ko/guides/instagram" class="guide-card" role="listitem" style="--guide-accent: #E1306C;">
             <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 100-8 4 4 0 000 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg></span>가이드 · Instagram</span>
             <h3 class="guide-card__title">Instagram 게시물과 릴스를 일괄 삭제하는 방법</h3>
             <p class="guide-card__hook">삭제 모드와 보관 모드, 해시태그·날짜 필터, 그리고 좋아요가 많은 게시물은 남기면서 나머지를 정리하는 방법을 알려드립니다.</p>
             <span class="guide-card__cta">가이드 읽기 →</span>
           </a>
-          <a href="/ko/guides/facebook.html" class="guide-card" role="listitem" style="--guide-accent: #1877F2;">
+          <a href="/ko/guides/facebook" class="guide-card" role="listitem" style="--guide-accent: #1877F2;">
             <span class="guide-card__eyebrow"><span class="guide-card__icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></span>가이드 · Facebook</span>
             <h3 class="guide-card__title">Facebook 게시물과 사진을 일괄 삭제하는 방법</h3>
             <p class="guide-card__hook">가장 안전한 기본값은 보관 모드입니다. 실행 전에 날짜·키워드·친구 비활성 기간별로 필터링하세요.</p>
@@ -727,21 +727,21 @@
         <div class="site-footer__col">
           <h4>제품</h4>
           <ul>
-            <li><a href="/ko/help.html">도움말 센터</a></li>
+            <li><a href="/ko/help">도움말 센터</a></li>
             <li><a href="#download">설치</a></li>
             <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/CHANGELOG.md" target="_blank" rel="noopener noreferrer">Changelog</a></li>
             <li><a href="https://github.com/socialeraser/SocialEraser/blob/master/ROADMAP.md" target="_blank" rel="noopener noreferrer">로드맵</a></li>
-            <li><a href="/ko/support.html">☕ 후원</a></li>
+            <li><a href="/ko/support">☕ 후원</a></li>
             <li><a href="https://github.com/socialeraser/SocialEraser" target="_blank" rel="noopener noreferrer">소스 코드</a></li>
           </ul>
         </div>
         <div class="site-footer__col">
           <h4>회사</h4>
           <ul>
-            <li><a href="/ko/about.html">회사 소개</a></li>
+            <li><a href="/ko/about">회사 소개</a></li>
             <li><a href="mailto:support@socialeraser.app">문의</a></li>
-            <li><a href="/ko/privacy.html">개인정보 보호</a></li>
-            <li><a href="/ko/terms.html">이용약관</a></li>
+            <li><a href="/ko/privacy">개인정보 보호</a></li>
+            <li><a href="/ko/terms">이용약관</a></li>
             <li><a href="https://github.com/socialeraser/SocialEraser#readme" target="_blank" rel="noopener noreferrer">프레스 키트</a></li>
           </ul>
         </div>
