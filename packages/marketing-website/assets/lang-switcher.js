@@ -141,7 +141,10 @@
   // so the trigger stays as "Language: <current>" and the list of 8
   // options expands on click. The current language is highlighted.
   const mobileHtml = LANGS.map(l => `
-    <a href="${l.path}" hreflang="${l.code}" data-lang="${l.code}" data-path="${l.path}" class="lang-mobile__item${l.code === active.code ? ' lang-mobile__item--active' : ''}" aria-current="${l.code === active.code ? 'true' : 'false'}">${l.label}</a>
+    <a href="${l.path}" hreflang="${l.code}" data-lang="${l.code}" data-path="${l.path}" class="lang-mobile__item${l.code === active.code ? ' lang-mobile__item--active' : ''}" aria-current="${l.code === active.code ? 'true' : 'false'}">
+      <span class="lang-mobile__flag">${FLAG_SVG[l.flag]}</span>
+      <span class="lang-mobile__label">${l.label}</span>
+    </a>
   `).join('');
   document.querySelectorAll('[data-lang-list]').forEach(host => {
     host.innerHTML = mobileHtml;
